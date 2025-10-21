@@ -1,0 +1,482 @@
+/* Reset básico */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    background-color: #62ff9e;
+    color: #333;
+}
+
+header {
+    background: #ff511c; /* Azul escuro */
+    color: #f9f9f9;
+    padding: 1rem;
+    text-align: center;
+    position: relative;
+}
+
+header .logo {
+    font-size: 3.5rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+nav ul {
+    position: sticky;
+    top: 0;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+nav ul li {
+    display: inline;
+    margin: 0 1rem;
+}
+
+nav ul li a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.social-media {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+}
+
+.social-button {
+    display: inline-block;
+    margin-left: 0.5rem;
+    color: #fff;
+    font-size: 1.5rem;
+    text-decoration: none;
+}
+
+.social-button i {
+    transition: color 0.3s ease;
+}
+
+.social-button:hover i {
+    color: #e0f2f1; /* Verde claro */
+}
+
+section {
+    padding: 2rem;
+}
+
+#banner {
+    background: #fff; /* Verde claro */
+    text-align: center;
+    padding: 4rem 0;
+    border-bottom: 2px solid #0056a0; /* Azul escuro */
+}
+
+#banner img {
+    width: 100%;
+    height: 100%;
+    border-bottom: 4px solid #e95e0d; /* Azul escuro */
+}
+
+#banner h1 {
+    color: #ff511c; /* Azul escuro */
+    font-size: 2.5rem;
+    margin-top: 1rem;
+}
+
+#banner p {
+    color: #00796b; /* Verde escuro */
+    font-size: 1.2rem;
+}
+
+section h2 {
+    color: #ff511c; /* Azul escuro */
+    border-bottom: 2px solid #00796b; /* Verde escuro */
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+form {
+    max-width: 600px;
+    margin: 0 auto;
+    background: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+form label {
+    display: block;
+    margin: 0.5rem 0 0.25rem;
+    font-weight: bold;
+}
+
+form input, form textarea {
+    width: 100%;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+form button {
+    background: #ff511c; /* Azul escuro */
+    color: #fff;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+form button:hover {
+    background: #ff511c; /* Azul mais escuro */
+}
+
+.button-container {
+    margin-top: 2rem;
+    text-align: center;
+}
+
+.button {
+    display: inline-block;
+    background: #00796b; /* Verde escuro */
+    color: #fff;
+    padding: 0.75rem 1.5rem;
+    margin: 0.5rem;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.button:hover {
+    background: #004d40; /* Verde mais escuro */
+}
+
+footer {
+    background: #ff511c; /* Azul escuro */
+    color: #fff;
+    text-align: center;
+    padding: 1rem;
+    position: relative;
+    bottom: 0;
+    width: 100%;
+}
+
+/* Estilo do Chatbot */
+#chatbot {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    z-index: 1000;
+}
+
+#chatbox {
+    display: none;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 300px;
+    max-height: 400px;
+    background: #fff;
+    border: 1px solid #ddd;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+#chat-header {
+    background: #00b871; /* Azul escuro */
+    color: #fff;
+    padding: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#chat-header h2 {
+    font-size: 1rem;
+}
+
+#chat-content {
+    padding: 1rem;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+#chat-log {
+    margin-bottom: 1rem;
+}
+
+#chat-input-container {
+    display: flex;
+}
+
+#chat-input {
+    flex: 1;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+#send-message {
+    background: #00b871; /* Azul escuro */
+    color: #fff;
+    border: none;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    border-radius: 4px;
+    margin-left: 0.5rem;
+}
+
+#send-message:hover {
+    background: #035231; /* Azul mais escuro */
+}
+
+#open-chat {
+    background: #00b871; /* Azul escuro */
+    color: #fff;
+    border: none;
+    padding: 1rem;
+    cursor: pointer;
+    border-radius: 50%;
+    font-size: 1.5rem;
+}
+
+#open-chat:hover {
+    background: #035231; /* Azul mais escuro */
+}
+img {
+    width: 200px;
+    height: 200px;
+    border: 2px solid #000;
+}
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+}
+
+.overlay-container {
+    position: fixed;
+    width: 50%; /* Ajuste a largura conforme necessário */
+    height: 7%; /* Ajuste a altura conforme necessário */
+    margin: auto;
+    top: 10%;
+    left: 10%;
+    transform: translate(-10%, -10%);
+    border: 2px solid #000;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.overlay-container img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+}
+
+.overlay-container .overlay-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.overlay-container a {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: red;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+html, body {
+    overflow: auto; /* Certifique-se de que a rolagem está habilitada */
+}
+.video-container {
+    position: relative;
+    width: 600px;
+    margin: auto;
+}
+
+.video-container button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #000;
+    color: #fff;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.animated-title {
+    font-size: 2em;
+    animation: fadeIn 30s ease-in-out infinite;
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    50% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+}
+
+.gallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    padding: 20px;
+    max-width: 1000px;
+    width: 100%;
+    justify-content: center;
+}
+
+.gallery__item {
+    flex: 0 1 calc(33.333% - 30px); /* Ajuste para três imagens por linha */
+    overflow: hidden;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center; /* Centraliza o texto do comentário */
+}
+
+.gallery__img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.gallery__caption {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #555;
+}
+.arrow::before {
+    content: '\2192'; /* Unicode para seta direita */
+    margin-right: 5px;
+}
+.bullet::before {
+    content: '\2022'; /* Unicode para ponto */
+    margin-right: 5px;
+}
+main {
+    padding: 2rem;
+    text-align: center;
+}
+
+.botao-equipe {
+    display: inline-block;
+    padding: 1rem 2rem;
+    background-color: #007BFF;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-top: 2rem;
+}
+
+.membro-equipe {
+    background-color: #fff;
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    text-align: left;
+}
+
+.membro-equipe img {
+    max-width: 150px;
+    border-radius: 50%;
+}
+
+.membro-equipe h3 {
+    margin-top: 0;
+}
+video {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+.botao-links-uteis {
+    display: inline-block;
+    padding: 1rem 2rem;
+    background-color: #007BFF;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-top: 2rem;
+}
+
+.links-uteis {
+    background-color: #fff;
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    text-align: left;
+}
+
+.links-uteis ul {
+    list-style: none;
+    padding: 0;
+}
+
+.links-uteis ul li {
+    margin: 0.5rem 0;
+}
+
+.links-uteis ul li a {
+    color: #007BFF;
+    text-decoration: none;
+}
+
+.links-uteis ul li a:hover {
+    text-decoration: underline;
+}
+.botao-restrito {
+    display: inline-block;
+    padding: 1rem 2rem;
+    background-color: #007BFF;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-top: 2rem;
+}
+
+.img {
+    height: 50vh;
+    width: 20vw;
+    object-fit: cover;
+}
