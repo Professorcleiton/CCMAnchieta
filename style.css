@@ -8,12 +8,12 @@
 body {
     font-family: Arial, sans-serif;
     line-height: 1.6;
-    background-color: #62ff9e;
-    color: #333;
+    background-color: #0056a0;
+    color: #fff;
 }
 
 header {
-    background: #ff511c; /* Azul escuro */
+    background: #0c7b00; /* Azul escuro */
     color: #f9f9f9;
     padding: 1rem;
     text-align: center;
@@ -136,7 +136,7 @@ form button {
 }
 
 form button:hover {
-    background: #ff511c; /* Azul mais escuro */
+    background: #00b871; /* Azul mais escuro */
 }
 
 .button-container {
@@ -160,7 +160,7 @@ form button:hover {
 }
 
 footer {
-    background: #ff511c; /* Azul escuro */
+    background: #00b871; /* Azul escuro */
     color: #fff;
     text-align: center;
     padding: 1rem;
