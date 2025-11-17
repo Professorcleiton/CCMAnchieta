@@ -9,7 +9,7 @@ body {
     font-family: Arial, sans-serif;
     line-height: 1.6;
     background-color: #0056a0;
-    color: #fff;
+
 }
 
 header {
@@ -479,4 +479,5 @@ video {
     height: 50vh;
     width: 20vw;
     object-fit: cover;
+
 }
