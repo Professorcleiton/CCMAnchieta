@@ -382,7 +382,7 @@ html, body {
 .gallery__caption {
     margin-top: 10px;
     font-size: 14px;
-    color: #555;
+    color: #ffff;
 }
 .arrow::before {
     content: '\2192'; /* Unicode para seta direita */
@@ -481,3 +481,4 @@ video {
     object-fit: cover;
 
 }
+
