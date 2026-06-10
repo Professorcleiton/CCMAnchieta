@@ -7,30 +7,172 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: Arial, sans-serif; background-color: #ffffff; color: #333; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f8fafc; color: #333; }
         
-        .nav-bar { background-color: #00a859; padding: 15px 20px; text-align: center; }
-        .nav-bar h1 { color: white; font-size: 24px; margin-bottom: 10px; font-weight: bold; }
+        /* 1. FAIXA AZUL ESCURA SUPERIOR */
+        .top-blue-bar {
+            background-color: #0d3b66;
+            color: white;
+            padding: 10px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .top-social-icons a { color: white; margin-left: 15px; font-size: 16px; text-decoration: none; }
+
+        /* 2. TOPO BRANCO COM OS 4 ELEMENTOS ALINHADOS */
+        .header-main {
+            background-color: #ffffff;
+            padding: 15px 5%;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            gap: 10px;
+        }
+        .header-main img { height: 90px; width: auto; object-fit: contain; }
+
+        /* 3. FAIXA VERDE COM O TÍTULO GRANDE */
+        .banner-verde {
+            background-color: #4caf50;
+            color: white;
+            text-align: center;
+            padding: 25px 20px;
+        }
+        .banner-verde h1 {
+            font-size: 38px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* 4. SEÇÃO DOS BOTÕES EM GRADE (DUAS LINHAS IGUAL AO PRINT) */
+        .menu-container {
+            background-color: #66bb6a;
+            padding: 20px 10px;
+            text-align: center;
+        }
+        .menu-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .menu-row {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .btn-custom {
+            color: white;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 14px;
+            text-transform: uppercase;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-custom:hover { transform: translateY(-2px); box-shadow: 0 6px 8px rgba(0,0,0,0.2); }
         
-        .nav-menu { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; list-style: none; }
-        .nav-link { background-color: rgba(255, 255, 255, 0.2); color: white; text-decoration: none; padding: 8px 16px; border-radius: 4px; font-weight: bold; font-size: 14px; transition: background 0.2s; }
-        .nav-link:hover { background-color: rgba(255, 255, 255, 0.4); }
+        /* Cores exatas das caixas de botões */
+        .btn-verde { background: linear-gradient(135deg, #43a047, #2e7d32); }
+        .btn-laranja { background: linear-gradient(135deg, #ff9800, #f57c00); }
+        .btn-azul { background: linear-gradient(135deg, #1e88e5, #1565c0); }
+
+        /* 5. ÁREA DE CONTEÚDO EM CARDS ARREDONDADOS */
+        .content-container {
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        .card-info {
+            background: white;
+            padding: 35px;
+            border-radius: 16px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+            position: relative;
+        }
+        .card-info h2 {
+            color: #0d3b66;
+            font-size: 28px;
+            margin-bottom: 15px;
+        }
+        .card-info p {
+            font-size: 17px;
+            color: #4a5568;
+            line-height: 1.6;
+        }
+
+        /* CARD DA GALERIA COM A FOTO REAL */
+        .img-galeria-principal {
+            width: 100%;
+            height: auto;
+            border-radius: 12px;
+            margin-top: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
     </style>
 </head>
 <body>
 
-    <nav class="nav-bar">
-        <h1>CCM ANCHIETA</h1>
-        <ul class="nav-menu">
-            <li><a href="#" class="nav-link">SOBRE NÓS</a></li>
-            <li><a href="#" class="nav-link">FREQUÊNCIA</a></li>
-            <li><a href="#" class="nav-link">GALERIA</a></li>
-            <li><a href="https://www.seed.pr.gov.br" target="_blank" class="nav-link">RCO</a></li>
-            <li><a href="#" class="nav-link">REGISTRO PONTO</a></li>
-            <li><a href="#" class="nav-link">CALENDÁRIO</a></li>
-            <li><a href="area-restrita.html" class="nav-link" style="background-color: #ff6600;">ÁREA RESTRITA</a></li>
-        </ul>
+    <div class="top-blue-bar">
+        <span>Área Restrita</span>
+        <div class="top-social-icons">
+            <a href="#"><i class="fa-brands fa-instagram"></i></a>
+            <a href="#"><i class="fa-brands fa-facebook"></i></a>
+        </div>
+    </div>
+
+    <header class="header-main">
+        <img src="img/ach1.jpg" alt="Estudante Feminino 3D">
+        <img src="img/nreumuarama.jpg" alt="Logo NRE Umuarama">
+        <img src="img/ccma.PNG" alt="Logo CCM Anchieta">
+        <img src="img/2A.jpg" alt="Estudante Masculino 3D">
+    </header>
+
+    <div class="banner-verde">
+        <h1>CCM Anchieta</h1>
+    </div>
+
+    <nav class="menu-container">
+        <div class="menu-grid">
+            <div class="menu-row">
+                <a href="#" class="btn-custom btn-verde">Sobre Nós</a>
+                <a href="frequencia.html" class="btn-custom btn-laranja">Frequência 📊</a>
+                <a href="#" class="btn-custom btn-verde">Galeria</a>
+                <a href="https://www.seed.pr.gov.br" target="_blank" class="btn-custom btn-verde">RCO</a>
+            </div>
+            <div class="menu-row">
+                <a href="#" class="btn-custom btn-laranja">Registro Ponto ⏰</a>
+                <a href="area-restrita.html" class="btn-custom btn-verde">Calendário</a>
+                <a href="#" class="btn-custom btn-verde">Contato</a>
+            </div>
+        </div>
     </nav>
+
+    <main class="content-container">
+        
+        <section class="card-info">
+            <h2>Sobre o Colégio</h2>
+            <p>O CCM Anchieta une disciplina e tecnologia para oferecer um ensino de excelência em Cruzeiro do Oeste.</p>
+        </section>
+
+        <section class="card-info">
+            <h2>Galeria de Fotos</h2>
+            <img src="img/diadosprofessores.png" alt="Dia dos Professores CCM Anchieta" class="img-galeria-principal">
+        </section>
+
+    </main>
 
 </body>
 </html>
