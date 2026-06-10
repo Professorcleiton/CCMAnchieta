@@ -3,71 +3,183 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CCM Anchieta | Área Restrita</title>
+    <title>SGI - Área Restrita CCM Anchieta</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f1f5f9; display: flex; height: 100vh; color: #1e293b; }
+        
+        .sidebar { width: 260px; background-color: #005088; color: white; display: flex; flex-direction: column; border-right: 4px solid #eab308; }
+        .sidebar-header { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+        .turmas-lista { list-style: none; padding: 10px; }
+        .turma-item { padding: 14px 20px; margin-bottom: 8px; background-color: rgba(255, 255, 255, 0.05); border-radius: 6px; cursor: pointer; font-weight: 600; }
+        .turma-item.active { background-color: #eab308; color: #1e293b; }
 
-        body, html {
-            height: 100%;
-            overflow: hidden;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f7f6;
-        }
-
-        /* BARRA SUPERIOR PARA VOLTAR AO SITE */
-        .header-voltar {
-            background: #003566;
-            padding: 12px 5%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: white;
-            height: 50px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        .header-voltar span {
-            font-weight: 600;
-            font-size: 0.95rem;
-            letter-spacing: 0.5px;
-        }
-
-        .header-voltar a {
-            color: white;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 0.85rem;
-            background: #0c7b00;
-            padding: 6px 16px;
-            border-radius: 4px;
-            transition: background 0.2s;
-            border-bottom: 2px solid #053b00;
-        }
-
-        .header-voltar a:hover {
-            background: #11aa00;
-        }
-
-        /* MOLDURA DO APLICATIVO (SGI) */
-        iframe {
-            width: 100%;
-            height: calc(100% - 50px); /* Desconta a altura da barra superior */
-            border: none;
-        }
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .top-bar { background-color: white; padding: 15px 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; }
+        .aluno-selector { font-size: 18px; font-weight: bold; color: #005088; }
+        
+        .board-container { flex: 1; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; padding: 20px; background-color: #f8fafc; }
+        .sector-column { background-color: white; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; }
+        .column-header { padding: 15px; background-color: #1e293b; color: white; border-top-left-radius: 7px; border-top-right-radius: 7px; text-align: center; font-weight: bold; }
+        
+        .feed-container { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+        .post-card { background-color: #f1f5f9; padding: 12px; border-radius: 6px; border-left: 4px solid #005088; }
+        .post-footer { font-size: 11px; color: #64748b; margin-top: 8px; border-top: 1px dashed #cbd5e1; padding-top: 5px; display: flex; justify-content: space-between; }
+        
+        .input-container { padding: 15px; border-top: 1px solid #e2e8f0; }
+        .input-container textarea { width: 100%; height: 60px; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; resize: none; margin-bottom: 10px; }
+        .btn-salvar { width: 100%; padding: 10px; background-color: #005088; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .btn-salvar:disabled { background-color: #cbd5e1; cursor: not-allowed; }
     </style>
 </head>
 <body>
 
-    <div class="header-voltar">
-        <span>Painel de Controle Interno - CCM Anchieta</span>
-        <a href="index.html"><i class="fa-solid fa-arrow-left"></i> Voltar ao Site</a>
-    </div>
+    <aside class="sidebar">
+        <div class="sidebar-header"><h2>TURMAS</h2></div>
+        <ul class="turmas-lista">
+            <li class="turma-item active"><i class="fa-solid fa-users-viewfinder"></i> 6º Ano A</li>
+        </ul>
+    </aside>
 
-    <iframe src="https://professorcleiton.github.io/Sistema-de-Gest-o-Integrada-SGI-/"></iframe>
+    <main class="main-content">
+        <header class="top-bar">
+            <div class="aluno-selector">
+                <label for="select-alunos"><i class="fa-solid fa-user-graduated"></i> Aluno: </label>
+                <select id="select-alunos" style="padding: 6px 12px; font-size: 16px; border-radius: 4px;">
+                    <option>Carregando alunos da planilha...</option>
+                </select>
+            </div>
+            <div style="font-size: 14px; font-weight: 600; background: #e2e8f0; padding: 8px 15px; border-radius: 20px;">
+                <i class="fa-solid fa-user-gear"></i> Setor Ativo: 
+                <select id="escolher-setor-simulado" onchange="aplicarBloqueioSetores()" style="padding: 2px; font-weight: bold; border: none; background: transparent; color: #005088;">
+                    <option value="pedagogico">PEDAGÓGICO</option>
+                    <option value="meivs">MEIV'S</option>
+                    <option value="adm">ADM</option>
+                    <option value="direcao">DIREÇÃO (Acesso Total)</option>
+                </select>
+            </div>
+        </header>
 
+        <div class="board-container">
+            <section class="sector-column" id="col-meivs">
+                <div class="column-header" style="background-color: #0284c7;">MEIV'S</div>
+                <div class="feed-container" id="feed-meivs"></div>
+                <div class="input-container">
+                    <textarea id="text-meivs" placeholder="Registrar informação fixa..."></textarea>
+                    <button class="btn-salvar" id="btn-meivs" onclick="salvarPost('meivs')">Salvar Registro</button>
+                </div>
+            </section>
+
+            <section class="sector-column" id="col-pedagogico">
+                <div class="column-header" style="background-color: #0d9488;">PEDAGO</div>
+                <div class="feed-container" id="feed-pedagogico"></div>
+                <div class="input-container">
+                    <textarea id="text-pedagogico" placeholder="Registrar informação fixa..."></textarea>
+                    <button class="btn-salvar" id="btn-pedagogico" onclick="salvarPost('pedagogico')">Salvar Registro</button>
+                </div>
+            </section>
+
+            <section class="sector-column" id="col-adm">
+                <div class="column-header" style="background-color: #4f46e5;">ADM</div>
+                <div class="feed-container" id="feed-adm"></div>
+                <div class="input-container">
+                    <textarea id="text-adm" placeholder="Registrar informação fixa..."></textarea>
+                    <button class="btn-salvar" id="btn-adm" onclick="salvarPost('adm')">Salvar Registro</button>
+                </div>
+            </section>
+
+            <section class="sector-column" id="col-direcao">
+                <div class="column-header" style="background-color: #b91c1c;">DIREÇÃO</div>
+                <div class="feed-container" id="feed-direcao"></div>
+                <div class="input-container">
+                    <textarea id="text-direcao" placeholder="Registrar informação fixa..."></textarea>
+                    <button class="btn-salvar" id="btn-direcao" onclick="salvarPost('direcao')">Salvar Registro</button>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script>
+        // Configuração da sua Planilha Mestre
+        const SHEET_ID = '1exnS8pasiZ1duYYtkhSUWo7MeaZpvF0U'; // Seu ID de planilha capturado
+        const COLS_ALUNOS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Alunos`;
+
+        // Carregar Alunos da Planilha automaticamente assim que abrir a página
+        async function carregarAlunos() {
+            try {
+                const response = await fetch(COLS_ALUNOS_URL);
+                const data = await response.text();
+                
+                // Converte as linhas do CSV da planilha em opções do Select
+                const linhas = data.split('\n').slice(1); // Pula o cabeçalho
+                const select = document.getElementById('select-alunos');
+                select.innerHTML = ''; // Limpa o carregando
+                
+                linhas.forEach(linha => {
+                    const colunas = linha.split(',');
+                    if(colunas[1]) {
+                        const nomeAluno = colunas[1].replace(/"/g, '').trim();
+                        let opt = document.createElement('option');
+                        opt.value = nomeAluno;
+                        opt.innerHTML = nomeAluno;
+                        select.appendChild(opt);
+                    }
+                });
+            } catch (error) {
+                console.error("Erro ao ler alunos da planilha:", error);
+                document.getElementById('select-alunos').innerHTML = '<option>Erro ao carregar lista</option>';
+            }
+        }
+
+        // Regra de Ouro: Bloquear inputs dos setores alheios
+        function aplicarBloqueioSetores() {
+            const setorLogado = document.getElementById('escolher-setor-simulado').value;
+            const setores = ['pedagogico', 'meivs', 'adm', 'direcao'];
+
+            setores.forEach(setor => {
+                const textarea = document.getElementById(`text-${setor}`);
+                const botao = document.getElementById(`btn-${setor}`);
+                
+                // Se for Direção, libera tudo. Se não, libera apenas a sua própria coluna
+                if (setorLogado === 'direcao' || setorLogado === setor) {
+                    textarea.disabled = false;
+                    botao.disabled = false;
+                    textarea.placeholder = "Registrar informação fixa...";
+                } else {
+                    textarea.disabled = true;
+                    botao.disabled = true;
+                    textarea.placeholder = "Apenas leitura para o seu setor.";
+                }
+            });
+        }
+
+        // Lógica Visual de salvar a mensagem com rodapé fixo
+        function salvarPost(setor) {
+            const texto = document.getElementById(`text-${setor}`).value;
+            if(!texto.trim()) return;
+
+            const feed = document.getElementById(`feed-${setor}`);
+            const dataAtual = new Date().toLocaleDateString('pt-BR');
+
+            // Monta o Card com a informação imutável e trilha de auditoria no rodapé
+            const novoCard = document.createElement('div');
+            novoCard.className = 'post-card';
+            novoCard.innerHTML = `
+                <p class="post-text">${texto}</p>
+                <div class="post-footer">
+                    <span><i class="fa-solid fa-user"></i> Funcionário (${setor.toUpperCase()})</span>
+                    <span>${dataAtual}</span>
+                </div>
+            `;
+
+            feed.appendChild(novoCard);
+            document.getElementById(`text-${setor}`).value = ''; // Limpa o campo
+        }
+
+        // Execuções Iniciais ao abrir a tela
+        carregarAlunos();
+        aplicarBloqueioSetores();
+    </script>
 </body>
 </html>
