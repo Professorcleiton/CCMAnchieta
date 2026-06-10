@@ -3,162 +3,112 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CCM Anchieta | Colégio Cívico-Militar</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Colégio Cívico-Militar Anchieta</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        :root {
-            --primary-blue: #0056a0;
-            --secondary-green: #0c7b00;
-            --btn-green: #33cc33;
-            --btn-dark: #22a222;
-            --white: #ffffff;
-            --bg-light: #f4f7f6;
-            --btn-ponto: #e67e22; /* Cor específica para o Ponto */
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f8fafc; color: #1e293b; line-height: 1.6; }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        /* TOPO COM LOGOS */
+        .header-logos { background-color: white; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; }
+        .logo-img-nre { height: 70px; width: auto; object-fit: contain; }
+        .logo-img-ccma { height: 85px; width: auto; object-fit: contain; }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, sans-serif;
-            background-color: var(--bg-light);
-            scroll-behavior: smooth;
-        }
+        /* BARRA VERDE DE NAVEGAÇÃO */
+        .nav-bar { background-color: #00a859; padding: 12px 5%; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
+        .nav-bar h1 { color: white; font-size: 24px; margin-bottom: 10px; font-weight: bold; letter-spacing: 1px; }
+        .nav-menu { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; list-style: none; }
+        .nav-link { background-color: rgba(255, 255, 255, 0.15); color: white; text-decoration: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+        .nav-link:hover { background-color: #eab308; color: #1e293b; transform: translateY(-2px); }
+        .nav-link.destaque { background-color: #ff6600; }
+        .nav-link.destaque:hover { background-color: #cc5200; color: white; }
 
-        /* BARRA SUPERIOR */
-        .top-bar {
-            background: #003566;
-            padding: 10px 5%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: white;
-        }
+        /* CONTEÚDO PRINCIPAL */
+        .container { max-width: 1100px; margin: 40px auto; padding: 0 20px; }
+        
+        .section-card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 30px; border-left: 6px solid #005088; }
+        .section-card h2 { color: #005088; margin-bottom: 20px; font-size: 26px; display: flex; align-items: center; gap: 12px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; }
+        .section-card p { font-size: 16px; color: #475569; margin-bottom: 15px; text-align: justify; }
 
-        .top-bar a { color: white; text-decoration: none; font-weight: bold; font-size: 0.9rem; }
+        /* GRID DA GALERIA */
+        .galeria-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 20px; }
+        .galeria-item { background: #f1f5f9; border-radius: 8px; overflow: hidden; border: 1px solid #e2e8f0; text-align: center; padding: 15px; }
+        .galeria-item i { font-size: 40px; color: #005088; margin-bottom: 10px; }
+        .galeria-item h4 { margin-bottom: 5px; color: #1e293b; }
 
-        /* CABEÇALHO - IMAGENS SEM CORTAR */
-        .header-logos {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            background: white;
-            padding: 15px;
-            height: 180px;
-            gap: 10px;
-        }
-
-        .header-logos img {
-            max-width: 23%;
-            height: 100%;
-            object-fit: contain;
-        }
-
-        .school-name-bar {
-            background-color: var(--btn-green);
-            color: white;
-            text-align: center;
-            padding: 15px 0;
-        }
-
-        .school-name-bar h1 { font-size: 2.5rem; letter-spacing: 2px; }
-
-        /* NAVEGAÇÃO - BOTÕES 3D */
-        nav {
-            background-color: var(--btn-dark);
-            padding: 15px 0;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        nav ul {
-            display: flex;
-            justify-content: center;
-            list-style: none;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        nav ul li a {
-            display: block;
-            background-color: var(--btn-green);
-            color: white;
-            text-decoration: none;
-            padding: 10px 18px;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 0.85rem;
-            border-bottom: 4px solid #086d00;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            transition: all 0.1s;
-            text-align: center;
-        }
-
-        /* DESTAQUES ESPECÍFICOS */
-        nav ul li a.frequenciometro { background-color: #f39c12; border-bottom-color: #d35400; }
-        nav ul li a.ponto { background-color: var(--btn-ponto); border-bottom-color: #d35400; }
-
-        nav ul li a:hover { transform: translateY(-2px); filter: brightness(1.1); }
-        nav ul li a:active { transform: translateY(3px); border-bottom: 2px solid #086d00; }
-
-        /* GALERIA */
-        .gallery-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .gallery-item {
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-
-        .gallery-item img { width: 100%; height: 180px; object-fit: cover; }
-        .gallery-item p { padding: 10px; text-align: center; font-weight: bold; }
-
-        footer { background: #222; color: white; padding: 30px; text-align: center; margin-top: 50px;}
-
-        @media (max-width: 768px) {
-            .header-logos { height: 100px; }
-            .school-name-bar h1 { font-size: 1.5rem; }
-            nav ul li a { padding: 8px; font-size: 0.75rem; }
-        }
+        /* RODAPÉ */
+        footer { background-color: #1e293b; color: #94a3b8; text-align: center; padding: 25px; font-size: 14px; margin-top: 60px; border-top: 4px solid #eab308; }
+        footer strong { color: white; }
     </style>
 </head>
 <body>
 
-    <div class="top-bar">
-        <a href="restrito.html">Área Restrita</a>
-        <div>
-            <a href="https://www.instagram.com/ccm_anchieta/" target="_blank" style="margin-left:15px"><i class="fab fa-instagram"></i></a>
-            <a href="https://www.facebook.com/anchieta.anchieta.779/" target="_blank" style="margin-left:15px"><i class="fab fa-facebook-f"></i></a>
-        </div>
-    </div>
+    <header class="header-logos">
+        <img src="nreumuarama.jpg" alt="Logo NRE Umuarama" class="logo-img-nre">
+        <img src="ccma.PNG" alt="Logo CCM Anchieta" class="logo-img-ccma">
+    </header>
 
-    <header id="TOPO">
-        <div class="header-logos">
-            <img src="img/femininobanner.JPG" alt="Mascote">
-            <img src="img/nreumuarama.jpg" alt="NRE">
-            <img src="img/ccma.PNG" alt="Brasão">
-            <img src="img/masculinobanner.JPG" alt="Mascote">
-        </div>
+    <nav class="nav-bar">
+        <h1>CCM ANCHIETA</h1>
+        <ul class="nav-menu">
+            <li><a href="#sobre" class="nav-link"><i class="fa-solid fa-school"></i> SOBRE NÓS</a></li>
+            <li><a href="https://www.ccmanchieta.com.br/frequenciometro" class="nav-link"><i class="fa-solid fa-chart-simple"></i> FREQUÊNCIA</a></li>
+            <li><a href="#galeria" class="nav-link"><i class="fa-solid fa-image"></i> GALERIA</a></li>
+            <li><a href="https://www.seed.pr.gov.br" target="_blank" class="nav-link"><i class="fa-solid fa-link"></i> RCO</a></li>
+            <li><a href="#ponto" class="nav-link"><i class="fa-solid fa-clock"></i> REGISTRO PONTO</a></li>
+            <li><a href="#calendario" class="nav-link"><i class="fa-solid fa-calendar-days"></i> CALENDÁRIO</a></li>
+            <li><a href="restrito.html" class="nav-link destaque"><i class="fa-solid fa-lock"></i> ÁREA RESTRITA</a></li>
+        </ul>
+    </nav>
 
-        <div class="school-name-bar">
-            <h1>CCM ANCHIETA</h1>
-        </div>
+    <main class="container">
 
-        <nav>
-            <ul>
-                <li><a href="#sobre">SOBRE NÓS</a></li>
-                <li><a href="https://anchietafrequencia.vercel.app" class="frequenciometro" target="_blank">FREQUÊNCIA 📊</a></li>
-                <li><a href="#gallery">GALERIA</a></li>
-                <li><a href="https://rco.paas.pr.gov.br" target="_blank">RCO</a></li>
-                <li><a href="https://auth-cs.identidadedigital.pr.gov.br/centralautenticacao/login.html?response_type=code&client_id=b86e8d03fe992d1b0e19656875ee557c&redirect_uri=http%3A%2F%2Fwww.registropontoseed.pr.gov.br%2Fcallback.php&scope=null&state=null&urlCert=https://certauth-cs.identidadedigital.pr.gov.br&dnsCidadao=https://cidadao-cs.identidadedigital.pr.gov.br/centralcidadao&loginPadrao=btnCentral&labelCentral=CPF&modulosDeAutenticacao=btnCpf,btnCentral&acesso=2118&tokenFormat=jwt&exibirLinkAutoCadastro=true&exibirLinkRecuperarSenha=true&exibirLinkAutoCadastroCertificado=false&exibirAviso=true&captcha=false" class="ponto" target="_blank">REGISTRO PONTO ⏱️</a></li>
-                <li><a href="Arq/calendario_escolar2026.pdf">CALENDÁRIO</a></li>
-                <li><a href="#contato">CONTATO</a></li>
-            </ul>
-        </nav>
-    </header
+        <section id="sobre" class="section-card">
+            <h2><i class="fa-solid fa-circle-info"></i> Sobre Nossa Instituição</h2>
+            <p>O Colégio Cívico-Militar Anchieta, localizado em Cruzeiro do Oeste - PR, integra a rede pública de ensino do Estado do Paraná sob a coordenação do Núcleo Regional de Educação (NRE) de Umuarama. Buscamos promover um ambiente educacional baseado na excelência acadêmica, no desenvolvimento de valores cívicos e na cidadania.</p>
+            <p>Nossa proposta pedagógica une o trabalho do corpo docente e da equipe de monitores militares (MEIV'S), focando na formação integral do aluno e na preparação para os desafios futuros.</p>
+        </section>
+
+        <section id="galeria" class="section-card">
+            <h2><i class="fa-solid fa-images"></i> Galeria de Projetos e Inovações</h2>
+            <p>Conheça as principais atividades práticas e recursos tecnológicos desenvolvidos pela nossa comunidade escolar:</p>
+            <div class="galeria-grid">
+                <div class="galeria-item">
+                    <i class="fa-solid fa-robot"></i>
+                    <h4>Robótica Educacional</h4>
+                    <p style="font-size: 13px; text-align:center;">Aulas práticas com Arduino e eletrônica aplicada.</p>
+                </div>
+                <div class="galeria-item">
+                    <i class="fa-solid fa-laptop-code"></i>
+                    <h4>Painel SGI</h4>
+                    <p style="font-size: 13px; text-align:center;">Monitoramento integrado entre setores em tempo real.</p>
+                </div>
+                <div class="galeria-item">
+                    <i class="fa-solid fa-medal"></i>
+                    <h4>Instrução Cívica</h4>
+                    <p style="font-size: 13px; text-align:center;">Atividades de valorização civil e monitoria.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="ponto" class="section-card" style="border-left-color: #eab308;">
+            <h2><i class="fa-solid fa-clock-pulse"></i> Registro de Ponto e Horários</h2>
+            <p>Espaço destinado às orientações funcionais para o corpo docente, agentes educacionais e equipe de monitoria técnica do colégio.</p>
+            <p>Certifique-se de cumprir os horários estabelecidos pela SEED-PR e mantenha seus registros atualizados junto à secretaria administrativa.</p>
+        </section>
+
+        <section id="calendario" class="section-card">
+            <h2><i class="fa-solid fa-calendar-check"></i> Calendário Letivo</h2>
+            <p>Acompanhe o cronograma de bimestres, recessos, conselhos de classe e reuniões de pais e mestres planejados para o ano letivo corrente.</p>
+            <p>Mantenha-se informado sobre os dias letivos e datas de avaliações institucionais através do nosso mural digital.</p>
+        </section>
+
+    </main>
+
+    <footer>
+        <p>&copy; 2026 <strong>Colégio Cívico-Militar Anchieta</strong> - Cruzeiro do Oeste - PR</p>
+        <p style="font-size: 12px; margin-top: 5px; color: #64748b;">NRE Umuarama | Secretaria de Estado da Educação do Paraná</p>
+    </footer>
+
+</body>
+</html>
