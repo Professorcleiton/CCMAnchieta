@@ -135,14 +135,16 @@
     </div>
 
     <script>
-        // CONFIGURAÇÕES MESTRE DO BANCO DE DADOS (GOOGLE SHEETS)
+        // CONFIGURAÇÃO DO ID DO SEU BANCO DE DADOS
         const SHEET_ID = '1UUiVcCaSb_9Lx7gdEpmBzeRQPlBwDZRouQC2pf1q8Vg'; 
-        const COLS_ALUNOS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&sheet=Alunos`;
-        const COLS_USERS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&sheet=Usuários`;
+        
+        // Rota de exportação explícita forçando as abas correspondentes
+        const COLS_ALUNOS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=Alunos`;
+        const COLS_USERS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=Usuários`;
 
         let usuarioLogado = null;
 
-        // 1. FUNÇÃO DE LOGIN E AUTENTICAÇÃO CONTRA A PLANILHA
+        // 1. AUTENTICAÇÃO BLINDADA (IGNORA MAIÚSCULAS NA PLANILHA)
         async function autenticarUsuario() {
             const emailDigitado = document.getElementById('user-email').value.trim().toLowerCase();
             const errMsg = document.getElementById('error-message');
@@ -151,29 +153,27 @@
 
             try {
                 const response = await fetch(COLS_USERS_URL);
-                if (!response.ok) throw new Error('Erro ao conectar na aba Usuários');
+                const text = await response.text();
                 
-                const data = await response.text();
-                const linhas = data.split('\n');
+                // Extrai o JSON estruturado para evitar quebra por separador de caractere
+                const jsonText = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
+                const data = JSON.parse(jsonText);
+                const linhas = data.table.rows;
                 
                 let cadastrado = false;
 
-                // Varre a lista procurando o e-mail cadastrado
-                for(let i = 1; i < linhas.length; i++) {
-                    const linha = linhas[i].trim();
-                    if (!linha) continue;
-
-                    const colunas = linha.includes(';') ? linha.split(';') : linha.split(',');
-                    if(colunas[0]) {
-                        const emailPlanilha = colunas[0].replace(/"/g, '').trim().toLowerCase();
+                for(let i = 0; i < linhas.length; i++) {
+                    const r = linhas[i].c;
+                    if(r && r[0] && r[0].v) {
+                        const emailPlanilha = r[0].v.toString().trim().toLowerCase();
                         
                         if(emailDigitado === emailPlanilha) {
                             cadastrado = true;
                             usuarioLogado = {
                                 email: emailPlanilha,
-                                nome: colunas[1].replace(/"/g, '').trim(),
-                                setor: colunas[2].replace(/"/g, '').trim().toLowerCase(),
-                                nivel: parseInt(colunas[3])
+                                nome: r[1] ? r[1].v.toString().trim() : 'Funcionário',
+                                setor: r[2] ? r[2].v.toString().trim().toLowerCase() : 'pedagogico',
+                                nivel: r[3] ? parseInt(r[3].v) : 1
                             };
                             break;
                         }
@@ -181,14 +181,10 @@
                 }
 
                 if(cadastrado) {
-                    // Esconde a tela de login e exibe o painel de setores
                     document.getElementById('login-screen').style.display = 'none';
                     document.getElementById('app-interface').style.display = 'flex';
-                    
-                    // Alimenta as informações do utilizador logado na barra superior
                     document.getElementById('user-display').innerHTML = `<i class="fa-solid fa-user-check"></i> ${usuarioLogado.nome} (${usuarioLogado.setor.toUpperCase()})`;
                     
-                    // Aplica a restrição de campos e começa a puxar os alunos
                     aplicarBloqueioSetores(usuarioLogado.setor);
                     carregarAlunos();
                 } else {
@@ -197,54 +193,48 @@
                 }
 
             } catch (error) {
-                console.error("Erro na autenticação:", error);
+                console.error(error);
                 errMsg.style.display = 'block';
-                errMsg.innerHTML = "Erro de conexão. Verifique se a planilha está compartilhada como pública!";
+                errMsg.innerHTML = "Erro ao ler a tabela de usuários. Verifique o compartilhamento!";
             }
         }
 
-        // 2. CARREGAR ALUNOS DA PLANILHA DINAMICAMENTE
+        // 2. CARREGAR ALUNOS DIRETAMENTE DA ABA ALUNOS
         async function carregarAlunos() {
             try {
                 const response = await fetch(COLS_ALUNOS_URL);
-                if (!response.ok) throw new Error('Erro ao conectar na aba Alunos');
-
-                const data = await response.text();
-                const linhas = data.split('\n');
+                const text = await response.text();
+                
+                const jsonText = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
+                const data = JSON.parse(jsonText);
+                const linhas = data.table.rows;
+                
                 const select = document.getElementById('select-alunos');
-                select.innerHTML = ''; // Limpa a mensagem de carregando
+                select.innerHTML = '';
                 
                 let totalAlunos = 0;
 
-                for (let i = 1; i < linhas.length; i++) {
-                    const linha = linhas[i].trim();
-                    if (!linha) continue;
-
-                    const colunas = linha.includes(';') ? linha.split(';') : line.split(',');
-                    
-                    // Coluna 1 (índice 1) representa o nome_aluno
-                    if (colunas[1]) {
-                        const nomeAluno = colunas[1].replace(/"/g, '').trim();
-                        if(nomeAluno.length > 0) {
-                            let opt = document.createElement('option');
-                            opt.value = nomeAluno;
-                            opt.innerHTML = nomeAluno;
-                            select.appendChild(opt);
-                            totalAlunos++;
-                        }
+                linhas.forEach(r => {
+                    if (r.c && r.c[1] && r.c[1].v) {
+                        const nomeAluno = r.c[1].v.toString().trim();
+                        let opt = document.createElement('option');
+                        opt.value = nomeAluno;
+                        opt.innerHTML = nomeAluno;
+                        select.appendChild(opt);
+                        totalAlunos++;
                     }
-                }
+                });
 
                 if(totalAlunos === 0) {
                     select.innerHTML = '<option>Nenhum aluno ativo encontrado</option>';
                 }
             } catch (error) {
-                console.error("Erro ao carregar alunos:", error);
+                console.error(error);
                 document.getElementById('select-alunos').innerHTML = '<option>Erro ao ler lista da planilha</option>';
             }
         }
 
-        // 3. BLOQUEIO DOS SETORES (APENAS O SETOR DONO DA COLUNA DIGITA)
+        // 3. REGRAS DE CONTROLE DOS CAMPOS DE ESCRITA
         function aplicarBloqueioSetores(setor) {
             const setores = ['pedagogico', 'meivs', 'adm', 'direcao'];
 
@@ -252,7 +242,6 @@
                 const textarea = document.getElementById(`text-${s}`);
                 const botao = document.getElementById(`btn-${s}`);
                 
-                // Se for a gestão superior (direção) ou o próprio setor, abre permissão de escrita
                 if (setor === 'direcao' || setor === s) {
                     textarea.disabled = false;
                     botao.disabled = false;
@@ -265,7 +254,7 @@
             });
         }
 
-        // 4. SALVAR REGISTRO VISUAL (CARD FIXO COM TRILHA DE AUDITORIA)
+        // 4. MENSAGENS FIXAS EM TELA
         function salvarPost(setor) {
             const textarea = document.getElementById(`text-${setor}`);
             const texto = textarea.value.trim();
@@ -284,7 +273,7 @@
                 </div>
             `;
             feed.appendChild(novoCard);
-            textarea.value = ''; // Limpa o campo de escrita
+            textarea.value = '';
         }
     </script>
 </body>
