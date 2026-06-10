@@ -1,4 +1,73 @@
-<main style="padding: 20px; text-align: center;">
-    <h2>Painel Integrado de Gestão - CCM Anchieta</h2>
-    <iframe src="URL_DO_SEU_NOVO_APP_NA_VERCEL" width="100%" height="850px" style="border: 2px solid #ccc; border-radius: 8px;"></iframe>
-</main>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CCM Anchieta | Área Restrita</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+        }
+
+        /* BARRA SUPERIOR PARA VOLTAR AO SITE */
+        .header-voltar {
+            background: #003566;
+            padding: 12px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            height: 50px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .header-voltar span {
+            font-weight: 600;
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+        }
+
+        .header-voltar a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.85rem;
+            background: #0c7b00;
+            padding: 6px 16px;
+            border-radius: 4px;
+            transition: background 0.2s;
+            border-bottom: 2px solid #053b00;
+        }
+
+        .header-voltar a:hover {
+            background: #11aa00;
+        }
+
+        /* MOLDURA DO APLICATIVO (SGI) */
+        iframe {
+            width: 100%;
+            height: calc(100% - 50px); /* Desconta a altura da barra superior */
+            border: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-voltar">
+        <span>Painel de Controle Interno - CCM Anchieta</span>
+        <a href="index.html"><i class="fa-solid fa-arrow-left"></i> Voltar ao Site</a>
+    </div>
+
+    <iframe src="https://professorcleiton.github.io/Sistema-de-Gest-o-Integrada-SGI-/"></iframe>
+
+</body>
+</html>
