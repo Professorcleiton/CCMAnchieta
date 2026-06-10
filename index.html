@@ -11,8 +11,8 @@
 
         /* TOPO COM LOGOS */
         .header-logos { background-color: white; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; }
-        .logo-img-nre { height: 70px; width: auto; object-fit: contain; }
-        .logo-img-ccma { height: 85px; width: auto; object-fit: contain; }
+        .logo-img-nre { height: 75px; width: auto; object-fit: contain; }
+        .logo-img-ccma { height: 90px; width: auto; object-fit: contain; }
 
         /* BARRA VERDE DE NAVEGAÇÃO */
         .nav-bar { background-color: #00a859; padding: 12px 5%; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
@@ -36,6 +36,10 @@
         .galeria-item i { font-size: 40px; color: #005088; margin-bottom: 10px; }
         .galeria-item h4 { margin-bottom: 5px; color: #1e293b; }
 
+        /* BOTOES DE DOWNLOAD */
+        .btn-download { display: inline-flex; align-items: center; gap: 10px; background-color: #005088; color: white; text-decoration: none; padding: 12px 25px; border-radius: 6px; font-weight: bold; margin-top: 10px; transition: background 0.2s; }
+        .btn-download:hover { background-color: #0a4673; }
+
         /* RODAPÉ */
         footer { background-color: #1e293b; color: #94a3b8; text-align: center; padding: 25px; font-size: 14px; margin-top: 60px; border-top: 4px solid #eab308; }
         footer strong { color: white; }
@@ -44,27 +48,27 @@
 <body>
 
     <header class="header-logos">
-        <img src="nreumuarama.jpg" alt="Logo NRE Umuarama" class="logo-img-nre">
-        <img src="ccma.PNG" alt="Logo CCM Anchieta" class="logo-img-ccma">
+        <img src="img/nreumuarama.jpg" alt="Logo NRE Umuarama" class="logo-img-nre">
+        <img src="img/ccma.PNG" alt="Logo CCM Anchieta" class="logo-img-ccma">
     </header>
 
     <nav class="nav-bar">
         <h1>CCM ANCHIETA</h1>
         <ul class="nav-menu">
             <li><a href="#sobre" class="nav-link"><i class="fa-solid fa-school"></i> SOBRE NÓS</a></li>
-            <li><a href="https://www.ccmanchieta.com.br/frequenciometro" class="nav-link"><i class="fa-solid fa-chart-simple"></i> FREQUÊNCIA</a></li>
+            <li><a href="frequencia.html" class="nav-link"><i class="fa-solid fa-chart-simple"></i> FREQUÊNCIA</a></li>
             <li><a href="#galeria" class="nav-link"><i class="fa-solid fa-image"></i> GALERIA</a></li>
             <li><a href="https://www.seed.pr.gov.br" target="_blank" class="nav-link"><i class="fa-solid fa-link"></i> RCO</a></li>
             <li><a href="#ponto" class="nav-link"><i class="fa-solid fa-clock"></i> REGISTRO PONTO</a></li>
             <li><a href="#calendario" class="nav-link"><i class="fa-solid fa-calendar-days"></i> CALENDÁRIO</a></li>
-            <li><a href="restrito.html" class="nav-link destaque"><i class="fa-solid fa-lock"></i> ÁREA RESTRITA</a></li>
+            <li><a href="area-restrita.html" class="nav-link destaque"><i class="fa-solid fa-lock"></i> ÁREA RESTRITA</a></li>
         </ul>
     </nav>
 
     <main class="container">
 
         <section id="sobre" class="section-card">
-            <h2><i class="fa-solid fa-circle-info"></i> Sobre Nossa Instituição</h2>
+            <h2><i class="fa-solid fa-school"></i> Sobre Nossa Instituição</h2>
             <p>O Colégio Cívico-Militar Anchieta, localizado em Cruzeiro do Oeste - PR, integra a rede pública de ensino do Estado do Paraná sob a coordenação do Núcleo Regional de Educação (NRE) de Umuarama. Buscamos promover um ambiente educacional baseado na excelência acadêmica, no desenvolvimento de valores cívicos e na cidadania.</p>
             <p>Nossa proposta pedagógica une o trabalho do corpo docente e da equipe de monitores militares (MEIV'S), focando na formação integral do aluno e na preparação para os desafios futuros.</p>
         </section>
@@ -98,9 +102,11 @@
         </section>
 
         <section id="calendario" class="section-card">
-            <h2><i class="fa-solid fa-calendar-check"></i> Calendário Letivo</h2>
-            <p>Acompanhe o cronograma de bimestres, recessos, conselhos de classe e reuniões de pais e mestres planejados para o ano letivo corrente.</p>
-            <p>Mantenha-se informado sobre os dias letivos e datas de avaliações institucionais através do nosso mural digital.</p>
+            <h2><i class="fa-solid fa-calendar-check"></i> Calendário Letivo 2026</h2>
+            <p>Clique no botão abaixo para visualizar ou baixar o documento oficial do Calendário Escolar de 2026 do Colégio Anchieta diretamente no seu dispositivo:</p>
+            <a href="calendario_escolar2026.pdf" target="_blank" class="btn-download">
+                <i class="fa-solid fa-file-pdf"></i> Baixar Calendário Escolar 2026 (PDF)
+            </a>
         </section>
 
     </main>
