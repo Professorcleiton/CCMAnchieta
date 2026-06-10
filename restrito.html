@@ -98,11 +98,11 @@
             </div>
             
             <div class="input-group">
-                <label for="user-password"><i class="fa-solid fa-key"></i> Senha (RG Individual):</label>
-                <input type="password" id="user-password" placeholder="Digite seu RG completo">
+                <label for="user-password"><i class="fa-solid fa-key"></i> Senha de Acesso:</label>
+                <input type="password" id="user-password" placeholder="Digite sua senha cadastrada">
             </div>
             
-            <div id="error-message">E-mail ou RG incorretos!</div>
+            <div id="error-message">E-mail ou Senha incorretos!</div>
             <button class="btn-login" id="btn-entrar-login" onclick="autenticarUsuario()">Entrar no Sistema</button>
             <br>
             <a href="index.html" class="btn-voltar-site">
@@ -231,30 +231,16 @@
 
                 for(let i = 0; i < linhas.length; i++) {
                     const r = linhas[i].c;
-                    // Blindagem: valida e-mail na coluna A (0) e senha/RG na coluna B (1)
-                    if(r && r[0] && r[0].v && r[1] && r[1].v) {
+                    // Valida Coluna A (E-mail) e Coluna E (Senha - Índice 4)
+                    if(r && r[0] && r[0].v && r[4] && r[4].v) {
                         const emailPlanilha = r[0].v.toString().trim().toLowerCase();
-                        const rgPlanilha = r[1].v.toString().trim();
+                        const senhaPlanilha = r[4].v.toString().trim();
                         
-                        if(emailDigitado === emailPlanilha && senhaDigitada === rgPlanilha) {
+                        if(emailDigitado === emailPlanilha && senhaDigitada === senhaPlanilha) {
                             autenticado = true;
-                            
-                            // Captura automática e flexível do setor independente de qual coluna ele esteja
-                            let setorIdentificado = 'pedagogico';
-                            for (let j = 2; j < r.length; j++) {
-                                if (r[j] && r[j].v) {
-                                    let val = r[j].v.toString().trim().toLowerCase();
-                                    if (['pedagogico', 'meivs', 'adm', 'direcao', 'professores'].includes(val)) {
-                                        // Se na planilha estiver escrito professores, mapeia para a chave da coluna 'direcao'
-                                        setorIdentificado = (val === 'professores') ? 'direcao' : val;
-                                        break;
-                                    }
-                                }
-                            }
-
                             usuarioLogado = {
                                 email: emailPlanilha,
-                                setor: setorIdentificado
+                                setor: r[2] ? r[2].v.toString().trim().toLowerCase() : 'pedagogico'
                             };
                             break;
                         }
@@ -266,14 +252,14 @@
                     inicializarPainel();
                 } else {
                     errMsg.style.display = 'block';
-                    errMsg.innerHTML = "E-mail ou RG incorretos/não autorizados!";
+                    errMsg.innerHTML = "E-mail ou Senha incorretos!";
                     btnLogin.disabled = false;
                     btnLogin.innerHTML = 'Entrar no Sistema';
                 }
             } catch (error) {
                 console.error(error);
                 errMsg.style.display = 'block';
-                errMsg.innerHTML = "Erro de conexão ao validar credenciais.";
+                errMsg.innerHTML = "Erro ao conectar na planilha de usuários.";
                 btnLogin.disabled = false;
                 btnLogin.innerHTML = 'Entrar no Sistema';
             }
@@ -283,9 +269,8 @@
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('app-interface').style.display = 'flex';
             
-            // Exibe o nome correto do setor no topo amarelo
             let nomeExibicaoSetor = usuarioLogado.setor.toUpperCase();
-            if (nomeExibicaoSetor === 'DIRECAO') nomeExibicaoSetor = 'PROFESSORES';
+            if (nomeExibicaoSetor === 'DIRECO' || nomeExibicaoSetor === 'DIRECAO') nomeExibicaoSetor = 'PROFESSORES';
             document.getElementById('user-display').innerHTML = `<i class="fa-solid fa-user-check"></i> ${nomeExibicaoSetor}`;
             
             aplicarBloqueioSetores(usuarioLogado.setor);
@@ -331,29 +316,7 @@
                     }
                 });
             } catch (error) {
-                try {
-                    const resSecundaria = await fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&sheet=Alunos`);
-                    const csvText = await resSecundaria.text();
-                    const linhasCsv = csvText.split('\n');
-                    
-                    for(let i = 1; i < linhasCsv.length; i++) {
-                        const linha = linhasCsv[i].trim();
-                        if(!linha) continue;
-                        const colunas = linha.includes(';') ? linha.split(';') : linha.split(',');
-                        if(colunas[1]) {
-                            const nomeLimpo = colunas[1].replace(/"/g, '').trim();
-                            const turmaLimpa = colunas[2] ? colunas[2].replace(/"/g, '').trim() : 'Sem Turma';
-                            if(nomeLimpo) {
-                                if(!cacheAlunosPorTurma[turmaLimpa]) {
-                                    cacheAlunosPorTurma[turmaLimpa] = [];
-                                }
-                                cacheAlunosPorTurma[turmaLimpa].push(nomeLimpo);
-                            }
-                        }
-                    }
-                } catch(err2) {
-                    console.error(err2);
-                }
+                console.error("Erro na leitura das turmas:", error);
             }
             renderizarSidebarTurmas();
         }
@@ -450,7 +413,6 @@
                             dataFormatada = new Date().toLocaleDateString('pt-BR');
                         }
 
-                        // Mapeamento visual do rodapé do card
                         let fSetor = reg.funcionario ? reg.funcionario.toUpperCase() : 'SGI';
                         if (fSetor === 'DIRECAO') fSetor = 'PROFESSORES';
 
@@ -499,7 +461,7 @@
                 textarea.value = '';
             } catch (error) {
                 console.error(error);
-                alert("Falha na comunicação com a planilha do Google.");
+                alert("Falha na gravação externa.");
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = 'Salvar Registro';
@@ -518,8 +480,8 @@
                 const textarea = document.getElementById(`text-${s}`);
                 const botao = document.getElementById(`btn-${s}`);
                 
-                // Professores/Direção possuem acesso total de escrita, os demais escrevem apenas no próprio setor
-                if (setor === 'direcao' || sector === 'professores' || setor === s) {
+                // Setor 'direcao' mapeia para a nova coluna de Professores e ganha permissão total de escrita
+                if (setor === 'direcao' || setor === 'direco' || setor === s) {
                     textarea.disabled = false;
                     botao.disabled = false;
                     textarea.placeholder = "Registrar informação fixa...";
@@ -533,4 +495,3 @@
     </script>
 </body>
 </html>
-  
