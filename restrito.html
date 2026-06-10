@@ -220,7 +220,7 @@
                     const linha = linhas[i].trim();
                     if (!linha) continue;
 
-                    const colunas = linha.includes(';') ? linha.split(';') : linha.split(',');
+                    const colunas = linha.includes(';') ? linha.split(';') : line.split(',');
                     
                     // Coluna 1 (índice 1) representa o nome_aluno
                     if (colunas[1]) {
