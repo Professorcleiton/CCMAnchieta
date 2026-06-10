@@ -240,6 +240,7 @@
                             autenticado = true;
                             usuarioLogado = {
                                 email: emailPlanilha,
+                                nome: r[1] ? r[1].v.toString().trim() : 'Funcionário', // Puxa o nome da Coluna B (Índice 1)
                                 setor: r[2] ? r[2].v.toString().trim().toLowerCase() : 'pedagogico'
                             };
                             break;
@@ -269,9 +270,8 @@
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('app-interface').style.display = 'flex';
             
-            let nomeExibicaoSetor = usuarioLogado.setor.toUpperCase();
-            if (nomeExibicaoSetor === 'DIRECO' || nomeExibicaoSetor === 'DIRECAO') nomeExibicaoSetor = 'PROFESSORES';
-            document.getElementById('user-display').innerHTML = `<i class="fa-solid fa-user-check"></i> ${nomeExibicaoSetor}`;
+            // Exibe o Nome real do usuário logado no topo amarelo!
+            document.getElementById('user-display').innerHTML = `<i class="fa-solid fa-user-check"></i> ${usuarioLogado.nome}`;
             
             aplicarBloqueioSetores(usuarioLogado.setor);
             await carregarAlunosETurmas();
@@ -413,13 +413,13 @@
                             dataFormatada = new Date().toLocaleDateString('pt-BR');
                         }
 
-                        let fSetor = reg.funcionario ? reg.funcionario.toUpperCase() : 'SGI';
-                        if (fSetor === 'DIRECAO') fSetor = 'PROFESSORES';
+                        // Exibe quem gravou (Nome do Funcionário ou o Setor histórico)
+                        let autorRegistro = reg.funcionario ? reg.funcionario.trim() : 'SGI';
 
                         novoCard.innerHTML = `
                             <p class="post-text">${reg.texto}</p>
                             <div class="post-footer">
-                                <span><i class="fa-solid fa-user"></i> ${fSetor}</span>
+                                <span><i class="fa-solid fa-user"></i> ${autorRegistro}</span>
                                 <span>${dataFormatada}</span>
                             </div>
                         `;
@@ -440,12 +440,13 @@
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Gravando...';
 
+            // Envia o Nome Real do Funcionário logado para ficar salvo na planilha!
             const payload = {
                 dataAtual: new Date().toLocaleDateString('pt-BR'),
                 aluno: alunoSelecionado,
                 setor: setor,
                 texto: texto,
-                funcionario: usuarioLogado.setor.toUpperCase()
+                funcionario: usuarioLogado.nome
             };
 
             try {
