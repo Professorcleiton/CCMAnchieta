@@ -7,7 +7,29 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f1f5f9; display: flex; height: 100vh; color: #1e293b; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f1f5f9; display: flex; height: 100vh; color: #1e293b; overflow: hidden; }
+        
+        /* TELA DE LOGIN OVERLAY */
+        #login-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #005088; display: flex; justify-content: center; align-items: center; z-index: 999;
+        }
+        .login-box {
+            background: white; padding: 40px; border-radius: 12px; width: 100%; max-width: 400px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2); text-align: center; border-top: 8px solid #eab308;
+        }
+        .login-box h2 { color: #005088; margin-bottom: 10px; font-size: 24px; }
+        .login-box p { color: #64748b; font-size: 14px; margin-bottom: 25px; }
+        .input-group { margin-bottom: 20px; text-align: left; }
+        .input-group label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; }
+        .input-group input { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 16px; }
+        .input-group input:focus { outline: none; border-color: #005088; }
+        .btn-login { width: 100%; padding: 12px; background-color: #005088; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+        .btn-login:hover { background-color: #0c4a6e; }
+        #error-message { color: #b91c1c; font-weight: bold; font-size: 14px; margin-top: 15px; display: none; }
+
+        /* PAINEL PRINCIPAL (SÓ APARECE APÓS LOGIN) */
+        #app-interface { display: none; width: 100%; height: 100%; }
         
         .sidebar { width: 260px; background-color: #005088; color: white; display: flex; flex-direction: column; border-right: 4px solid #eab308; }
         .sidebar-header { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
@@ -35,135 +57,203 @@
 </head>
 <body>
 
-    <aside class="sidebar">
-        <div class="sidebar-header"><h2>TURMAS</h2></div>
-        <ul class="turmas-lista">
-            <li class="turma-item active"><i class="fa-solid fa-users-viewfinder"></i> 6º Ano A</li>
-        </ul>
-    </aside>
-
-    <main class="main-content">
-        <header class="top-bar">
-            <div class="aluno-selector">
-                <label for="select-alunos"><i class="fa-solid fa-user-graduated"></i> Aluno: </label>
-                <select id="select-alunos" style="padding: 6px 12px; font-size: 16px; border-radius: 4px;">
-                    <option>Carregando alunos da planilha...</option>
-                </select>
+    <div id="login-screen">
+        <div class="login-box">
+            <i class="fa-solid fa-shield-halved" style="font-size: 50px; color: #005088; margin-bottom: 15px;"></i>
+            <h2>Área Restrita</h2>
+            <p>SGI - Colégio Cívico-Militar Anchieta</p>
+            
+            <div class="input-group">
+                <label for="user-email"><i class="fa-solid fa-envelope"></i> E-mail Institucional:</label>
+                <input type="email" id="user-email" placeholder="nome.sobrenome@escola.pr.gov.br">
             </div>
-            <div style="font-size: 14px; font-weight: 600; background: #e2e8f0; padding: 8px 15px; border-radius: 20px;">
-                <i class="fa-solid fa-user-gear"></i> Setor Ativo: 
-                <select id="escolher-setor-simulado" onchange="aplicarBloqueioSetores()" style="padding: 2px; font-weight: bold; border: none; background: transparent; color: #005088;">
-                    <option value="pedagogico">PEDAGÓGICO</option>
-                    <option value="meivs">MEIV'S</option>
-                    <option value="adm">ADM</option>
-                    <option value="direcao">DIREÇÃO (Acesso Total)</option>
-                </select>
-            </div>
-        </header>
-
-        <div class="board-container">
-            <section class="sector-column" id="col-meivs">
-                <div class="column-header" style="background-color: #0284c7;">MEIV'S</div>
-                <div class="feed-container" id="feed-meivs"></div>
-                <div class="input-container">
-                    <textarea id="text-meivs" placeholder="Registrar informação fixa..."></textarea>
-                    <button class="btn-salvar" id="btn-meivs" onclick="salvarPost('meivs')">Salvar Registro</button>
-                </div>
-            </section>
-
-            <section class="sector-column" id="col-pedagogico">
-                <div class="column-header" style="background-color: #0d9488;">PEDAGO</div>
-                <div class="feed-container" id="feed-pedagogico"></div>
-                <div class="input-container">
-                    <textarea id="text-pedagogico" placeholder="Registrar informação fixa..."></textarea>
-                    <button class="btn-salvar" id="btn-pedagogico" onclick="salvarPost('pedagogico')">Salvar Registro</button>
-                </div>
-            </section>
-
-            <section class="sector-column" id="col-adm">
-                <div class="column-header" style="background-color: #4f46e5;">ADM</div>
-                <div class="feed-container" id="feed-adm"></div>
-                <div class="input-container">
-                    <textarea id="text-adm" placeholder="Registrar informação fixa..."></textarea>
-                    <button class="btn-salvar" id="btn-adm" onclick="salvarPost('adm')">Salvar Registro</button>
-                </div>
-            </section>
-
-            <section class="sector-column" id="col-direcao">
-                <div class="column-header" style="background-color: #b91c1c;">DIREÇÃO</div>
-                <div class="feed-container" id="feed-direcao"></div>
-                <div class="input-container">
-                    <textarea id="text-direcao" placeholder="Registrar informação fixa..."></textarea>
-                    <button class="btn-salvar" id="btn-direcao" onclick="salvarPost('direcao')">Salvar Registro</button>
-                </div>
-            </section>
+            
+            <button class="btn-login" onclick="autenticarUsuario()">Entrar no Sistema</button>
+            <div id="error-message">E-mail não autorizado ou incorreto!</div>
         </div>
-    </main>
+    </div>
+
+    <div id="app-interface">
+        <aside class="sidebar">
+            <div class="sidebar-header"><h2>TURMAS</h2></div>
+            <ul class="turmas-lista">
+                <li class="turma-item active"><i class="fa-solid fa-users-viewfinder"></i> 6º Ano A</li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-bar">
+                <div class="aluno-selector">
+                    <label for="select-alunos"><i class="fa-solid fa-user-graduated"></i> Aluno: </label>
+                    <select id="select-alunos" style="padding: 6px 12px; font-size: 16px; border-radius: 4px;">
+                        <option>Buscando lista de alunos...</option>
+                    </select>
+                </div>
+                <div id="user-display" style="font-size: 14px; font-weight: 600; background: #eab308; color: #1e293b; padding: 8px 15px; border-radius: 20px;">
+                    <i class="fa-solid fa-user-check"></i> Carregando perfil...
+                </div>
+            </header>
+
+            <div class="board-container">
+                <section class="sector-column" id="col-meivs">
+                    <div class="column-header" style="background-color: #0284c7;">MEIV'S</div>
+                    <div class="feed-container" id="feed-meivs"></div>
+                    <div class="input-container">
+                        <textarea id="text-meivs" placeholder="Registrar informação fixa..."></textarea>
+                        <button class="btn-salvar" id="btn-meivs" onclick="salvarPost('meivs')">Salvar Registro</button>
+                    </div>
+                </section>
+
+                <section class="sector-column" id="col-pedagogico">
+                    <div class="column-header" style="background-color: #0d9488;">PEDAGO</div>
+                    <div class="feed-container" id="feed-pedagogico"></div>
+                    <div class="input-container">
+                        <textarea id="text-pedagogico" placeholder="Registrar informação fixa..."></textarea>
+                        <button class="btn-salvar" id="btn-pedagogico" onclick="salvarPost('pedagogico')">Salvar Registro</button>
+                    </div>
+                </section>
+
+                <section class="sector-column" id="col-adm">
+                    <div class="column-header" style="background-color: #4f46e5;">ADM</div>
+                    <div class="feed-container" id="feed-adm"></div>
+                    <div class="input-container">
+                        <textarea id="text-adm" placeholder="Registrar informação fixa..."></textarea>
+                        <button class="btn-salvar" id="btn-adm" onclick="salvarPost('adm')">Salvar Registro</button>
+                    </div>
+                </section>
+
+                <section class="sector-column" id="col-direcao">
+                    <div class="column-header" style="background-color: #b91c1c;">DIREÇÃO</div>
+                    <div class="feed-container" id="feed-direcao"></div>
+                    <div class="input-container">
+                        <textarea id="text-direcao" placeholder="Registrar informação fixa..."></textarea>
+                        <button class="btn-salvar" id="btn-direcao" onclick="salvarPost('direcao')">Salvar Registro</button>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
 
     <script>
-        // Configuração da sua Planilha Mestre
-        const SHEET_ID = '1UUiVcCaSb_9Lx7gdEpmBzeRQPlBwDZRouQC2pf1q8Vg'; // Seu ID de planilha capturado
-        const COLS_ALUNOS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=1126760845`;
+        // CONFIGURAÇÕES MESTRE DO BANCO DE DADOS (GOOGLE SHEETS)
+        const SHEET_ID = '1UUiVcCaSb_9Lx7gdEpmBzeRQPlBwDZRouQC2pf1q8Vg'; 
+        const COLS_ALUNOS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&sheet=Alunos`;
+        const COLS_USERS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&sheet=Usuários`;
 
-        // Carregar Alunos da Planilha automaticamente assim que abrir a página
-async function carregarAlunos() {
+        let usuarioLogado = null;
+
+        // 1. FUNÇÃO DE LOGIN E AUTENTICAÇÃO CONTRA A PLANILHA
+        async function autenticarUsuario() {
+            const emailDigitado = document.getElementById('user-email').value.trim().toLowerCase();
+            const errMsg = document.getElementById('error-message');
+            
+            if(!emailDigitado) return;
+
             try {
-                // Rota de exportação limpa que contorna o erro de CORS
-                const urlCsvDireto = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&sheet=Alunos`;
-                
-                const response = await fetch(urlCsvDireto);
-                if (!response.ok) throw new Error('Falha na resposta do servidor');
+                const response = await fetch(COLS_USERS_URL);
+                if (!response.ok) throw new Error('Erro ao conectar na aba Usuários');
                 
                 const data = await response.text();
-                
-                // Quebra as linhas do arquivo recebido
                 const linhas = data.split('\n');
-                const select = document.getElementById('select-alunos');
-                select.innerHTML = ''; // Limpa a mensagem antiga
                 
-                let cadastrouAlunos = false;
+                let cadastrado = false;
 
-                // Percorre as linhas pulando o cabeçalho (índice 0)
-                for (let i = 1; i < linhas.length; i++) {
+                // Varre a lista procurando o e-mail cadastrado
+                for(let i = 1; i < linhas.length; i++) {
                     const linha = linhas[i].trim();
                     if (!linha) continue;
 
-                    // Divide por vírgula ou ponto e vírgula
                     const colunas = linha.includes(';') ? linha.split(';') : linha.split(',');
-                    
-                    // Pega a segunda coluna (Nome do Aluno)
-                    if (colunas[1]) {
-                        const nomeAluno = colunas[1].replace(/"/g, '').trim();
-                        if (nomeAluno.length > 0) {
-                            let opt = document.createElement('option');
-                            opt.value = nomeAluno;
-                            opt.innerHTML = nomeAluno;
-                            select.appendChild(opt);
-                            cadastrouAlunos = true;
+                    if(colunas[0]) {
+                        const emailPlanilha = colunas[0].replace(/"/g, '').trim().toLowerCase();
+                        
+                        if(emailDigitado === emailPlanilha) {
+                            cadastrado = true;
+                            usuarioLogado = {
+                                email: emailPlanilha,
+                                nome: colunas[1].replace(/"/g, '').trim(),
+                                setor: colunas[2].replace(/"/g, '').trim().toLowerCase(),
+                                nivel: parseInt(colunas[3])
+                            };
+                            break;
                         }
                     }
                 }
 
-                if (!cadastrouAlunos) {
-                    select.innerHTML = '<option>Nenhum aluno encontrado na aba Alunos</option>';
+                if(cadastrado) {
+                    // Esconde a tela de login e exibe o painel de setores
+                    document.getElementById('login-screen').style.display = 'none';
+                    document.getElementById('app-interface').style.display = 'flex';
+                    
+                    // Alimenta as informações do utilizador logado na barra superior
+                    document.getElementById('user-display').innerHTML = `<i class="fa-solid fa-user-check"></i> ${usuarioLogado.nome} (${usuarioLogado.setor.toUpperCase()})`;
+                    
+                    // Aplica a restrição de campos e começa a puxar os alunos
+                    aplicarBloqueioSetores(usuarioLogado.setor);
+                    carregarAlunos();
+                } else {
+                    errMsg.style.display = 'block';
+                    errMsg.innerHTML = "E-mail institucional não autorizado ou incorreto!";
                 }
+
             } catch (error) {
-                console.error("Erro detalhado:", error);
-                document.getElementById('select-alunos').innerHTML = '<option>Erro na conexão (verifique o Compartilhar)</option>';
+                console.error("Erro na autenticação:", error);
+                errMsg.style.display = 'block';
+                errMsg.innerHTML = "Erro de conexão. Verifique se a planilha está compartilhada como pública!";
             }
         }
 
-        // Regra de Ouro: Bloquear inputs dos setores alheios
-        function aplicarBloqueioSetores() {
-            const setorLogado = document.getElementById('escolher-setor-simulado').value;
+        // 2. CARREGAR ALUNOS DA PLANILHA DINAMICAMENTE
+        async function carregarAlunos() {
+            try {
+                const response = await fetch(COLS_ALUNOS_URL);
+                if (!response.ok) throw new Error('Erro ao conectar na aba Alunos');
+
+                const data = await response.text();
+                const linhas = data.split('\n');
+                const select = document.getElementById('select-alunos');
+                select.innerHTML = ''; // Limpa a mensagem de carregando
+                
+                let totalAlunos = 0;
+
+                for (let i = 1; i < linhas.length; i++) {
+                    const linha = linhas[i].trim();
+                    if (!linha) continue;
+
+                    const colunas = linha.includes(';') ? linha.split(';') : linha.split(',');
+                    
+                    // Coluna 1 (índice 1) representa o nome_aluno
+                    if (colunas[1]) {
+                        const nomeAluno = colunas[1].replace(/"/g, '').trim();
+                        if(nomeAluno.length > 0) {
+                            let opt = document.createElement('option');
+                            opt.value = nomeAluno;
+                            opt.innerHTML = nomeAluno;
+                            select.appendChild(opt);
+                            totalAlunos++;
+                        }
+                    }
+                }
+
+                if(totalAlunos === 0) {
+                    select.innerHTML = '<option>Nenhum aluno ativo encontrado</option>';
+                }
+            } catch (error) {
+                console.error("Erro ao carregar alunos:", error);
+                document.getElementById('select-alunos').innerHTML = '<option>Erro ao ler lista da planilha</option>';
+            }
+        }
+
+        // 3. BLOQUEIO DOS SETORES (APENAS O SETOR DONO DA COLUNA DIGITA)
+        function aplicarBloqueioSetores(setor) {
             const setores = ['pedagogico', 'meivs', 'adm', 'direcao'];
 
-            setores.forEach(setor => {
-                const textarea = document.getElementById(`text-${setor}`);
-                const botao = document.getElementById(`btn-${setor}`);
+            setores.forEach(s => {
+                const textarea = document.getElementById(`text-${s}`);
+                const botao = document.getElementById(`btn-${s}`);
                 
-                // Se for Direção, libera tudo. Se não, libera apenas a sua própria coluna
-                if (setorLogado === 'direcao' || setorLogado === setor) {
+                // Se for a gestão superior (direção) ou o próprio setor, abre permissão de escrita
+                if (setor === 'direcao' || setor === s) {
                     textarea.disabled = false;
                     botao.disabled = false;
                     textarea.placeholder = "Registrar informação fixa...";
@@ -175,32 +265,27 @@ async function carregarAlunos() {
             });
         }
 
-        // Lógica Visual de salvar a mensagem com rodapé fixo
+        // 4. SALVAR REGISTRO VISUAL (CARD FIXO COM TRILHA DE AUDITORIA)
         function salvarPost(setor) {
-            const texto = document.getElementById(`text-${setor}`).value;
-            if(!texto.trim()) return;
+            const textarea = document.getElementById(`text-${setor}`);
+            const texto = textarea.value.trim();
+            if(!texto) return;
 
             const feed = document.getElementById(`feed-${setor}`);
             const dataAtual = new Date().toLocaleDateString('pt-BR');
 
-            // Monta o Card com a informação imutável e trilha de auditoria no rodapé
             const novoCard = document.createElement('div');
             novoCard.className = 'post-card';
             novoCard.innerHTML = `
                 <p class="post-text">${texto}</p>
                 <div class="post-footer">
-                    <span><i class="fa-solid fa-user"></i> Funcionário (${setor.toUpperCase()})</span>
+                    <span><i class="fa-solid fa-user"></i> ${usuarioLogado.nome}</span>
                     <span>${dataAtual}</span>
                 </div>
             `;
-
             feed.appendChild(novoCard);
-            document.getElementById(`text-${setor}`).value = ''; // Limpa o campo
+            textarea.value = ''; // Limpa o campo de escrita
         }
-
-        // Execuções Iniciais ao abrir a tela
-        carregarAlunos();
-        aplicarBloqueioSetores();
     </script>
 </body>
 </html>
