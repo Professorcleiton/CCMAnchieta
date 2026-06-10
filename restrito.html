@@ -21,7 +21,7 @@
         .login-logo-nova { width: 200px; height: auto; margin-bottom: 20px; object-fit: contain; }
         .login-box h2 { color: #005088; margin-bottom: 5px; font-size: 24px; }
         .login-box p { color: #64748b; font-size: 14px; margin-bottom: 25px; }
-        .input-group { margin-bottom: 20px; text-align: left; }
+        .input-group { margin-bottom: 18px; text-align: left; }
         .input-group label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; }
         .input-group input { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 16px; }
         .input-group input:focus { outline: none; border-color: #005088; }
@@ -36,7 +36,7 @@
         #app-interface { display: none; width: 100%; height: 100%; }
         
         .sidebar { width: 260px; background-color: #005088; color: white; display: flex; flex-direction: column; border-right: 4px solid #eab308; justify-content: space-between; }
-        .sidebar-top { display: flex; flex-direction: column; }
+        .sidebar-top { display: flex; flex-direction: column; overflow-y: auto; flex: 1; }
         
         .sidebar-header { padding: 20px 15px; text-align: center; border-bottom: 1px solid rgba(255, 255, 255, 0.1); display: flex; align-items: center; justify-content: center; gap: 12px; }
         .sidebar-logo { width: 55px; height: 55px; object-fit: contain; }
@@ -45,7 +45,8 @@
         .sidebar-subtitle { font-size: 11px; color: #eab308; font-weight: 600; display: block; }
         
         .turmas-lista { list-style: none; padding: 10px; }
-        .turma-item { padding: 14px 20px; margin-bottom: 8px; background-color: rgba(255, 255, 255, 0.05); border-radius: 6px; cursor: pointer; font-weight: 600; }
+        .turma-item { padding: 14px 20px; margin-bottom: 8px; background-color: rgba(255, 255, 255, 0.05); border-radius: 6px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 10px; transition: background 0.2s; }
+        .turma-item:hover { background-color: rgba(255, 255, 255, 0.1); }
         .turma-item.active { background-color: #eab308; color: #1e293b; }
 
         .sidebar-footer { padding: 15px; border-top: 1px solid rgba(255, 255, 255, 0.1); }
@@ -54,13 +55,9 @@
 
         .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
         
-        /* Ajuste fino na Top Bar para organizar os lados esquerdo e direito */
         .top-bar-app { background-color: white; padding: 0 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; height: 65px; }
-        
-        /* Lado esquerdo: Seletor do Aluno isolado */
         .aluno-selector { font-size: 18px; font-weight: bold; color: #005088; display: flex; align-items: center; }
         
-        /* Lado direito: Agrupamento da Logo NRE + Nome do Usuário */
         .user-and-nre-wrapper { display: flex; align-items: center; gap: 20px; }
         .right-nre-logo { height: 42px; width: auto; object-fit: contain; }
         
@@ -94,11 +91,18 @@
             <img src="img/IMG_20260610_071544.png" alt="Brasão Anchieta" class="login-logo-nova">
             <h2>Área Restrita</h2>
             <p>SGI - Colégio Cívico-Militar Anchieta</p>
+            
             <div class="input-group">
                 <label for="user-email"><i class="fa-solid fa-envelope"></i> E-mail Institucional:</label>
                 <input type="email" id="user-email" placeholder="nome.sobrenome@escola.pr.gov.br">
             </div>
-            <div id="error-message">E-mail não autorizado ou incorreto!</div>
+            
+            <div class="input-group">
+                <label for="user-password"><i class="fa-solid fa-key"></i> Senha (RG Individual):</label>
+                <input type="password" id="user-password" placeholder="Digite seu RG completo">
+            </div>
+            
+            <div id="error-message">E-mail ou RG incorretos!</div>
             <button class="btn-login" onclick="autenticarUsuario()">Entrar no Sistema</button>
             <br>
             <a href="index.html" class="btn-voltar-site">
@@ -117,8 +121,8 @@
                         <span class="sidebar-subtitle">CCM Anchieta</span>
                     </div>
                 </div>
-                <ul class="turmas-lista">
-                    <li class="turma-item active"><i class="fa-solid fa-users-viewfinder"></i> 6º Ano A</li>
+                <ul class="turmas-lista" id="lista-turmas-sidebar">
+                    <li class="turma-item"><i class="fa-solid fa-spinner fa-spin"></i> Lendo turmas...</li>
                 </ul>
             </div>
             <div class="sidebar-footer">
@@ -133,7 +137,7 @@
                 <div class="aluno-selector">
                     <label for="select-alunos"><i class="fa-solid fa-user-graduated"></i> Aluno: </label>
                     <select id="select-alunos" onchange="filtrarRegistrosPorAluno()" style="padding: 6px 12px; font-size: 16px; border-radius: 4px; margin-left: 8px;">
-                        <option>A buscar lista de alunos...</option>
+                        <option>Selecione uma turma primeiro...</option>
                     </select>
                 </div>
                 
@@ -156,7 +160,7 @@
                 </section>
 
                 <section class="sector-column" id="col-pedagogico">
-                    <div class="column-header" style="background-color: #0d9488;">PEDAGO</div>
+                    <div class="column-header" style="background-color: #0d9488;">PEDAGÓGICO</div>
                     <div class="feed-container" id="feed-pedagogico"></div>
                     <div class="input-container">
                         <textarea id="text-pedagogico" placeholder="Registrar informação fixa..."></textarea>
@@ -193,11 +197,16 @@
 
         let usuarioLogado = null;
         let todosOsRegistros = [];
+        let cacheAlunosPorTurma = {}; 
+        let turmaSelecionadaAtiva = '';
 
+        // 1. AUTENTICAÇÃO DUPLA (E-MAIL + RG)
         async function autenticarUsuario() {
             const emailDigitado = document.getElementById('user-email').value.trim().toLowerCase();
+            const senhaDigitada = document.getElementById('user-password').value.trim();
             const errMsg = document.getElementById('error-message');
-            if(!emailDigitado) return;
+            
+            if(!emailDigitado || !senhaDigitada) return;
 
             try {
                 const response = await fetch(COLS_USERS_URL);
@@ -205,17 +214,20 @@
                 const jsonText = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
                 const data = JSON.parse(jsonText);
                 const linhas = data.table.rows;
-                let cadastrado = false;
+                let autenticado = false;
 
                 for(let i = 0; i < linhas.length; i++) {
                     const r = linhas[i].c;
-                    if(r && r[0] && r[0].v) {
+                    if(r && r[0] && r[0].v && r[1] && r[1].v) {
                         const emailPlanilha = r[0].v.toString().trim().toLowerCase();
-                        if(emailDigitado === emailPlanilha) {
-                            cadastrado = true;
+                        const rgPlanilha = r[1].v.toString().trim(); // Lê o RG da coluna B
+                        
+                        // Valida se e-mail e RG coincidem
+                        if(emailDigitado === emailPlanilha && senhaDigitada === rgPlanilha) {
+                            autenticado = true;
                             usuarioLogado = {
                                 email: emailPlanilha,
-                                nome: r[1] ? r[1].v.toString().trim() : 'Funcionário',
+                                nome: "Funcionário", // Nome genérico ou associado se houver outra coluna
                                 setor: r[2] ? r[2].v.toString().trim().toLowerCase() : 'pedagogico',
                                 nivel: r[3] ? parseInt(r[3].v) : 1
                             };
@@ -224,60 +236,62 @@
                     }
                 }
 
-                if(cadastrado) {
+                if(autenticado) {
                     document.getElementById('login-screen').style.display = 'none';
                     document.getElementById('app-interface').style.display = 'flex';
-                    document.getElementById('user-display').innerHTML = `<i class="fa-solid fa-user-check"></i> ${usuarioLogado.nome} (${usuarioLogado.setor.toUpperCase()})`;
+                    document.getElementById('user-display').innerHTML = `<i class="fa-solid fa-user-check"></i> ${usuarioLogado.setor.toUpperCase()}`;
                     
                     aplicarBloqueioSetores(usuarioLogado.setor);
-                    await carregarAlunos();
+                    await carregarAlunosETurmas();
                     await carregarRegistrosDoServidor();
                 } else {
                     errMsg.style.display = 'block';
-                    errMsg.innerHTML = "E-mail institucional não autorizado!";
+                    errMsg.innerHTML = "E-mail ou RG incorretos/não autorizados!";
                 }
             } catch (error) {
                 console.error(error);
                 errMsg.style.display = 'block';
-                errMsg.innerHTML = "Erro de conexão ao validar usuário.";
+                errMsg.innerHTML = "Erro de conexão ao validar credenciais.";
             }
         }
 
         function fazerLogout() {
             usuarioLogado = null;
             todosOsRegistros = [];
+            cacheAlunosPorTurma = {};
+            turmaSelecionadaAtiva = '';
             document.getElementById('user-email').value = '';
+            document.getElementById('user-password').value = '';
             document.getElementById('error-message').style.display = 'none';
             document.getElementById('app-interface').style.display = 'none';
             document.getElementById('login-screen').style.display = 'flex';
         }
 
-        async function carregarAlunos() {
-            const select = document.getElementById('select-alunos');
+        async function carregarAlunosETurmas() {
+            cacheAlunosPorTurma = {};
             try {
                 const response = await fetch(COLS_ALUNOS_URL);
                 const text = await response.text();
                 const jsonText = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
                 const data = JSON.parse(jsonText);
                 const linhas = data.table.rows;
-                select.innerHTML = '';
                 
                 linhas.forEach(r => {
                     if (r.c && r.c[1] && r.c[1].v) {
                         const nomeAluno = r.c[1].v.toString().trim();
-                        let opt = document.createElement('option');
-                        opt.value = nomeAluno;
-                        opt.innerHTML = nomeAluno;
-                        select.appendChild(opt);
+                        const nomeTurma = r.c[2] && r.c[2].v ? r.c[2].v.toString().trim() : 'Sem Turma';
+                        
+                        if(!cacheAlunosPorTurma[nomeTurma]) {
+                            cacheAlunosPorTurma[nomeTurma] = [];
+                        }
+                        cacheAlunosPorTurma[nomeTurma].push(nomeAluno);
                     }
                 });
             } catch (error) {
-                console.warn("Acionando canal secundário de leitura de estudantes...");
                 try {
                     const resSecundaria = await fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&sheet=Alunos`);
                     const csvText = await resSecundaria.text();
                     const linhasCsv = csvText.split('\n');
-                    select.innerHTML = '';
                     
                     for(let i = 1; i < linhasCsv.length; i++) {
                         const linha = linhasCsv[i].trim();
@@ -285,18 +299,70 @@
                         const colunas = linha.includes(';') ? linha.split(';') : linha.split(',');
                         if(colunas[1]) {
                             const nomeLimpo = colunas[1].replace(/"/g, '').trim();
+                            const turmaLimpa = colunas[2] ? colunas[2].replace(/"/g, '').trim() : 'Sem Turma';
                             if(nomeLimpo) {
-                                let opt = document.createElement('option');
-                                opt.value = nomeLimpo;
-                                opt.innerHTML = nomeLimpo;
-                                select.appendChild(opt);
+                                if(!cacheAlunosPorTurma[turmaLimpa]) {
+                                    cacheAlunosPorTurma[turmaLimpa] = [];
+                                }
+                                cacheAlunosPorTurma[turmaLimpa].push(nomeLimpo);
                             }
                         }
                     }
                 } catch(err2) {
-                    select.innerHTML = '<option>Erro ao ler lista da aba Alunos</option>';
+                    console.error(err2);
                 }
             }
+            renderizarSidebarTurmas();
+        }
+
+        function renderizarSidebarTurmas() {
+            const sidebarLista = document.getElementById('lista-turmas-sidebar');
+            sidebarLista.innerHTML = '';
+            const listaDeTurmasOrdenada = Object.keys(cacheAlunosPorTurma).sort();
+            
+            if(listaDeTurmasOrdenada.length === 0) {
+                sidebarLista.innerHTML = '<li class="turma-item">Nenhuma turma achada</li>';
+                return;
+            }
+            
+            listaDeTurmasOrdenada.forEach((turma, index) => {
+                let li = document.createElement('li');
+                li.className = 'turma-item';
+                li.innerHTML = `<i class="fa-solid fa-users-viewfinder"></i> ${turma}`;
+                li.setAttribute('data-turma', turma);
+                
+                li.onclick = function() {
+                    document.querySelectorAll('.turma-item').forEach(el => el.classList.remove('active'));
+                    li.classList.add('active');
+                    selecionarTurma(turma);
+                };
+                
+                sidebarLista.appendChild(li);
+                if(index === 0) {
+                    li.classList.add('active');
+                    selecionarTurma(turma);
+                }
+            });
+        }
+
+        function selecionarTurma(turma) {
+            turmaSelecionadaAtiva = turma;
+            const select = document.getElementById('select-alunos');
+            select.innerHTML = '';
+            const alunosDaTurma = cacheAlunosPorTurma[turma] || [];
+            
+            if(alunosDaTurma.length === 0) {
+                select.innerHTML = '<option>Nenhum aluno nessa turma</option>';
+                return;
+            }
+            
+            alunosDaTurma.sort().forEach(aluno => {
+                let opt = document.createElement('option');
+                opt.value = aluno;
+                opt.innerHTML = aluno;
+                select.appendChild(opt);
+            });
+            filtrarRegistrosPorAluno();
         }
 
         async function carregarRegistrosDoServidor() {
@@ -306,17 +372,20 @@
                 todosOsRegistros = await response.json();
                 filtrarRegistrosPorAluno();
             } catch (error) {
-                console.error("Erro ao sincronizar registros:", error);
+                console.error(error);
             }
         }
 
         function filtrarRegistrosPorAluno() {
             const selectElem = document.getElementById('select-alunos');
-            if(!selectElem.options.length || selectElem.value.includes('A buscar')) return;
+            if(!selectElem.options.length || selectElem.value.includes('Selecione uma turma') || selectElem.value.includes('Nenhum aluno')) {
+                const setores = ['meivs', 'pedagogico', 'adm', 'direcao'];
+                setores.forEach(s => document.getElementById(`feed-${s}`).innerHTML = '');
+                return;
+            }
 
             const alunoSelecionado = selectElem.value;
             const setores = ['meivs', 'pedagogico', 'adm', 'direcao'];
-            
             setores.forEach(s => document.getElementById(`feed-${s}`).innerHTML = '');
 
             todosOsRegistros.forEach(reg => {
@@ -350,7 +419,7 @@
             const alunoSelecionado = document.getElementById('select-alunos').value;
             const btn = document.getElementById(`btn-${setor}`);
             
-            if(!texto || !alunoSelecionado) return;
+            if(!texto || !alunoSelecionado || alunoSelecionado.includes('Selecione uma turma')) return;
 
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Gravando...';
@@ -358,9 +427,9 @@
             const payload = {
                 dataAtual: new Date().toLocaleDateString('pt-BR'),
                 aluno: alunoSelecionado,
-                setor: setor,
+                setor: sector,
                 texto: texto,
-                funcionario: usuarioLogado.nome
+                funcionario: usuarioLogado.setor.toUpperCase()
             };
 
             try {
@@ -377,7 +446,7 @@
                 filtrarRegistrosPorAluno();
                 textarea.value = '';
             } catch (error) {
-                console.error("Erro ao gravar:", error);
+                console.error(error);
                 alert("Falha ao salvar no banco de dados.");
             } finally {
                 btn.disabled = false;
