@@ -18,7 +18,9 @@
             background: white; padding: 40px; border-radius: 12px; width: 100%; max-width: 400px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.2); text-align: center; border-top: 8px solid #eab308;
         }
-        .login-box h2 { color: #005088; margin-bottom: 10px; font-size: 24px; }
+        /* Estilização da Logo do NRE na tela de login */
+        .login-logo-nre { width: 220px; height: auto; margin-bottom: 20px; object-fit: contain; }
+        .login-box h2 { color: #005088; margin-bottom: 5px; font-size: 24px; }
         .login-box p { color: #64748b; font-size: 14px; margin-bottom: 25px; }
         .input-group { margin-bottom: 20px; text-align: left; }
         .input-group label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; }
@@ -28,7 +30,6 @@
         .btn-login:hover { background-color: #0c4a6e; }
         #error-message { color: #b91c1c; font-weight: bold; font-size: 14px; margin-bottom: 15px; display: none; }
         
-        /* LINK VOLTAR AO SITE (TELA DE LOGIN) */
         .btn-voltar-site { display: inline-flex; align-items: center; gap: 8px; color: #005088; text-decoration: none; font-weight: 600; font-size: 14px; transition: color 0.2s; }
         .btn-voltar-site:hover { color: #eab308; text-decoration: underline; }
 
@@ -37,12 +38,18 @@
         
         .sidebar { width: 260px; background-color: #005088; color: white; display: flex; flex-direction: column; border-right: 4px solid #eab308; justify-content: space-between; }
         .sidebar-top { display: flex; flex-direction: column; }
-        .sidebar-header { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+        
+        /* Cabeçalho da Sidebar Ajustado para a Logo do Colégio */
+        .sidebar-header { padding: 20px 15px; text-align: center; border-bottom: 1px solid rgba(255, 255, 255, 0.1); display: flex; align-items: center; justify-content: center; gap: 12px; }
+        .sidebar-logo { width: 50px; height: 50px; object-fit: contain; }
+        .sidebar-title-container { text-align: left; }
+        .sidebar-title-container h2 { font-size: 22px; font-weight: bold; letter-spacing: 0.5px; line-height: 1.1; }
+        .sidebar-subtitle { font-size: 11px; color: #eab308; font-weight: 600; display: block; }
+        
         .turmas-lista { list-style: none; padding: 10px; }
         .turma-item { padding: 14px 20px; margin-bottom: 8px; background-color: rgba(255, 255, 255, 0.05); border-radius: 6px; cursor: pointer; font-weight: 600; }
         .turma-item.active { background-color: #eab308; color: #1e293b; }
 
-        /* BOTÃO LOGOUT / SAIR (ÁREA RESTRITA) */
         .sidebar-footer { padding: 15px; border-top: 1px solid rgba(255, 255, 255, 0.1); }
         .btn-logout { width: 100%; padding: 12px; background-color: #b91c1c; color: white; border: none; border-radius: 6px; font-weight: bold; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: background 0.2s; }
         .btn-logout:hover { background-color: #991b1b; }
@@ -71,7 +78,7 @@
 
     <div id="login-screen">
         <div class="login-box">
-            <i class="fa-solid fa-shield-halved" style="font-size: 50px; color: #005088; margin-bottom: 15px;"></i>
+            <img src="nreumuarama.jpg" alt="NRE Umuarama" class="login-logo-nre">
             <h2>Área Restrita</h2>
             <p>SGI - Colégio Cívico-Militar Anchieta</p>
             <div class="input-group">
@@ -90,7 +97,13 @@
     <div id="app-interface">
         <aside class="sidebar">
             <div class="sidebar-top">
-                <div class="sidebar-header"><h2>TURMAS</h2></div>
+                <div class="sidebar-header">
+                    <img src="ccma.PNG" alt="Logo CCMA" class="sidebar-logo">
+                    <div class="sidebar-title-container">
+                        <h2>SGI</h2>
+                        <span class="sidebar-subtitle">CCM Anchieta</span>
+                    </div>
+                </div>
                 <ul class="turmas-lista">
                     <li class="turma-item active"><i class="fa-solid fa-users-viewfinder"></i> 6º Ano A</li>
                 </ul>
@@ -107,7 +120,7 @@
                 <div class="aluno-selector">
                     <label for="select-alunos"><i class="fa-solid fa-user-graduated"></i> Aluno: </label>
                     <select id="select-alunos" onchange="filtrarRegistrosPorAluno()" style="padding: 6px 12px; font-size: 16px; border-radius: 4px;">
-                        <option>Buscando lista de alunos...</option>
+                        <option>A buscar lista de alunos...</option>
                     </select>
                 </div>
                 <div id="user-display" style="font-size: 14px; font-weight: 600; background: #eab308; color: #1e293b; padding: 8px 15px; border-radius: 20px;">
@@ -160,8 +173,8 @@
         const COLS_ALUNOS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=Alunos`;
         const COLS_USERS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=Usuários`;
         
-        // Coloque abaixo a sua URL gerada no Apps Script
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzoK39QjTNhioAfCInzsd-2dyB8reqGCI7HCUVyOCNrtP-VHJ6pjagJgvc2oNJd683w/exec';
+        // Link mestre de gravação e leitura do Google Apps Script
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbymZyJ4OlSBmlM7jioHCwCkYF3FQYld2GpXwHhxAuMeFxLoQnAqZNL39Fdcy2N7J2eyjQ/exec';
 
         let usuarioLogado = null;
         let todosOsRegistros = [];
@@ -216,27 +229,25 @@
             }
         }
 
-        // 1.2 FUNÇÃO DE LOGOUT (VOLTA PARA A TELA DE ENTRADA)
+        // 1.2 LOGOUT
         function fazerLogout() {
             usuarioLogado = null;
             todosOsRegistros = [];
             document.getElementById('user-email').value = '';
             document.getElementById('error-message').style.display = 'none';
-            
-            // Inverte a exibição visual das telas
             document.getElementById('app-interface').style.display = 'none';
             document.getElementById('login-screen').style.display = 'flex';
         }
 
-        // 2. CARREGAR LISTA DE ALUNOS
+        // 2. CARREGAR LISTA DE ALUNOS COM REDIRECIONAMENTO INTELIGENTE ANTI-CORS
         async function carregarAlunos() {
+            const select = document.getElementById('select-alunos');
             try {
                 const response = await fetch(COLS_ALUNOS_URL);
                 const text = await response.text();
                 const jsonText = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
                 const data = JSON.parse(jsonText);
                 const linhas = data.table.rows;
-                const select = document.getElementById('select-alunos');
                 select.innerHTML = '';
                 
                 linhas.forEach(r => {
@@ -249,13 +260,36 @@
                     }
                 });
             } catch (error) {
-                console.error(error);
+                console.warn("Acionando canal secundário de leitura de estudantes...");
+                try {
+                    const resSecundaria = await fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&sheet=Alunos`);
+                    const csvText = await resSecundaria.text();
+                    const linhasCsv = csvText.split('\n');
+                    select.innerHTML = '';
+                    
+                    for(let i = 1; i < linhasCsv.length; i++) {
+                        const linha = linhasCsv[i].trim();
+                        if(!linha) continue;
+                        const colunas = linha.includes(';') ? linha.split(';') : linha.split(',');
+                        if(colunas[1]) {
+                            const nomeLimpo = colunas[1].replace(/"/g, '').trim();
+                            if(nomeLimpo) {
+                                let opt = document.createElement('option');
+                                opt.value = nomeLimpo;
+                                opt.innerHTML = nomeLimpo;
+                                select.appendChild(opt);
+                            }
+                        }
+                    }
+                } catch(err2) {
+                    select.innerHTML = '<option>Erro ao ler lista da aba Alunos</option>';
+                }
             }
         }
 
         // 3. BUSCAR REGISTROS REAIS DO BANCO DE DADOS
         async function carregarRegistrosDoServidor() {
-            if(!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes('COLOQUE_AQUI')) return;
+            if(!APPS_SCRIPT_URL) return;
             try {
                 const response = await fetch(APPS_SCRIPT_URL);
                 todosOsRegistros = await response.json();
@@ -265,15 +299,18 @@
             }
         }
 
-        // 4. FILTRAGEM INTELIGENTE POR ALUNO SELECIONADO
+        // 4. FILTRAGEM DE REGISTROS POR ALUNO SELECIONADO
         function filtrarRegistrosPorAluno() {
-            const alunoSelecionado = document.getElementById('select-alunos').value;
+            const selectElem = document.getElementById('select-alunos');
+            if(!selectElem.options.length || selectElem.value.includes('Buscando')) return;
+
+            const alunoSelecionado = selectElem.value;
             const setores = ['meivs', 'pedagogico', 'adm', 'direcao'];
             
             setores.forEach(s => document.getElementById(`feed-${s}`).innerHTML = '');
 
             todosOsRegistros.forEach(reg => {
-                if(reg.aluno.trim() === alunoSelecionado.trim()) {
+                if(reg.aluno && reg.aluno.trim() === alunoSelecionado.trim()) {
                     const feed = document.getElementById(`feed-${reg.setor}`);
                     if(feed) {
                         const novoCard = document.createElement('div');
@@ -318,7 +355,7 @@
             };
 
             try {
-                if(APPS_SCRIPT_URL && !APPS_SCRIPT_URL.includes('COLOQUE_AQUI')) {
+                if(APPS_SCRIPT_URL) {
                     await fetch(APPS_SCRIPT_URL, {
                         method: 'POST',
                         mode: 'no-cors',
@@ -346,10 +383,6 @@
             setores.forEach(s => {
                 const textarea = document.getElementById(`text-${s}`);
                 const botao = document.getElementById(`btn-${s}`);
-                
-                if (setor === 'direcao' || sector === s || (setor === 'pedagogico' && s === 'pedagogico')) {
-                    // Correção de escopo para garantir a abertura correta das permissões
-                }
                 
                 if (setor === 'direcao' || setor === s) {
                     textarea.disabled = false;
