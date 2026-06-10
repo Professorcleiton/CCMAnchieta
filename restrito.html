@@ -103,7 +103,7 @@
             </div>
             
             <div id="error-message">E-mail ou RG incorretos!</div>
-            <button class="btn-login" onclick="autenticarUsuario()">Entrar no Sistema</button>
+            <button class="btn-login" id="btn-entrar-login" onclick="autenticarUsuario()">Entrar no Sistema</button>
             <br>
             <a href="index.html" class="btn-voltar-site">
                 <i class="fa-solid fa-arrow-left"></i> Voltar ao site principal
@@ -200,13 +200,27 @@
         let cacheAlunosPorTurma = {}; 
         let turmaSelecionadaAtiva = '';
 
-        // 1. AUTENTICAÇÃO DUPLA (E-MAIL + RG)
+        // Executa imediatamente ao abrir a página para ver se o usuário já estava logado antes
+        window.addEventListener('DOMContentLoaded', verificarSessaoAtiva);
+
+        function verificarSessaoAtiva() {
+            const sessaoSalva = localStorage.getItem('sgi_ccma_session');
+            if (sessaoSalva) {
+                usuarioLogado = JSON.parse(sessaoSalva);
+                inicializarPainel();
+            }
+        }
+
         async function autenticarUsuario() {
             const emailDigitado = document.getElementById('user-email').value.trim().toLowerCase();
             const senhaDigitada = document.getElementById('user-password').value.trim();
             const errMsg = document.getElementById('error-message');
+            const btnLogin = document.getElementById('btn-entrar-login');
             
             if(!emailDigitado || !senhaDigitada) return;
+
+            btnLogin.disabled = true;
+            btnLogin.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Validando...';
 
             try {
                 const response = await fetch(COLS_USERS_URL);
@@ -220,14 +234,12 @@
                     const r = linhas[i].c;
                     if(r && r[0] && r[0].v && r[1] && r[1].v) {
                         const emailPlanilha = r[0].v.toString().trim().toLowerCase();
-                        const rgPlanilha = r[1].v.toString().trim(); // Lê o RG da coluna B
+                        const rgPlanilha = r[1].v.toString().trim();
                         
-                        // Valida se e-mail e RG coincidem
                         if(emailDigitado === emailPlanilha && senhaDigitada === rgPlanilha) {
                             autenticado = true;
                             usuarioLogado = {
                                 email: emailPlanilha,
-                                nome: "Funcionário", // Nome genérico ou associado se houver outra coluna
                                 setor: r[2] ? r[2].v.toString().trim().toLowerCase() : 'pedagogico',
                                 nivel: r[3] ? parseInt(r[3].v) : 1
                             };
@@ -237,22 +249,32 @@
                 }
 
                 if(autenticado) {
-                    document.getElementById('login-screen').style.display = 'none';
-                    document.getElementById('app-interface').style.display = 'flex';
-                    document.getElementById('user-display').innerHTML = `<i class="fa-solid fa-user-check"></i> ${usuarioLogado.setor.toUpperCase()}`;
-                    
-                    aplicarBloqueioSetores(usuarioLogado.setor);
-                    await carregarAlunosETurmas();
-                    await carregarRegistrosDoServidor();
+                    // Guarda o login na memória permanente do navegador
+                    localStorage.setItem('sgi_ccma_session', JSON.stringify(usuarioLogado));
+                    inicializarPainel();
                 } else {
                     errMsg.style.display = 'block';
                     errMsg.innerHTML = "E-mail ou RG incorretos/não autorizados!";
+                    btnLogin.disabled = false;
+                    btnLogin.innerHTML = 'Entrar no Sistema';
                 }
             } catch (error) {
                 console.error(error);
                 errMsg.style.display = 'block';
                 errMsg.innerHTML = "Erro de conexão ao validar credenciais.";
+                btnLogin.disabled = false;
+                btnLogin.innerHTML = 'Entrar no Sistema';
             }
+        }
+
+        async function inicializarPainel() {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('app-interface').style.display = 'flex';
+            document.getElementById('user-display').innerHTML = `<i class="fa-solid fa-user-check"></i> ${usuarioLogado.setor.toUpperCase()}`;
+            
+            aplicarBloqueioSetores(usuarioLogado.setor);
+            await carregarAlunosETurmas();
+            await carregarRegistrosDoServidor();
         }
 
         function fazerLogout() {
@@ -260,9 +282,368 @@
             todosOsRegistros = [];
             cacheAlunosPorTurma = {};
             turmaSelecionadaAtiva = '';
+            localStorage.removeItem('sgi_ccma_session'); // Limpa a sessão para exigir senha no próximo acesso
+            
             document.getElementById('user-email').value = '';
             document.getElementById('user-password').value = '';
             document.getElementById('error-message').style.display = 'none';
+            document.getElementById('btn-entrar-login').disabled = false;
+            document.getElementById('btn-entrar-login').innerHTML = 'Entrar no Sistema';
+            
+            document.getElementById('app-interface').style.display = 'none';
+            document.getElementById('login-screen').style.display = 'flex';
+        }
+
+        async function carregarAlunosETurmas() {
+            cacheAlunosPorTurma = {};
+            try {
+                const response = await fetch(COLS_ALUNOS_URL);
+                const text = await response.text();
+                const jsonText = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
+                const data = JSON.parse(jsonText);
+                const linhas = data.table.rows;
+                
+                linhas.forEach(r => {
+                    if (r.c && r.c[1] && r.c[1].v) {
+                        const nomeAluno = r.c[1].v.toString().trim();
+                        const nomeTurma = r.c[2] && r.c[2].v ? r.c[2].v.toString().trim() : 'Sem Turma';
+                        
+                        if(!cacheAlunosPorTurma[nomeTurma]) {
+                            cacheAlunosPorTurma[nomeTurma] = [];
+                        }
+                        cacheAlunosPorTurma[nomeTurma].push(nomeAluno);
+                    }
+                });
+            } catch (error) {
+                try {
+                    const resSecundaria = await fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&sheet=Alunos`);
+                    const csvText = await resSecundaria.text();
+                    const linhasCsv = csvText.split('\n');
+                    
+                    for(let i = 1; i < linhasCsv.length; i++) {
+                        const linha = linhasCsv[i].trim();
+                        if(!linha) continue;
+                        const colunas = linha.includes(';') ? linha.split(';') : linha.split(',');
+                        if(colunas[1]) {
+                            const nomeLimpo = colunas[1].replace(/"/g, '').trim();
+                            const turmaLimpa = colunas[2] ? colunas[2].replace(/"/g, '').trim() : 'Sem Turma';
+                            if(nomeLimpo) {
+                                if(!cacheAlunosPorTurma[turmaLimpa]) {
+                                    cacheAlunosPorTurma[turmaLimpa] = [];
+                                }
+                                cacheAlunosPorTurma[turmaLimpa].push(nomeLimpo);
+                            }
+                        }
+                    }
+                } catch(err2) {
+                    console.error(err2);
+                }
+            }
+            renderizarSidebarTurmas();
+        }
+
+        function renderizarSidebarTurmas() {
+            const sidebarLista = document.getElementById('lista-turmas-sidebar');
+            sidebarLista.innerHTML = '';
+            const listaDeTurmasOrdenada = Object.keys(cacheAlunosPorTurma).sort();
+            
+            if(listaDeTurmasOrdenada.length === 0) {
+                sidebarLista.innerHTML = '<li class="turma-item">Nenhuma turma achada</li>';
+                return;
+            }
+            
+            <!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SGI - Área Restrita CCM Anchieta</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f1f5f9; display: flex; height: 100vh; color: #1e293b; overflow: hidden; }
+        
+        /* TELA DE LOGIN OVERLAY */
+        #login-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #005088; display: flex; justify-content: center; align-items: center; z-index: 999;
+        }
+        .login-box {
+            background: white; padding: 40px; border-radius: 12px; width: 100%; max-width: 400px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2); text-align: center; border-top: 8px solid #eab308;
+        }
+        .login-logo-nova { width: 200px; height: auto; margin-bottom: 20px; object-fit: contain; }
+        .login-box h2 { color: #005088; margin-bottom: 5px; font-size: 24px; }
+        .login-box p { color: #64748b; font-size: 14px; margin-bottom: 25px; }
+        .input-group { margin-bottom: 18px; text-align: left; }
+        .input-group label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; }
+        .input-group input { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 16px; }
+        .input-group input:focus { outline: none; border-color: #005088; }
+        .btn-login { width: 100%; padding: 12px; background-color: #005088; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.2s; margin-bottom: 20px; }
+        .btn-login:hover { background-color: #0c4a6e; }
+        #error-message { color: #b91c1c; font-weight: bold; font-size: 14px; margin-bottom: 15px; display: none; }
+        
+        .btn-voltar-site { display: inline-flex; align-items: center; gap: 8px; color: #005088; text-decoration: none; font-weight: 600; font-size: 14px; transition: color 0.2s; }
+        .btn-voltar-site:hover { color: #eab308; text-decoration: underline; }
+
+        /* PAINEL PRINCIPAL */
+        #app-interface { display: none; width: 100%; height: 100%; }
+        
+        .sidebar { width: 260px; background-color: #005088; color: white; display: flex; flex-direction: column; border-right: 4px solid #eab308; justify-content: space-between; }
+        .sidebar-top { display: flex; flex-direction: column; overflow-y: auto; flex: 1; }
+        
+        .sidebar-header { padding: 20px 15px; text-align: center; border-bottom: 1px solid rgba(255, 255, 255, 0.1); display: flex; align-items: center; justify-content: center; gap: 12px; }
+        .sidebar-logo { width: 55px; height: 55px; object-fit: contain; }
+        .sidebar-title-container { text-align: left; }
+        .sidebar-title-container h2 { font-size: 22px; font-weight: bold; letter-spacing: 0.5px; line-height: 1.1; }
+        .sidebar-subtitle { font-size: 11px; color: #eab308; font-weight: 600; display: block; }
+        
+        .turmas-lista { list-style: none; padding: 10px; }
+        .turma-item { padding: 14px 20px; margin-bottom: 8px; background-color: rgba(255, 255, 255, 0.05); border-radius: 6px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 10px; transition: background 0.2s; }
+        .turma-item:hover { background-color: rgba(255, 255, 255, 0.1); }
+        .turma-item.active { background-color: #eab308; color: #1e293b; }
+
+        .sidebar-footer { padding: 15px; border-top: 1px solid rgba(255, 255, 255, 0.1); }
+        .btn-logout { width: 100%; padding: 12px; background-color: #b91c1c; color: white; border: none; border-radius: 6px; font-weight: bold; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: background 0.2s; }
+        .btn-logout:hover { background-color: #991b1b; }
+
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        
+        .top-bar-app { background-color: white; padding: 0 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; height: 65px; }
+        .aluno-selector { font-size: 18px; font-weight: bold; color: #005088; display: flex; align-items: center; }
+        
+        .user-and-nre-wrapper { display: flex; align-items: center; gap: 20px; }
+        .right-nre-logo { height: 42px; width: auto; object-fit: contain; }
+        
+        #user-display { font-size: 14px; font-weight: 600; background: #eab308; color: #1e293b; padding: 8px 15px; border-radius: 20px; display: inline-flex; align-items: center; gap: 6px; }
+        
+        .board-container { flex: 1; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; padding: 20px; background-color: #f8fafc; }
+        .sector-column { background-color: white; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; }
+        .column-header { padding: 15px; background-color: #1e293b; color: white; border-top-left-radius: 7px; border-top-right-radius: 7px; text-align: center; font-weight: bold; }
+        
+        .feed-container { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+        .post-card { background-color: #f1f5f9; padding: 12px; border-radius: 6px; border-left: 4px solid #005088; animation: fadeIn 0.3s ease; }
+        .post-footer { font-size: 11px; color: #64748b; margin-top: 8px; border-top: 1px dashed #cbd5e1; padding-top: 5px; display: flex; justify-content: space-between; }
+        
+        .input-container { padding: 15px; border-top: 1px solid #e2e8f0; }
+        .input-container textarea { width: 100%; height: 60px; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; resize: none; margin-bottom: 10px; }
+        .btn-salvar { width: 100%; padding: 10px; background-color: #005088; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .btn-salvar:disabled { background-color: #cbd5e1; cursor: not-allowed; }
+
+        @media (max-width: 1024px) {
+            .board-container { grid-template-columns: repeat(2, 1fr); overflow-y: auto; }
+            .top-bar-app { padding: 0 15px; }
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <div id="login-screen">
+        <div class="login-box">
+            <img src="img/IMG_20260610_071544.png" alt="Brasão Anchieta" class="login-logo-nova">
+            <h2>Área Restrita</h2>
+            <p>SGI - Colégio Cívico-Militar Anchieta</p>
+            
+            <div class="input-group">
+                <label for="user-email"><i class="fa-solid fa-envelope"></i> E-mail Institucional:</label>
+                <input type="email" id="user-email" placeholder="nome.sobrenome@escola.pr.gov.br">
+            </div>
+            
+            <div class="input-group">
+                <label for="user-password"><i class="fa-solid fa-key"></i> Senha (RG Individual):</label>
+                <input type="password" id="user-password" placeholder="Digite seu RG completo">
+            </div>
+            
+            <div id="error-message">E-mail ou RG incorretos!</div>
+            <button class="btn-login" id="btn-entrar-login" onclick="autenticarUsuario()">Entrar no Sistema</button>
+            <br>
+            <a href="index.html" class="btn-voltar-site">
+                <i class="fa-solid fa-arrow-left"></i> Voltar ao site principal
+            </a>
+        </div>
+    </div>
+
+    <div id="app-interface">
+        <aside class="sidebar">
+            <div class="sidebar-top">
+                <div class="sidebar-header">
+                    <img src="img/IMG_20260610_071544.png" alt="Logo CCMA" class="sidebar-logo">
+                    <div class="sidebar-title-container">
+                        <h2>SGI</h2>
+                        <span class="sidebar-subtitle">CCM Anchieta</span>
+                    </div>
+                </div>
+                <ul class="turmas-lista" id="lista-turmas-sidebar">
+                    <li class="turma-item"><i class="fa-solid fa-spinner fa-spin"></i> Lendo turmas...</li>
+                </ul>
+            </div>
+            <div class="sidebar-footer">
+                <button class="btn-logout" onclick="fazerLogout()">
+                    <i class="fa-solid fa-right-from-bracket"></i> Sair do Painel
+                </button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-bar-app">
+                <div class="aluno-selector">
+                    <label for="select-alunos"><i class="fa-solid fa-user-graduated"></i> Aluno: </label>
+                    <select id="select-alunos" onchange="filtrarRegistrosPorAluno()" style="padding: 6px 12px; font-size: 16px; border-radius: 4px; margin-left: 8px;">
+                        <option>Selecione uma turma primeiro...</option>
+                    </select>
+                </div>
+                
+                <div class="user-and-nre-wrapper">
+                    <img src="img/nreumuarama.jpg" alt="NRE Umuarama" class="right-nre-logo">
+                    <div id="user-display">
+                        <i class="fa-solid fa-user-check"></i> Carregando perfil...
+                    </div>
+                </div>
+            </header>
+
+            <div class="board-container">
+                <section class="sector-column" id="col-meivs">
+                    <div class="column-header" style="background-color: #0284c7;">MEIV'S</div>
+                    <div class="feed-container" id="feed-meivs"></div>
+                    <div class="input-container">
+                        <textarea id="text-meivs" placeholder="Registrar informação fixa..."></textarea>
+                        <button class="btn-salvar" id="btn-meivs" onclick="salvarPost('meivs')">Salvar Registro</button>
+                    </div>
+                </section>
+
+                <section class="sector-column" id="col-pedagogico">
+                    <div class="column-header" style="background-color: #0d9488;">PEDAGÓGICO</div>
+                    <div class="feed-container" id="feed-pedagogico"></div>
+                    <div class="input-container">
+                        <textarea id="text-pedagogico" placeholder="Registrar informação fixa..."></textarea>
+                        <button class="btn-salvar" id="btn-pedagogico" onclick="salvarPost('pedagogico')">Salvar Registro</button>
+                    </div>
+                </section>
+
+                <section class="sector-column" id="col-adm">
+                    <div class="column-header" style="background-color: #4f46e5;">ADM</div>
+                    <div class="feed-container" id="feed-adm"></div>
+                    <div class="input-container">
+                        <textarea id="text-adm" placeholder="Registrar informação fixa..."></textarea>
+                        <button class="btn-salvar" id="btn-adm" onclick="salvarPost('adm')">Salvar Registro</button>
+                    </div>
+                </section>
+
+                <section class="sector-column" id="col-direcao">
+                    <div class="column-header" style="background-color: #b91c1c;">DIREÇÃO</div>
+                    <div class="feed-container" id="feed-direcao"></div>
+                    <div class="input-container">
+                        <textarea id="text-direcao" placeholder="Registrar informação fixa..."></textarea>
+                        <button class="btn-salvar" id="btn-direcao" onclick="salvarPost('direcao')">Salvar Registro</button>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const SHEET_ID = '1UUiVcCaSb_9Lx7gdEpmBzeRQPlBwDZRouQC2pf1q8Vg'; 
+        const COLS_ALUNOS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=Alunos`;
+        const COLS_USERS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=Usuários`;
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbymZyJ4OlSBmlM7jioHCwCkYF3FQYld2GpXwHhxAuMeFxLoQnAqZNL39Fdcy2N7J2eyjQ/exec';
+
+        let usuarioLogado = null;
+        let todosOsRegistros = [];
+        let cacheAlunosPorTurma = {}; 
+        let turmaSelecionadaAtiva = '';
+
+        // Executa imediatamente ao abrir a página para ver se o usuário já estava logado antes
+        window.addEventListener('DOMContentLoaded', verificarSessaoAtiva);
+
+        function verificarSessaoAtiva() {
+            const sessaoSalva = localStorage.getItem('sgi_ccma_session');
+            if (sessaoSalva) {
+                usuarioLogado = JSON.parse(sessaoSalva);
+                inicializarPainel();
+            }
+        }
+
+        async function autenticarUsuario() {
+            const emailDigitado = document.getElementById('user-email').value.trim().toLowerCase();
+            const senhaDigitada = document.getElementById('user-password').value.trim();
+            const errMsg = document.getElementById('error-message');
+            const btnLogin = document.getElementById('btn-entrar-login');
+            
+            if(!emailDigitado || !senhaDigitada) return;
+
+            btnLogin.disabled = true;
+            btnLogin.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Validando...';
+
+            try {
+                const response = await fetch(COLS_USERS_URL);
+                const text = await response.text();
+                const jsonText = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
+                const data = JSON.parse(jsonText);
+                const linhas = data.table.rows;
+                let autenticado = false;
+
+                for(let i = 0; i < linhas.length; i++) {
+                    const r = linhas[i].c;
+                    if(r && r[0] && r[0].v && r[1] && r[1].v) {
+                        const emailPlanilha = r[0].v.toString().trim().toLowerCase();
+                        const rgPlanilha = r[1].v.toString().trim();
+                        
+                        if(emailDigitado === emailPlanilha && senhaDigitada === rgPlanilha) {
+                            autenticado = true;
+                            usuarioLogado = {
+                                email: emailPlanilha,
+                                setor: r[2] ? r[2].v.toString().trim().toLowerCase() : 'pedagogico',
+                                nivel: r[3] ? parseInt(r[3].v) : 1
+                            };
+                            break;
+                        }
+                    }
+                }
+
+                if(autenticado) {
+                    // Guarda o login na memória permanente do navegador
+                    localStorage.setItem('sgi_ccma_session', JSON.stringify(usuarioLogado));
+                    inicializarPainel();
+                } else {
+                    errMsg.style.display = 'block';
+                    errMsg.innerHTML = "E-mail ou RG incorretos/não autorizados!";
+                    btnLogin.disabled = false;
+                    btnLogin.innerHTML = 'Entrar no Sistema';
+                }
+            } catch (error) {
+                console.error(error);
+                errMsg.style.display = 'block';
+                errMsg.innerHTML = "Erro de conexão ao validar credenciais.";
+                btnLogin.disabled = false;
+                btnLogin.innerHTML = 'Entrar no Sistema';
+            }
+        }
+
+        async function inicializarPainel() {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('app-interface').style.display = 'flex';
+            document.getElementById('user-display').innerHTML = `<i class="fa-solid fa-user-check"></i> ${usuarioLogado.setor.toUpperCase()}`;
+            
+            aplicarBloqueioSetores(usuarioLogado.setor);
+            await carregarAlunosETurmas();
+            await carregarRegistrosDoServidor();
+        }
+
+        function fazerLogout() {
+            usuarioLogado = null;
+            todosOsRegistros = [];
+            cacheAlunosPorTurma = {};
+            turmaSelecionadaAtiva = '';
+            localStorage.removeItem('sgi_ccma_session'); // Limpa a sessão para exigir senha no próximo acesso
+            
+            document.getElementById('user-email').value = '';
+            document.getElementById('user-password').value = '';
+            document.getElementById('error-message').style.display = 'none';
+            document.getElementById('btn-entrar-login').disabled = false;
+            document.getElementById('btn-entrar-login').innerHTML = 'Entrar no Sistema';
+            
             document.getElementById('app-interface').style.display = 'none';
             document.getElementById('login-screen').style.display = 'flex';
         }
@@ -338,16 +719,19 @@
                 };
                 
                 sidebarLista.appendChild(li);
-                if(index === 0) {
+                if(index === 0 && !turmaSelecionadaAtiva) {
                     li.classList.add('active');
                     selecionarTurma(turma);
+                } else if(turma === turmaSelecionadaAtiva) {
+                    li.classList.add('active');
                 }
             });
         }
 
         function selecionarTurma(turma) {
-            turmaSelecionadaAtiva = turma;
+            turmaSelecionadaAtiva = { name: turma }; // Mantém compatibilidade interna
             const select = document.getElementById('select-alunos');
+            const valorAntigoAluno = select.value;
             select.innerHTML = '';
             const alunosDaTurma = cacheAlunosPorTurma[turma] || [];
             
@@ -362,6 +746,10 @@
                 opt.innerHTML = aluno;
                 select.appendChild(opt);
             });
+
+            if(alunosDaTurma.includes(valorAntigoAluno)) {
+                select.value = valorAntigoAluno;
+            }
             filtrarRegistrosPorAluno();
         }
 
@@ -427,27 +815,27 @@
             const payload = {
                 dataAtual: new Date().toLocaleDateString('pt-BR'),
                 aluno: alunoSelecionado,
-                setor: sector,
+                setor: setor,
                 texto: texto,
                 funcionario: usuarioLogado.setor.toUpperCase()
             };
 
             try {
-                if(APPS_SCRIPT_URL) {
-                    await fetch(APPS_SCRIPT_URL, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                }
+                // Força o envio correto estruturado em texto puro para contornar qualquer barreira de CORS do Sheets
+                await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify(payload)
+                });
 
+                // Insere no banco local e atualiza a tela instantaneamente
                 todosOsRegistros.push(payload);
                 filtrarRegistrosPorAluno();
                 textarea.value = '';
             } catch (error) {
                 console.error(error);
-                alert("Falha ao salvar no banco de dados.");
+                alert("Falha na comunicação com a planilha do Google. O registro não pôde ser gravado.");
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = 'Salvar Registro';
