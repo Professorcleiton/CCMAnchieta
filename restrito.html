@@ -231,7 +231,6 @@
 
                 for(let i = 0; i < linhas.length; i++) {
                     const r = linhas[i].c;
-                    // Valida Coluna A (E-mail) e Coluna E (Senha - Índice 4)
                     if(r && r[0] && r[0].v && r[4] && r[4].v) {
                         const emailPlanilha = r[0].v.toString().trim().toLowerCase();
                         const senhaPlanilha = r[4].v.toString().trim();
@@ -239,14 +238,17 @@
                         if(emailDigitado === emailPlanilha && senhaDigitada === senhaPlanilha) {
                             autenticado = true;
                             
-                            let setorBruto = r[2] ? r[2].v.toString().trim() : 'pedagogico';
-                            let setorFormatado = (setorBruto.toLowerCase() === 'direcao') ? 'Professores' : setorBruto.toUpperCase();
+                            let setorBruto = r[2] ? r[2].v.toString().trim().toLowerCase() : 'pedagogico';
+                            let setorExibir = setorBruto.toUpperCase();
+                            if(setorBruto === 'professor' || setorBruto === 'direcao' || setorBruto === 'professores') {
+                                setorExibir = 'PROFESSORES';
+                            }
 
                             usuarioLogado = {
                                 email: emailPlanilha,
-                                nome: r[1] ? r[1].v.toString().trim() : 'Funcionário', // Coluna B
-                                setorExibicao: setorFormatado, 
-                                setor: setorBruto.toLowerCase() 
+                                nome: r[1] ? r[1].v.toString().trim() : 'Funcionário',
+                                setorExibicao: setorExibir, 
+                                setor: setorBruto 
                             };
                             break;
                         }
@@ -275,7 +277,7 @@
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('app-interface').style.display = 'flex';
             
-            // Exibe Nome e Setor juntos no topo direito do painel
+            // ATUALIZADO: Mostra o Nome do Usuário logado e o Cargo juntos!
             document.getElementById('user-display').innerHTML = `<i class="fa-solid fa-user-check"></i> ${usuarioLogado.nome} (${usuarioLogado.setorExibicao})`;
             
             aplicarBloqueioSetores(usuarioLogado.setor);
@@ -356,7 +358,9 @@
                     li.classList.add('active');
                 }
             });
-            function selecionarTurma(turma) {
+        }
+
+        function selecionarTurma(turma) {
             turmaSelecionadaAtiva = turma;
             const select = document.getElementById('select-alunos');
             const valorAntigoAluno = select.value;
@@ -442,7 +446,6 @@
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Gravando...';
 
-            // Envia o nome completo do utilizador para gravação na planilha
             const payload = {
                 dataAtual: new Date().toLocaleDateString('pt-BR'),
                 aluno: alunoSelecionado,
@@ -483,7 +486,8 @@
                 const textarea = document.getElementById(`text-${s}`);
                 const botao = document.getElementById(`btn-${s}`);
                 
-                if (setor === 'direcao' || setor === 'direco' || setor === s) {
+                // CORRIGIDO: Agora libera total acesso se na planilha o Setor estiver como "professor" ou "direcao"
+                if (setor === 'direcao' || setor === 'professor' || setor === 'professores' || setor === s) {
                     textarea.disabled = false;
                     botao.disabled = false;
                     textarea.placeholder = "Registrar informação fixa...";
