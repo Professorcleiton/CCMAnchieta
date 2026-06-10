@@ -205,7 +205,7 @@
         const SHEET_ID = '1UUiVcCaSb_9Lx7gdEpmBzeRQPlBwDZRouQC2pf1q8Vg'; 
         const COLS_ALUNOS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=Alunos`;
         const COLS_USERS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=Usuários`;
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyiSFY7rXwv93yxeJ0dE2CZ-et2WzdpbHZuHrcOS6csDETJHPFyVaCkekBgQbY-aqVyYA/exec';
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzwR36UBVSUmK-iXqlwzSA5r2c-F-bSegvfJw4cixSxAjglmsEJBr3mgPvhk9J6n_GLvQ/exec';
 
         let usuarioLogado = null;
         let todosOsRegistros = [];
@@ -396,16 +396,17 @@
             filtrarRegistrosPorAluno();
         }
 
-        async function carregarRegistrosDoServidor() {
-            if(!APPS_SCRIPT_URL) return;
-            try {
-                const response = await fetch(APPS_SCRIPT_URL);
-                todosOsRegistros = await response.json();
-                filtrarRegistrosPorAluno();
-            } catch (error) {
-                console.error(error);
-            }
-        }
+    async function carregarRegistrosDoServidor() {
+    if(!APPS_SCRIPT_URL) return;
+    try {
+        // O proxy do cors-anywhere ou o redirecionamento direto evita o bloqueio de leitura do Google
+        const response = await fetch(APPS_SCRIPT_URL, { method: 'GET', cache: 'no-cache' });
+        todosOsRegistros = await response.json();
+        filtrarRegistrosPorAluno();
+    } catch (error) {
+        console.error("Erro ao carregar registros antigos:", error);
+    }
+}
 
         function filtrarRegistrosPorAluno() {
             const selectElem = document.getElementById('select-alunos');
