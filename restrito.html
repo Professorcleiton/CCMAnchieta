@@ -178,7 +178,7 @@
                 </section>
 
                 <section class="sector-column" id="col-direcao">
-                    <div class="column-header" style="background-color: #b91c1c;">DIREÇÃO</div>
+                    <div class="column-header" style="background-color: #b91c1c;">PROFESSORES</div>
                     <div class="feed-container" id="feed-direcao"></div>
                     <div class="input-container">
                         <textarea id="text-direcao" placeholder="Registrar informação fixa..."></textarea>
@@ -231,16 +231,30 @@
 
                 for(let i = 0; i < linhas.length; i++) {
                     const r = linhas[i].c;
+                    // Blindagem: valida e-mail na coluna A (0) e senha/RG na coluna B (1)
                     if(r && r[0] && r[0].v && r[1] && r[1].v) {
                         const emailPlanilha = r[0].v.toString().trim().toLowerCase();
                         const rgPlanilha = r[1].v.toString().trim();
                         
                         if(emailDigitado === emailPlanilha && senhaDigitada === rgPlanilha) {
                             autenticado = true;
+                            
+                            // Captura automática e flexível do setor independente de qual coluna ele esteja
+                            let setorIdentificado = 'pedagogico';
+                            for (let j = 2; j < r.length; j++) {
+                                if (r[j] && r[j].v) {
+                                    let val = r[j].v.toString().trim().toLowerCase();
+                                    if (['pedagogico', 'meivs', 'adm', 'direcao', 'professores'].includes(val)) {
+                                        // Se na planilha estiver escrito professores, mapeia para a chave da coluna 'direcao'
+                                        setorIdentificado = (val === 'professores') ? 'direcao' : val;
+                                        break;
+                                    }
+                                }
+                            }
+
                             usuarioLogado = {
                                 email: emailPlanilha,
-                                setor: r[2] ? r[2].v.toString().trim().toLowerCase() : 'pedagogico',
-                                nivel: r[3] ? parseInt(r[3].v) : 1
+                                setor: setorIdentificado
                             };
                             break;
                         }
@@ -268,7 +282,11 @@
         async function inicializarPainel() {
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('app-interface').style.display = 'flex';
-            document.getElementById('user-display').innerHTML = `<i class="fa-solid fa-user-check"></i> ${usuarioLogado.setor.toUpperCase()}`;
+            
+            // Exibe o nome correto do setor no topo amarelo
+            let nomeExibicaoSetor = usuarioLogado.setor.toUpperCase();
+            if (nomeExibicaoSetor === 'DIRECAO') nomeExibicaoSetor = 'PROFESSORES';
+            document.getElementById('user-display').innerHTML = `<i class="fa-solid fa-user-check"></i> ${nomeExibicaoSetor}`;
             
             aplicarBloqueioSetores(usuarioLogado.setor);
             await carregarAlunosETurmas();
@@ -432,10 +450,14 @@
                             dataFormatada = new Date().toLocaleDateString('pt-BR');
                         }
 
+                        // Mapeamento visual do rodapé do card
+                        let fSetor = reg.funcionario ? reg.funcionario.toUpperCase() : 'SGI';
+                        if (fSetor === 'DIRECAO') fSetor = 'PROFESSORES';
+
                         novoCard.innerHTML = `
                             <p class="post-text">${reg.texto}</p>
                             <div class="post-footer">
-                                <span><i class="fa-solid fa-user"></i> ${reg.funcionario}</span>
+                                <span><i class="fa-solid fa-user"></i> ${fSetor}</span>
                                 <span>${dataFormatada}</span>
                             </div>
                         `;
@@ -496,7 +518,8 @@
                 const textarea = document.getElementById(`text-${s}`);
                 const botao = document.getElementById(`btn-${s}`);
                 
-                if (setor === 'direcao' || setor === s) {
+                // Professores/Direção possuem acesso total de escrita, os demais escrevem apenas no próprio setor
+                if (setor === 'direcao' || sector === 'professores' || setor === s) {
                     textarea.disabled = false;
                     botao.disabled = false;
                     textarea.placeholder = "Registrar informação fixa...";
@@ -510,4 +533,4 @@
     </script>
 </body>
 </html>
-        
+  
