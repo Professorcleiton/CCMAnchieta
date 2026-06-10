@@ -77,7 +77,7 @@
         .post-card { background-color: #f1f5f9; padding: 12px; border-radius: 6px; border-left: 4px solid #005088; animation: fadeIn 0.3s ease; word-break: break-word; position: relative; }
         .post-footer { font-size: 11px; color: #64748b; margin-top: 8px; border-top: 1px dashed #cbd5e1; padding-top: 5px; display: flex; justify-content: space-between; align-items: center; }
         
-        /* NOVO: Estilo dos botões de ação rápidos do Nível 2 nos cards */
+        /* Estilo dos botões de ação rápidos do Nível 2 nos cards */
         .card-actions { display: flex; gap: 8px; margin-top: 5px; justify-content: flex-end; border-top: 1px solid #e2e8f0; padding-top: 5px; }
         .btn-action-card { background: none; border: none; cursor: pointer; font-size: 12px; font-weight: bold; padding: 2px 6px; border-radius: 3px; }
         .btn-edit-card { color: #4f46e5; } .btn-edit-card:hover { background: #e0e7ff; }
@@ -246,7 +246,7 @@
                 let autenticado = false;
 
                 for(let i = 0; i < linhas.length; i++) {
-                    const r = linhas[i].c;
+                    const r = líneas[i].c;
                     if(r && r[0] && r[0].v && r[4] && r[4].v) {
                         const emailPlanilha = r[0].v.toString().trim().toLowerCase();
                         const senhaPlanilha = r[4].v.toString().trim();
@@ -376,7 +376,7 @@
         }
 
         function selecionarTurma(turma) {
-            turmaSelecionadaAtiva = turma; 
+            turmaSelecionadaAtiva = { name: turma }; 
             const select = document.getElementById('select-alunos');
             const valorAntigoAluno = select.value;
             select.innerHTML = '';
@@ -425,7 +425,11 @@
 
             todosOsRegistros.forEach(reg => {
                 if(reg.aluno && reg.aluno.trim() === alunoSelecionado.trim()) {
-                    const feed = document.getElementById(`feed-${reg.setor}`);
+                    // CORRIGIDO: Se vier 'professores' da planilha, mapeia visualmente para a coluna 'direcao'
+                    let chaveSetorVisual = reg.setor;
+                    if (reg.setor === 'professores') chaveSetorVisual = 'direcao';
+
+                    const feed = document.getElementById(`feed-${chaveSetorVisual}`);
                     if(feed) {
                         const novoCard = document.createElement('div');
                         novoCard.className = 'post-card';
@@ -473,11 +477,15 @@
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Gravando...';
 
+            // CORRIGIDO: Se for a coluna interna 'direcao', manda 'professores' para a planilha
+            let setorGravar = setor;
+            if (setor === 'direcao') setorGravar = 'professores';
+
             const payload = {
                 operacao: "SALVAR",
                 dataAtual: new Date().toLocaleDateString('pt-BR'),
                 aluno: alunoSelecionado,
-                setor: setor,
+                setor: setorGravar,
                 texto: texto,
                 funcionario: usuarioLogado.nome
             };
@@ -503,7 +511,7 @@
             }
         }
 
-        // NOVO: Função para o Nível 2 Apagar Registros direto na tela
+        // Função para o Nível 2 Apagar Registros direto na tela
         async function excluirRegistroServidor(idLinha) {
             if (!idLinha) return;
             if (!confirm("Tem certeza absoluta de que deseja apagar permanentemente esta ocorrência da planilha?")) return;
@@ -525,7 +533,7 @@
             }
         }
 
-        // NOVO: Função para o Nível 2 Editar Registros direto na tela
+        // Função para o Nível 2 Editar Registros direto na tela
         async function editarRegistroServidor(idLinha, setor) {
             if (!idLinha) return;
             const paragrafoTexto = document.getElementById(`text-card-${idLinha}`);
@@ -568,7 +576,7 @@
                     </div>
                     <div style="background: #f8fafc; padding: 15px; border-radius: 6px; margin-bottom: 30px; border: 1px solid #e2e8f0;">
                         <p style="font-size: 16px; margin-bottom: 5px;"><strong>Estudante:</strong> ${aluno}</p>
-                        <p style="font-size: 14px; color: #475569;"><strong>Turma:</strong> ${turmaSelecionadaAtiva}</p>
+                        <p style="font-size: 14px; color: #475569;"><strong>Turma:</strong> ${turmaSelecionadaAtiva.name || turmaSelecionadaAtiva}</p>
                         <p style="font-size: 12px; color: #64748b; margin-top: 10px;">Relatório emitido em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}</p>
                     </div>
                     <h2 style="font-size: 18px; color: #005088; border-bottom: 1px solid #cbd5e1; padding-bottom: 5px; margin-bottom: 15px;">HISTÓRICO DE APONTAMENTOS FIXOS</h2>
@@ -578,13 +586,13 @@
                 { id: 'meivs', nome: 'MEIV\'S (DISCIPLINA / INSTRUTORIA)' },
                 { id: 'pedagogico', nome: 'PEDAGÓGICO (APRENDIZAGEM / PEDAGOGIA)' },
                 { id: 'adm', nome: 'ADMINISTRATIVO (SECRETARIA / CRONOGRAMA)' },
-                { id: 'direcao', nome: 'PROFESSORES (CONSELHO / RENDIMENTO)' }
+                { id: 'professores', nome: 'PROFESSORES (CONSELHO / RENDIMENTO)' }
             ];
 
             let temRegistros = false;
 
             setoresMapeados.forEach(set => {
-                let postsSetor = todosOsRegistros.filter(r => r.aluno.trim() === aluno.trim() && r.setor === set.id);
+                let postsSetor = todosOsRegistros.filter(r => r.aluno.trim() === aluno.trim() && (r.setor === set.id || (set.id === 'professores' && r.setor === 'direcao')));
                 if(postsSetor.length > 0) {
                     temRegistros = true;
                     htmlDocumento += `<h3 style="font-size: 14px; color: #1e293b; margin-top: 20px; background: #e2e8f0; padding: 6px; border-radius: 4px;">${set.nome}</h3>`;
@@ -638,6 +646,7 @@
                 const textarea = document.getElementById(`text-${s}`);
                 const botao = document.getElementById(`btn-${s}`);
                 
+                // CORRIGIDO: Validação da variável em português 'setor' consertada
                 if (setor === 'direcao' || setor === 'professor' || setor === 'professores' || setor === s) {
                     textarea.disabled = false;
                     botao.disabled = false;
