@@ -18,8 +18,8 @@
             background: white; padding: 40px; border-radius: 12px; width: 100%; max-width: 400px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.2); text-align: center; border-top: 8px solid #eab308;
         }
-        /* Estilização da Logo do NRE na tela de login */
-        .login-logo-nre { width: 220px; height: auto; margin-bottom: 20px; object-fit: contain; }
+        /* Nova logo atualizada na tela de login */
+        .login-logo-nova { width: 200px; height: auto; margin-bottom: 20px; object-fit: contain; }
         .login-box h2 { color: #005088; margin-bottom: 5px; font-size: 24px; }
         .login-box p { color: #64748b; font-size: 14px; margin-bottom: 25px; }
         .input-group { margin-bottom: 20px; text-align: left; }
@@ -39,9 +39,9 @@
         .sidebar { width: 260px; background-color: #005088; color: white; display: flex; flex-direction: column; border-right: 4px solid #eab308; justify-content: space-between; }
         .sidebar-top { display: flex; flex-direction: column; }
         
-        /* Cabeçalho da Sidebar Ajustado para a Logo do Colégio */
+        /* Cabeçalho da Sidebar Ajustado para a Nova Logo */
         .sidebar-header { padding: 20px 15px; text-align: center; border-bottom: 1px solid rgba(255, 255, 255, 0.1); display: flex; align-items: center; justify-content: center; gap: 12px; }
-        .sidebar-logo { width: 50px; height: 50px; object-fit: contain; }
+        .sidebar-logo { width: 55px; height: 55px; object-fit: contain; }
         .sidebar-title-container { text-align: left; }
         .sidebar-title-container h2 { font-size: 22px; font-weight: bold; letter-spacing: 0.5px; line-height: 1.1; }
         .sidebar-subtitle { font-size: 11px; color: #eab308; font-weight: 600; display: block; }
@@ -55,8 +55,17 @@
         .btn-logout:hover { background-color: #991b1b; }
 
         .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-        .top-bar { background-color: white; padding: 15px 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; }
-        .aluno-selector { font-size: 18px; font-weight: bold; color: #005088; }
+        
+        /* Top Bar Reajustada para Alinhamento com a Logo do NRE Centralizada */
+        .top-bar-app { background-color: white; padding: 10px 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; height: 65px; }
+        .aluno-selector { font-size: 18px; font-weight: bold; color: #005088; width: 35%; display: flex; align-items: center; }
+        
+        /* Elemento centralizado da Logo do NRE */
+        .center-nre-logo-container { width: 30%; display: flex; justify-content: center; align-items: center; }
+        .center-nre-logo { height: 45px; width: auto; object-fit: contain; }
+        
+        .user-display-wrapper { width: 35%; display: flex; justify-content: flex-end; }
+        #user-display { font-size: 14px; font-weight: 600; background: #eab308; color: #1e293b; padding: 8px 15px; border-radius: 20px; display: inline-flex; align-items: center; gap: 6px; }
         
         .board-container { flex: 1; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; padding: 20px; background-color: #f8fafc; }
         .sector-column { background-color: white; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; }
@@ -71,6 +80,12 @@
         .btn-salvar { width: 100%; padding: 10px; background-color: #005088; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
         .btn-salvar:disabled { background-color: #cbd5e1; cursor: not-allowed; }
 
+        @media (max-width: 1024px) {
+            .board-container { grid-template-columns: repeat(2, 1fr); overflow-y: auto; }
+            .top-bar-app { padding: 10px 15px; }
+            .center-nre-logo { height: 35px; }
+        }
+
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
@@ -78,7 +93,7 @@
 
     <div id="login-screen">
         <div class="login-box">
-            <img src="img/nreumuarama.jpg" alt="NRE Umuarama" class="login-logo-nre">
+            <img src="img/logoA.png" alt="Brasão Anchieta" class="login-logo-nova">
             <h2>Área Restrita</h2>
             <p>SGI - Colégio Cívico-Militar Anchieta</p>
             <div class="input-group">
@@ -88,7 +103,7 @@
             <div id="error-message">E-mail não autorizado ou incorreto!</div>
             <button class="btn-login" onclick="autenticarUsuario()">Entrar no Sistema</button>
             <br>
-            <a href="https://ccmanchieta.com.br" class="btn-voltar-site">
+            <a href="index.html" class="btn-voltar-site">
                 <i class="fa-solid fa-arrow-left"></i> Voltar ao site principal
             </a>
         </div>
@@ -98,7 +113,7 @@
         <aside class="sidebar">
             <div class="sidebar-top">
                 <div class="sidebar-header">
-                    <img src="img/ccma.PNG" alt="Logo CCMA" class="sidebar-logo">
+                    <img src="img/logoA.png" alt="Logo CCMA" class="sidebar-logo">
                     <div class="sidebar-title-container">
                         <h2>SGI</h2>
                         <span class="sidebar-subtitle">CCM Anchieta</span>
@@ -116,15 +131,22 @@
         </aside>
 
         <main class="main-content">
-            <header class="top-bar">
+            <header class="top-bar-app">
                 <div class="aluno-selector">
                     <label for="select-alunos"><i class="fa-solid fa-user-graduated"></i> Aluno: </label>
-                    <select id="select-alunos" onchange="filtrarRegistrosPorAluno()" style="padding: 6px 12px; font-size: 16px; border-radius: 4px;">
+                    <select id="select-alunos" onchange="filtrarRegistrosPorAluno()" style="padding: 6px 12px; font-size: 16px; border-radius: 4px; margin-left: 8px;">
                         <option>A buscar lista de alunos...</option>
                     </select>
                 </div>
-                <div id="user-display" style="font-size: 14px; font-weight: 600; background: #eab308; color: #1e293b; padding: 8px 15px; border-radius: 20px;">
-                    <i class="fa-solid fa-user-check"></i> Carregando perfil...
+                
+                <div class="center-nre-logo-container">
+                    <img src="img/nreumuarama.jpg" alt="NRE Umuarama" class="center-nre-logo">
+                </div>
+                
+                <div class="user-display-wrapper">
+                    <div id="user-display">
+                        <i class="fa-solid fa-user-check"></i> Carregando perfil...
+                    </div>
                 </div>
             </header>
 
@@ -172,14 +194,11 @@
         const SHEET_ID = '1UUiVcCaSb_9Lx7gdEpmBzeRQPlBwDZRouQC2pf1q8Vg'; 
         const COLS_ALUNOS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=Alunos`;
         const COLS_USERS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=Usuários`;
-        
-        // Link mestre de gravação e leitura do Google Apps Script
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbymZyJ4OlSBmlM7jioHCwCkYF3FQYld2GpXwHhxAuMeFxLoQnAqZNL39Fdcy2N7J2eyjQ/exec';
 
         let usuarioLogado = null;
         let todosOsRegistros = [];
 
-        // 1. AUTENTICAÇÃO DO USUÁRIO
         async function autenticarUsuario() {
             const emailDigitado = document.getElementById('user-email').value.trim().toLowerCase();
             const errMsg = document.getElementById('error-message');
@@ -229,7 +248,6 @@
             }
         }
 
-        // 1.2 LOGOUT
         function fazerLogout() {
             usuarioLogado = null;
             todosOsRegistros = [];
@@ -239,7 +257,6 @@
             document.getElementById('login-screen').style.display = 'flex';
         }
 
-        // 2. CARREGAR LISTA DE ALUNOS COM REDIRECIONAMENTO INTELIGENTE ANTI-CORS
         async function carregarAlunos() {
             const select = document.getElementById('select-alunos');
             try {
@@ -287,7 +304,6 @@
             }
         }
 
-        // 3. BUSCAR REGISTROS REAIS DO BANCO DE DADOS
         async function carregarRegistrosDoServidor() {
             if(!APPS_SCRIPT_URL) return;
             try {
@@ -299,10 +315,9 @@
             }
         }
 
-        // 4. FILTRAGEM DE REGISTROS POR ALUNO SELECIONADO
         function filtrarRegistrosPorAluno() {
             const selectElem = document.getElementById('select-alunos');
-            if(!selectElem.options.length || selectElem.value.includes('Buscando')) return;
+            if(!selectElem.options.length || selectElem.value.includes('A buscar')) return;
 
             const alunoSelecionado = selectElem.value;
             const setores = ['meivs', 'pedagogico', 'adm', 'direcao'];
@@ -334,7 +349,6 @@
             });
         }
 
-        // 5. SALVAR REGISTRO
         async function salvarPost(setor) {
             const textarea = document.getElementById(`text-${setor}`);
             const texto = textarea.value.trim();
@@ -377,7 +391,11 @@
             }
         }
 
-        // 6. TRAVAS DE ESCRITA DE ACORDO COM O SETOR
+        window.salvarPost = salvarPost;
+        window.filtrarRegistrosPorAluno = filtrarRegistrosPorAluno;
+        window.fazerLogout = fazerLogout;
+        window.autenticarUsuario = autenticarUsuario;
+
         function aplicarBloqueioSetores(setor) {
             const setores = ['pedagogico', 'meivs', 'adm', 'direcao'];
             setores.forEach(s => {
