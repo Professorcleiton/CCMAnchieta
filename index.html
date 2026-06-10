@@ -3,118 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Colégio Cívico-Militar Anchieta</title>
+    <title>CCM ANCHIETA</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f8fafc; color: #1e293b; line-height: 1.6; }
-
-        /* TOPO COM LOGOS */
-        .header-logos { background-color: white; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; }
-        .logo-img-nre { height: 75px; width: auto; object-fit: contain; }
-        .logo-img-ccma { height: 90px; width: auto; object-fit: contain; }
-
-        /* BARRA VERDE DE NAVEGAÇÃO */
-        .nav-bar { background-color: #00a859; padding: 12px 5%; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
-        .nav-bar h1 { color: white; font-size: 24px; margin-bottom: 10px; font-weight: bold; letter-spacing: 1px; }
-        .nav-menu { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; list-style: none; }
-        .nav-link { background-color: rgba(255, 255, 255, 0.15); color: white; text-decoration: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
-        .nav-link:hover { background-color: #eab308; color: #1e293b; transform: translateY(-2px); }
-        .nav-link.destaque { background-color: #ff6600; }
-        .nav-link.destaque:hover { background-color: #cc5200; color: white; }
-
-        /* CONTEÚDO PRINCIPAL */
-        .container { max-width: 1100px; margin: 40px auto; padding: 0 20px; }
+        body { font-family: Arial, sans-serif; background-color: #ffffff; color: #333; }
         
-        .section-card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 30px; border-left: 6px solid #005088; }
-        .section-card h2 { color: #005088; margin-bottom: 20px; font-size: 26px; display: flex; align-items: center; gap: 12px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; }
-        .section-card p { font-size: 16px; color: #475569; margin-bottom: 15px; text-align: justify; }
-
-        /* GRID DA GALERIA */
-        .galeria-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 20px; }
-        .galeria-item { background: #f1f5f9; border-radius: 8px; overflow: hidden; border: 1px solid #e2e8f0; text-align: center; padding: 15px; }
-        .galeria-item i { font-size: 40px; color: #005088; margin-bottom: 10px; }
-        .galeria-item h4 { margin-bottom: 5px; color: #1e293b; }
-
-        /* BOTOES DE DOWNLOAD */
-        .btn-download { display: inline-flex; align-items: center; gap: 10px; background-color: #005088; color: white; text-decoration: none; padding: 12px 25px; border-radius: 6px; font-weight: bold; margin-top: 10px; transition: background 0.2s; }
-        .btn-download:hover { background-color: #0a4673; }
-
-        /* RODAPÉ */
-        footer { background-color: #1e293b; color: #94a3b8; text-align: center; padding: 25px; font-size: 14px; margin-top: 60px; border-top: 4px solid #eab308; }
-        footer strong { color: white; }
+        .nav-bar { background-color: #00a859; padding: 15px 20px; text-align: center; }
+        .nav-bar h1 { color: white; font-size: 24px; margin-bottom: 10px; font-weight: bold; }
+        
+        .nav-menu { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; list-style: none; }
+        .nav-link { background-color: rgba(255, 255, 255, 0.2); color: white; text-decoration: none; padding: 8px 16px; border-radius: 4px; font-weight: bold; font-size: 14px; transition: background 0.2s; }
+        .nav-link:hover { background-color: rgba(255, 255, 255, 0.4); }
     </style>
 </head>
 <body>
 
-    <header class="header-logos">
-        <img src="img/nreumuarama.jpg" alt="Logo NRE Umuarama" class="logo-img-nre">
-        <img src="img/ccma.PNG" alt="Logo CCM Anchieta" class="logo-img-ccma">
-    </header>
-
     <nav class="nav-bar">
         <h1>CCM ANCHIETA</h1>
         <ul class="nav-menu">
-            <li><a href="#sobre" class="nav-link"><i class="fa-solid fa-school"></i> SOBRE NÓS</a></li>
-            <li><a href="frequencia.html" class="nav-link"><i class="fa-solid fa-chart-simple"></i> FREQUÊNCIA</a></li>
-            <li><a href="#galeria" class="nav-link"><i class="fa-solid fa-image"></i> GALERIA</a></li>
-            <li><a href="https://www.seed.pr.gov.br" target="_blank" class="nav-link"><i class="fa-solid fa-link"></i> RCO</a></li>
-            <li><a href="#ponto" class="nav-link"><i class="fa-solid fa-clock"></i> REGISTRO PONTO</a></li>
-            <li><a href="#calendario" class="nav-link"><i class="fa-solid fa-calendar-days"></i> CALENDÁRIO</a></li>
-            <li><a href="area-restrita.html" class="nav-link destaque"><i class="fa-solid fa-lock"></i> ÁREA RESTRITA</a></li>
+            <li><a href="#" class="nav-link">SOBRE NÓS</a></li>
+            <li><a href="#" class="nav-link">FREQUÊNCIA</a></li>
+            <li><a href="#" class="nav-link">GALERIA</a></li>
+            <li><a href="https://www.seed.pr.gov.br" target="_blank" class="nav-link">RCO</a></li>
+            <li><a href="#" class="nav-link">REGISTRO PONTO</a></li>
+            <li><a href="Arq/calendario_escolar2026.pdf" target="_blank" class="nav-link">CALENDÁRIO</a></li>
+            <li><a href="area-restrita.html" class="nav-link" style="background-color: #ff6600;">ÁREA RESTRITA</a></li>
         </ul>
     </nav>
-
-    <main class="container">
-
-        <section id="sobre" class="section-card">
-            <h2><i class="fa-solid fa-school"></i> Sobre Nossa Instituição</h2>
-            <p>O Colégio Cívico-Militar Anchieta, localizado em Cruzeiro do Oeste - PR, integra a rede pública de ensino do Estado do Paraná sob a coordenação do Núcleo Regional de Educação (NRE) de Umuarama. Buscamos promover um ambiente educacional baseado na excelência acadêmica, no desenvolvimento de valores cívicos e na cidadania.</p>
-            <p>Nossa proposta pedagógica une o trabalho do corpo docente e da equipe de monitores militares (MEIV'S), focando na formação integral do aluno e na preparação para os desafios futuros.</p>
-        </section>
-
-        <section id="galeria" class="section-card">
-            <h2><i class="fa-solid fa-images"></i> Galeria de Projetos e Inovações</h2>
-            <p>Conheça as principais atividades práticas e recursos tecnológicos desenvolvidos pela nossa comunidade escolar:</p>
-            <div class="galeria-grid">
-                <div class="galeria-item">
-                    <i class="fa-solid fa-robot"></i>
-                    <h4>Robótica Educacional</h4>
-                    <p style="font-size: 13px; text-align:center;">Aulas práticas com Arduino e eletrônica aplicada.</p>
-                </div>
-                <div class="galeria-item">
-                    <i class="fa-solid fa-laptop-code"></i>
-                    <h4>Painel SGI</h4>
-                    <p style="font-size: 13px; text-align:center;">Monitoramento integrado entre setores em tempo real.</p>
-                </div>
-                <div class="galeria-item">
-                    <i class="fa-solid fa-medal"></i>
-                    <h4>Instrução Cívica</h4>
-                    <p style="font-size: 13px; text-align:center;">Atividades de valorização civil e monitoria.</p>
-                </div>
-            </div>
-        </section>
-
-        <section id="ponto" class="section-card" style="border-left-color: #eab308;">
-            <h2><i class="fa-solid fa-clock-pulse"></i> Registro de Ponto e Horários</h2>
-            <p>Espaço destinado às orientações funcionais para o corpo docente, agentes educacionais e equipe de monitoria técnica do colégio.</p>
-            <p>Certifique-se de cumprir os horários estabelecidos pela SEED-PR e mantenha seus registros atualizados junto à secretaria administrativa.</p>
-        </section>
-
-        <section id="calendario" class="section-card">
-            <h2><i class="fa-solid fa-calendar-check"></i> Calendário Letivo 2026</h2>
-            <p>Clique no botão abaixo para visualizar ou baixar o documento oficial do Calendário Escolar de 2026 do Colégio Anchieta diretamente no seu dispositivo:</p>
-            <a href="calendario_escolar2026.pdf" target="_blank" class="btn-download">
-                <i class="fa-solid fa-file-pdf"></i> Baixar Calendário Escolar 2026 (PDF)
-            </a>
-        </section>
-
-    </main>
-
-    <footer>
-        <p>&copy; 2026 <strong>Colégio Cívico-Militar Anchieta</strong> - Cruzeiro do Oeste - PR</p>
-        <p style="font-size: 12px; margin-top: 5px; color: #64748b;">NRE Umuarama | Secretaria de Estado da Educação do Paraná</p>
-    </footer>
 
 </body>
 </html>
