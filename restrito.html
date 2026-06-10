@@ -238,10 +238,15 @@
                         
                         if(emailDigitado === emailPlanilha && senhaDigitada === senhaPlanilha) {
                             autenticado = true;
+                            
+                            let setorBruto = r[2] ? r[2].v.toString().trim() : 'pedagogico';
+                            let setorFormatado = (setorBruto.toLowerCase() === 'direcao') ? 'Professores' : setorBruto.toUpperCase();
+
                             usuarioLogado = {
                                 email: emailPlanilha,
-                                nome: r[1] ? r[1].v.toString().trim() : 'Funcionário', // Puxa o nome da Coluna B (Índice 1)
-                                setor: r[2] ? r[2].v.toString().trim().toLowerCase() : 'pedagogico'
+                                nome: r[1] ? r[1].v.toString().trim() : 'Funcionário', // Coluna B
+                                setorExibicao: setorFormatado, 
+                                setor: setorBruto.toLowerCase() 
                             };
                             break;
                         }
@@ -270,8 +275,8 @@
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('app-interface').style.display = 'flex';
             
-            // Exibe o Nome real do usuário logado no topo amarelo!
-            document.getElementById('user-display').innerHTML = `<i class="fa-solid fa-user-check"></i> ${usuarioLogado.nome}`;
+            // Exibe Nome e Setor juntos no topo direito do painel
+            document.getElementById('user-display').innerHTML = `<i class="fa-solid fa-user-check"></i> ${usuarioLogado.nome} (${usuarioLogado.setorExibicao})`;
             
             aplicarBloqueioSetores(usuarioLogado.setor);
             await carregarAlunosETurmas();
@@ -351,9 +356,7 @@
                     li.classList.add('active');
                 }
             });
-        }
-
-        function selecionarTurma(turma) {
+            function selecionarTurma(turma) {
             turmaSelecionadaAtiva = turma;
             const select = document.getElementById('select-alunos');
             const valorAntigoAluno = select.value;
@@ -413,7 +416,6 @@
                             dataFormatada = new Date().toLocaleDateString('pt-BR');
                         }
 
-                        // Exibe quem gravou (Nome do Funcionário ou o Setor histórico)
                         let autorRegistro = reg.funcionario ? reg.funcionario.trim() : 'SGI';
 
                         novoCard.innerHTML = `
@@ -440,7 +442,7 @@
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Gravando...';
 
-            // Envia o Nome Real do Funcionário logado para ficar salvo na planilha!
+            // Envia o nome completo do utilizador para gravação na planilha
             const payload = {
                 dataAtual: new Date().toLocaleDateString('pt-BR'),
                 aluno: alunoSelecionado,
@@ -481,7 +483,6 @@
                 const textarea = document.getElementById(`text-${s}`);
                 const botao = document.getElementById(`btn-${s}`);
                 
-                // Setor 'direcao' mapeia para a nova coluna de Professores e ganha permissão total de escrita
                 if (setor === 'direcao' || setor === 'direco' || setor === s) {
                     textarea.disabled = false;
                     botao.disabled = false;
