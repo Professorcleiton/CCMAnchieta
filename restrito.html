@@ -68,19 +68,21 @@
         
         #user-display { font-size: 14px; font-weight: 600; background: #eab308; color: #1e293b; padding: 8px 15px; border-radius: 20px; display: inline-flex; align-items: center; gap: 6px; }
         
-        /* Contêiner dos quadros para travar a altura */
         .board-container { flex: 1; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; padding: 20px; background-color: #f8fafc; height: calc(100vh - 65px); overflow: hidden; }
-        
-        /* Coluna travada com overflow oculto */
         .sector-column { background-color: white; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
         .column-header { padding: 15px; background-color: #1e293b; color: white; border-top-left-radius: 7px; border-top-right-radius: 7px; text-align: center; font-weight: bold; }
         
-        /* Área das mensagens com rolagem vertical ativada e independente */
         .feed-container { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; min-height: 0; }
         
-        .post-card { background-color: #f1f5f9; padding: 12px; border-radius: 6px; border-left: 4px solid #005088; animation: fadeIn 0.3s ease; word-break: break-word; }
-        .post-footer { font-size: 11px; color: #64748b; margin-top: 8px; border-top: 1px dashed #cbd5e1; padding-top: 5px; display: flex; justify-content: space-between; }
+        .post-card { background-color: #f1f5f9; padding: 12px; border-radius: 6px; border-left: 4px solid #005088; animation: fadeIn 0.3s ease; word-break: break-word; position: relative; }
+        .post-footer { font-size: 11px; color: #64748b; margin-top: 8px; border-top: 1px dashed #cbd5e1; padding-top: 5px; display: flex; justify-content: space-between; align-items: center; }
         
+        /* NOVO: Estilo dos botões de ação rápidos do Nível 2 nos cards */
+        .card-actions { display: flex; gap: 8px; margin-top: 5px; justify-content: flex-end; border-top: 1px solid #e2e8f0; padding-top: 5px; }
+        .btn-action-card { background: none; border: none; cursor: pointer; font-size: 12px; font-weight: bold; padding: 2px 6px; border-radius: 3px; }
+        .btn-edit-card { color: #4f46e5; } .btn-edit-card:hover { background: #e0e7ff; }
+        .btn-delete-card { color: #b91c1c; } .btn-delete-card:hover { background: #fee2e2; }
+
         .input-container { padding: 15px; border-top: 1px solid #e2e8f0; background: white; }
         .input-container textarea { width: 100%; height: 60px; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; resize: none; margin-bottom: 10px; font-family: inherit; }
         .btn-salvar { width: 100%; padding: 10px; background-color: #005088; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
@@ -202,10 +204,12 @@
     </div>
 
     <script>
+        // ATENÇÃO: COLOQUE AQUI O SEU LINK ATUALIZADO DO GOOGLE APPS SCRIPT GERADO NO PASSO 1
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw_UTtLWZ89pOjQBR4q5BQ3RGSkjAHezFtO5FR_80ju8UMM67ZQj0PCwK77bPCkgejnLA/exec';
+        
         const SHEET_ID = '1UUiVcCaSb_9Lx7gdEpmBzeRQPlBwDZRouQC2pf1q8Vg'; 
         const COLS_ALUNOS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=Alunos`;
         const COLS_USERS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=Usuários`;
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzwR36UBVSUmK-iXqlwzSA5r2c-F-bSegvfJw4cixSxAjglmsEJBr3mgPvhk9J6n_GLvQ/exec';
 
         let usuarioLogado = null;
         let todosOsRegistros = [];
@@ -260,7 +264,8 @@
                                 email: emailPlanilha,
                                 nome: r[1] ? r[1].v.toString().trim() : 'Funcionário',
                                 setorExibicao: setorExibir, 
-                                setor: setorBruto 
+                                setor: setorBruto,
+                                nivel: r[3] ? parseInt(r[3].v) : 1 // Captura o Nível da Coluna D
                             };
                             break;
                         }
@@ -371,7 +376,6 @@
         }
 
         function selecionarTurma(turma) {
-            // CORRIGIDO: Retornou para texto puro para evitar quebra de leitura nas outras funções
             turmaSelecionadaAtiva = turma; 
             const select = document.getElementById('select-alunos');
             const valorAntigoAluno = select.value;
@@ -396,17 +400,16 @@
             filtrarRegistrosPorAluno();
         }
 
-    async function carregarRegistrosDoServidor() {
-    if(!APPS_SCRIPT_URL) return;
-    try {
-        // O proxy do cors-anywhere ou o redirecionamento direto evita o bloqueio de leitura do Google
-        const response = await fetch(APPS_SCRIPT_URL, { method: 'GET', cache: 'no-cache' });
-        todosOsRegistros = await response.json();
-        filtrarRegistrosPorAluno();
-    } catch (error) {
-        console.error("Erro ao carregar registros antigos:", error);
-    }
-}
+        async function carregarRegistrosDoServidor() {
+            if(!APPS_SCRIPT_URL) return;
+            try {
+                const response = await fetch(APPS_SCRIPT_URL, { method: 'GET', cache: 'no-cache' });
+                todosOsRegistros = await response.json();
+                filtrarRegistrosPorAluno();
+            } catch (error) {
+                console.error("Erro ao carregar registros antigos:", error);
+            }
+        }
 
         function filtrarRegistrosPorAluno() {
             const selectElem = document.getElementById('select-alunos');
@@ -434,12 +437,24 @@
 
                         let autorRegistro = reg.funcionario ? reg.funcionario.trim() : 'SGI';
 
+                        // MONTAGEM DO CARD COM OS BOTÕES SE FOR NÍVEL 2
+                        let botoesAcaoHtml = "";
+                        if (usuarioLogado && usuarioLogado.nivel >= 2) {
+                            botoesAcaoHtml = `
+                                <div class="card-actions">
+                                    <button class="btn-action-card btn-edit-card" onclick="editarRegistroServidor(${reg.idLinha}, '${reg.setor}')"><i class="fa-solid fa-pen-to-square"></i> Editar</button>
+                                    <button class="btn-action-card btn-delete-card" onclick="excluirRegistroServidor(${reg.idLinha})"><i class="fa-solid fa-trash-can"></i> Apagar</button>
+                                </div>
+                            `;
+                        }
+
                         novoCard.innerHTML = `
-                            <p class="post-text">${reg.texto}</p>
+                            <p class="post-text" id="text-card-${reg.idLinha}">${reg.texto}</p>
                             <div class="post-footer">
                                 <span><i class="fa-solid fa-user"></i> ${autorRegistro}</span>
                                 <span>${dataFormatada}</span>
                             </div>
+                            ${botoesAcaoHtml}
                         `;
                         feed.appendChild(novoCard);
                     }
@@ -459,6 +474,7 @@
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Gravando...';
 
             const payload = {
+                operacao: "SALVAR",
                 dataAtual: new Date().toLocaleDateString('pt-BR'),
                 aluno: alunoSelecionado,
                 setor: setor,
@@ -475,9 +491,8 @@
                     body: JSON.stringify(payload)
                 });
 
-                todosOsRegistros.push(payload);
-                filtrarRegistrosPorAluno();
                 textarea.value = '';
+                await carregarRegistrosDoServidor(); // Recarrega para trazer o novo idLinha certo
             } catch (error) {
                 console.error(error);
                 alert("Falha na gravação externa.");
@@ -485,6 +500,56 @@
                 btn.disabled = false;
                 btn.innerHTML = 'Salvar Registro';
                 aplicarBloqueioSetores(usuarioLogado.setor);
+            }
+        }
+
+        // NOVO: Função para o Nível 2 Apagar Registros direto na tela
+        async function excluirRegistroServidor(idLinha) {
+            if (!idLinha) return;
+            if (!confirm("Tem certeza absoluta de que deseja apagar permanentemente esta ocorrência da planilha?")) return;
+
+            try {
+                await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    cache: 'no-cache',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({ operacao: "EXCLUIR", idLinha: idLinha })
+                });
+
+                // Atualiza a tela local removendo o registro
+                todosOsRegistros = todosOsRegistros.filter(r => r.idLinha !== idLinha);
+                filtrarRegistrosPorAluno();
+            } catch (error) {
+                alert("Erro ao excluir o registro.");
+            }
+        }
+
+        // NOVO: Função para o Nível 2 Editar Registros direto na tela
+        async function editarRegistroServidor(idLinha, setor) {
+            if (!idLinha) return;
+            const paragrafoTexto = document.getElementById(`text-card-${idLinha}`);
+            const textoAntigo = paragrafoTexto.innerText;
+            
+            const novoTexto = prompt("Edite o texto do apontamento abaixo:", textoAntigo);
+            if (novoTexto === null) return; // Cancelou
+            if (novoTexto.trim() === "") return alert("O texto não pode ficar em branco.");
+
+            try {
+                await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    cache: 'no-cache',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({ operacao: "EDITAR", idLinha: idLinha, texto: novoTexto.trim() })
+                });
+
+                // Atualiza localmente o texto
+                let reg = todosOsRegistros.find(r => r.idLinha === idLinha);
+                if (reg) reg.texto = novoTexto.trim();
+                filtrarRegistrosPorAluno();
+            } catch (error) {
+                alert("Erro ao editar o registro.");
             }
         }
 
@@ -564,6 +629,8 @@
         window.fazerLogout = fazerLogout;
         window.autenticarUsuario = autenticarUsuario;
         window.gerarRelatorioPDF = gerarRelatorioPDF;
+        window.excluirRegistroServidor = excluirRegistroServidor;
+        window.editarRegistroServidor = editarRegistroServidor;
 
         function aplicarBloqueioSetores(setor) {
             const setores = ['pedagogico', 'meivs', 'adm', 'direcao'];
@@ -571,7 +638,6 @@
                 const textarea = document.getElementById(`text-${s}`);
                 const botao = document.getElementById(`btn-${s}`);
                 
-                // CORRIGIDO: Variável interna 'setor' mapeada corretamente sem erros de digitação
                 if (setor === 'direcao' || setor === 'professor' || setor === 'professores' || setor === s) {
                     textarea.disabled = false;
                     botao.disabled = false;
