@@ -106,29 +106,50 @@
         const COLS_ALUNOS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=1866544411`;
 
         // Carregar Alunos da Planilha automaticamente assim que abrir a página
-        async function carregarAlunos() {
+async function carregarAlunos() {
             try {
-                const response = await fetch(COLS_ALUNOS_URL);
+                // Rota de exportação limpa que contorna o erro de CORS
+                const urlCsvDireto = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&sheet=Alunos`;
+                
+                const response = await fetch(urlCsvDireto);
+                if (!response.ok) throw new Error('Falha na resposta do servidor');
+                
                 const data = await response.text();
                 
-                // Converte as linhas do CSV da planilha em opções do Select
-                const linhas = data.split('\n').slice(1); // Pula o cabeçalho
+                // Quebra as linhas do arquivo recebido
+                const linhas = data.split('\n');
                 const select = document.getElementById('select-alunos');
-                select.innerHTML = ''; // Limpa o carregando
+                select.innerHTML = ''; // Limpa a mensagem antiga
                 
-                linhas.forEach(linha => {
-                    const colunas = linha.split(',');
-                    if(colunas[1]) {
+                let cadastrouAlunos = false;
+
+                // Percorre as linhas pulando o cabeçalho (índice 0)
+                for (let i = 1; i < linhas.length; i++) {
+                    const linha = linhas[i].trim();
+                    if (!linha) continue;
+
+                    // Divide por vírgula ou ponto e vírgula
+                    const colunas = linha.includes(';') ? linha.split(';') : linha.split(',');
+                    
+                    // Pega a segunda coluna (Nome do Aluno)
+                    if (colunas[1]) {
                         const nomeAluno = colunas[1].replace(/"/g, '').trim();
-                        let opt = document.createElement('option');
-                        opt.value = nomeAluno;
-                        opt.innerHTML = nomeAluno;
-                        select.appendChild(opt);
+                        if (nomeAluno.length > 0) {
+                            let opt = document.createElement('option');
+                            opt.value = nomeAluno;
+                            opt.innerHTML = nomeAluno;
+                            select.appendChild(opt);
+                            cadastrouAlunos = true;
+                        }
                     }
-                });
+                }
+
+                if (!cadastrouAlunos) {
+                    select.innerHTML = '<option>Nenhum aluno encontrado na aba Alunos</option>';
+                }
             } catch (error) {
-                console.error("Erro ao ler alunos da planilha:", error);
-                document.getElementById('select-alunos').innerHTML = '<option>Erro ao carregar lista</option>';
+                console.error("Erro detalhado:", error);
+                document.getElementById('select-alunos').innerHTML = '<option>Erro na conexão (verifique o Compartilhar)</option>';
             }
         }
 
