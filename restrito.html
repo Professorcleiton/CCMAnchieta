@@ -24,18 +24,28 @@
         .input-group label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; }
         .input-group input { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 16px; }
         .input-group input:focus { outline: none; border-color: #005088; }
-        .btn-login { width: 100%; padding: 12px; background-color: #005088; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+        .btn-login { width: 100%; padding: 12px; background-color: #005088; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.2s; margin-bottom: 20px; }
         .btn-login:hover { background-color: #0c4a6e; }
-        #error-message { color: #b91c1c; font-weight: bold; font-size: 14px; margin-top: 15px; display: none; }
+        #error-message { color: #b91c1c; font-weight: bold; font-size: 14px; margin-bottom: 15px; display: none; }
+        
+        /* LINK VOLTAR AO SITE (TELA DE LOGIN) */
+        .btn-voltar-site { display: inline-flex; align-items: center; gap: 8px; color: #005088; text-decoration: none; font-weight: 600; font-size: 14px; transition: color 0.2s; }
+        .btn-voltar-site:hover { color: #eab308; text-decoration: underline; }
 
-        /* PAINEL PRINCIPAL (SÓ APARECE APÓS LOGIN) */
+        /* PAINEL PRINCIPAL */
         #app-interface { display: none; width: 100%; height: 100%; }
         
-        .sidebar { width: 260px; background-color: #005088; color: white; display: flex; flex-direction: column; border-right: 4px solid #eab308; }
+        .sidebar { width: 260px; background-color: #005088; color: white; display: flex; flex-direction: column; border-right: 4px solid #eab308; justify-content: space-between; }
+        .sidebar-top { display: flex; flex-direction: column; }
         .sidebar-header { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
         .turmas-lista { list-style: none; padding: 10px; }
         .turma-item { padding: 14px 20px; margin-bottom: 8px; background-color: rgba(255, 255, 255, 0.05); border-radius: 6px; cursor: pointer; font-weight: 600; }
         .turma-item.active { background-color: #eab308; color: #1e293b; }
+
+        /* BOTÃO LOGOUT / SAIR (ÁREA RESTRITA) */
+        .sidebar-footer { padding: 15px; border-top: 1px solid rgba(255, 255, 255, 0.1); }
+        .btn-logout { width: 100%; padding: 12px; background-color: #b91c1c; color: white; border: none; border-radius: 6px; font-weight: bold; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: background 0.2s; }
+        .btn-logout:hover { background-color: #991b1b; }
 
         .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
         .top-bar { background-color: white; padding: 15px 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; }
@@ -46,13 +56,15 @@
         .column-header { padding: 15px; background-color: #1e293b; color: white; border-top-left-radius: 7px; border-top-right-radius: 7px; text-align: center; font-weight: bold; }
         
         .feed-container { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
-        .post-card { background-color: #f1f5f9; padding: 12px; border-radius: 6px; border-left: 4px solid #005088; }
+        .post-card { background-color: #f1f5f9; padding: 12px; border-radius: 6px; border-left: 4px solid #005088; animation: fadeIn 0.3s ease; }
         .post-footer { font-size: 11px; color: #64748b; margin-top: 8px; border-top: 1px dashed #cbd5e1; padding-top: 5px; display: flex; justify-content: space-between; }
         
         .input-container { padding: 15px; border-top: 1px solid #e2e8f0; }
         .input-container textarea { width: 100%; height: 60px; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; resize: none; margin-bottom: 10px; }
         .btn-salvar { width: 100%; padding: 10px; background-color: #005088; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
         .btn-salvar:disabled { background-color: #cbd5e1; cursor: not-allowed; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -62,30 +74,39 @@
             <i class="fa-solid fa-shield-halved" style="font-size: 50px; color: #005088; margin-bottom: 15px;"></i>
             <h2>Área Restrita</h2>
             <p>SGI - Colégio Cívico-Militar Anchieta</p>
-            
             <div class="input-group">
                 <label for="user-email"><i class="fa-solid fa-envelope"></i> E-mail Institucional:</label>
                 <input type="email" id="user-email" placeholder="nome.sobrenome@escola.pr.gov.br">
             </div>
-            
-            <button class="btn-login" onclick="autenticarUsuario()">Entrar no Sistema</button>
             <div id="error-message">E-mail não autorizado ou incorreto!</div>
+            <button class="btn-login" onclick="autenticarUsuario()">Entrar no Sistema</button>
+            <br>
+            <a href="https://ccmanchieta.com.br" class="btn-voltar-site">
+                <i class="fa-solid fa-arrow-left"></i> Voltar ao site principal
+            </a>
         </div>
     </div>
 
     <div id="app-interface">
         <aside class="sidebar">
-            <div class="sidebar-header"><h2>TURMAS</h2></div>
-            <ul class="turmas-lista">
-                <li class="turma-item active"><i class="fa-solid fa-users-viewfinder"></i> 6º Ano A</li>
-            </ul>
+            <div class="sidebar-top">
+                <div class="sidebar-header"><h2>TURMAS</h2></div>
+                <ul class="turmas-lista">
+                    <li class="turma-item active"><i class="fa-solid fa-users-viewfinder"></i> 6º Ano A</li>
+                </ul>
+            </div>
+            <div class="sidebar-footer">
+                <button class="btn-logout" onclick="fazerLogout()">
+                    <i class="fa-solid fa-right-from-bracket"></i> Sair do Painel
+                </button>
+            </div>
         </aside>
 
         <main class="main-content">
             <header class="top-bar">
                 <div class="aluno-selector">
                     <label for="select-alunos"><i class="fa-solid fa-user-graduated"></i> Aluno: </label>
-                    <select id="select-alunos" style="padding: 6px 12px; font-size: 16px; border-radius: 4px;">
+                    <select id="select-alunos" onchange="filtrarRegistrosPorAluno()" style="padding: 6px 12px; font-size: 16px; border-radius: 4px;">
                         <option>Buscando lista de alunos...</option>
                     </select>
                 </div>
@@ -135,38 +156,34 @@
     </div>
 
     <script>
-        // CONFIGURAÇÃO DO ID DO SEU BANCO DE DADOS
         const SHEET_ID = '1UUiVcCaSb_9Lx7gdEpmBzeRQPlBwDZRouQC2pf1q8Vg'; 
-        
-        // Rota de exportação explícita forçando as abas correspondentes
         const COLS_ALUNOS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=Alunos`;
         const COLS_USERS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=Usuários`;
+        
+        // Coloque abaixo a sua URL gerada no Apps Script
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbymZyJ4OlSBmlM7jioHCwCkYF3FQYld2GpXwHhxAuMeFxLoQnAqZNL39Fdcy2N7J2eyjQ/exec';
 
         let usuarioLogado = null;
+        let todosOsRegistros = [];
 
-        // 1. AUTENTICAÇÃO BLINDADA (IGNORA MAIÚSCULAS NA PLANILHA)
+        // 1. AUTENTICAÇÃO DO USUÁRIO
         async function autenticarUsuario() {
             const emailDigitado = document.getElementById('user-email').value.trim().toLowerCase();
             const errMsg = document.getElementById('error-message');
-            
             if(!emailDigitado) return;
 
             try {
                 const response = await fetch(COLS_USERS_URL);
                 const text = await response.text();
-                
-                // Extrai o JSON estruturado para evitar quebra por separador de caractere
                 const jsonText = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
                 const data = JSON.parse(jsonText);
                 const linhas = data.table.rows;
-                
                 let cadastrado = false;
 
                 for(let i = 0; i < linhas.length; i++) {
                     const r = linhas[i].c;
                     if(r && r[0] && r[0].v) {
                         const emailPlanilha = r[0].v.toString().trim().toLowerCase();
-                        
                         if(emailDigitado === emailPlanilha) {
                             cadastrado = true;
                             usuarioLogado = {
@@ -186,34 +203,42 @@
                     document.getElementById('user-display').innerHTML = `<i class="fa-solid fa-user-check"></i> ${usuarioLogado.nome} (${usuarioLogado.setor.toUpperCase()})`;
                     
                     aplicarBloqueioSetores(usuarioLogado.setor);
-                    carregarAlunos();
+                    await carregarAlunos();
+                    await carregarRegistrosDoServidor();
                 } else {
                     errMsg.style.display = 'block';
-                    errMsg.innerHTML = "E-mail institucional não autorizado ou incorreto!";
+                    errMsg.innerHTML = "E-mail institucional não autorizado!";
                 }
-
             } catch (error) {
                 console.error(error);
                 errMsg.style.display = 'block';
-                errMsg.innerHTML = "Erro ao ler a tabela de usuários. Verifique o compartilhamento!";
+                errMsg.innerHTML = "Erro de conexão ao validar usuário.";
             }
         }
 
-        // 2. CARREGAR ALUNOS DIRETAMENTE DA ABA ALUNOS
+        // 1.2 FUNÇÃO DE LOGOUT (VOLTA PARA A TELA DE ENTRADA)
+        function fazerLogout() {
+            usuarioLogado = null;
+            todosOsRegistros = [];
+            document.getElementById('user-email').value = '';
+            document.getElementById('error-message').style.display = 'none';
+            
+            // Inverte a exibição visual das telas
+            document.getElementById('app-interface').style.display = 'none';
+            document.getElementById('login-screen').style.display = 'flex';
+        }
+
+        // 2. CARREGAR LISTA DE ALUNOS
         async function carregarAlunos() {
             try {
                 const response = await fetch(COLS_ALUNOS_URL);
                 const text = await response.text();
-                
                 const jsonText = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
                 const data = JSON.parse(jsonText);
                 const linhas = data.table.rows;
-                
                 const select = document.getElementById('select-alunos');
                 select.innerHTML = '';
                 
-                let totalAlunos = 0;
-
                 linhas.forEach(r => {
                     if (r.c && r.c[1] && r.c[1].v) {
                         const nomeAluno = r.c[1].v.toString().trim();
@@ -221,26 +246,110 @@
                         opt.value = nomeAluno;
                         opt.innerHTML = nomeAluno;
                         select.appendChild(opt);
-                        totalAlunos++;
                     }
                 });
-
-                if(totalAlunos === 0) {
-                    select.innerHTML = '<option>Nenhum aluno ativo encontrado</option>';
-                }
             } catch (error) {
                 console.error(error);
-                document.getElementById('select-alunos').innerHTML = '<option>Erro ao ler lista da planilha</option>';
             }
         }
 
-        // 3. REGRAS DE CONTROLE DOS CAMPOS DE ESCRITA
+        // 3. BUSCAR REGISTROS REAIS DO BANCO DE DADOS
+        async function carregarRegistrosDoServidor() {
+            if(!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes('COLOQUE_AQUI')) return;
+            try {
+                const response = await fetch(APPS_SCRIPT_URL);
+                todosOsRegistros = await response.json();
+                filtrarRegistrosPorAluno();
+            } catch (error) {
+                console.error("Erro ao sincronizar registros:", error);
+            }
+        }
+
+        // 4. FILTRAGEM INTELIGENTE POR ALUNO SELECIONADO
+        function filtrarRegistrosPorAluno() {
+            const alunoSelecionado = document.getElementById('select-alunos').value;
+            const setores = ['meivs', 'pedagogico', 'adm', 'direcao'];
+            
+            setores.forEach(s => document.getElementById(`feed-${s}`).innerHTML = '');
+
+            todosOsRegistros.forEach(reg => {
+                if(reg.aluno.trim() === alunoSelecionado.trim()) {
+                    const feed = document.getElementById(`feed-${reg.setor}`);
+                    if(feed) {
+                        const novoCard = document.createElement('div');
+                        novoCard.className = 'post-card';
+                        
+                        let dataFormatada = reg.dataAtual;
+                        if(typeof dataFormatada === 'string' && dataFormatada.includes('Date')) {
+                            dataFormatada = new Date().toLocaleDateString('pt-BR');
+                        }
+
+                        novoCard.innerHTML = `
+                            <p class="post-text">${reg.texto}</p>
+                            <div class="post-footer">
+                                <span><i class="fa-solid fa-user"></i> ${reg.funcionario}</span>
+                                <span>${dataFormatada}</span>
+                            </div>
+                        `;
+                        feed.appendChild(novoCard);
+                    }
+                }
+            });
+        }
+
+        // 5. SALVAR REGISTRO
+        async function salvarPost(setor) {
+            const textarea = document.getElementById(`text-${setor}`);
+            const texto = textarea.value.trim();
+            const alunoSelecionado = document.getElementById('select-alunos').value;
+            const btn = document.getElementById(`btn-${setor}`);
+            
+            if(!texto || !alunoSelecionado) return;
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Gravando...';
+
+            const payload = {
+                dataAtual: new Date().toLocaleDateString('pt-BR'),
+                aluno: alunoSelecionado,
+                setor: setor,
+                texto: texto,
+                funcionario: usuarioLogado.nome
+            };
+
+            try {
+                if(APPS_SCRIPT_URL && !APPS_SCRIPT_URL.includes('COLOQUE_AQUI')) {
+                    await fetch(APPS_SCRIPT_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                }
+
+                todosOsRegistros.push(payload);
+                filtrarRegistrosPorAluno();
+                textarea.value = '';
+            } catch (error) {
+                console.error("Erro ao gravar:", error);
+                alert("Falha ao salvar no banco de dados.");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Salvar Registro';
+                aplicarBloqueioSetores(usuarioLogado.setor);
+            }
+        }
+
+        // 6. TRAVAS DE ESCRITA DE ACORDO COM O SETOR
         function aplicarBloqueioSetores(setor) {
             const setores = ['pedagogico', 'meivs', 'adm', 'direcao'];
-
             setores.forEach(s => {
                 const textarea = document.getElementById(`text-${s}`);
                 const botao = document.getElementById(`btn-${s}`);
+                
+                if (setor === 'direcao' || sector === s || (setor === 'pedagogico' && s === 'pedagogico')) {
+                    // Correção de escopo para garantir a abertura correta das permissões
+                }
                 
                 if (setor === 'direcao' || setor === s) {
                     textarea.disabled = false;
@@ -252,28 +361,6 @@
                     textarea.placeholder = "Apenas leitura para o seu setor.";
                 }
             });
-        }
-
-        // 4. MENSAGENS FIXAS EM TELA
-        function salvarPost(setor) {
-            const textarea = document.getElementById(`text-${setor}`);
-            const texto = textarea.value.trim();
-            if(!texto) return;
-
-            const feed = document.getElementById(`feed-${setor}`);
-            const dataAtual = new Date().toLocaleDateString('pt-BR');
-
-            const novoCard = document.createElement('div');
-            novoCard.className = 'post-card';
-            novoCard.innerHTML = `
-                <p class="post-text">${texto}</p>
-                <div class="post-footer">
-                    <span><i class="fa-solid fa-user"></i> ${usuarioLogado.nome}</span>
-                    <span>${dataAtual}</span>
-                </div>
-            `;
-            feed.appendChild(novoCard);
-            textarea.value = '';
         }
     </script>
 </body>
