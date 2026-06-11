@@ -291,61 +291,64 @@
     <script>new window.VLibras.Widget('https://vlibras.gov.br/app');</script>
 
     <!-- SCRIPT DO CARROSSEL -->
-    <script>
+<script>
         document.addEventListener("DOMContentLoaded", () => {
             const items = document.querySelectorAll('.carousel-item');
             let currentIndex = 0;
             let timeoutId;
 
-            // Tempo em milissegundos para imagens (10 segundos = 10000ms)
+            // Tempo para imagens (10 segundos)
             const imageDisplayTime = 10000; 
 
             function showSlide(index) {
-                // Remove a classe 'active' e pausa todos os vídeos
+                // Pausa os vídeos e remove a classe active de todos
                 items.forEach((item) => {
                     item.classList.remove('active');
                     if (item.dataset.type === 'video') {
                         const vid = item.querySelector('video');
                         if(vid) {
                             vid.pause();
-                            vid.currentTime = 0; // Volta o vídeo pro início
+                            vid.currentTime = 0;
                         }
                     }
                 });
 
-                // Atualiza o índice e ativa o slide atual
+                // Ativa o slide atual
                 currentIndex = index;
                 const currentItem = items[currentIndex];
                 currentItem.classList.add('active');
 
-                // Limpa contadores anteriores para evitar atropelamentos
                 clearTimeout(timeoutId);
 
                 if (currentItem.dataset.type === 'video') {
                     const video = currentItem.querySelector('video');
-                    
                     if (video) {
-                        // Tenta dar play no vídeo
-                        let playPromise = video.play();
+                        // TRAVA DE SEGURANÇA: Se o vídeo não for encontrado ou não der play, 
+                        // ele pula para o próximo slide em 3 segundos para não travar.
+                        timeoutId = setTimeout(nextSlide, 3000);
 
+                        let playPromise = video.play();
+                        
                         if (playPromise !== undefined) {
-                            playPromise.then(_ => {
-                                // O vídeo está rodando. Quando acabar, vai para o próximo slide.
+                            playPromise.then(() => {
+                                // Deu certo! O vídeo existe e está rodando.
+                                clearTimeout(timeoutId); // Cancela a trava de erro
+                                
+                                // Só pula de slide quando o vídeo terminar de verdade
                                 video.onended = () => {
                                     nextSlide();
                                 };
                             }).catch(error => {
-                                // Se o navegador bloquear o autoplay, age como se fosse uma imagem e passa em 10s
-                                console.log("Autoplay bloqueado pelo navegador.", error);
-                                timeoutId = setTimeout(nextSlide, imageDisplayTime);
+                                // Ocorreu um erro (ex: arquivo não encontrado).
+                                console.log("Erro no vídeo, pulando em 3 segundos:", error);
+                                // A trava de segurança (timeoutId) já vai agir aqui.
                             });
                         }
                     } else {
-                        // Falha de segurança caso a tag de vídeo não exista dentro da div
                         timeoutId = setTimeout(nextSlide, imageDisplayTime);
                     }
                 } else {
-                    // É uma imagem. Espera o tempo definido e chama o próximo.
+                    // É uma imagem. Espera o tempo definido (10s) e passa.
                     timeoutId = setTimeout(nextSlide, imageDisplayTime);
                 }
             }
@@ -361,5 +364,3 @@
             }
         });
     </script>
-</body>
-</html>
