@@ -203,7 +203,7 @@
     </div>
 
     <script>
-        // ATUALIZADO: Injetada a sua URL final do WebApp com suporte total a CORS, Nível 2 e Datas em texto
+        // SEU LINK NOVO JÁ INTEGRADO E CONFIGURADO COM TRATAMENTO DE DATAS E SETORES
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
         
         const SHEET_ID = '1UUiVcCaSb_9Lx7gdEpmBzeRQPlBwDZRouQC2pf1q8Vg'; 
@@ -251,10 +251,16 @@
                 const resultado = await response.json();
 
                 if(resultado.status === "success") {
+                    // Força a exibição como PROFESSORES caso venha como direção/professor no banco de dados
+                    let exibicaoCorrigida = resultado.setorExibicao;
+                    if (resultado.setor === 'direcao' || resultado.setor === 'professor' || resultado.setor === 'professores' || resultado.setor === 'direção') {
+                        exibicaoCorrigida = 'PROFESSORES';
+                    }
+
                     usuarioLogado = {
                         email: emailDigitado,
                         nome: resultado.nome,
-                        setorExibicao: resultado.setorExibicao, 
+                        setorExibicao: exibicaoCorrigida, 
                         setor: resultado.setor,
                         nivel: resultado.nivel
                     };
@@ -295,7 +301,6 @@
         function resetarTimerInatividade() {
             if (!usuarioLogado) return;
             clearTimeout(timerInatividade);
-            // 20 minutos de tolerância por inatividade
             timerInatividade = setTimeout(function() {
                 alert("Sessão expirada por inatividade (20 minutos). Faça login novamente por segurança.");
                 fazerLogout();
@@ -620,7 +625,7 @@
         window.filtrarRegistrosPorAluno = filtrarRegistrosPorAluno;
         window.fazerLogout = fazerLogout;
         window.autenticarUsuario = autenticarUsuario;
-        window.gerarRelatorioPDF = gerarRelatorioPDF;
+        window.gerarRelatorioPDF = generarRelatorioPDF;
         window.excluirRegistroServidor = excluirRegistroServidor;
         window.editarRegistroServidor = editarRegistroServidor;
 
@@ -630,7 +635,8 @@
                 const textarea = document.getElementById(`text-${s}`);
                 const botao = document.getElementById(`btn-${s}`);
                 
-                if (setor === 'direcao' || setor === 'professor' || setor === 'professores' || setor === s) {
+                // Validação expandida para suportar as nomenclaturas da planilha
+                if (setor === 'direcao' || setor === 'professor' || setor === 'professores' || setor === 'direção' || setor === s) {
                     textarea.disabled = false;
                     botao.disabled = false;
                     textarea.placeholder = "Registrar informação fixa...";
