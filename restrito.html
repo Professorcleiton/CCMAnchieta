@@ -461,7 +461,7 @@
             border-radius: 4px;
         }
 
-        /* REGRAS MOBILE */
+        /* REGRAS MOBILE ATUALIZADAS (FORÇA VISUALIZAÇÃO DO CONTEÚDO) */
         @media (max-width: 768px) {
             #app-interface {
                 flex-direction: column !important;
@@ -532,6 +532,9 @@
             .sector-column.active {
                 display: flex !important;
             }
+            .column-header {
+                display: none !important;
+            }
         }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(5px); }
@@ -541,6 +544,7 @@
 </head>
 <body>
 
+    <!-- 1. TELA DE LOGIN OVERLAY -->
     <div id="login-screen">
         <div class="login-box">
             <img src="img/SIGA.png" alt="Brasão SIGA Anchieta" class="login-logo-nova">
@@ -561,6 +565,7 @@
         </div>
     </div>
 
+    <!-- 2. INTERFACE PRINCIPAL DO PAINEL -->
     <div id="app-interface">
         <div class="mobile-tabs" id="mobile-tabs-container">
             <button class="tab-button active" onclick="alternarAbaMobile('meivs', this)">MEIV'S</button>
@@ -605,38 +610,42 @@
             </header>
 
             <div class="board-container">
+                <!-- COLUNA MEIV'S -->
                 <section class="sector-column active" id="col-meivs">
                     <div class="column-header" style="background-color: #0284c7;">MEIV'S</div>
                     <div class="feed-container" id="feed-meivs"></div>
                     <div class="input-container">
-                        <textarea id="text-meivs" placeholder="Registrar informação fixa..."></textarea>
+                        <textarea id="text-meivs" placeholder="Registrar informação fixa..." onkeydown="verificarTeclaEnter(event, 'meivs')"></textarea>
                         <button class="btn-salvar" id="btn-meivs" onclick="salvarPost('meivs')">Salvar Registro</button>
                     </div>
                 </section>
 
+                <!-- COLUNA PEDAGÓGICO -->
                 <section class="sector-column" id="col-pedagogico">
                     <div class="column-header" style="background-color: #0d9488;">PEDAGÓGICO</div>
                     <div class="feed-container" id="feed-pedagogico"></div>
                     <div class="input-container">
-                        <textarea id="text-pedagogico" placeholder="Registrar informação fixa..."></textarea>
+                        <textarea id="text-pedagogico" placeholder="Registrar informação fixa..." onkeydown="verificarTeclaEnter(event, 'pedagogico')"></textarea>
                         <button class="btn-salvar" id="btn-pedagogico" onclick="salvarPost('pedagogico')">Salvar Registro</button>
                     </div>
                 </section>
 
+                <!-- COLUNA ADM -->
                 <section class="sector-column" id="col-adm">
                     <div class="column-header" style="background-color: #4f46e5;">ADM</div>
                     <div class="feed-container" id="feed-adm"></div>
                     <div class="input-container">
-                        <textarea id="text-adm" placeholder="Registrar informação fixa..."></textarea>
+                        <textarea id="text-adm" placeholder="Registrar informação fixa..." onkeydown="verificarTeclaEnter(event, 'adm')"></textarea>
                         <button class="btn-salvar" id="btn-adm" onclick="salvarPost('adm')">Salvar Registro</button>
                     </div>
                 </section>
 
+                <!-- COLUNA PROFESSORES -->
                 <section class="sector-column" id="col-direcao">
                     <div class="column-header" style="background-color: #b91c1c;">PROFESSORES</div>
                     <div class="feed-container" id="feed-direcao"></div>
                     <div class="input-container">
-                        <textarea id="text-direcao" placeholder="Registrar informação fixa..."></textarea>
+                        <textarea id="text-direcao" placeholder="Registrar informação fixa..." onkeydown="verificarTeclaEnter(event, 'direcao')"></textarea>
                         <button class="btn-salvar" id="btn-direcao" onclick="salvarPost('direcao')">Salvar Registro</button>
                     </div>
                 </section>
@@ -813,12 +822,11 @@
             try { const response = await fetch(APPS_SCRIPT_URL, { method: 'GET', cache: 'no-cache' }); todosOsRegistros = await response.json(); filtrarRegistrosPorAluno(); } catch (error) { console.error("Erro ao carregar registros antigos:", error); }
         }
 
-        // NOVO FORMATADOR DE STRINGS INTEGRADAS: Trata o texto longo vindo do AppScript
+        // MOTOR ADAPTÁVEL RECONSTRUÍDO: Aceita e formata datas com ou sem horário sem quebrar os cards de ontem
         function formatarDataEHora(dataBruta) {
             if (!dataBruta) return "";
             let s = dataBruta.toString().trim();
             
-            // Se for a string extensa nativa "Thu Jun 11 2026 15:30:00..."
             if (s.match(/^[A-Za-z]{3}\s[A-Za-z]{3}/) || s.includes('GMT')) {
                 try {
                     const d = new Date(s);
@@ -830,12 +838,17 @@
                 } catch(e) {}
             }
             
-            // Se já for a nossa string formatada direta com data e hora "11/06/2026 15:30"
-            if (s.includes('/') && s.includes(':')) {
-                const partes = s.split(' ');
-                if (partes[0] && partes[1]) {
-                    return `${partes[0]} às ${partes[1]}`;
+            if (s.includes('-')) {
+                const partesGerais = s.split(' ');
+                const soData = partesGerais[0].split('-');
+                const horaSurgida = partesGerais[1] ? ' às ' + partesGerais[1].substring(0,5) : '';
+                if (soData[0].length === 4) {
+                    return `${soData[2]}/${soData[1]}/${soData[0]}${horaSurgida}`;
                 }
+            }
+
+            if (s.includes('/')) {
+                return s.replace(' ', ' às ');
             }
             
             return s;
@@ -850,7 +863,11 @@
             
             todosOsRegistros.forEach(reg => {
                 if(reg.aluno && reg.aluno.trim() === alunoSelecionado.trim()) {
-                    const feed = document.getElementById(`feed-${reg.setor}`);
+                    // Mapeia internamente o setor 'professores' antigo para renderizar no feed correto
+                    let alvoSetor = reg.setor;
+                    if(alvoSetor === 'professores') alvoSetor = 'direcao';
+
+                    const feed = document.getElementById(`feed-${alvoSetor}`);
                     if(feed) {
                         const novoCard = document.createElement('div'); novoCard.className = 'post-card';
                         
@@ -878,6 +895,14 @@
             });
         }
 
+        // DISPARADOR COM ENTER: Envia o post ao pressionar Enter sozinho
+        function verificarTeclaEnter(event, setor) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault(); 
+                salvarPost(setor);
+            }
+        }
+
         async function salvarPost(setor) {
             const textarea = document.getElementById(`text-${setor}`); const texto = textarea.value.trim(); const alunoSelecionado = document.getElementById('select-alunos').value; const btn = document.getElementById(`btn-${setor}`);
             if(!texto || !alunoSelecionado || alunoSelecionado.includes('Selecione uma turma')) return;
@@ -886,7 +911,13 @@
             const agora = new Date();
             const dataCarimbo = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
             
-            const payload = { operacao: "SALVAR", aluno: alunoSelecionado, sector: setor, texto: texto, funcionario: usuarioLogado.nome, dataAtual: dataCarimbo };
+            // CORREÇÃO DO PAYLOAD DA SPREADSHEET: Transforma 'direcao' em 'professores' antes de gravar na célula
+            let setorPlanilha = setor;
+            if (setorPlanilha === 'direcao') {
+                setorPlanilha = 'professores';
+            }
+
+            const payload = { operacao: "SALVAR", aluno: alunoSelecionado, setor: setorPlanilha, texto: texto, funcionario: usuarioLogado.nome, dataAtual: dataCarimbo };
             try {
                 await fetch(APPS_SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
                 textarea.value = ''; await carregarRegistrosDoServidor(); 
@@ -901,7 +932,7 @@
             } catch (error) { alert("Erro ao excluir."); }
         }
 
-        async function editarRegistroServidor(idLinha, sector) {
+        async function editarRegistroServidor(idLinha, setor) {
             if (!idLinha) return; const paragrafoTexto = document.getElementById(`text-card-${idLinha}`); const textoAntigo = paragrafoTexto.innerText;
             const novoTexto = prompt("Edite o texto do apontamento abaixo:", textoAntigo); if (novoTexto === null) return; if (novoTexto.trim() === "") return alert("O texto não pode ficar em branco.");
             try {
@@ -917,10 +948,12 @@
             let temRegistros = false;
             
             setoresMapeados.forEach(set => {
-                let postsSetor = todosOsRegistros.filter(r => r.aluno.trim() === aluno.trim() && r.setor === set.id);
+                let alvoId = set.id;
+                if(alvoId === 'direcao') alvoId = 'professores';
+                let postsSetor = todosOsRegistros.filter(r => r.aluno.trim() === aluno.trim() && (r.setor === set.id || r.setor === alvoId));
                 if(postsSetor.length > 0) {
                     temRegistros = true; htmlDocumento += `<h3 style="font-size: 14px; color: #1e293b; margin-top: 20px; background: #e2e8f0; padding: 6px; border-radius: 4px;">${set.nome}</h3>`;
-                    postsSetor.forEach(p => { htmlDocumento += `<div style="margin: 10px 0; padding: 10px 15px; background: #fff; border-left: 4px solid #eab308; border-bottom: 1px solid #f1f5f9;"><p style="font-size: 14px; line-height: 1.4; margin-bottom: 5px;">${p.texto}</p><p style="font-size: 11px; color: #64748b; text-align: right;">Por: ${p.funcionario} | Data: ${p.dataAtual}</p></div>`; });
+                    postsSetor.forEach(p => { htmlDocumento += `<div style="margin: 10px 0; padding: 10px 15px; background: #fff; border-left: 4px solid #eab308; border-bottom: 1px solid #f1f5f9;"><p style="font-size: 14px; line-height: 1.4; margin-bottom: 5px;">${p.texto}</p><p style="font-size: 11px; color: #64748b; text-align: right;">Por: ${p.funcionario} | Data: ${formatarDataEHora(p.dataAtual)}</p></div>`; });
                 }
             });
             if(!temRegistros) { htmlDocumento += `<p style="color: #64748b; font-style: italic; margin-top: 20px;">Nenhum apontamento registrado.</p>`; }
@@ -950,7 +983,7 @@
             });
         }
 
-        window.salvarPost = salvarPost; window.filtrarRegistrosPorAluno = filtrarRegistrosPorAluno; window.fazerLogout = fazerLogout; window.autenticarUsuario = autenticarUsuario; window.gerarRelatorioPDF = gerarRelatorioPDF; window.excluirRegistroServidor = excluirRegistroServidor; window.editarRegistroServidor = editarRegistroServidor; window.alternarMenuLateral = alternarMenuLateral; window.alternarAbaMobile = alternarAbaMobile;
+        window.salvarPost = salvarPost; window.filtrarRegistrosPorAluno = filtrarRegistrosPorAluno; window.fazerLogout = fazerLogout; window.autenticarUsuario = autenticarUsuario; window.gerarRelatorioPDF = gerarRelatorioPDF; window.excluirRegistroServidor = excluirRegistroServidor; window.editarRegistroServidor = editarRegistroServidor; window.alternarMenuLateral = alternarMenuLateral; window.alternarAbaMobile = alternarAbaMobile; window.verificarTeclaEnter = verificarTeclaEnter;
     </script>
 </body>
 </html>
