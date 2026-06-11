@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SGI - Área Restrita CCM Anchieta</title>
+    <title>SIGA - Área Restrita CCM Anchieta</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
@@ -99,9 +99,9 @@
 
     <div id="login-screen">
         <div class="login-box">
-            <img src="img/IMG_20260610_071544.png" alt="Brasão Anchieta" class="login-logo-nova">
+            <img src="img/SIGA.png" alt="Brasão SIGA Anchieta" class="login-logo-nova">
             <h2>Área Restrita</h2>
-            <p>SGI - Colégio Cívico-Militar Anchieta</p>
+            <p>SIGA - Sistema Integrado de Gestão Anchieta</p>
             
             <div class="input-group">
                 <label for="user-email"><i class="fa-solid fa-envelope"></i> E-mail Institucional:</label>
@@ -126,10 +126,10 @@
         <aside class="sidebar">
             <div class="sidebar-top">
                 <div class="sidebar-header">
-                    <img src="img/IMG_20260610_071544.png" alt="Logo CCMA" class="sidebar-logo">
+                    <img src="img/SIGA.png" alt="Logo SIGA" class="sidebar-logo">
                     <div class="sidebar-title-container">
-                        <h2>SGI</h2>
-                        <span class="sidebar-meaning">Sistema de Gestão Integrada</span>
+                        <h2>SIGA</h2>
+                        <span class="sidebar-meaning">Sistema Integrado de Gestão Anchieta</span>
                         <span class="sidebar-subtitle">CCM Anchieta</span>
                     </div>
                 </div>
@@ -441,7 +441,7 @@
                             dataFormatada = new Date().toLocaleDateString('pt-BR');
                         }
 
-                        let autorRegistro = reg.funcionario ? reg.funcionario.trim() : 'SGI';
+                        let autorRegistro = reg.funcionario ? reg.funcionario.trim() : 'SIGA';
 
                         let botoesAcaoHtml = "";
                         if (usuarioLogado && usuarioLogado.nivel >= 2) {
@@ -478,7 +478,6 @@
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Gravando...';
 
-            // CORREÇÃO: Dispara a data e hora do navegador travada no fuso de São Paulo
             const agora = new Date();
             const dataHoraBrasilia = agora.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
 
@@ -563,7 +562,7 @@
                 <div style="padding: 40px; font-family: Arial, sans-serif; color: #1e293b;">
                     <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #005088; padding-bottom: 15px;">
                         <h1 style="color: #005088; font-size: 26px; margin-bottom: 5px;">COLÉGIO CÍVICO-MILITAR ANCHIETA</h1>
-                        <p style="font-size: 13px; letter-spacing: 1px; font-weight: bold; color: #64748b;">SGI - SISTEMA DE GESTÃO INTEGRADA</p>
+                        <p style="font-size: 13px; letter-spacing: 1px; font-weight: bold; color: #64748b;">SIGA - SISTEMA INTEGRADO DE GESTÃO ANCHIETA</p>
                     </div>
                     <div style="background: #f8fafc; padding: 15px; border-radius: 6px; margin-bottom: 30px; border: 1px solid #e2e8f0;">
                         <p style="font-size: 16px; margin-bottom: 5px;"><strong>Estudante:</strong> ${aluno}</p>
@@ -604,7 +603,7 @@
 
             htmlDocumento += `
                     <div style="margin-top: 60px; text-align: center; font-size: 11px; color: #94a3b8; border-top: 1px dashed #cbd5e1; padding-top: 10px;">
-                        Documento Gerado Digitalmente pelo Painel Restrito SGI - CCM Anchieta
+                        Documento Gerado Digitalmente pelo Painel Restrito SIGA - CCM Anchieta
                     </div>
                 </div>
             `;
@@ -614,7 +613,7 @@
             
             const configuracaoPdf = {
                 margin: 10,
-                filename: `Historico_SGI_${aluno.replace(/ /g, '_')}.pdf`,
+                filename: `Historico_SIGA_${aluno.replace(/ /g, '_')}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: { scale: 2, useCORS: true },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
@@ -631,14 +630,13 @@
         window.excluirRegistroServidor = excluirRegistroServidor;
         window.editarRegistroServidor = editarRegistroServidor;
 
-        // CORREÇÃO: Permissões flexíveis unificadas
         function aplicarBloqueioSetores(setor) {
             const setores = ['pedagogico', 'meivs', 'adm', 'direcao'];
             setores.forEach(s => {
                 const textarea = document.getElementById(`text-${s}`);
                 const botao = document.getElementById(`btn-${s}`);
                 
-                if (setor === 'direcao' || setor === 'professor' || setor === 'professores' || setor === 'direção' || setor === s) {
+                if (setor === 'direcao' || sector === 'professor' || sector === 'professores' || sector === 'direção' || sector === s) {
                     textarea.disabled = false;
                     botao.disabled = false;
                     textarea.placeholder = "Registrar informação fixa...";
