@@ -40,7 +40,7 @@
         .sidebar-top { display: flex; flex-direction: column; overflow-y: auto; flex: 1; }
         
         .sidebar-header { padding: 15px; text-align: center; border-bottom: 1px solid rgba(255, 255, 255, 0.1); display: flex; align-items: center; gap: 10px; }
-        .sidebar-logo { width: 55px; height: 55px; object-fit: contain; }
+        .sidebar-logo { width: 65px; height: 65px; object-fit: contain; border-radius: 50%; background-color: transparent; }
         .sidebar-title-container { text-align: left; }
         .sidebar-title-container h2 { font-size: 22px; font-weight: bold; line-height: 1; color: white; letter-spacing: 0.5px; }
         .sidebar-meaning { font-size: 10px; color: #cbd5e1; display: block; margin-top: 3px; font-weight: normal; line-height: 1.2; }
@@ -203,7 +203,7 @@
     </div>
 
     <script>
-        // Seu link mais recente incorporado com sucesso aqui
+        // ATUALIZADO: Sua URL mais recente gerada vinculada diretamente aqui
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
         
         const SHEET_ID = '1UUiVcCaSb_9Lx7gdEpmBzeRQPlBwDZRouQC2pf1q8Vg'; 
@@ -250,7 +250,6 @@
                 const resultado = await response.json();
 
                 if(resultado.status === "success") {
-                    // Correção forçada para exibir sempre PROFESSORES nas permissões do site
                     let exibirCargo = resultado.setorExibicao;
                     if(resultado.setor === 'direcao' || resultado.setor === 'professor' || resultado.setor === 'professores') {
                         exibirCargo = 'PROFESSORES';
@@ -421,10 +420,6 @@
                         novoCard.className = 'post-card';
                         
                         let dataFormatada = reg.dataAtual;
-                        if(typeof dataFormatada === 'string' && dataFormatada.includes('Date')) {
-                            dataFormatada = new Date().toLocaleDateString('pt-BR');
-                        }
-
                         let autorRegistro = reg.funcionario ? reg.funcionario.trim() : 'SIGA';
 
                         let botoesAcaoHtml = "";
@@ -464,7 +459,6 @@
 
             const payload = {
                 operacao: "SALVAR",
-                dataAtual: new Date().toLocaleDateString('pt-BR'),
                 aluno: alunoSelecionado,
                 setor: setor,
                 texto: texto,
@@ -611,7 +605,6 @@
         window.excluirRegistroServidor = excluirRegistroServidor;
         window.editarRegistroServidor = editarRegistroServidor;
 
-        // Função de controle de setores corrigida para garantir o funcionamento correto de PROFESSORES
         function aplicarBloqueioSetores(setor) {
             const setores = ['pedagogico', 'meivs', 'adm', 'direcao'];
             setores.forEach(s => {
