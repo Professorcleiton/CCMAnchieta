@@ -351,7 +351,7 @@
             position: relative;
         }
         .post-footer {
-            font-size: 12px;
+            font-size: 11px;
             color: #475569;
             font-weight: 500;
             margin-top: 8px;
@@ -461,7 +461,7 @@
             border-radius: 4px;
         }
 
-        /* REGRAS MOBILE RECONSTRUÍDAS */
+        /* REGRAS MOBILE */
         @media (max-width: 768px) {
             #app-interface {
                 flex-direction: column !important;
@@ -531,9 +531,6 @@
             }
             .sector-column.active {
                 display: flex !important;
-            }
-            .column-header {
-                display: none !important;
             }
         }
         @keyframes fadeIn {
@@ -792,94 +789,45 @@
         }
 
         function renderizarSidebarTurmas() {
-            const sidebarLista = document.getElementById('lista-turmas-sidebar'); 
-            sidebarLista.innerHTML = ''; 
-            const listaDeTurmasOrdenada = Object.keys(cacheAlunosPorTurma).sort();
-            
-            if(listaDeTurmasOrdenada.length === 0) { 
-                sidebarLista.innerHTML = '<li class="turma-item">Nenhuma turma encontrada</li>'; 
-                return; 
-            }
+            const sidebarLista = document.getElementById('lista-turmas-sidebar'); sidebarLista.innerHTML = ''; const listaDeTurmasOrdenada = Object.keys(cacheAlunosPorTurma).sort();
+            if(listaDeTurmasOrdenada.length === 0) { sidebarLista.innerHTML = '<li class="turma-item">Nenhuma turma encontrada</li>'; return; }
             listaDeTurmasOrdenada.forEach((turma, index) => {
-                let li = document.createElement('li'); 
-                li.className = 'turma-item'; 
-                li.innerHTML = `<i class="fa-solid fa-users-viewfinder"></i> ${turma}`; 
-                li.setAttribute('data-turma', turma);
-                
+                let li = document.createElement('li'); li.className = 'turma-item'; li.innerHTML = `<i class="fa-solid fa-users-viewfinder"></i> ${turma}`; li.setAttribute('data-turma', turma);
                 li.onclick = function() {
-                    document.querySelectorAll('.turma-item').forEach(el => {
-                        el.classList.remove('active');
-                    }); 
-                    li.classList.add('active'); 
-                    selecionarTurma(turma); 
-                    document.getElementById('app-sidebar').classList.remove('open');
+                    document.querySelectorAll('.turma-item').forEach(el => el.classList.remove('active')); li.classList.add('active'); selecionarTurma(turma); document.getElementById('app-sidebar').classList.remove('open');
                 };
                 sidebarLista.appendChild(li);
-                if(index === 0 && !turmaSelecionadaAtiva) { 
-                    li.classList.add('active'); 
-                    selecionarTurma(turma); 
-                } else if(turma === turmaSelecionadaAtiva) { 
-                    li.classList.add('active'); 
-                }
+                if(index === 0 && !turmaSelecionadaAtiva) { li.classList.add('active'); selecionarTurma(turma); } else if(turma === turmaSelecionadaAtiva) { li.classList.add('active'); }
             });
         }
 
         function selecionarTurma(turma) {
-            turmaSelecionadaAtiva = turma; 
-            const select = document.getElementById('select-alunos'); 
-            const valorAntigoAluno = select.value; 
-            select.innerHTML = ''; 
-            const alunosDaTurma = cacheAlunosPorTurma[turma] || [];
-            
-            if(alunosDaTurma.length === 0) { 
-                select.innerHTML = '<option>Nenhum aluno nessa turma</option>'; 
-                return; 
-            }
-            alunosDaTurma.sort().forEach(aluno => { 
-                let opt = document.createElement('option'); 
-                opt.value = aluno; 
-                opt.innerHTML = aluno; 
-                select.appendChild(opt); 
-            });
-            if(alunosDaTurma.includes(valorAntigoAluno)) { 
-                select.value = valorAntigoAluno; 
-            } 
-            filtrarRegistrosPorAluno();
+            turmaSelecionadaAtiva = turma; const select = document.getElementById('select-alunos'); const valorAntigoAluno = select.value; select.innerHTML = ''; const alunosDaTurma = cacheAlunosPorTurma[turma] || [];
+            if(alunosDaTurma.length === 0) { select.innerHTML = '<option>Nenhum aluno nessa turma</option>'; return; }
+            alunosDaTurma.sort().forEach(aluno => { let opt = document.createElement('option'); opt.value = aluno; opt.innerHTML = aluno; select.appendChild(opt); });
+            if(alunosDaTurma.includes(valorAntigoAluno)) { select.value = valorAntigoAluno; } filtrarRegistrosPorAluno();
         }
 
         async function carregarRegistrosDoServidor() {
             if(!APPS_SCRIPT_URL) return;
-            try { 
-                const response = await fetch(APPS_SCRIPT_URL, { method: 'GET', cache: 'no-cache' }); 
-                todosOsRegistros = await response.json(); 
-                filtrarRegistrosPorAluno(); 
-            } catch (error) { 
-                console.error("Erro ao carregar registros antigos:", error); 
-            }
+            try { const response = await fetch(APPS_SCRIPT_URL, { method: 'GET', cache: 'no-cache' }); todosOsRegistros = await response.json(); filtrarRegistrosPorAluno(); } catch (error) { console.error("Erro ao carregar registros antigos:", error); }
         }
 
-        // CORREÇÃO CIRÚRGICA DE FUSO E DATA DA FOTO 3: Quebra strings extensas de fusos horários
+        // TRATAMENTO DA IMAGEM 3: Converte o texto extenso do Sheets e renderiza data + hora
         function formatarDataEHora(dataBruta) {
             if (!dataBruta) return "";
             let s = dataBruta.toString().trim();
             
-            // Se o Google Sheets mandou a string nativa gigante (ex: "Thu Jun 11 2026...")
-            if (s.includes('GMT') || s.includes('Horário')) {
+            // Tratamento caso venha o formato extenso nativo "Thu Jun 11 2026..."
+            if (s.match(/^[A-Za-z]{3}\s[A-Za-z]{3}/) || s.includes('GMT')) {
                 try {
                     const d = new Date(s);
                     if (!isNaN(d.getTime())) {
-                        return d.toLocaleDateString('pt-BR');
+                        const dataFormato = d.toLocaleDateString('pt-BR');
+                        const horaFormato = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                        return `${dataFormato} às ${horaFormato}`;
                     }
                 } catch(e) {}
-            }
-            
-            // Tratamento alternativo para formato ISO com traço (AAAA-MM-DD)
-            if (s.includes('-')) {
-                const partesGerais = s.split(' ');
-                const soData = partesGerais[0].split('-');
-                if (soData[0].length === 4) {
-                    return `${soData[2]}/${soData[1]}/${soData[0]}`;
-                }
             }
             return s;
         }
@@ -887,20 +835,15 @@
         function filtrarRegistrosPorAluno() {
             const selectElem = document.getElementById('select-alunos');
             if(!selectElem.options.length || selectElem.value.includes('Selecione uma turma') || selectElem.value.includes('Nenhum aluno')) {
-                const setores = ['meivs', 'pedagogico', 'adm', 'direcao']; 
-                setores.forEach(s => document.getElementById(`feed-${s}`).innerHTML = ''); 
-                return;
+                const setores = ['meivs', 'pedagogico', 'adm', 'direcao']; setores.forEach(s => document.getElementById(`feed-${s}`).innerHTML = ''); return;
             }
-            const alunoSelecionado = selectElem.value; 
-            const setores = ['meivs', 'pedagogico', 'adm', 'direcao']; 
-            setores.forEach(s => document.getElementById(`feed-${s}`).innerHTML = '');
+            const alunoSelecionado = selectElem.value; const setores = ['meivs', 'pedagogico', 'adm', 'direcao']; setores.forEach(s => document.getElementById(`feed-${s}`).innerHTML = '');
             
             todosOsRegistros.forEach(reg => {
                 if(reg.aluno && reg.aluno.trim() === alunoSelecionado.trim()) {
                     const feed = document.getElementById(`feed-${reg.setor}`);
                     if(feed) {
-                        const novoCard = document.createElement('div'); 
-                        novoCard.className = 'post-card'; 
+                        const novoCard = document.createElement('div'); novoCard.className = 'post-card';
                         
                         let dataExibicao = formatarDataEHora(reg.dataAtual);
                         let autorRegistro = reg.funcionario ? reg.funcionario.trim() : 'SIGA';
@@ -917,7 +860,7 @@
                             <p class="post-text" id="text-card-${reg.idLinha}">${reg.texto}</p>
                             <div class="post-footer">
                                 <span><i class="fa-solid fa-user"></i>${autorRegistro}</span>
-                                <span><i class="fa-solid fa-calendar-day"></i>${dataExibicao}</span>
+                                <span><i class="fa-solid fa-clock"></i>${dataExibicao}</span>
                             </div>
                             ${botoesAcaoHtml}`;
                         feed.appendChild(novoCard);
@@ -927,88 +870,40 @@
         }
 
         async function salvarPost(setor) {
-            const textarea = document.getElementById(`text-${setor}`); 
-            const texto = textarea.value.trim(); 
-            const alunoSelecionado = document.getElementById('select-alunos').value; 
-            const btn = document.getElementById(`btn-${setor}`);
-            
+            const textarea = document.getElementById(`text-${setor}`); const texto = textarea.value.trim(); const alunoSelecionado = document.getElementById('select-alunos').value; const btn = document.getElementById(`btn-${setor}`);
             if(!texto || !alunoSelecionado || alunoSelecionado.includes('Selecione uma turma')) return;
+            btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>...';
             
-            btn.disabled = true; 
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>...';
-            
+            // Cria o texto de data e hora do Paraná de forma direta para a planilha
             const agora = new Date();
-            const dataCarimbo = agora.toLocaleDateString('pt-BR');
+            const dataCarimbo = agora.toLocaleDateString('pt-BR') + ' às ' + agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
             
-            const payload = { 
-                operacao: "SALVAR", 
-                aluno: alunoSelecionado, 
-                setor: setor, 
-                texto: texto, 
-                funcionario: usuarioLogado.nome,
-                dataAtual: dataCarimbo
-            };
+            const payload = { operacao: "SALVAR", aluno: alunoSelecionado, setor: setor, texto: texto, funcionario: usuarioLogado.nome, dataAtual: dataCarimbo };
             try {
-                await fetch(APPS_SCRIPT_URL, { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'text/plain' }, 
-                    body: JSON.stringify(payload) 
-                });
-                textarea.value = ''; 
-                await carregarRegistrosDoServidor(); 
-            } catch (error) { 
-                console.error(error); 
-                alert("Falha na gravação."); 
-            } finally { 
-                btn.disabled = false; 
-                btn.innerHTML = 'Salvar Registro'; 
-                aplicarBloqueioSetores(usuarioLogado.setor, usuarioLogado.nivel); 
-            }
+                await fetch(APPS_SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
+                textarea.value = ''; await carregarRegistrosDoServidor(); 
+            } catch (error) { console.error(error); alert("Falha na gravação."); } finally { btn.disabled = false; btn.innerHTML = 'Salvar Registro'; aplicarBloqueioSetores(usuarioLogado.setor, usuarioLogado.nivel); }
         }
 
         async function excluirRegistroServidor(idLinha) {
             if (!idLinha || !confirm("Deseja apagar permanentemente esta ocorrência?")) return;
             try {
-                await fetch(APPS_SCRIPT_URL, { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'text/plain' }, 
-                    body: JSON.stringify({ operacao: "EXCLUIR", idLinha: idLinha }) 
-                });
-                todosOsRegistros = todosOsRegistros.filter(r => r.idLinha !== idLinha); 
-                filtrarRegistrosPorAluno();
-            } catch (error) { 
-                alert("Erro ao excluir."); 
-            }
+                await fetch(APPS_SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ operacao: "EXCLUIR", idLinha: idLinha }) });
+                todosOsRegistros = todosOsRegistros.filter(r => r.idLinha !== idLinha); filtrarRegistrosPorAluno();
+            } catch (error) { alert("Erro ao excluir."); }
         }
 
         async function editarRegistroServidor(idLinha, setor) {
-            if (!idLinha) return; 
-            const paragrafoTexto = document.getElementById(`text-card-${idLinha}`); 
-            const textoAntigo = paragrafoTexto.innerText;
-            
-            const novoTexto = prompt("Edite o texto do apontamento abaixo:", textoAntigo); 
-            if (novoTexto === null) return; 
-            if (novoTexto.trim() === "") return alert("O texto não pode ficar em branco.");
+            if (!idLinha) return; const paragrafoTexto = document.getElementById(`text-card-${idLinha}`); const textoAntigo = paragrafoTexto.innerText;
+            const novoTexto = prompt("Edite o texto do apontamento abaixo:", textoAntigo); if (novoTexto === null) return; if (novoTexto.trim() === "") return alert("O texto não pode ficar em branco.");
             try {
-                await fetch(APPS_SCRIPT_URL, { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'text/plain' }, 
-                    body: JSON.stringify({ operacao: "EDITAR", idLinha: idLinha, texto: novoTexto.trim() }) 
-                });
-                let reg = todosOsRegistros.find(r => r.idLinha === idLinha); 
-                if (reg) reg.texto = novoTexto.trim(); 
-                filtrarRegistrosPorAluno();
-            } catch (error) { 
-                alert("Erro ao editar."); 
-            }
+                await fetch(APPS_SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ operacao: "EDITAR", idLinha: idLinha, texto: novoTexto.trim() }) });
+                let reg = todosOsRegistros.find(r => r.idLinha === idLinha); if (reg) reg.texto = novoTexto.trim(); filtrarRegistrosPorAluno();
+            } catch (error) { alert("Erro ao editar."); }
         }
 
         function gerarRelatorioPDF() {
-            const aluno = document.getElementById('select-alunos').value; 
-            if(!aluno || aluno.includes('Selecione') || aluno.includes('Nenhum')) { 
-                alert('Selecione um aluno válido.'); 
-                return; 
-            }
+            const aluno = document.getElementById('select-alunos').value; if(!aluno || aluno.includes('Selecione') || aluno.includes('Nenhum')) { alert('Selecione um aluno válido.'); return; }
             let htmlDocumento = `<div style="padding: 40px; font-family: Arial, sans-serif; color: #1e293b;"><div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #005088; padding-bottom: 15px;"><h1 style="color: #005088; font-size: 26px; margin-bottom: 5px;">COLÉGIO CÍVICO-MILITAR ANCHIETA</h1><p style="font-size: 13px; letter-spacing: 1px; font-weight: bold; color: #64748b;">SIGA - SISTEMA INTEGRADO DE GESTÃO ANCHIETA</p></div><div style="background: #f8fafc; padding: 15px; border-radius: 6px; margin-bottom: 30px; border: 1px solid #e2e8f0;"><p style="font-size: 16px; margin-bottom: 5px;"><strong>Estudante:</strong> ${aluno}</p><p style="font-size: 14px; color: #475569;"><strong>Turma:</strong> ${turmaSelecionadaAtiva}</p><p style="font-size: 12px; color: #64748b; margin-top: 10px;">Relatório emitido em: ${new Date().toLocaleDateString('pt-BR')}</p></div><h2 style="font-size: 18px; color: #005088; border-bottom: 1px solid #cbd5e1; padding-bottom: 5px; margin-bottom: 15px;">HISTÓRICO DE APONTAMENTOS FIXOS</h2>`;
             const setoresMapeados = [{ id: 'meivs', nome: 'MEIV\'S (DISCIPLINA)' }, { id: 'pedagogico', nome: 'PEDAGÓGICO (APRENDIZAGEM)' }, { id: 'adm', nome: 'ADMINISTRATIVO (SECRETARIA)' }, { id: 'direcao', nome: 'PROFESSORES (CONSELHO)' }];
             let temRegistros = false;
@@ -1016,20 +911,14 @@
             setoresMapeados.forEach(set => {
                 let postsSetor = todosOsRegistros.filter(r => r.aluno.trim() === aluno.trim() && r.setor === set.id);
                 if(postsSetor.length > 0) {
-                    temRegistros = true; 
-                    htmlDocumento += `<h3 style="font-size: 14px; color: #1e293b; margin-top: 20px; background: #e2e8f0; padding: 6px; border-radius: 4px;">${set.nome}</h3>`;
-                    postsSetor.forEach(p => { 
-                        htmlDocumento += `<div style="margin: 10px 0; padding: 10px 15px; background: #fff; border-left: 4px solid #eab308; border-bottom: 1px solid #f1f5f9;"><p style="font-size: 14px; line-height: 1.4; margin-bottom: 5px;">${p.texto}</p><p style="font-size: 11px; color: #64748b; text-align: right;">Por: ${p.funcionario} | Data: ${p.dataAtual}</p></div>`; 
-                    });
+                    temRegistros = true; htmlDocumento += `<h3 style="font-size: 14px; color: #1e293b; margin-top: 20px; background: #e2e8f0; padding: 6px; border-radius: 4px;">${set.nome}</h3>`;
+                    postsSetor.forEach(p => { htmlDocumento += `<div style="margin: 10px 0; padding: 10px 15px; background: #fff; border-left: 4px solid #eab308; border-bottom: 1px solid #f1f5f9;"><p style="font-size: 14px; line-height: 1.4; margin-bottom: 5px;">${p.texto}</p><p style="font-size: 11px; color: #64748b; text-align: right;">Por: ${p.funcionario} | Data: ${p.dataAtual}</p></div>`; });
                 }
             });
-            if(!temRegistros) { 
-                htmlDocumento += `<p style="color: #64748b; font-style: italic; margin-top: 20px;">Nenhum apontamento registrado.</p>`; 
-            }
+            if(!temRegistros) { htmlDocumento += `<p style="color: #64748b; font-style: italic; margin-top: 20px;">Nenhum apontamento registrado.</p>`; }
             htmlDocumento += `<div style="margin-top: 60px; text-align: center; font-size: 11px; color: #94a3b8; border-top: 1px dashed #cbd5e1; padding-top: 10px;">Documento Gerado Digitalmente pelo Painel Restrito SIGA</div></div>`;
             
-            const elementoTemporario = document.createElement('div'); 
-            elementoTemporario.innerHTML = htmlDocumento;
+            const elementoTemporario = document.createElement('div'); elementoTemporario.innerHTML = htmlDocumento;
             const configuracaoPdf = { margin: 10, filename: `Historico_SIGA_${aluno.replace(/ /g, '_')}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
             html2pdf().set(configuracaoPdf).from(elementoTemporario).save();
         }
@@ -1037,47 +926,23 @@
         function aplicarBloqueioSetores(setor, nivel) {
             const setores = ['pedagogico', 'meivs', 'adm', 'direcao'];
             setores.forEach(s => {
-                const textarea = document.getElementById(`text-${s}`); 
-                const botao = document.getElementById(`btn-${s}`);
-                
-                if (nivel >= 2) { 
-                    textarea.disabled = false; 
-                    botao.disabled = false; 
-                    textarea.placeholder = "Registrar informação fixa..."; 
-                } 
+                const textarea = document.getElementById(`text-${s}`); const botao = document.getElementById(`btn-${s}`);
+                if (nivel >= 2) { textarea.disabled = false; botao.disabled = false; textarea.placeholder = "Registrar informação fixa..."; } 
                 else {
                     if (setor === 'direcao' || setor === 'professor' || setor === 'professores' || setor === s) { 
                         if (setor === 'professores' && s === 'direcao') {
-                            textarea.disabled = false;
-                            botao.disabled = false;
-                            textarea.placeholder = "Registrar informação fixa...";
+                            textarea.disabled = false; botao.disabled = false; textarea.placeholder = "Registrar informação fixa...";
                         } else if (setor === s) {
-                            textarea.disabled = false;
-                            botao.disabled = false;
-                            textarea.placeholder = "Registrar informação fixa...";
+                            textarea.disabled = false; botao.disabled = false; textarea.placeholder = "Registrar informação fixa...";
                         } else {
-                            textarea.disabled = true;
-                            botao.disabled = true;
-                            textarea.placeholder = "Apenas leitura para o seu setor.";
+                            textarea.disabled = true; botao.disabled = true; textarea.placeholder = "Apenas leitura para o seu setor.";
                         }
-                    } else { 
-                        textarea.disabled = true; 
-                        botao.disabled = true; 
-                        textarea.placeholder = "Apenas leitura para o seu setor."; 
-                    }
+                    } else { textarea.disabled = true; botao.disabled = true; textarea.placeholder = "Apenas leitura para o seu setor."; }
                 }
             });
         }
 
-        window.salvarPost = salvarPost; 
-        window.filtrarRegistrosPorAluno = filtrarRegistrosPorAluno; 
-        window.fazerLogout = fazerLogout; 
-        window.autenticarUsuario = autenticarUsuario; 
-        window.gerarRelatorioPDF = gerarRelatorioPDF; 
-        window.excluirRegistroServidor = excluirRegistroServidor; 
-        window.editarRegistroServidor = editarRegistroServidor; 
-        window.alternarMenuLateral = alternarMenuLateral; 
-        window.alternarAbaMobile = alternarAbaMobile;
+        window.salvarPost = salvarPost; window.filtrarRegistrosPorAluno = filtrarRegistrosPorAluno; window.fazerLogout = fazerLogout; window.autenticarUsuario = autenticarUsuario; window.gerarRelatorioPDF = gerarRelatorioPDF; window.excluirRegistroServidor = excluirRegistroServidor; window.editarRegistroServidor = editarRegistroServidor; window.alternarMenuLateral = alternarMenuLateral; window.alternarAbaMobile = alternarAbaMobile;
     </script>
 </body>
 </html>
