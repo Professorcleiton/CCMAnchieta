@@ -77,7 +77,6 @@
         .post-card { background-color: #f1f5f9; padding: 12px; border-radius: 6px; border-left: 4px solid #005088; animation: fadeIn 0.3s ease; word-break: break-word; position: relative; }
         .post-footer { font-size: 11px; color: #64748b; margin-top: 8px; border-top: 1px dashed #cbd5e1; padding-top: 5px; display: flex; justify-content: space-between; align-items: center; }
         
-        /* Estilo dos botões de ação rápidos do Nível 2 nos cards */
         .card-actions { display: flex; gap: 8px; margin-top: 5px; justify-content: flex-end; border-top: 1px solid #e2e8f0; padding-top: 5px; }
         .btn-action-card { background: none; border: none; cursor: pointer; font-size: 12px; font-weight: bold; padding: 2px 6px; border-radius: 3px; }
         .btn-edit-card { color: #4f46e5; } .btn-edit-card:hover { background: #e0e7ff; }
@@ -205,11 +204,10 @@
 
     <script>
         // ATENÇÃO: COLOQUE AQUI O SEU LINK ATUALIZADO DO GOOGLE APPS SCRIPT GERADO NO PASSO 1
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw_UTtLWZ89pOjQBR4q5BQ3RGSkjAHezFtO5FR_80ju8UMM67ZQj0PCwK77bPCkgejnLA/exec';
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwm-ONErY-wuY5GoUxLkZOYLcctKeTno1Awp0D4UNyuhx6kRu2sqILpApLm_WWbKkYnhQ/exec';
         
         const SHEET_ID = '1UUiVcCaSb_9Lx7gdEpmBzeRQPlBwDZRouQC2pf1q8Vg'; 
         const COLS_ALUNOS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=Alunos`;
-        const COLS_USERS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=Usuários`;
 
         let usuarioLogado = null;
         let todosOsRegistros = [];
@@ -236,43 +234,30 @@
 
             btnLogin.disabled = true;
             btnLogin.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Validando...';
+            errMsg.style.display = 'none';
 
             try {
-                const response = await fetch(COLS_USERS_URL);
-                const text = await response.text();
-                const jsonText = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
-                const data = JSON.parse(jsonText);
-                const linhas = data.table.rows;
-                let autenticado = false;
+                // CORRIGIDO: Envia as credenciais direto ao AppScript para evitar o erro CORS
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({
+                        operacao: "LOGIN",
+                        email: emailDigitado,
+                        senha: senhaDigitada
+                    })
+                });
+                
+                const resultado = await response.json();
 
-                for(let i = 0; i < linhas.length; i++) {
-                    const r = líneas[i].c;
-                    if(r && r[0] && r[0].v && r[4] && r[4].v) {
-                        const emailPlanilha = r[0].v.toString().trim().toLowerCase();
-                        const senhaPlanilha = r[4].v.toString().trim();
-                        
-                        if(emailDigitado === emailPlanilha && senhaDigitada === senhaPlanilha) {
-                            autenticado = true;
-                            
-                            let setorBruto = r[2] ? r[2].v.toString().trim().toLowerCase() : 'pedagogico';
-                            let setorExibir = setorBruto.toUpperCase();
-                            if(setorBruto === 'professor' || setorBruto === 'direcao' || setorBruto === 'professores') {
-                                setorExibir = 'PROFESSORES';
-                            }
-
-                            usuarioLogado = {
-                                email: emailPlanilha,
-                                nome: r[1] ? r[1].v.toString().trim() : 'Funcionário',
-                                setorExibicao: setorExibir, 
-                                setor: setorBruto,
-                                nivel: r[3] ? parseInt(r[3].v) : 1 // Captura o Nível da Coluna D
-                            };
-                            break;
-                        }
-                    }
-                }
-
-                if(autenticado) {
+                if(resultado.status === "success") {
+                    usuarioLogado = {
+                        email: emailDigitado,
+                        nome: resultado.nome,
+                        setorExibicao: resultado.setorExibicao, 
+                        setor: resultado.setor,
+                        nivel: resultado.nivel
+                    };
                     localStorage.setItem('sgi_ccma_session', JSON.stringify(usuarioLogado));
                     inicializarPainel();
                 } else {
@@ -284,7 +269,7 @@
             } catch (error) {
                 console.error(error);
                 errMsg.style.display = 'block';
-                errMsg.innerHTML = "Erro ao conectar na planilha de usuários.";
+                errMsg.innerHTML = "Erro de comunicação com o servidor de autenticação.";
                 btnLogin.disabled = false;
                 btnLogin.innerHTML = 'Entrar no Sistema';
             }
@@ -376,7 +361,7 @@
         }
 
         function selecionarTurma(turma) {
-            turmaSelecionadaAtiva = { name: turma }; 
+            turmaSelecionadaAtiva = turma; 
             const select = document.getElementById('select-alunos');
             const valorAntigoAluno = select.value;
             select.innerHTML = '';
@@ -425,11 +410,7 @@
 
             todosOsRegistros.forEach(reg => {
                 if(reg.aluno && reg.aluno.trim() === alunoSelecionado.trim()) {
-                    // CORRIGIDO: Se vier 'professores' da planilha, mapeia visualmente para a coluna 'direcao'
-                    let chaveSetorVisual = reg.setor;
-                    if (reg.setor === 'professores') chaveSetorVisual = 'direcao';
-
-                    const feed = document.getElementById(`feed-${chaveSetorVisual}`);
+                    const feed = document.getElementById(`feed-${reg.setor}`);
                     if(feed) {
                         const novoCard = document.createElement('div');
                         novoCard.className = 'post-card';
@@ -441,7 +422,6 @@
 
                         let autorRegistro = reg.funcionario ? reg.funcionario.trim() : 'SGI';
 
-                        // MONTAGEM DO CARD COM OS BOTÕES SE FOR NÍVEL 2
                         let botoesAcaoHtml = "";
                         if (usuarioLogado && usuarioLogado.nivel >= 2) {
                             botoesAcaoHtml = `
@@ -477,15 +457,11 @@
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Gravando...';
 
-            // CORRIGIDO: Se for a coluna interna 'direcao', manda 'professores' para a planilha
-            let setorGravar = setor;
-            if (setor === 'direcao') setorGravar = 'professores';
-
             const payload = {
                 operacao: "SALVAR",
                 dataAtual: new Date().toLocaleDateString('pt-BR'),
                 aluno: alunoSelecionado,
-                setor: setorGravar,
+                setor: setor,
                 texto: texto,
                 funcionario: usuarioLogado.nome
             };
@@ -493,14 +469,12 @@
             try {
                 await fetch(APPS_SCRIPT_URL, {
                     method: 'POST',
-                    mode: 'no-cors',
-                    cache: 'no-cache',
                     headers: { 'Content-Type': 'text/plain' },
                     body: JSON.stringify(payload)
                 });
 
                 textarea.value = '';
-                await carregarRegistrosDoServidor(); // Recarrega para trazer o novo idLinha certo
+                await carregarRegistrosDoServidor(); 
             } catch (error) {
                 console.error(error);
                 alert("Falha na gravação externa.");
@@ -511,7 +485,6 @@
             }
         }
 
-        // Função para o Nível 2 Apagar Registros direto na tela
         async function excluirRegistroServidor(idLinha) {
             if (!idLinha) return;
             if (!confirm("Tem certeza absoluta de que deseja apagar permanentemente esta ocorrência da planilha?")) return;
@@ -519,13 +492,10 @@
             try {
                 await fetch(APPS_SCRIPT_URL, {
                     method: 'POST',
-                    mode: 'no-cors',
-                    cache: 'no-cache',
                     headers: { 'Content-Type': 'text/plain' },
                     body: JSON.stringify({ operacao: "EXCLUIR", idLinha: idLinha })
                 });
 
-                // Atualiza a tela local removendo o registro
                 todosOsRegistros = todosOsRegistros.filter(r => r.idLinha !== idLinha);
                 filtrarRegistrosPorAluno();
             } catch (error) {
@@ -533,26 +503,22 @@
             }
         }
 
-        // Função para o Nível 2 Editar Registros direto na tela
         async function editarRegistroServidor(idLinha, setor) {
             if (!idLinha) return;
             const paragrafoTexto = document.getElementById(`text-card-${idLinha}`);
             const textoAntigo = paragrafoTexto.innerText;
             
             const novoTexto = prompt("Edite o texto do apontamento abaixo:", textoAntigo);
-            if (novoTexto === null) return; // Cancelou
+            if (novoTexto === null) return; 
             if (novoTexto.trim() === "") return alert("O texto não pode ficar em branco.");
 
             try {
                 await fetch(APPS_SCRIPT_URL, {
                     method: 'POST',
-                    mode: 'no-cors',
-                    cache: 'no-cache',
                     headers: { 'Content-Type': 'text/plain' },
                     body: JSON.stringify({ operacao: "EDITAR", idLinha: idLinha, texto: novoTexto.trim() })
                 });
 
-                // Atualiza localmente o texto
                 let reg = todosOsRegistros.find(r => r.idLinha === idLinha);
                 if (reg) reg.texto = novoTexto.trim();
                 filtrarRegistrosPorAluno();
@@ -576,7 +542,7 @@
                     </div>
                     <div style="background: #f8fafc; padding: 15px; border-radius: 6px; margin-bottom: 30px; border: 1px solid #e2e8f0;">
                         <p style="font-size: 16px; margin-bottom: 5px;"><strong>Estudante:</strong> ${aluno}</p>
-                        <p style="font-size: 14px; color: #475569;"><strong>Turma:</strong> ${turmaSelecionadaAtiva.name || turmaSelecionadaAtiva}</p>
+                        <p style="font-size: 14px; color: #475569;"><strong>Turma:</strong> ${turmaSelecionadaAtiva}</p>
                         <p style="font-size: 12px; color: #64748b; margin-top: 10px;">Relatório emitido em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}</p>
                     </div>
                     <h2 style="font-size: 18px; color: #005088; border-bottom: 1px solid #cbd5e1; padding-bottom: 5px; margin-bottom: 15px;">HISTÓRICO DE APONTAMENTOS FIXOS</h2>
@@ -586,13 +552,13 @@
                 { id: 'meivs', nome: 'MEIV\'S (DISCIPLINA / INSTRUTORIA)' },
                 { id: 'pedagogico', nome: 'PEDAGÓGICO (APRENDIZAGEM / PEDAGOGIA)' },
                 { id: 'adm', nome: 'ADMINISTRATIVO (SECRETARIA / CRONOGRAMA)' },
-                { id: 'professores', nome: 'PROFESSORES (CONSELHO / RENDIMENTO)' }
+                { id: 'direcao', nome: 'PROFESSORES (CONSELHO / RENDIMENTO)' }
             ];
 
             let temRegistros = false;
 
             setoresMapeados.forEach(set => {
-                let postsSetor = todosOsRegistros.filter(r => r.aluno.trim() === aluno.trim() && (r.setor === set.id || (set.id === 'professores' && r.setor === 'direcao')));
+                let postsSetor = todosOsRegistros.filter(r => r.aluno.trim() === aluno.trim() && r.setor === set.id);
                 if(postsSetor.length > 0) {
                     temRegistros = true;
                     htmlDocumento += `<h3 style="font-size: 14px; color: #1e293b; margin-top: 20px; background: #e2e8f0; padding: 6px; border-radius: 4px;">${set.nome}</h3>`;
@@ -646,7 +612,6 @@
                 const textarea = document.getElementById(`text-${s}`);
                 const botao = document.getElementById(`btn-${s}`);
                 
-                // CORRIGIDO: Validação da variável em português 'setor' consertada
                 if (setor === 'direcao' || setor === 'professor' || setor === 'professores' || setor === s) {
                     textarea.disabled = false;
                     botao.disabled = false;
