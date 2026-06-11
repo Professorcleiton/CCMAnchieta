@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIGA - Área Restrita CCM Anchieta</title>
+    <title>SGI - Área Restrita CCM Anchieta</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
@@ -19,7 +19,7 @@
             background: white; padding: 40px; border-radius: 12px; width: 100%; max-width: 400px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.2); text-align: center; border-top: 8px solid #eab308;
         }
-        .login-logo-nova { width: 200px; height: auto; margin-bottom: 20px; object-fit: contain; }
+        .login-logo-nova { width: 180px; height: 180px; margin-bottom: 20px; object-fit: contain; }
         .login-box h2 { color: #005088; margin-bottom: 5px; font-size: 24px; }
         .login-box p { color: #64748b; font-size: 14px; margin-bottom: 25px; }
         .input-group { margin-bottom: 18px; text-align: left; }
@@ -64,7 +64,7 @@
         .btn-pdf:hover { background-color: #991b1b; }
 
         .user-and-nre-wrapper { display: flex; align-items: center; gap: 20px; }
-        .right-nre-logo { height: 42px; width: auto; object-fit: contain; }
+        .right-nre-logo { height: 48px; width: auto; object-fit: contain; max-width: 150px; }
         
         #user-display { font-size: 14px; font-weight: 600; background: #eab308; color: #1e293b; padding: 8px 15px; border-radius: 20px; display: inline-flex; align-items: center; gap: 6px; }
         
@@ -99,9 +99,9 @@
 
     <div id="login-screen">
         <div class="login-box">
-            <img src="img/SIGA.png" alt="Brasão SIGA Anchieta" class="login-logo-nova">
+            <img src="img/IMG_20260610_071544.png" alt="Brasão Anchieta" class="login-logo-nova">
             <h2>Área Restrita</h2>
-            <p>SIGA - Sistema Integrado de Gestão Anchieta</p>
+            <p>SGI - Colégio Cívico-Militar Anchieta</p>
             
             <div class="input-group">
                 <label for="user-email"><i class="fa-solid fa-envelope"></i> E-mail Institucional:</label>
@@ -126,10 +126,10 @@
         <aside class="sidebar">
             <div class="sidebar-top">
                 <div class="sidebar-header">
-                    <img src="img/SIGA.png" alt="Logo SIGA" class="sidebar-logo">
+                    <img src="img/IMG_20260610_071544.png" alt="Logo CCMA" class="sidebar-logo">
                     <div class="sidebar-title-container">
-                        <h2>SIGA</h2>
-                        <span class="sidebar-meaning">Sistema Integrado de Gestão Anchieta</span>
+                        <h2>SGI</h2>
+                        <span class="sidebar-meaning">Sistema de Gestão Integrada</span>
                         <span class="sidebar-subtitle">CCM Anchieta</span>
                     </div>
                 </div>
@@ -203,6 +203,7 @@
     </div>
 
     <script>
+        // NOVO LINK VINCULADO E ATUALIZADO COM SUCESSO AQUI ABAIXO
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
         
         const SHEET_ID = '1UUiVcCaSb_9Lx7gdEpmBzeRQPlBwDZRouQC2pf1q8Vg'; 
@@ -212,7 +213,6 @@
         let todosOsRegistros = [];
         let cacheAlunosPorTurma = {}; 
         let turmaSelecionadaAtiva = '';
-        let timerInatividade = null; 
 
         window.addEventListener('DOMContentLoaded', verificarSessaoAtiva);
 
@@ -250,15 +250,16 @@
                 const resultado = await response.json();
 
                 if(resultado.status === "success") {
-                    let exibicaoCorrigida = resultado.setorExibicao;
-                    if (resultado.setor === 'direcao' || resultado.setor === 'professor' || resultado.setor === 'professores' || resultado.setor === 'direção') {
-                        exibicaoCorrigida = 'PROFESSORES';
+                    // CORREÇÃO: Garante que mesmo se o servidor responder como "direcao", o site force "PROFESSORES"
+                    let exibirCargo = resultado.setorExibicao;
+                    if(resultado.setor === 'direcao' || resultado.setor === 'professor' || resultado.setor === 'professores') {
+                        exibirCargo = 'PROFESSORES';
                     }
 
                     usuarioLogado = {
                         email: emailDigitado,
                         nome: resultado.nome,
-                        setorExibicao: exibicaoCorrigida, 
+                        setorExibicao: exibirCargo, 
                         setor: resultado.setor,
                         nivel: resultado.nivel
                     };
@@ -287,26 +288,9 @@
             aplicarBloqueioSetores(usuarioLogado.setor);
             await carregarAlunosETurmas();
             await carregarRegistrosDoServidor();
-            
-            resetarTimerInatividade();
-            window.onload = resetarTimerInatividade;
-            document.onmousemove = resetarTimerInatividade;
-            document.onkeypress = resetarTimerInatividade;
-            document.onclick = resetarTimerInatividade;
-            document.onscroll = resetarTimerInatividade;
-        }
-
-        function resetarTimerInatividade() {
-            if (!usuarioLogado) return;
-            clearTimeout(timerInatividade);
-            timerInatividade = setTimeout(function() {
-                alert("Sessão expirada por inatividade (20 minutos). Faça login novamente por segurança.");
-                fazerLogout();
-            }, 1200000);
         }
 
         function fazerLogout() {
-            clearTimeout(timerInatividade);
             usuarioLogado = null;
             todosOsRegistros = [];
             cacheAlunosPorTurma = {};
@@ -441,7 +425,7 @@
                             dataFormatada = new Date().toLocaleDateString('pt-BR');
                         }
 
-                        let autorRegistro = reg.funcionario ? reg.funcionario.trim() : 'SIGA';
+                        let autorRegistro = reg.funcionario ? reg.funcionario.trim() : 'SGI';
 
                         let botoesAcaoHtml = "";
                         if (usuarioLogado && usuarioLogado.nivel >= 2) {
@@ -478,12 +462,9 @@
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Gravando...';
 
-            const agora = new Date();
-            const dataHoraBrasilia = agora.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
-
             const payload = {
                 operacao: "SALVAR",
-                dataAtual: dataHoraBrasilia, 
+                dataAtual: new Date().toLocaleDateString('pt-BR'),
                 aluno: alunoSelecionado,
                 setor: setor,
                 texto: texto,
@@ -562,7 +543,7 @@
                 <div style="padding: 40px; font-family: Arial, sans-serif; color: #1e293b;">
                     <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #005088; padding-bottom: 15px;">
                         <h1 style="color: #005088; font-size: 26px; margin-bottom: 5px;">COLÉGIO CÍVICO-MILITAR ANCHIETA</h1>
-                        <p style="font-size: 13px; letter-spacing: 1px; font-weight: bold; color: #64748b;">SIGA - SISTEMA INTEGRADO DE GESTÃO ANCHIETA</p>
+                        <p style="font-size: 13px; letter-spacing: 1px; font-weight: bold; color: #64748b;">SGI - SISTEMA DE GESTÃO INTEGRADA</p>
                     </div>
                     <div style="background: #f8fafc; padding: 15px; border-radius: 6px; margin-bottom: 30px; border: 1px solid #e2e8f0;">
                         <p style="font-size: 16px; margin-bottom: 5px;"><strong>Estudante:</strong> ${aluno}</p>
@@ -603,7 +584,7 @@
 
             htmlDocumento += `
                     <div style="margin-top: 60px; text-align: center; font-size: 11px; color: #94a3b8; border-top: 1px dashed #cbd5e1; padding-top: 10px;">
-                        Documento Gerado Digitalmente pelo Painel Restrito SIGA - CCM Anchieta
+                        Documento Gerado Digitalmente pelo Painel Restrito SGI - CCM Anchieta
                     </div>
                 </div>
             `;
@@ -613,7 +594,7 @@
             
             const configuracaoPdf = {
                 margin: 10,
-                filename: `Historico_SIGA_${aluno.replace(/ /g, '_')}.pdf`,
+                filename: `Historico_SGI_${aluno.replace(/ /g, '_')}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: { scale: 2, useCORS: true },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
@@ -636,7 +617,8 @@
                 const textarea = document.getElementById(`text-${s}`);
                 const botao = document.getElementById(`btn-${s}`);
                 
-                if (setor === 'direcao' || sector === 'professor' || sector === 'professores' || sector === 'direção' || sector === s) {
+                // CORREÇÃO DOS SETORES: Unifica 'direcao' e 'professor' para liberar a coluna 'direcao' (PROFESSORES)
+                if (setor === 'direcao' || setor === 'professor' || setor === 'professores' || setor === s) {
                     textarea.disabled = false;
                     botao.disabled = false;
                     textarea.placeholder = "Registrar informação fixa...";
