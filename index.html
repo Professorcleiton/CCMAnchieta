@@ -13,7 +13,7 @@
             --btn-dark: #22a222;
             --white: #ffffff;
             --bg-light: #f4f7f6;
-            --btn-ponto: #e67e22; /* Cor específica para o Ponto */
+            --btn-ponto: #e67e22;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -36,7 +36,7 @@
 
         .top-bar a { color: white; text-decoration: none; font-weight: bold; font-size: 0.9rem; }
 
-        /* CABEÇALHO - IMAGENS SEM CORTAR */
+        /* CABEÇALHO */
         .header-logos {
             display: flex;
             justify-content: space-around;
@@ -62,7 +62,7 @@
 
         .school-name-bar h1 { font-size: 2.5rem; letter-spacing: 2px; }
 
-        /* NAVEGAÇÃO - BOTÕES 3D */
+        /* NAVEGAÇÃO */
         nav {
             background-color: var(--btn-dark);
             padding: 15px 0;
@@ -94,30 +94,71 @@
             text-align: center;
         }
 
-        /* DESTAQUES ESPECÍFICOS */
         nav ul li a.frequenciometro { background-color: #f39c12; border-bottom-color: #d35400; }
         nav ul li a.ponto { background-color: var(--btn-ponto); border-bottom-color: #d35400; }
 
         nav ul li a:hover { transform: translateY(-2px); filter: brightness(1.1); }
         nav ul li a:active { transform: translateY(3px); border-bottom: 2px solid #086d00; }
 
-        /* GALERIA */
-        .gallery-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .gallery-item {
-            background: white;
-            border-radius: 10px;
+        /* CARROSSEL DE NOVIDADES */
+        .carousel-wrapper {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            border-radius: 15px;
             overflow: hidden;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            background-color: #000;
+            margin-bottom: 50px;
         }
 
-        .gallery-item img { width: 100%; height: 180px; object-fit: cover; }
-        .gallery-item p { padding: 10px; text-align: center; font-weight: bold; }
+        .carousel-item {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 1s ease-in-out, visibility 1s ease-in-out;
+            z-index: 0;
+        }
+
+        .carousel-item.active {
+            opacity: 1;
+            visibility: visible;
+            z-index: 1;
+        }
+
+        .carousel-item img, .carousel-item video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .carousel-caption {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            background: rgba(0, 53, 102, 0.85); /* Azul institucional transparente */
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            border-left: 5px solid var(--btn-green);
+        }
+
+        .carousel-caption h3 { margin-bottom: 5px; font-size: 1.5rem; }
+        .carousel-caption p { font-size: 1rem; }
+
+        /* SOBRE (Mantido para a página não ficar vazia) */
+        .sobre-box {
+            background: white; 
+            padding: 30px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+            margin-bottom: 50px;
+            text-align: center;
+        }
 
         footer { background: #222; color: white; padding: 30px; text-align: center; margin-top: 50px;}
 
@@ -125,6 +166,10 @@
             .header-logos { height: 100px; }
             .school-name-bar h1 { font-size: 1.5rem; }
             nav ul li a { padding: 8px; font-size: 0.75rem; }
+            .carousel-wrapper { height: 350px; }
+            .carousel-caption { bottom: 15px; left: 15px; right: 15px; padding: 10px; }
+            .carousel-caption h3 { font-size: 1.2rem; }
+            .carousel-caption p { font-size: 0.85rem; }
         }
     </style>
 </head>
@@ -152,9 +197,9 @@
 
         <nav>
             <ul>
+                <li><a href="#destaques">DESTAQUES</a></li>
                 <li><a href="#sobre">SOBRE NÓS</a></li>
                 <li><a href="https://anchietafrequencia.vercel.app" class="frequenciometro" target="_blank">FREQUÊNCIA 📊</a></li>
-                <li><a href="#gallery">GALERIA</a></li>
                 <li><a href="https://rco.paas.pr.gov.br" target="_blank">RCO</a></li>
                 <li><a href="https://auth-cs.identidadedigital.pr.gov.br/centralautenticacao/login.html?response_type=code&client_id=b86e8d03fe992d1b0e19656875ee557c&redirect_uri=http%3A%2F%2Fwww.registropontoseed.pr.gov.br%2Fcallback.php" class="ponto" target="_blank">REGISTRO PONTO ⏱️</a></li>
                 <li><a href="Arq/calendario_escolar2026.pdf">CALENDÁRIO</a></li>
@@ -165,19 +210,69 @@
 
     <main style="max-width: 1200px; margin: 40px auto; padding: 0 20px;">
         
-        <section id="sobre" style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 50px;">
-            <h2 style="color: var(--primary-blue); margin-bottom: 10px;">Sobre o Colégio</h2>
-            <p>O CCM Anchieta une disciplina e tecnologia para oferecer um ensino de excelência em Cruzeiro do Oeste.</p>
+        <!-- CARROSSEL DAS 5 POSTAGENS -->
+        <section id="destaques">
+            <h2 style="color: var(--primary-blue); margin-bottom: 20px; text-align: center;">Últimas Atualizações</h2>
+            
+            <div class="carousel-wrapper" id="mainCarousel">
+                
+                <!-- Slide 1: Imagem -->
+                <div class="carousel-item" data-type="image">
+                    <img src="img/ach1.jpg" alt="Agrinho 2025">
+                    <div class="carousel-caption">
+                        <h3>Agrinho 2025</h3>
+                        <p>Nossos alunos se destacando em mais uma edição do projeto.</p>
+                    </div>
+                </div>
+
+                <!-- Slide 2: Vídeo Exemplo (Substitua o src pelo caminho do seu vídeo) -->
+                <div class="carousel-item" data-type="video">
+                    <video muted playsinline>
+                        <source src="video/apresentacao.mp4" type="video/mp4">
+                        Seu navegador não suporta vídeos.
+                    </video>
+                    <div class="carousel-caption">
+                        <h3>Desfile Cívico</h3>
+                        <p>Apresentação da nossa banda marcial.</p>
+                    </div>
+                </div>
+
+                <!-- Slide 3: Imagem -->
+                <div class="carousel-item" data-type="image">
+                    <img src="img/ftt1.jpg" alt="Dia das Crianças">
+                    <div class="carousel-caption">
+                        <h3>Dia das Crianças</h3>
+                        <p>Muita alegria e diversão em nossa escola.</p>
+                    </div>
+                </div>
+
+                <!-- Slide 4: Vídeo Exemplo -->
+                <div class="carousel-item" data-type="video">
+                    <video muted playsinline>
+                        <source src="video/robotica.mp4" type="video/mp4">
+                    </video>
+                    <div class="carousel-caption">
+                        <h3>Feira de Robótica</h3>
+                        <p>Projetos incríveis desenvolvidos pelas turmas do 2º Ano.</p>
+                    </div>
+                </div>
+
+                <!-- Slide 5: Imagem -->
+                <div class="carousel-item" data-type="image">
+                    <img src="img/diaprofessores.jpeg" alt="Dia dos Professores">
+                    <div class="carousel-caption">
+                        <h3>Homenagem aos Professores</h3>
+                        <p>Reconhecimento àqueles que transformam futuros.</p>
+                    </div>
+                </div>
+
+            </div>
         </section>
 
-        <section id="gallery">
-            <h2 style="color: var(--primary-blue); margin-bottom: 20px;">Galeria de Fotos</h2>
-            <div class="gallery-container">
-                <div class="gallery-item"><img src="img/ach1.jpg"><p>Agrinho 2025</p></div>
-                <div class="gallery-item"><img src="img/ftt1.jpg"><p>Dia das Crianças</p></div>
-                <div class="gallery-item"><img src="img/diaprofessores.jpeg"><p>Dia dos Professores</p></div>
-                <div class="gallery-item"><img src="img/2A.jpg"><p>Robótica</p></div>
-            </div>
+        <!-- SEÇÃO SOBRE -->
+        <section id="sobre" class="sobre-box">
+            <h2 style="color: var(--primary-blue); margin-bottom: 10px;">Sobre o Colégio</h2>
+            <p>O CCM Anchieta une disciplina e tecnologia para oferecer um ensino de excelência em Cruzeiro do Oeste.</p>
         </section>
 
     </main>
@@ -187,11 +282,84 @@
         <a href="#TOPO" style="color: #33cc33; text-decoration: none; font-weight: bold;">Voltar ao Topo</a>
     </footer>
 
+    <!-- Acessibilidade -->
     <div vw class="enabled">
         <div vw-access-button class="active"></div>
         <div vw-plugin-wrapper><div class="vw-plugin-top-wrapper"></div></div>
     </div>
     <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
     <script>new window.VLibras.Widget('https://vlibras.gov.br/app');</script>
+
+    <!-- SCRIPT DO CARROSSEL -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const items = document.querySelectorAll('.carousel-item');
+            let currentIndex = 0;
+            let timeoutId;
+
+            // Tempo em milissegundos para imagens (10 segundos = 10000ms)
+            const imageDisplayTime = 10000; 
+
+            function showSlide(index) {
+                // Remove a classe 'active' e pausa todos os vídeos
+                items.forEach((item) => {
+                    item.classList.remove('active');
+                    if (item.dataset.type === 'video') {
+                        const vid = item.querySelector('video');
+                        if(vid) {
+                            vid.pause();
+                            vid.currentTime = 0; // Volta o vídeo pro início
+                        }
+                    }
+                });
+
+                // Atualiza o índice e ativa o slide atual
+                currentIndex = index;
+                const currentItem = items[currentIndex];
+                currentItem.classList.add('active');
+
+                // Limpa contadores anteriores para evitar atropelamentos
+                clearTimeout(timeoutId);
+
+                if (currentItem.dataset.type === 'video') {
+                    const video = currentItem.querySelector('video');
+                    
+                    if (video) {
+                        // Tenta dar play no vídeo
+                        let playPromise = video.play();
+
+                        if (playPromise !== undefined) {
+                            playPromise.then(_ => {
+                                // O vídeo está rodando. Quando acabar, vai para o próximo slide.
+                                video.onended = () => {
+                                    nextSlide();
+                                };
+                            }).catch(error => {
+                                // Se o navegador bloquear o autoplay, age como se fosse uma imagem e passa em 10s
+                                console.log("Autoplay bloqueado pelo navegador.", error);
+                                timeoutId = setTimeout(nextSlide, imageDisplayTime);
+                            });
+                        }
+                    } else {
+                        // Falha de segurança caso a tag de vídeo não exista dentro da div
+                        timeoutId = setTimeout(nextSlide, imageDisplayTime);
+                    }
+                } else {
+                    // É uma imagem. Espera o tempo definido e chama o próximo.
+                    timeoutId = setTimeout(nextSlide, imageDisplayTime);
+                }
+            }
+
+            function nextSlide() {
+                let nextIndex = (currentIndex + 1) % items.length;
+                showSlide(nextIndex);
+            }
+
+            // Inicia o carrossel se existirem itens
+            if(items.length > 0) {
+                showSlide(0);
+            }
+        });
+    </script>
 </body>
 </html>
