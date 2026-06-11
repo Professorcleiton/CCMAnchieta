@@ -145,26 +145,29 @@
         }
         .sidebar-header {
             padding: 15px;
-            text-align: center;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
             align-items: center;
-            gap: 10px;
+            justify-content: flex-start;
+            gap: 15px;
         }
         .sidebar-logo {
             width: 65px;
             height: 65px;
+            min-width: 65px;
             object-fit: contain;
             border-radius: 50%;
             background-color: transparent;
         }
         .sidebar-title-container {
             text-align: left;
+            display: flex;
+            flex-direction: column;
         }
         .sidebar-title-container h2 {
             font-size: 22px;
             font-weight: bold;
-            line-height: 1;
+            line-height: 1.1;
             color: white;
             letter-spacing: 0.5px;
         }
@@ -348,14 +351,19 @@
             position: relative;
         }
         .post-footer {
-            font-size: 11px;
-            color: #64748b;
+            font-size: 12px;
+            color: #475569;
+            font-weight: 500;
             margin-top: 8px;
             border-top: 1px dashed #cbd5e1;
-            padding-top: 5px;
+            padding-top: 6px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+        }
+        .post-footer span i {
+            margin-right: 4px;
+            color: #005088;
         }
         .card-actions {
             display: flex;
@@ -418,7 +426,7 @@
             cursor: not-allowed;
         }
 
-        /* BARRA DE ABAS - SÓ APARECE NO CELULAR */
+        /* NAVEGAÇÃO MOBILE */
         .mobile-tabs {
             display: none;
             background: #1e293b;
@@ -453,7 +461,7 @@
             border-radius: 4px;
         }
 
-        /* COMPATIBILIDADE MOBILE CORRIGIDA */
+        /* REGRAS MOBILE RECONSTRUÍDAS */
         @media (max-width: 768px) {
             #app-interface {
                 flex-direction: column !important;
@@ -476,11 +484,11 @@
             }
             .top-bar-app {
                 padding: 0 15px !important;
-                gap: 10px !important;
+                gap: 5px !important;
                 height: auto !important;
-                min-height: 60px !important;
-                padding-top: 5px !important;
-                padding-bottom: 5px !important;
+                min-height: 65px !important;
+                padding-top: 8px !important;
+                padding-bottom: 8px !important;
                 flex-wrap: wrap !important;
             }
             .aluno-selector {
@@ -490,7 +498,7 @@
             }
             .aluno-selector select {
                 flex: 1 !important;
-                max-width: 60% !important;
+                max-width: 65% !important;
                 font-size: 14px !important;
             }
             .user-and-nre-wrapper {
@@ -501,28 +509,31 @@
                 padding-top: 5px !important;
             }
             .right-nre-logo {
-                height: 30px;
+                height: 28px;
             }
             
             .mobile-tabs {
                 display: grid !important;
             }
             .board-container {
-                display: block !important;
-                height: calc(100vh - 150px) !important;
+                display: flex !important;
+                flex-direction: column !important;
+                flex: 1 !important;
+                height: calc(100vh - 145px) !important;
                 padding: 10px !important;
+                overflow: hidden !important;
             }
             .sector-column {
                 display: none !important;
                 width: 100% !important;
                 height: 100% !important;
-                border-radius: 8px !important;
+                flex: 1 !important;
             }
             .sector-column.active {
                 display: flex !important;
             }
             .column-header {
-                display: none;
+                display: none !important;
             }
         }
         @keyframes fadeIn {
@@ -678,8 +689,7 @@
                 const resultado = await response.json();
 
                 if(resultado.status === "success") {
-                    // BLINDAGEM DO SETOR: Unifica e força o termo 'PROFESSORES' internamente
-                    let cargoDefinitivo = resultado.setor;
+                    let cargoDefinitivo = resultado.setor.toString().trim().toLowerCase();
                     if(cargoDefinitivo === 'direcao' || cargoDefinitivo === 'professor' || cargoDefinitivo === 'professores') {
                         cargoDefinitivo = 'professores';
                     }
@@ -712,8 +722,7 @@
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('app-interface').style.display = 'flex';
             
-            // Corrige exibição do cabeçalho de perfil
-            let cargoTexto = usuarioLogado.setor === 'professores' ? 'PROFESSORES' : usuarioLogado.setorExibicao;
+            let cargoTexto = usuarioLogado.setor === 'professores' ? 'PROFESSORES' : usuarioLogado.setor.toUpperCase();
             document.getElementById('user-display').innerHTML = `<i class="fa-solid fa-user-check"></i> ${usuarioLogado.nome} (${cargoTexto})`;
             
             aplicarBloqueioSetores(usuarioLogado.setor, usuarioLogado.nivel);
@@ -849,17 +858,30 @@
             }
         }
 
+        // CORREÇÃO CIRÚRGICA DE FUSO E DATA DA FOTO 3: Quebra strings extensas de fusos horários
         function formatarDataEHora(dataBruta) {
             if (!dataBruta) return "";
-            let textoData = dataBruta.toString();
-            // Se vier no formato JSON Date do Google Sheets, limpa traços
-            if (textoData.includes('-')) {
-                const partes = textoData.split('-');
-                if (partes[0].length === 4) {
-                    return `${partes[2]}/${partes[1]}/${partes[0]}`;
+            let s = dataBruta.toString().trim();
+            
+            // Se o Google Sheets mandou a string nativa gigante (ex: "Thu Jun 11 2026...")
+            if (s.includes('GMT') || s.includes('Horário')) {
+                try {
+                    const d = new Date(s);
+                    if (!isNaN(d.getTime())) {
+                        return d.toLocaleDateString('pt-BR');
+                    }
+                } catch(e) {}
+            }
+            
+            // Tratamento alternativo para formato ISO com traço (AAAA-MM-DD)
+            if (s.includes('-')) {
+                const partesGerais = s.split(' ');
+                const soData = partesGerais[0].split('-');
+                if (soData[0].length === 4) {
+                    return `${soData[2]}/${soData[1]}/${soData[0]}`;
                 }
             }
-            return textoData;
+            return s;
         }
 
         function filtrarRegistrosPorAluno() {
@@ -880,7 +902,6 @@
                         const novoCard = document.createElement('div'); 
                         novoCard.className = 'post-card'; 
                         
-                        // Executa a blindagem estrita do formato de data brasileiro
                         let dataExibicao = formatarDataEHora(reg.dataAtual);
                         let autorRegistro = reg.funcionario ? reg.funcionario.trim() : 'SIGA';
                         
@@ -895,8 +916,8 @@
                         novoCard.innerHTML = `
                             <p class="post-text" id="text-card-${reg.idLinha}">${reg.texto}</p>
                             <div class="post-footer">
-                                <span><i class="fa-solid fa-user"></i> ${autorRegistro}</span>
-                                <span>${dataExibicao}</span>
+                                <span><i class="fa-solid fa-user"></i>${autorRegistro}</span>
+                                <span><i class="fa-solid fa-calendar-day"></i>${dataExibicao}</span>
                             </div>
                             ${botoesAcaoHtml}`;
                         feed.appendChild(novoCard);
@@ -916,9 +937,8 @@
             btn.disabled = true; 
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>...';
             
-            // Registra com carimbo de data e hora local do dispositivo do usuário (padrão Brasil)
             const agora = new Date();
-            const dataCarimbo = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+            const dataCarimbo = agora.toLocaleDateString('pt-BR');
             
             const payload = { 
                 operacao: "SALVAR", 
@@ -1026,7 +1046,6 @@
                     textarea.placeholder = "Registrar informação fixa..."; 
                 } 
                 else {
-                    // BLINDAGEM COMPLETA DO BOTÃO: Se o usuário logado for do setor professores (antigo direcao), libera o quadrante 'direcao'
                     if (setor === 'direcao' || setor === 'professor' || setor === 'professores' || setor === s) { 
                         if (setor === 'professores' && s === 'direcao') {
                             textarea.disabled = false;
