@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SGI - Área Restrita CCM Anchieta</title>
+    <title>SIGA - Área Restrita CCM Anchieta</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
@@ -36,15 +36,15 @@
         /* PAINEL PRINCIPAL */
         #app-interface { display: none; width: 100%; height: 100vh; }
         
-        .sidebar { width: 260px; background-color: #005088; color: white; display: flex; flex-direction: column; border-right: 4px solid #eab308; justify-content: space-between; }
+        .sidebar { width: 275px; background-color: #005088; color: white; display: flex; flex-direction: column; border-right: 4px solid #eab308; justify-content: space-between; }
         .sidebar-top { display: flex; flex-direction: column; overflow-y: auto; flex: 1; }
         
         .sidebar-header { padding: 15px; text-align: center; border-bottom: 1px solid rgba(255, 255, 255, 0.1); display: flex; align-items: center; gap: 10px; }
-        .sidebar-logo { width: 50px; height: 50px; object-fit: contain; }
+        .sidebar-logo { width: 55px; height: 55px; object-fit: contain; }
         .sidebar-title-container { text-align: left; }
-        .sidebar-title-container h2 { font-size: 20px; font-weight: bold; line-height: 1; }
-        .sidebar-meaning { font-size: 10px; color: #cbd5e1; display: block; margin-top: 2px; font-weight: normal; }
-        .sidebar-subtitle { font-size: 11px; color: #eab308; font-weight: 600; display: block; margin-top: 1px; }
+        .sidebar-title-container h2 { font-size: 22px; font-weight: bold; line-height: 1; color: white; letter-spacing: 0.5px; }
+        .sidebar-meaning { font-size: 10px; color: #cbd5e1; display: block; margin-top: 3px; font-weight: normal; line-height: 1.2; }
+        .sidebar-subtitle { font-size: 11px; color: #eab308; font-weight: 600; display: block; margin-top: 2px; }
         
         .turmas-lista { list-style: none; padding: 10px; }
         .turma-item { padding: 14px 20px; margin-bottom: 8px; background-color: rgba(255, 255, 255, 0.05); border-radius: 6px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 10px; transition: background 0.2s; }
@@ -99,9 +99,9 @@
 
     <div id="login-screen">
         <div class="login-box">
-            <img src="img/IMG_20260610_071544.png" alt="Brasão Anchieta" class="login-logo-nova">
+            <img src="img/SIGA.png" alt="Brasão SIGA Anchieta" class="login-logo-nova">
             <h2>Área Restrita</h2>
-            <p>SGI - Colégio Cívico-Militar Anchieta</p>
+            <p>SIGA - Colégio Cívico-Militar Anchieta</p>
             
             <div class="input-group">
                 <label for="user-email"><i class="fa-solid fa-envelope"></i> E-mail Institucional:</label>
@@ -126,10 +126,10 @@
         <aside class="sidebar">
             <div class="sidebar-top">
                 <div class="sidebar-header">
-                    <img src="img/IMG_20260610_071544.png" alt="Logo CCMA" class="sidebar-logo">
+                    <img src="img/SIGA.png" alt="Logo SIGA" class="sidebar-logo">
                     <div class="sidebar-title-container">
-                        <h2>SGI</h2>
-                        <span class="sidebar-meaning">Sistema de Gestão Integrada</span>
+                        <h2>SIGA</h2>
+                        <span class="sidebar-meaning">Sistema Integrado de Gestão Anchieta</span>
                         <span class="sidebar-subtitle">CCM Anchieta</span>
                     </div>
                 </div>
@@ -203,7 +203,7 @@
     </div>
 
     <script>
-        // NOVO LINK VINCULADO E ATUALIZADO COM SUCESSO AQUI ABAIXO
+        // Seu link mais recente incorporado com sucesso aqui
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
         
         const SHEET_ID = '1UUiVcCaSb_9Lx7gdEpmBzeRQPlBwDZRouQC2pf1q8Vg'; 
@@ -250,7 +250,7 @@
                 const resultado = await response.json();
 
                 if(resultado.status === "success") {
-                    // CORREÇÃO: Garante que mesmo se o servidor responder como "direcao", o site force "PROFESSORES"
+                    // Correção forçada para exibir sempre PROFESSORES nas permissões do site
                     let exibirCargo = resultado.setorExibicao;
                     if(resultado.setor === 'direcao' || resultado.setor === 'professor' || resultado.setor === 'professores') {
                         exibirCargo = 'PROFESSORES';
@@ -425,7 +425,7 @@
                             dataFormatada = new Date().toLocaleDateString('pt-BR');
                         }
 
-                        let autorRegistro = reg.funcionario ? reg.funcionario.trim() : 'SGI';
+                        let autorRegistro = reg.funcionario ? reg.funcionario.trim() : 'SIGA';
 
                         let botoesAcaoHtml = "";
                         if (usuarioLogado && usuarioLogado.nivel >= 2) {
@@ -543,7 +543,7 @@
                 <div style="padding: 40px; font-family: Arial, sans-serif; color: #1e293b;">
                     <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #005088; padding-bottom: 15px;">
                         <h1 style="color: #005088; font-size: 26px; margin-bottom: 5px;">COLÉGIO CÍVICO-MILITAR ANCHIETA</h1>
-                        <p style="font-size: 13px; letter-spacing: 1px; font-weight: bold; color: #64748b;">SGI - SISTEMA DE GESTÃO INTEGRADA</p>
+                        <p style="font-size: 13px; letter-spacing: 1px; font-weight: bold; color: #64748b;">SIGA - SISTEMA INTEGRADO DE GESTÃO ANCHIETA</p>
                     </div>
                     <div style="background: #f8fafc; padding: 15px; border-radius: 6px; margin-bottom: 30px; border: 1px solid #e2e8f0;">
                         <p style="font-size: 16px; margin-bottom: 5px;"><strong>Estudante:</strong> ${aluno}</p>
@@ -584,7 +584,7 @@
 
             htmlDocumento += `
                     <div style="margin-top: 60px; text-align: center; font-size: 11px; color: #94a3b8; border-top: 1px dashed #cbd5e1; padding-top: 10px;">
-                        Documento Gerado Digitalmente pelo Painel Restrito SGI - CCM Anchieta
+                        Documento Gerado Digitalmente pelo Painel Restrito SIGA - CCM Anchieta
                     </div>
                 </div>
             `;
@@ -594,7 +594,7 @@
             
             const configuracaoPdf = {
                 margin: 10,
-                filename: `Historico_SGI_${aluno.replace(/ /g, '_')}.pdf`,
+                filename: `Historico_SIGA_${aluno.replace(/ /g, '_')}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: { scale: 2, useCORS: true },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
@@ -611,13 +611,13 @@
         window.excluirRegistroServidor = excluirRegistroServidor;
         window.editarRegistroServidor = editarRegistroServidor;
 
+        // Função de controle de setores corrigida para garantir o funcionamento correto de PROFESSORES
         function aplicarBloqueioSetores(setor) {
             const setores = ['pedagogico', 'meivs', 'adm', 'direcao'];
             setores.forEach(s => {
                 const textarea = document.getElementById(`text-${s}`);
                 const botao = document.getElementById(`btn-${s}`);
                 
-                // CORREÇÃO DOS SETORES: Unifica 'direcao' e 'professor' para liberar a coluna 'direcao' (PROFESSORES)
                 if (setor === 'direcao' || setor === 'professor' || setor === 'professores' || setor === s) {
                     textarea.disabled = false;
                     botao.disabled = false;
