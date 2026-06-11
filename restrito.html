@@ -203,8 +203,8 @@
     </div>
 
     <script>
-        // ATENÇÃO: COLOQUE AQUI O SEU LINK ATUALIZADO DO GOOGLE APPS SCRIPT GERADO NO PASSO 1
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwm-ONErY-wuY5GoUxLkZOYLcctKeTno1Awp0D4UNyuhx6kRu2sqILpApLm_WWbKkYnhQ/exec';
+        // ATUALIZADO: Injetada a sua URL final do WebApp com suporte total a CORS, Nível 2 e Datas em texto
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
         
         const SHEET_ID = '1UUiVcCaSb_9Lx7gdEpmBzeRQPlBwDZRouQC2pf1q8Vg'; 
         const COLS_ALUNOS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=Alunos`;
@@ -213,6 +213,7 @@
         let todosOsRegistros = [];
         let cacheAlunosPorTurma = {}; 
         let turmaSelecionadaAtiva = '';
+        let timerInatividade = null; 
 
         window.addEventListener('DOMContentLoaded', verificarSessaoAtiva);
 
@@ -237,7 +238,6 @@
             errMsg.style.display = 'none';
 
             try {
-                // CORRIGIDO: Envia as credenciais direto ao AppScript para evitar o erro CORS
                 const response = await fetch(APPS_SCRIPT_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain' },
@@ -283,9 +283,27 @@
             aplicarBloqueioSetores(usuarioLogado.setor);
             await carregarAlunosETurmas();
             await carregarRegistrosDoServidor();
+            
+            resetarTimerInatividade();
+            window.onload = resetarTimerInatividade;
+            document.onmousemove = resetarTimerInatividade;
+            document.onkeypress = resetarTimerInatividade;
+            document.onclick = resetarTimerInatividade;
+            document.onscroll = resetarTimerInatividade;
+        }
+
+        function resetarTimerInatividade() {
+            if (!usuarioLogado) return;
+            clearTimeout(timerInatividade);
+            // 20 minutos de tolerância por inatividade
+            timerInatividade = setTimeout(function() {
+                alert("Sessão expirada por inatividade (20 minutos). Faça login novamente por segurança.");
+                fazerLogout();
+            }, 1200000);
         }
 
         function fazerLogout() {
+            clearTimeout(timerInatividade);
             usuarioLogado = null;
             todosOsRegistros = [];
             cacheAlunosPorTurma = {};
