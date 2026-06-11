@@ -813,12 +813,12 @@
             try { const response = await fetch(APPS_SCRIPT_URL, { method: 'GET', cache: 'no-cache' }); todosOsRegistros = await response.json(); filtrarRegistrosPorAluno(); } catch (error) { console.error("Erro ao carregar registros antigos:", error); }
         }
 
-        // TRATAMENTO DA IMAGEM 3: Converte o texto extenso do Sheets e renderiza data + hora
+        // NOVO FORMATADOR DE STRINGS INTEGRADAS: Trata o texto longo vindo do AppScript
         function formatarDataEHora(dataBruta) {
             if (!dataBruta) return "";
             let s = dataBruta.toString().trim();
             
-            // Tratamento caso venha o formato extenso nativo "Thu Jun 11 2026..."
+            // Se for a string extensa nativa "Thu Jun 11 2026 15:30:00..."
             if (s.match(/^[A-Za-z]{3}\s[A-Za-z]{3}/) || s.includes('GMT')) {
                 try {
                     const d = new Date(s);
@@ -829,6 +829,15 @@
                     }
                 } catch(e) {}
             }
+            
+            // Se já for a nossa string formatada direta com data e hora "11/06/2026 15:30"
+            if (s.includes('/') && s.includes(':')) {
+                const partes = s.split(' ');
+                if (partes[0] && partes[1]) {
+                    return `${partes[0]} às ${partes[1]}`;
+                }
+            }
+            
             return s;
         }
 
@@ -874,11 +883,10 @@
             if(!texto || !alunoSelecionado || alunoSelecionado.includes('Selecione uma turma')) return;
             btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>...';
             
-            // Cria o texto de data e hora do Paraná de forma direta para a planilha
             const agora = new Date();
-            const dataCarimbo = agora.toLocaleDateString('pt-BR') + ' às ' + agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            const dataCarimbo = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
             
-            const payload = { operacao: "SALVAR", aluno: alunoSelecionado, setor: setor, texto: texto, funcionario: usuarioLogado.nome, dataAtual: dataCarimbo };
+            const payload = { operacao: "SALVAR", aluno: alunoSelecionado, sector: setor, texto: texto, funcionario: usuarioLogado.nome, dataAtual: dataCarimbo };
             try {
                 await fetch(APPS_SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
                 textarea.value = ''; await carregarRegistrosDoServidor(); 
@@ -893,7 +901,7 @@
             } catch (error) { alert("Erro ao excluir."); }
         }
 
-        async function editarRegistroServidor(idLinha, setor) {
+        async function editarRegistroServidor(idLinha, sector) {
             if (!idLinha) return; const paragrafoTexto = document.getElementById(`text-card-${idLinha}`); const textoAntigo = paragrafoTexto.innerText;
             const novoTexto = prompt("Edite o texto do apontamento abaixo:", textoAntigo); if (novoTexto === null) return; if (novoTexto.trim() === "") return alert("O texto não pode ficar em branco.");
             try {
