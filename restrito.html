@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIGA - Área Restrita CCM Anchieta</title>
+    <title>SIGA - Central Pedagógica CCM Anchieta</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
@@ -21,7 +21,7 @@
             overflow: hidden;
         }
         
-        /* TELA DE LOGIN OVERLAY */
+        /* TELA DE LOGIN OVERLAY RENOVAÇÃO DO LOGO */
         #login-screen {
             position: fixed;
             top: 0;
@@ -39,16 +39,23 @@
             padding: 40px;
             border-radius: 12px;
             width: 100%;
-            max-width: 400px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            max-width: 420px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
             text-align: center;
             border-top: 8px solid #eab308;
         }
+        /* MELHORIA: Logo redondo, maior e com fundo de contraste para leitura das inscrições */
         .login-logo-nova {
-            width: 280px;
-            height: 280px;
-            margin-bottom: 20px;
+            width: 180px;
+            height: 180px;
+            margin: 0 auto 25px auto;
             object-fit: contain;
+            border-radius: 50%;
+            background-color: #ffffff;
+            padding: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border: 2px solid #e2e8f0;
+            display: block;
         }
         .login-box h2 {
             color: #005088;
@@ -127,7 +134,7 @@
             flex-direction: row;
         }
         .sidebar {
-            width: 275px;
+            width: 290px; /* Expandido ligeiramente para acomodar o logo maior */
             background-color: #005088;
             color: white;
             display: flex;
@@ -144,20 +151,24 @@
             flex: 1;
         }
         .sidebar-header {
-            padding: 15px;
+            padding: 20px 15px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
             align-items: center;
             justify-content: flex-start;
-            gap: 15px;
+            gap: 12px;
         }
+        /* MELHORIA: Logo da sidebar redondo, maior e com fundo branco de alto contraste */
         .sidebar-logo {
-            width: 120px;
-            height: 120px;
-            min-width: 65px;
+            width: 70px;
+            height: 70px;
+            min-width: 70px;
             object-fit: contain;
             border-radius: 50%;
-            background-color: transparent;
+            background-color: #ffffff;
+            padding: 4px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
         .sidebar-title-container {
             text-align: left;
@@ -300,15 +311,140 @@
             align-items: center;
             gap: 6px;
         }
+
+        /* INTERFACE DO DASHBOARD INICIAL */
+        .summary-dashboard-bar {
+            background-color: white;
+            padding: 12px 20px;
+            border-bottom: 1px solid #cbd5e1;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            justify-content: flex-start;
+        }
+        .metric-mini-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .metric-mini-card span.count-number {
+            background: #005088;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+        }
+        .mini-chart-bar-container {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex: 1;
+            max-width: 450px;
+            margin-left: auto;
+            background: #f8fafc;
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+        }
+        .mini-label-chart {
+            font-size: 10px;
+            font-weight: bold;
+            color: #64748b;
+        }
+        .visual-bar-fill {
+            height: 12px;
+            border-radius: 3px;
+            transition: width 0.4s ease;
+            min-width: 4px;
+        }
+
+        /* MURAL CENTRAL DE BOAS VINDAS */
+        #welcome-dashboard-mural {
+            flex: 1;
+            padding: 30px;
+            background-color: #f8fafc;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        .welcome-header-box {
+            background: linear-gradient(135deg, #005088 0%, #0c4a6e 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border-left: 6px solid #eab308;
+        }
+        .welcome-header-box h2 { font-size: 22px; margin-bottom: 5px; }
+        .welcome-header-box p { font-size: 13px; color: #cbd5e1; }
+        
+        .grid-stats-mural {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+        .card-stat-mural {
+            background: white;
+            border: 1px solid #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .card-stat-mural i { font-size: 30px; }
+        .card-stat-mural .stat-info h3 { font-size: 24px; font-weight: bold; color: #1e293b; }
+        .card-stat-mural .stat-info p { font-size: 12px; color: #64748b; font-weight: 500; }
+
+        .mural-chart-box {
+            background: white;
+            border: 1px solid #e2e8f0;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .mural-chart-box h4 { font-size: 14px; margin-bottom: 15px; color: #005088; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px; }
+        
+        .mural-large-bar-row {
+            margin-bottom: 15px;
+        }
+        .mural-bar-label-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        .mural-bar-outer {
+            background: #e2e8f0;
+            height: 16px;
+            border-radius: 4px;
+            overflow: hidden;
+            width: 100%;
+        }
+        .mural-bar-inner {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease-in-out;
+            width: 0%;
+        }
         
         .board-container {
+            display: none; 
             flex: 1;
-            display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 15px;
             padding: 15px;
             background-color: #f8fafc;
-            height: calc(100vh - 65px);
+            height: calc(100vh - 110px);
             overflow: hidden;
         }
         .sector-column {
@@ -382,18 +518,11 @@
             padding: 2px 6px;
             border-radius: 3px;
         }
-        .btn-edit-card {
-            color: #4f46e5;
-        }
-        .btn-edit-card:hover {
-            background: #e0e7ff;
-        }
-        .btn-delete-card {
-            color: #b91c1c;
-        }
-        .btn-delete-card:hover {
-            background: #fee2e2;
-        }
+        .btn-edit-card { color: #4f46e5; }
+        .btn-edit-card:hover { background: #e0e7ff; }
+        .btn-delete-card { color: #b91c1c; }
+        .btn-delete-card:hover { background: #fee2e2; }
+        
         .input-container {
             padding: 12px;
             border-top: 1px solid #e2e8f0;
@@ -461,27 +590,20 @@
             border-radius: 4px;
         }
 
-        /* REGRAS MOBILE ATUALIZADAS (FORÇA VISUALIZAÇÃO DO CONTEÚDO) */
+        /* REGRAS MOBILE */
         @media (max-width: 768px) {
-            #app-interface {
-                flex-direction: column !important;
-            }
-            .menu-toggle {
-                display: block !important;
-            }
+            #app-interface { flex-direction: column !important; }
+            .menu-toggle { display: block !important; }
             .sidebar {
                 position: fixed !important;
-                top: 0;
-                left: 0;
+                top: 0; left: 0;
                 height: 100vh !important;
                 width: 260px !important;
                 transform: translateX(-100%) !important;
                 box-shadow: 5px 0 15px rgba(0,0,0,0.3);
                 z-index: 9999 !important;
             }
-            .sidebar.open {
-                transform: translateX(0) !important;
-            }
+            .sidebar.open { transform: translateX(0) !important; }
             .top-bar-app {
                 padding: 0 15px !important;
                 gap: 5px !important;
@@ -491,16 +613,8 @@
                 padding-bottom: 8px !important;
                 flex-wrap: wrap !important;
             }
-            .aluno-selector {
-                font-size: 15px !important;
-                width: 100% !important;
-                justify-content: space-between !important;
-            }
-            .aluno-selector select {
-                flex: 1 !important;
-                max-width: 65% !important;
-                font-size: 14px !important;
-            }
+            .aluno-selector { font-size: 15px !important; width: 100% !important; justify-content: space-between !important; }
+            .aluno-selector select { flex: 1 !important; max-width: 65% !important; font-size: 14px !important; }
             .user-and-nre-wrapper {
                 width: 100% !important;
                 justify-content: space-between !important;
@@ -508,33 +622,24 @@
                 border-top: 1px solid #f1f5f9 !important;
                 padding-top: 5px !important;
             }
-            .right-nre-logo {
-                height: 28px;
-            }
-            
-            .mobile-tabs {
-                display: grid !important;
-            }
+            .right-nre-logo { height: 28px; }
+            .summary-dashboard-bar { padding: 6px 12px !important; gap: 10px !important; flex-wrap: wrap !important; }
+            .mini-chart-bar-container { max-width: 100% !important; width: 100% !important; }
+            .mobile-tabs { display: none !important; } 
+            .mobile-tabs.active-student { display: grid !important; }
             .board-container {
-                display: flex !important;
+                display: none !important;
                 flex-direction: column !important;
                 flex: 1 !important;
-                height: calc(100vh - 145px) !important;
+                height: calc(100vh - 190px) !important;
                 padding: 10px !important;
                 overflow: hidden !important;
             }
-            .sector-column {
-                display: none !important;
-                width: 100% !important;
-                height: 100% !important;
-                flex: 1 !important;
-            }
-            .sector-column.active {
-                display: flex !important;
-            }
-            .column-header {
-                display: none !important;
-            }
+            .board-container.active-student { display: none !important; }
+            .board-container.active-student.show-grid { display: flex !important; }
+            .sector-column { display: none !important; width: 100% !important; height: 100% !important; flex: 1 !important; }
+            .sector-column.active { display: flex !important; }
+            .column-header { display: none !important; }
         }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(5px); }
@@ -547,16 +652,17 @@
     <!-- 1. TELA DE LOGIN OVERLAY -->
     <div id="login-screen">
         <div class="login-box">
+            <!-- DESIGN REFEITO: Logo redondo, ampliado e com contraste aprimorado -->
             <img src="img/SIGA.png" alt="Brasão SIGA Anchieta" class="login-logo-nova">
             <h2>Área Restrita</h2>
-            <p>SIGA - Colégio Cívico-Militar Anchieta</p>
+            <p>Sua senha padrão são os números do seu RG</p>
             <div class="input-group">
                 <label for="user-email"><i class="fa-solid fa-envelope"></i> E-mail Institucional:</label>
                 <input type="email" id="user-email" placeholder="nome.sobrenome@escola.pr.gov.br">
             </div>
             <div class="input-group">
-                <label for="user-password"><i class="fa-solid fa-key"></i> Senha de Acesso:</label>
-                <input type="password" id="user-password" placeholder="Digite sua senha cadastrada">
+                <label for="user-password"><i class="fa-solid fa-key"></i> Senha (RG sem pontos/traços):</label>
+                <input type="password" id="user-password" placeholder="Ex: 60250621">
             </div>
             <div id="error-message">E-mail ou Senha incorretos!</div>
             <button class="btn-login" id="btn-entrar-login" onclick="autenticarUsuario()">Entrar no Sistema</button>
@@ -577,6 +683,7 @@
         <aside class="sidebar" id="app-sidebar">
             <div class="sidebar-top">
                 <div class="sidebar-header">
+                    <!-- DESIGN REFEITO: Logo da barra interna redondo, maior e protegido com borda branca de nitidez -->
                     <img src="img/SIGA.png" alt="Logo SIGA" class="sidebar-logo">
                     <div class="sidebar-title-container">
                         <h2>SIGA</h2>
@@ -601,7 +708,7 @@
                     <select id="select-alunos" onchange="filtrarRegistrosPorAluno()" style="padding: 6px 12px; font-size: 16px; border-radius: 4px;">
                         <option>Selecione uma turma primeiro...</option>
                     </select>
-                    <button class="btn-pdf" onclick="gerarRelatorioPDF()"><i class="fa-solid fa-file-pdf"></i> PDF</button>
+                    <button class="btn-pdf" id="btn-gerar-pdf-oficial" onclick="gerarFichaIndividualConselho()" style="display: none;"><i class="fa-solid fa-file-invoice"></i> FICHA CONSELHO</button>
                 </div>
                 <div class="user-and-nre-wrapper">
                     <img src="img/nreumuarama.jpg" alt="NRE Umuarama" class="right-nre-logo">
@@ -609,7 +716,83 @@
                 </div>
             </header>
 
-            <div class="board-container">
+            <div class="summary-dashboard-bar" id="student-mini-dash" style="display: none;">
+                <div class="metric-mini-card">
+                    <i class="fa-solid fa-chart-line" style="color: #005088;"></i> Apontamentos do Estudante: 
+                    <span class="count-number" id="dash-total-count">0</span>
+                </div>
+                <div class="mini-chart-bar-container">
+                    <span class="mini-label-chart">MEIVS</span>
+                    <div class="visual-bar-fill" id="bar-meivs" style="background-color: #0284c7; width: 0%;"></div>
+                    <span class="mini-label-chart">PEDAG</span>
+                    <div class="visual-bar-fill" id="bar-pedag" style="background-color: #0d9488; width: 0%;"></div>
+                    <span class="mini-label-chart">ADM</span>
+                    <div class="visual-bar-fill" id="bar-adm" style="background-color: #4f46e5; width: 0%;"></div>
+                    <span class="mini-label-chart">PROFS</span>
+                    <div class="visual-bar-fill" id="bar-profs" style="background-color: #b91c1c; width: 0%;"></div>
+                </div>
+            </div>
+
+            <div id="welcome-dashboard-mural">
+                <div class="welcome-header-box">
+                    <h2 id="txt-boas-vindas-nome">Olá, Professor(a)! Seja bem-vindo ao SIGA</h2>
+                    <p>Consulte abaixo o panorama estatístico em tempo real de todas as ocorrências e apontamentos do CCM Anchieta.</p>
+                </div>
+
+                <div class="grid-stats-mural">
+                    <div class="card-stat-mural">
+                        <i class="fa-solid fa-database" style="color: #005088;"></i>
+                        <div class="stat-info">
+                            <h3 id="mural-total-geral">0</h3>
+                            <p>Registros Computados</p>
+                        </div>
+                    </div>
+                    <div class="card-stat-mural">
+                        <i class="fa-solid fa-shield-halved" style="color: #0284c7;"></i>
+                        <div class="stat-info">
+                            <h3 id="mural-total-meivs">0</h3>
+                            <p>Apontamentos MEIVS</p>
+                        </div>
+                    </div>
+                    <div class="card-stat-mural">
+                        <i class="fa-solid fa-graduation-cap" style="color: #0d9488;"></i>
+                        <div class="stat-info">
+                            <h3 id="mural-total-pedag">0</h3>
+                            <p>Casos Pedagógicos</p>
+                        </div>
+                    </div>
+                    <div class="card-stat-mural">
+                        <i class="fa-solid fa-chalkboard-user" style="color: #b91c1c;"></i>
+                        <div class="stat-info">
+                            <h3 id="mural-total-profs">0</h3>
+                            <p>Atas de Professores</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mural-chart-box">
+                    <h4><i class="fa-solid fa-chart-bar"></i> Distribuição Volumétrica por Setores no Colégio</h4>
+                    
+                    <div class="mural-large-bar-row">
+                        <div class="mural-bar-label-info"><span>MEIV'S (Disciplina Civil-Militar)</span><span id="txt-pct-meivs">0%</span></div>
+                        <div class="mural-bar-outer"><div class="mural-bar-inner" id="mural-fill-meivs" style="background-color: #0284c7;"></div></div>
+                    </div>
+                    <div class="mural-large-bar-row">
+                        <div class="mural-bar-label-info"><span>PEDAGÓGICO (Evolução de Aprendizagem)</span><span id="txt-pct-pedag">0%</span></div>
+                        <div class="mural-bar-outer"><div class="mural-bar-inner" id="mural-fill-pedag" style="background-color: #0d9488;"></div></div>
+                    </div>
+                    <div class="mural-large-bar-row">
+                        <div class="mural-bar-label-info"><span>ADMINISTRATIVO (Secretaria e Atendimento)</span><span id="txt-pct-adm">0%</span></div>
+                        <div class="mural-bar-outer"><div class="mural-bar-inner" id="mural-fill-adm" style="background-color: #4f46e5;"></div></div>
+                    </div>
+                    <div class="mural-large-bar-row">
+                        <div class="mural-bar-label-info"><span>PROFESSORES (Conselho de Classe)</span><span id="txt-pct-profs">0%</span></div>
+                        <div class="mural-bar-outer"><div class="mural-bar-inner" id="mural-fill-profs" style="background-color: #b91c1c;"></div></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="board-container" id="siga-columns-grid">
                 <!-- COLUNA MEIV'S -->
                 <section class="sector-column active" id="col-meivs">
                     <div class="column-header" style="background-color: #0284c7;">MEIV'S</div>
@@ -675,7 +858,7 @@
 
         async function autenticarUsuario() {
             const emailDigitado = document.getElementById('user-email').value.trim().toLowerCase();
-            const senhaDigitada = document.getElementById('user-password').value.trim();
+            const senhaDigitada = document.getElementById('user-password').value.trim().replace(/\D/g, ""); 
             const errMsg = document.getElementById('error-message');
             const btnLogin = document.getElementById('btn-entrar-login');
             
@@ -730,7 +913,8 @@
             
             let cargoTexto = usuarioLogado.setor === 'professores' ? 'PROFESSORES' : usuarioLogado.setor.toUpperCase();
             document.getElementById('user-display').innerHTML = `<i class="fa-solid fa-user-check"></i> ${usuarioLogado.nome} (${cargoTexto})`;
-            
+            document.getElementById('txt-boas-vindas-nome').innerText = `Olá, ${usuarioLogado.nome}! Seja bem-vindo ao SIGA`;
+
             aplicarBloqueioSetores(usuarioLogado.setor, usuarioLogado.nivel);
             await carregarAlunosETurmas();
             await carregarRegistrosDoServidor();
@@ -742,9 +926,7 @@
         }
         
         function alternarAbaMobile(setorId, botaoAtivo) {
-            document.querySelectorAll('.tab-button').forEach(btn => {
-                btn.classList.remove('active');
-            }); 
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active')); 
             botaoAtivo.classList.add('active');
             
             document.querySelectorAll('.sector-column').forEach(col => {
@@ -757,18 +939,12 @@
         }
 
         function fazerLogout() {
-            usuarioLogado = null; 
-            todosOsRegistros = []; 
-            cacheAlunosPorTurma = {}; 
-            turmaSelecionadaAtiva = ''; 
+            usuarioLogado = null; todosOsRegistros = []; cacheAlunosPorTurma = {}; turmaSelecionadaAtiva = ''; 
             localStorage.removeItem('sgi_ccma_session');
-            document.getElementById('user-email').value = ''; 
-            document.getElementById('user-password').value = ''; 
+            document.getElementById('user-email').value = ''; document.getElementById('user-password').value = ''; 
             document.getElementById('error-message').style.display = 'none';
-            document.getElementById('btn-entrar-login').disabled = false; 
-            document.getElementById('btn-entrar-login').innerHTML = 'Entrar no Sistema';
-            document.getElementById('app-interface').style.display = 'none'; 
-            document.getElementById('login-screen').style.display = 'flex'; 
+            document.getElementById('btn-entrar-login').disabled = false; document.getElementById('btn-entrar-login').innerHTML = 'Entrar no Sistema';
+            document.getElementById('app-interface').style.display = 'none'; document.getElementById('login-screen').style.display = 'flex'; 
             document.getElementById('app-sidebar').classList.remove('open');
         }
 
@@ -785,15 +961,11 @@
                     if (r.c && r.c[1] && r.c[1].v) {
                         const nomeAluno = r.c[1].v.toString().trim(); 
                         const nomeTurma = r.c[2] && r.c[2].v ? r.c[2].v.toString().trim() : 'Sem Turma';
-                        if(!cacheAlunosPorTurma[nomeTurma]) { 
-                            cacheAlunosPorTurma[nomeTurma] = []; 
-                        } 
+                        if(!cacheAlunosPorTurma[nomeTurma]) { cacheAlunosPorTurma[nomeTurma] = []; } 
                         cacheAlunosPorTurma[nomeTurma].push(nomeAluno);
                     }
                 });
-            } catch (error) { 
-                console.error("Erro na leitura das turmas:", error); 
-            }
+            } catch (error) { console.error("Erro na leitura das turmas:", error); }
             renderizarSidebarTurmas();
         }
 
@@ -803,74 +975,133 @@
             listaDeTurmasOrdenada.forEach((turma, index) => {
                 let li = document.createElement('li'); li.className = 'turma-item'; li.innerHTML = `<i class="fa-solid fa-users-viewfinder"></i> ${turma}`; li.setAttribute('data-turma', turma);
                 li.onclick = function() {
-                    document.querySelectorAll('.turma-item').forEach(el => el.classList.remove('active')); li.classList.add('active'); selecionarTurma(turma); document.getElementById('app-sidebar').classList.remove('open');
+                    document.querySelectorAll('.turma-item').forEach(el => el.classList.remove('active')); li.classList.add('active'); 
+                    selecionarTurma(turma); document.getElementById('app-sidebar').classList.remove('open');
                 };
                 sidebarLista.appendChild(li);
-                if(index === 0 && !turmaSelecionadaAtiva) { li.classList.add('active'); selecionarTurma(turma); } else if(turma === turmaSelecionadaAtiva) { li.classList.add('active'); }
             });
         }
 
         function selecionarTurma(turma) {
-            turmaSelecionadaAtiva = turma; const select = document.getElementById('select-alunos'); const valorAntigoAluno = select.value; select.innerHTML = ''; const alunosDaTurma = cacheAlunosPorTurma[turma] || [];
-            if(alunosDaTurma.length === 0) { select.innerHTML = '<option>Nenhum aluno nessa turma</option>'; return; }
-            alunosDaTurma.sort().forEach(aluno => { let opt = document.createElement('option'); opt.value = aluno; opt.innerHTML = aluno; select.appendChild(opt); });
-            if(alunosDaTurma.includes(valorAntigoAluno)) { select.value = valorAntigoAluno; } filtrarRegistrosPorAluno();
+            turmaSelecionadaAtiva = turma; const select = document.getElementById('select-alunos'); select.innerHTML = ''; const alunosDaTurma = cacheAlunosPorTurma[turma] || [];
+            
+            let optDefault = document.createElement('option');
+            optDefault.value = ""; optDefault.innerHTML = "-- Escolha o Aluno da Lista --";
+            select.appendChild(optDefault);
+
+            alunosDaTurma.sort().forEach(aluno => { 
+                let opt = document.createElement('option'); opt.value = aluno; opt.innerHTML = aluno; select.appendChild(opt); 
+            });
+            filtrarRegistrosPorAluno();
         }
 
         async function carregarRegistrosDoServidor() {
             if(!APPS_SCRIPT_URL) return;
-            try { const response = await fetch(APPS_SCRIPT_URL, { method: 'GET', cache: 'no-cache' }); todosOsRegistros = await response.json(); filtrarRegistrosPorAluno(); } catch (error) { console.error("Erro ao carregar registros antigos:", error); }
+            try { 
+                const response = await fetch(APPS_SCRIPT_URL, { method: 'GET', cache: 'no-cache' }); 
+                todosOsRegistros = await response.json(); 
+                calcularDashboardGeralEscola(); 
+            } catch (error) { console.error("Erro ao carregar registros antigos:", error); }
         }
 
-        // MOTOR ADAPTÁVEL RECONSTRUÍDO: Aceita e formata datas com ou sem horário sem quebrar os cards de ontem
+        function calcularDashboardGeralEscola() {
+            let total = todosOsRegistros.length;
+            document.getElementById('mural-total-geral').innerText = total;
+
+            let m = 0, p = 0, a = 0, pf = 0;
+            todosOsRegistros.forEach(r => {
+                if (r.setor === 'meivs') m++;
+                else if (r.setor === 'pedagogico') p++;
+                else if (r.setor === 'adm') a++;
+                else if (r.setor === 'professores' || r.setor === 'direcao') pf++;
+            });
+
+            document.getElementById('mural-total-meivs').innerText = m;
+            document.getElementById('mural-total-pedag').innerText = p;
+            document.getElementById('mural-total-profs').innerText = pf;
+
+            let pctM = total > 0 ? Math.round((m/total)*100) : 0;
+            let pctP = total > 0 ? Math.round((p/total)*100) : 0;
+            let pctA = total > 0 ? Math.round((a/total)*100) : 0;
+            let pctPf = total > 0 ? Math.round((pf/total)*100) : 0;
+
+            document.getElementById('txt-pct-meivs').innerText = pctM + "%";
+            document.getElementById('txt-pct-pedag').innerText = pctP + "%";
+            document.getElementById('txt-pct-adm').innerText = pctA + "%";
+            document.getElementById('txt-pct-profs').innerText = pctPf + "%";
+
+            document.getElementById('mural-fill-meivs').style.width = pctM + "%";
+            document.getElementById('mural-fill-pedag').style.width = pctP + "%";
+            document.getElementById('mural-fill-adm').style.width = pctA + "%";
+            document.getElementById('mural-fill-profs').style.width = pctPf + "%";
+        }
+
         function formatarDataEHora(dataBruta) {
-            if (!dataBruta) return "";
-            let s = dataBruta.toString().trim();
-            
+            if (!dataBruta) return ""; let s = dataBruta.toString().trim();
             if (s.match(/^[A-Za-z]{3}\s[A-Za-z]{3}/) || s.includes('GMT')) {
                 try {
                     const d = new Date(s);
                     if (!isNaN(d.getTime())) {
-                        const dataFormato = d.toLocaleDateString('pt-BR');
-                        const horaFormato = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-                        return `${dataFormato} às ${horaFormato}`;
+                        return `${d.toLocaleDateString('pt-BR')} às ${d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
                     }
                 } catch(e) {}
             }
-            
             if (s.includes('-')) {
-                const partesGerais = s.split(' ');
-                const soData = partesGerais[0].split('-');
+                const partesGerais = s.split(' '); const soData = partesGerais[0].split('-');
                 const horaSurgida = partesGerais[1] ? ' às ' + partesGerais[1].substring(0,5) : '';
-                if (soData[0].length === 4) {
-                    return `${soData[2]}/${soData[1]}/${soData[0]}${horaSurgida}`;
-                }
+                if (soData[0].length === 4) return `${soData[2]}/${soData[1]}/${soData[0]}${horaSurgida}`;
             }
-
-            if (s.includes('/')) {
-                return s.replace(' ', ' às ');
-            }
-            
+            if (s.includes('/')) return s.replace(' ', ' às ');
             return s;
         }
 
         function filtrarRegistrosPorAluno() {
             const selectElem = document.getElementById('select-alunos');
-            if(!selectElem.options.length || selectElem.value.includes('Selecione uma turma') || selectElem.value.includes('Nenhum aluno')) {
-                const setores = ['meivs', 'pedagogico', 'adm', 'direcao']; setores.forEach(s => document.getElementById(`feed-${s}`).innerHTML = ''); return;
-            }
-            const alunoSelecionado = selectElem.value; const setores = ['meivs', 'pedagogico', 'adm', 'direcao']; setores.forEach(s => document.getElementById(`feed-${s}`).innerHTML = '');
             
+            if(!selectElem.options.length || selectElem.value === "" || selectElem.value.includes('Selecione') || selectElem.value.includes('Nenhum')) {
+                document.getElementById('welcome-dashboard-mural').style.display = "flex";
+                document.getElementById('student-mini-dash').style.display = "none";
+                document.getElementById('siga-columns-grid').style.setProperty('display', 'none', 'important');
+                document.getElementById('btn-gerar-pdf-oficial').style.display = "none";
+                
+                document.getElementById('mobile-tabs-container').classList.remove('active-student');
+                document.getElementById('siga-columns-grid').classList.remove('active-student', 'show-grid');
+                
+                calcularDashboardGeralEscola();
+                return;
+            }
+
+            document.getElementById('welcome-dashboard-mural').style.display = "none";
+            document.getElementById('student-mini-dash').style.display = "flex";
+            document.getElementById('btn-gerar-pdf-oficial').style.display = "inline-flex";
+            
+            if (window.innerWidth > 768) {
+                document.getElementById('siga-columns-grid').style.setProperty('display', 'grid', 'important');
+            } else {
+                document.getElementById('mobile-tabs-container').classList.add('active-student');
+                document.getElementById('siga-columns-grid').classList.add('active-student', 'show-grid');
+                alternarAbaMobile('meivs', document.querySelector('.tab-button'));
+            }
+
+            const alunoSelecionado = selectElem.value; const setores = ['meivs', 'pedagogico', 'adm', 'direcao']; 
+            setores.forEach(s => document.getElementById(`feed-${s}`).innerHTML = '');
+            
+            let cMeivs = 0, cPedag = 0, cAdm = 0, cProfs = 0;
+
             todosOsRegistros.forEach(reg => {
                 if(reg.aluno && reg.aluno.trim() === alunoSelecionado.trim()) {
-                    // Mapeia internamente o setor 'professores' antigo para renderizar no feed correto
                     let alvoSetor = reg.setor;
+                    
+                    if (alvoSetor === 'meivs') cMeivs++;
+                    else if (alvoSetor === 'pedagogico') cPedag++;
+                    else if (alvoSetor === 'adm') cAdm++;
+                    else if (alvoSetor === 'professores' || alvoSetor === 'direcao') cProfs++;
+
                     if(alvoSetor === 'professores') alvoSetor = 'direcao';
 
                     const feed = document.getElementById(`feed-${alvoSetor}`);
                     if(feed) {
                         const novoCard = document.createElement('div'); novoCard.className = 'post-card';
-                        
                         let dataExibicao = formatarDataEHora(reg.dataAtual);
                         let autorRegistro = reg.funcionario ? reg.funcionario.trim() : 'SIGA';
                         
@@ -893,29 +1124,39 @@
                     }
                 }
             });
+
+            atualizarMetricasDashboardIndividual(cMeivs, cPedag, cAdm, cProfs);
         }
 
-        // DISPARADOR COM ENTER: Envia o post ao pressionar Enter sozinho
+        function atualizarMetricasDashboardIndividual(meivs, pedag, adm, profs) {
+            const total = meivs + pedag + adm + profs;
+            document.getElementById('dash-total-count').innerText = total;
+
+            const pMeivs = total > 0 ? (meivs / total) * 100 : 0;
+            const pPedag = total > 0 ? (pedag / total) * 100 : 0;
+            const pAdm = total > 0 ? (adm / total) * 100 : 0;
+            const pProfs = total > 0 ? (profs / total) * 100 : 0;
+
+            document.getElementById('bar-meivs').style.width = `${Math.max(pMeivs, total > 0 ? 5 : 0)}%`;
+            document.getElementById('bar-pedag').style.width = `${Math.max(pPedag, total > 0 ? 5 : 0)}%`;
+            document.getElementById('bar-adm').style.width = `${Math.max(pAdm, total > 0 ? 5 : 0)}%`;
+            document.getElementById('bar-profs').style.width = `${Math.max(pProfs, total > 0 ? 5 : 0)}%`;
+        }
+
         function verificarTeclaEnter(event, setor) {
             if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault(); 
-                salvarPost(setor);
+                event.preventDefault(); salvarPost(setor);
             }
         }
 
         async function salvarPost(setor) {
             const textarea = document.getElementById(`text-${setor}`); const texto = textarea.value.trim(); const alunoSelecionado = document.getElementById('select-alunos').value; const btn = document.getElementById(`btn-${setor}`);
-            if(!texto || !alunoSelecionado || alunoSelecionado.includes('Selecione uma turma')) return;
+            if(!texto || !alunoSelecionado) return;
             btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>...';
             
             const agora = new Date();
             const dataCarimbo = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-            
-            // CORREÇÃO DO PAYLOAD DA SPREADSHEET: Transforma 'direcao' em 'professores' antes de gravar na célula
-            let setorPlanilha = setor;
-            if (setorPlanilha === 'direcao') {
-                setorPlanilha = 'professores';
-            }
+            let setorPlanilha = setor === 'direcao' ? 'professores' : setor;
 
             const payload = { operacao: "SALVAR", aluno: alunoSelecionado, setor: setorPlanilha, texto: texto, funcionario: usuarioLogado.nome, dataAtual: dataCarimbo };
             try {
@@ -941,26 +1182,69 @@
             } catch (error) { alert("Erro ao editar."); }
         }
 
-        function gerarRelatorioPDF() {
-            const aluno = document.getElementById('select-alunos').value; if(!aluno || aluno.includes('Selecione') || aluno.includes('Nenhum')) { alert('Selecione um aluno válido.'); return; }
-            let htmlDocumento = `<div style="padding: 40px; font-family: Arial, sans-serif; color: #1e293b;"><div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #005088; padding-bottom: 15px;"><h1 style="color: #005088; font-size: 26px; margin-bottom: 5px;">COLÉGIO CÍVICO-MILITAR ANCHIETA</h1><p style="font-size: 13px; letter-spacing: 1px; font-weight: bold; color: #64748b;">SIGA - SISTEMA INTEGRADO DE GESTÃO ANCHIETA</p></div><div style="background: #f8fafc; padding: 15px; border-radius: 6px; margin-bottom: 30px; border: 1px solid #e2e8f0;"><p style="font-size: 16px; margin-bottom: 5px;"><strong>Estudante:</strong> ${aluno}</p><p style="font-size: 14px; color: #475569;"><strong>Turma:</strong> ${turmaSelecionadaAtiva}</p><p style="font-size: 12px; color: #64748b; margin-top: 10px;">Relatório emitido em: ${new Date().toLocaleDateString('pt-BR')}</p></div><h2 style="font-size: 18px; color: #005088; border-bottom: 1px solid #cbd5e1; padding-bottom: 5px; margin-bottom: 15px;">HISTÓRICO DE APONTAMENTOS FIXOS</h2>`;
-            const setoresMapeados = [{ id: 'meivs', nome: 'MEIV\'S (DISCIPLINA)' }, { id: 'pedagogico', nome: 'PEDAGÓGICO (APRENDIZAGEM)' }, { id: 'adm', nome: 'ADMINISTRATIVO (SECRETARIA)' }, { id: 'direcao', nome: 'PROFESSORES (CONSELHO)' }];
-            let temRegistros = false;
+        function gerarFichaIndividualConselho() {
+            const aluno = document.getElementById('select-alunos').value; if(!aluno) return;
             
+            let htmlDocumento = `
+            <div style="padding: 25px; font-family: 'Segoe UI', Arial, sans-serif; color: #000; background: #fff;">
+                <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 3px double #005088; padding-bottom: 12px; margin-bottom: 20px;">
+                    <div style="text-align: left;">
+                        <h4 style="margin: 0; font-size: 13px; color: #475569;">SECRETARIA DE ESTADO DA EDUCAÇÃO - SEED</h4>
+                        <h4 style="margin: 2px 0 0 0; font-size: 12px; color: #64748b;">NÚCLEO REGIONAL DE EDUCAÇÃO DE UMUARAMA</h4>
+                        <h2 style="margin: 5px 0 0 0; color: #005088; font-size: 18px; font-weight: bold;">COLÉGIO CÍVICO-MILITAR ANCHIETA</h2>
+                        <p style="margin: 2px 0 0 0; font-size: 11px; color: #475569;">Ensino Fundamental e Médio - Cruzeiro do Oeste - PR</p>
+                    </div>
+                    <div style="text-align: right;"><span style="font-size: 10px; font-weight: bold; border: 1px solid #005088; padding: 4px 8px; border-radius: 4px; color: #005088;">DOCUMENTO INTERNO</span></div>
+                </div>
+
+                <div style="text-align: center; margin-bottom: 25px;"><h3 style="font-size: 16px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin: 0; border-bottom: 1px solid #cbd5e1; padding-bottom: 5px; display: inline-block;">Ficha de Acompanhamento Individual do Estudante</h3></div>
+
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px; font-size: 13px;">
+                    <tr>
+                        <td style="padding: 6px; border: 1px solid #94a3b8; background: #f8fafc; font-weight: bold; width: 15%;">Estudante:</td><td style="padding: 6px; border: 1px solid #94a3b8; font-weight: 500;">${aluno}</td>
+                        <td style="padding: 6px; border: 1px solid #94a3b8; background: #f8fafc; font-weight: bold; width: 12%;">Turma:</td><td style="padding: 6px; border: 1px solid #94a3b8; font-weight: 500; width: 20%;">${turmaSelecionadaAtiva}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 6px; border: 1px solid #94a3b8; background: #f8fafc; font-weight: bold;">Emissão:</td><td style="padding: 6px; border: 1px solid #94a3b8; color: #334155;">${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}</td>
+                        <td style="padding: 6px; border: 1px solid #94a3b8; background: #f8fafc; font-weight: bold;">Sistema:</td><td style="padding: 6px; border: 1px solid #94a3b8; color: #334155;">SIGA Central</td>
+                    </tr>
+                </table>
+                <h4 style="font-size: 13px; color: #005088; border-bottom: 2px solid #e2e8f0; padding-bottom: 4px; margin-bottom: 12px; text-transform: uppercase; font-weight: bold;">Histórico Cronológico de Ocorrências e Apontamentos</h4>
+            `;
+
+            const setoresMapeados = [
+                { id: 'meivs', nome: "MEIV'S - SETOR DE DISCIPLINA CIVIL-MILITAR" },
+                { id: 'pedagogico', nome: "PEDAGÓGICO - DESEMPENHO E APRENDIZAGEM" },
+                { id: 'adm', nome: "SECRETARIA - APONTAMENTOS ADMINISTRATIVOS" },
+                { id: 'direcao', nome: "PROFESSORES - CONSELHO DE CLASSE E CONSELHO DE ANO" }
+            ];
+            let totalGeralRegistros = 0;
+
             setoresMapeados.forEach(set => {
-                let alvoId = set.id;
-                if(alvoId === 'direcao') alvoId = 'professores';
-                let postsSetor = todosOsRegistros.filter(r => r.aluno.trim() === aluno.trim() && (r.setor === set.id || r.setor === alvoId));
+                let idFiltro = set.id === 'direcao' ? 'professores' : set.id;
+                let postsSetor = todosOsRegistros.filter(r => r.aluno.trim() === aluno.trim() && (r.setor === set.id || r.setor === idFiltro));
                 if(postsSetor.length > 0) {
-                    temRegistros = true; htmlDocumento += `<h3 style="font-size: 14px; color: #1e293b; margin-top: 20px; background: #e2e8f0; padding: 6px; border-radius: 4px;">${set.nome}</h3>`;
-                    postsSetor.forEach(p => { htmlDocumento += `<div style="margin: 10px 0; padding: 10px 15px; background: #fff; border-left: 4px solid #eab308; border-bottom: 1px solid #f1f5f9;"><p style="font-size: 14px; line-height: 1.4; margin-bottom: 5px;">${p.texto}</p><p style="font-size: 11px; color: #64748b; text-align: right;">Por: ${p.funcionario} | Data: ${formatarDataEHora(p.dataAtual)}</p></div>`; });
+                    totalGeralRegistros += postsSetor.length;
+                    htmlDocumento += `<div style="margin-top: 15px; background: #f1f5f9; padding: 5px 10px; border-radius: 4px; font-size: 12px; font-weight: bold; border-left: 5px solid #005088; color: #1e293b;">${set.nome}</div>`;
+                    postsSetor.forEach(p => { 
+                        htmlDocumento += `<div style="margin: 8px 0; padding: 8px 12px; background: #fff; border-bottom: 1px solid #e2e8f0; font-size: 12px; line-height: 1.5;"><div style="color: #000; margin-bottom: 4px;">${p.texto}</div><div style="font-size: 10px; color: #64748b; text-align: right; font-style: italic;">Registrado por: <strong>${p.funcionario}</strong> | Data: ${formatarDataEHora(p.dataAtual)}</div></div>`; 
+                    });
                 }
             });
-            if(!temRegistros) { htmlDocumento += `<p style="color: #64748b; font-style: italic; margin-top: 20px;">Nenhum apontamento registrado.</p>`; }
-            htmlDocumento += `<div style="margin-top: 60px; text-align: center; font-size: 11px; color: #94a3b8; border-top: 1px dashed #cbd5e1; padding-top: 10px;">Documento Gerado Digitalmente pelo Painel Restrito SIGA</div></div>`;
+
+            if(totalGeralRegistros === 0) { htmlDocumento += `<p style="color: #64748b; font-style: italic; font-size: 13px; margin: 20px 0;">Nenhum apontamento registrado.</p>`; }
+
+            htmlDocumento += `
+                <div style="margin-top: 35px; page-break-inside: avoid;"><div style="font-size: 12px; font-weight: bold; text-transform: uppercase; color: #005088; margin-bottom: 5px;">Parecer e Encaminhamentos da Equipe Pedagógica / Conselho:</div><div style="border: 1px dashed #94a3b8; height: 80px; border-radius: 4px; background: #fafafa;"></div></div>
+                <div style="margin-top: 50px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 40px; text-align: center; font-size: 11px; page-break-inside: avoid;">
+                    <div><div style="border-top: 1px solid #000; width: 85%; margin: 0 auto; padding-top: 5px;"><strong>Equipe Pedagógica / Direção</strong><br>CCM Anchieta</div></div>
+                    <div><div style="border-top: 1px solid #000; width: 85%; margin: 0 auto; padding-top: 5px;"><strong>Assinatura do Responsável Legal</strong><br>C.P.F.: _______._______._______-____</div></div>
+                </div>
+                <div style="margin-top: 40px; text-align: center; font-size: 10px; color: #94a3b8; border-top: 1px dashed #cbd5e1; padding-top: 8px;">Documento Gerado Digitalmente via Plataforma SIGA em Cruzeiro do Oeste - PR</div>
+            </div>`;
             
             const elementoTemporario = document.createElement('div'); elementoTemporario.innerHTML = htmlDocumento;
-            const configuracaoPdf = { margin: 10, filename: `Historico_SIGA_${aluno.replace(/ /g, '_')}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
+            const configuracaoPdf = { margin: 12, filename: `Ficha_Conselho_${aluno.replace(/ /g, '_')}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
             html2pdf().set(configuracaoPdf).from(elementoTemporario).save();
         }
 
@@ -971,19 +1255,15 @@
                 if (nivel >= 2) { textarea.disabled = false; botao.disabled = false; textarea.placeholder = "Registrar informação fixa..."; } 
                 else {
                     if (setor === 'direcao' || setor === 'professor' || setor === 'professores' || setor === s) { 
-                        if (setor === 'professores' && s === 'direcao') {
-                            textarea.disabled = false; botao.disabled = false; textarea.placeholder = "Registrar informação fixa...";
-                        } else if (setor === s) {
-                            textarea.disabled = false; botao.disabled = false; textarea.placeholder = "Registrar informação fixa...";
-                        } else {
-                            textarea.disabled = true; botao.disabled = true; textarea.placeholder = "Apenas leitura para o seu setor.";
-                        }
+                        if (setor === 'professores' && s === 'direcao') { textarea.disabled = false; botao.disabled = false; textarea.placeholder = "Registrar informação fixa..."; } 
+                        else if (setor === s) { textarea.disabled = false; botao.disabled = false; textarea.placeholder = "Registrar informação fixa..."; } 
+                        else { textarea.disabled = true; botao.disabled = true; textarea.placeholder = "Apenas leitura para o seu setor."; }
                     } else { textarea.disabled = true; botao.disabled = true; textarea.placeholder = "Apenas leitura para o seu setor."; }
                 }
             });
         }
 
-        window.salvarPost = salvarPost; window.filtrarRegistrosPorAluno = filtrarRegistrosPorAluno; window.fazerLogout = fazerLogout; window.autenticarUsuario = autenticarUsuario; window.gerarRelatorioPDF = gerarRelatorioPDF; window.excluirRegistroServidor = excluirRegistroServidor; window.editarRegistroServidor = editarRegistroServidor; window.alternarMenuLateral = alternarMenuLateral; window.alternarAbaMobile = alternarAbaMobile; window.verificarTeclaEnter = verificarTeclaEnter;
+        window.salvarPost = salvarPost; window.filtrarRegistrosPorAluno = filtrarRegistrosPorAluno; window.fazerLogout = fazerLogout; window.autenticarUsuario = autenticarUsuario; window.gerarFichaIndividualConselho = gerarFichaIndividualConselho; window.excluirRegistroServidor = excluirRegistroServidor; window.editarRegistroServidor = editarRegistroServidor; window.alternarMenuLateral = alternarMenuLateral; window.alternarAbaMobile = alternarAbaMobile; window.verificarTeclaEnter = verificarTeclaEnter;
     </script>
 </body>
 </html>
