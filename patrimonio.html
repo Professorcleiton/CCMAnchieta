@@ -75,11 +75,11 @@
         
         .search-box {
             display: flex; align-items: center; background: #f1f5f9;
-            padding: 6px 12px; border-radius: 6px; border: 1px solid #cbd5e1; width: 300px;
+            padding: 6px 12px; border-radius: 6px; border: 1px solid #cbd5e1; width: 320px;
         }
         .search-box input { background: none; border: none; outline: none; width: 100%; font-size: 14px; margin-left: 8px; }
 
-        .workspace { flex: 1; padding: 25px; overflow-y: auto; display: grid; grid-template-columns: 1fr 430px; gap: 25px; }
+        .workspace { flex: 1; padding: 25px; overflow-y: auto; display: grid; grid-template-columns: 1fr 440px; gap: 25px; }
 
         .inventory-panel {
             background: white; border-radius: 8px; border: 1px solid #e2e8f0;
@@ -88,9 +88,9 @@
         .inventory-panel h3 { font-size: 15px; color: #005088; margin-bottom: 15px; text-transform: uppercase; }
         
         .table-wrapper { flex: 1; overflow-y: auto; }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
-        th { position: sticky; top: 0; background: #f8fafc; padding: 10px; font-weight: bold; color: #64748b; border-bottom: 2px solid #e2e8f0; }
-        td { padding: 12px 10px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; table-layout: auto; }
+        th { position: sticky; top: 0; background: #f8fafc; padding: 12px 14px; font-weight: bold; color: #64748b; border-bottom: 2px solid #e2e8f0; }
+        td { padding: 14px 14px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; word-break: break-word; }
         tr:hover { background-color: #f8fafc; }
         
         .item-tag-vinculo {
@@ -101,7 +101,7 @@
             font-size: 11px; background: #fff7ed; color: #c2410c; padding: 2px 6px; border-radius: 4px; margin-top: 4px; display: inline-block;
         }
 
-        .status-badge { padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; }
+        .status-badge { padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; white-space: nowrap; }
         .status-bom { background: #dcfce7; color: #166534; }
         .status-manutencao { background: #fef9c3; color: #854d0e; }
         .status-danificado { background: #fee2e2; color: #991b1b; }
@@ -117,20 +117,9 @@
             width: 100%;
         }
         .tab-nav-btn {
-            background: none; 
-            border: none; 
-            padding: 10px 1px; 
-            font-weight: bold;
-            font-size: 11px; 
-            cursor: pointer; 
-            border-radius: 6px; 
-            color: #475569; 
-            transition: all 0.2s;
-            white-space: nowrap; 
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
+            background: none; border: none; padding: 10px 1px; font-weight: bold;
+            font-size: 11px; cursor: pointer; border-radius: 6px; color: #475569; transition: all 0.2s;
+            white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 4px;
         }
         .tab-nav-btn.active { background: white; color: #005088; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 
@@ -225,8 +214,8 @@
                     <table>
                         <thead>
                             <tr>
-                                <th>Código</th>
-                                <th>Item / Descrição</th>
+                                <th style="width: 150px;">Código Real</th>
+                                <th style="width: 180px;">Item / Descrição</th>
                                 <th>Categoria</th>
                                 <th>Localização Atual</th>
                                 <th>Responsável</th>
@@ -259,7 +248,7 @@
                         <label for="trans-code">Código do Patrimônio:</label>
                         <div id="scanner-reader-move" class="camera-scanner-container"></div>
                         <div class="input-camera-group">
-                            <input type="text" id="trans-code" placeholder="Ex: 001245" oninput="buscarItemPorCodigoDigitado()">
+                            <input type="text" id="trans-code" placeholder="Ex: 100003506623" oninput="buscarItemPorCodigoDigitado()">
                             <button type="button" class="btn-camera-scanner" onclick="alternarCameraLeitora('trans-code', 'scanner-reader-move')">
                                 <i class="fa-solid fa-camera"></i>
                             </button>
@@ -299,7 +288,7 @@
                         <label for="reg-code">Código / Etiqueta do Item:</label>
                         <div id="scanner-reader-reg" class="camera-scanner-container"></div>
                         <div class="input-camera-group">
-                            <input type="text" id="reg-code" placeholder="Ex: 104523" oninput="checarSeCodigoExisteParaEditar()">
+                            <input type="text" id="reg-code" placeholder="Ex: 100003506623" oninput="checarSeCodigoExisteParaEditar()">
                             <button type="button" class="btn-camera-scanner" onclick="alternarCameraLeitora('reg-code', 'scanner-reader-reg')">
                                 <i class="fa-solid fa-camera"></i>
                             </button>
@@ -327,7 +316,7 @@
                     
                     <div class="form-group" style="background: #f8fafc; padding: 8px; border-radius: 6px; border: 1px dashed #cbd5e1;">
                         <label for="reg-parent" style="color: #0269a1;"><i class="fa-solid fa-link"></i> Pertence ao Código Pai? (Opcional):</label>
-                        <input type="text" id="reg-parent" placeholder="Ex: 0052" oninput="validarCodigoPaiDigitado()">
+                        <input type="text" id="reg-parent" placeholder="Ex: Digite o código pai real" oninput="validarCodigoPaiDigitado()">
                         <span id="reg-parent-preview" style="font-size: 11px; color:#64748b; display:block; margin-top:3px;"></span>
                     </div>
 
@@ -369,7 +358,7 @@
         let listaDeAmbientes = [];
         let salaFiltroAtual = 'TODOS';
         let usuarioLogado = {};
-        let html5QrcodeScanner = null; // Instância ativa do scanner de câmera
+        let html5QrcodeScanner = null;
 
         window.addEventListener('DOMContentLoaded', () => {
             const sessao = localStorage.getItem('sgi_ccma_session');
@@ -379,9 +368,7 @@
             if (!usuarioLogado.nivel || parseInt(usuarioLogado.nivel) < 3) {
                 alert("Restrito ao Nível 3."); window.location.href = "restrito.html"; return;
             }
-            
             if(document.getElementById('reg-resp')) document.getElementById('reg-resp').value = usuarioLogado.nome || "";
-            
             inicializarSistemaDinamico();
         });
 
@@ -390,7 +377,6 @@
             await carregarPatrimonioDoServidor();
         }
 
-        // FECHA A CÂMERA SE O USUÁRIO MUDAR DE ABA
         function alternarAbaFormulario(abaAlvo) {
             fecharCameraScannerAtiva();
             const tabs = { 'MOVER': 'btn-tab-move', 'CADASTRAR': 'btn-tab-reg', 'AMBIENTES': 'btn-tab-amb' };
@@ -400,41 +386,34 @@
                 document.getElementById(tabs[k]).classList.toggle('active', k === abaAlvo);
                 document.getElementById(panels[k]).style.display = k === abaAlvo ? "flex" : "none";
             });
-
             if(abaAlvo === 'CADASTRAR') resetarFormularioCadastro();
         }
 
-        // CONTROLE DA CÂMERA DO CELULAR
+        // CÂMERA DE 12 DÍGITOS REAIS SEM CORTES DE PREFIXO
         function alternarCameraLeitora(inputIdAlvo, containerIdDiv) {
             const containerBox = document.getElementById(containerIdDiv);
-            
-            if (html5QrcodeScanner) {
-                fecharCameraScannerAtiva();
-                return;
-            }
+            if (html5QrcodeScanner) { fecharCameraScannerAtiva(); return; }
 
             containerBox.style.display = "block";
-            
-            // Inicia o leitor configurado otimizado para câmera traseira de smartphone
             html5QrcodeScanner = new Html5Qrcode(containerIdDiv);
-            
-            const configConfig = { fps: 15, qrbox: { width: 250, height: 150 } };
+            const configConfig = { fps: 25, qrbox: { width: 280, height: 140 } };
 
             html5QrcodeScanner.start(
-                { facingMode: "environment" }, // Força o uso da câmera traseira do celular
+                { facingMode: "environment" },
                 configConfig,
                 (decodedText) => {
-                    // Executado quando lê com sucesso
-                    document.getElementById(inputIdAlvo).value = decodedText.trim();
+                    // MANTÉM O NÚMERO EXATO E COMPLETO DA LEITURA (EX: 100003506623)
+                    let codigoCompletoReal = decodedText.trim();
+
+                    document.getElementById(inputIdAlvo).value = codigoCompletoReal;
                     fecharCameraScannerAtiva();
                     
-                    // Dispara a busca automática baseada no input preenchido
                     if (inputIdAlvo === 'trans-code') buscarItemPorCodigoDigitado();
                     if (inputIdAlvo === 'reg-code') checarSeCodigoExisteParaEditar();
                 },
-                (errorMessage) => { /* Silenciar erros de foco e varredura padrão */ }
+                (errorMessage) => {}
             ).catch(err => {
-                alert("Erro ao acessar a câmera. Certifique-se de dar permissão.");
+                alert("Permita o acesso à câmera para escanear.");
                 containerBox.style.display = "none";
                 html5QrcodeScanner = null;
             });
@@ -443,11 +422,7 @@
         function fecharCameraScannerAtiva() {
             document.querySelectorAll('.camera-scanner-container').forEach(c => c.style.display = 'none');
             if (html5QrcodeScanner) {
-                html5QrcodeScanner.stop().then(() => {
-                    html5QrcodeScanner = null;
-                }).catch(() => {
-                    html5QrcodeScanner = null;
-                });
+                html5QrcodeScanner.stop().then(() => { html5QrcodeScanner = null; }).catch(() => { html5QrcodeScanner = null; });
             }
         }
 
@@ -479,19 +454,16 @@
                 listaDeAmbientes.forEach(sala => {
                     miniBox.innerHTML += `<li><span>${sala}</span><button class="btn-del-mini" onclick="deletarAmbienteServidor('${sala}')"><i class="fa-solid fa-trash"></i></button></li>`;
                 });
-
-            } catch(e) { console.error("Erro ambientes:", e); }
+            } catch(e) { console.error(e); }
         }
 
         async function adicionarNovoAmbienteServidor() {
             const input = document.getElementById('new-amb-name');
             const nome = input.value.trim();
             if(!nome) return;
-
             try {
                 await fetch(APPS_SCRIPT_PAT_URL, { method: 'POST', body: JSON.stringify({ operacao: "AMB_ADICIONAR", ambiente: nome }) });
-                input.value = '';
-                await carregarAmbientesDoServidor();
+                input.value = ''; await carregarAmbientesDoServidor();
             } catch(e) { alert("Erro ao salvar sala."); }
         }
 
@@ -539,7 +511,7 @@
                 tr.onclick = () => { alternarAbaFormulario('MOVER'); carregarItemNoFormulario(item.codigo); };
                 
                 tr.innerHTML = `
-                    <td style="color:#005088; font-weight:bold;">${item.codigo}</td>
+                    <td style="color:#005088; font-weight:bold; letter-spacing:0.5px;">${item.codigo}</td>
                     <td><strong>${item.item}</strong>${labelVinculoPai}</td>
                     <td style="color:#64748b;">${item.categoria}</td>
                     <td><i class="fa-solid fa-location-dot" style="color:#eab308; margin-right:5px;"></i>${item.localizacao}</td>
@@ -608,7 +580,7 @@
                 
                 let subItens = todosOsPatrimonios.filter(p => p.itemPai === itemEncontrado.codigo);
                 if(subItens.length > 0) {
-                    vinculoContainer.innerHTML = `<span class="parent-alert-box"><i class="fa-solid fa-boxes-stacked"></i> Alerta: Existem ${subItens.length} itens vinculados a este pai.</span>`;
+                    vinculoContainer.innerHTML = `<span class="parent-alert-box"><i class="fa-solid fa-boxes-stacked"></i> Alerta: Existem ${subItens.length} itens vinculados.</span>`;
                 } else { vinculoContainer.innerHTML = ''; }
 
                 previewBox.style.display = "block"; btn.disabled = false;
@@ -622,9 +594,9 @@
 
             const pai = todosOsPatrimonios.find(p => p.codigo === codPai);
             if(pai) {
-                label.innerHTML = `<i class="fa-solid fa-check" style="color:green;"></i> Item Pai Localizado: <strong>${pai.item}</strong> (${pai.localizacao})`;
+                label.innerHTML = `<i class="fa-solid fa-check" style="color:green;"></i> Item Pai Localizado: <strong>${pai.item}</strong>`;
             } else {
-                label.innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="color:orange;"></i> Código Pai não cadastrado (ficará lincado para fins de rastreio).`;
+                label.innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="color:orange;"></i> Código Pai não localizado na tabela.`;
             }
         }
 
@@ -688,7 +660,7 @@
         async function executarCadastroNovoPatrimonio() {
             const codigo = document.getElementById('reg-code').value.trim();
             const item = document.getElementById('reg-item').value.trim();
-            const categoria = document.getElementById('reg-cat').value;
+            const category = document.getElementById('reg-cat').value;
             const sala = document.getElementById('reg-room').value;
             const funcionario = document.getElementById('reg-resp').value.trim();
             const status = document.getElementById('reg-status').value;
@@ -698,15 +670,14 @@
             if(!codigo || !item || !funcionario || !sala) { alert("Preencha os campos obrigatórios."); return; }
             btn.disabled = true;
 
-            const payload = { operacao: "PAT_CADASTRAR", codigo: codigo, item: item, categoria: categoria, localizacao: sala, responsavel: funcionario, status: status, itemPai: itemPai };
+            const payload = { operacao: "PAT_CADASTRAR", codigo: codigo, item: item, categoria: category, localizacao: sala, responsavel: funcionario, status: status, itemPai: itemPai };
 
             try {
                 const r = await fetch(APPS_SCRIPT_PAT_URL, { method: 'POST', body: JSON.stringify(payload) });
                 const res = await r.json();
                 if(res.status === "success" || res.status === "updated") {
-                    alert(res.status === "updated" ? "Patrimônio atualizado com sucesso!" : "Novo item gravado com sucesso!");
-                    resetarFormularioCadastro();
-                    await carregarPatrimonioDoServidor();
+                    alert(res.status === "updated" ? "Patrimônio atualizado!" : "Novo item gravado!");
+                    resetarFormularioCadastro(); await carregarPatrimonioDoServidor();
                 }
             } catch (e) { alert("Erro ao salvar."); } finally { btn.disabled = false; }
         }
