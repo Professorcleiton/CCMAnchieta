@@ -94,7 +94,7 @@
         
         .item-tag-vinculo {
             display: inline-block; font-size: 11px; background: #e0f2fe; color: #0369a1;
-            padding: 1px 6px; border-radius: 4px; margin-top: 4px; font-weight: 500;
+            padding: 2px 6px; border-radius: 4px; margin-top: 4px; font-weight: 500;
         }
         .parent-alert-box {
             font-size: 11px; background: #fff7ed; color: #c2410c; padding: 2px 6px; border-radius: 4px; margin-top: 4px; display: inline-block;
@@ -335,7 +335,6 @@
             await carregarPatrimonioDoServidor();
         }
 
-        // CONTROLADOR DE ABAS DIREITAS
         function alternarAbaFormulario(abaAlvo) {
             const tabs = { 'MOVER': 'btn-tab-move', 'CADASTRAR': 'btn-tab-reg', 'AMBIENTES': 'btn-tab-amb' };
             const panels = { 'MOVER': 'panel-movimentar-bens', 'CADASTRAR': 'panel-cadastrar-bens', 'AMBIENTES': 'panel-ambientes-gerenciar' };
@@ -348,36 +347,33 @@
             if(abaAlvo === 'CADASTRAR') resetarFormularioCadastro();
         }
 
-        // MOTOR DE LEITURA DE AMBIENTES DINÂMICOS
         async function carregarAmbientesDoServidor() {
             try {
-                const r = await fetch(${APPS_SCRIPT_PAT_URL}?aba=ambientes, { method: 'GET', cache: 'no-cache' });
+                const r = await fetch(`${APPS_SCRIPT_PAT_URL}?aba=ambientes`, { method: 'GET', cache: 'no-cache' });
                 listaDeAmbientes = await r.json();
                 
-                // 1. Renderiza os filtros na Barra Lateral
                 const sidebarList = document.getElementById('room-container-list');
-                sidebarList.innerHTML = <li class="room-item ${salaFiltroAtual==='TODOS'?'active':''}" onclick="filtrarPorSala('TODOS', this)"><i class="fa-solid fa-boxes-stacked"></i> Ver Tudo</li>;
+                sidebarList.innerHTML = `<li class="room-item ${salaFiltroAtual==='TODOS'?'active':''}" onclick="filtrarPorSala('TODOS', this)"><span><i class="fa-solid fa-boxes-stacked"></i> Ver Tudo</span></li>`;
                 
                 listaDeAmbientes.forEach(sala => {
                     let li = document.createElement('li');
-                    li.className = room-item ${salaFiltroAtual===sala?'active':''};
+                    li.className = `room-item ${salaFiltroAtual===sala?'active':''}`;
                     li.onclick = () => filtrarPorSala(sala, li);
-                    li.innerHTML = <span><i class="fa-solid fa-location-dot"></i> ${sala}</span>;
+                    li.innerHTML = `<span><i class="fa-solid fa-location-dot"></i> ${sala}</span>`;
                     sidebarList.appendChild(li);
                 });
-                // 2. Alimenta os seletores de formulários (<select>)
+
                 document.querySelectorAll('.select-salas-dinamicas').forEach(select => {
                     select.innerHTML = '<option value="">-- Selecione o Local --</option>';
                     listaDeAmbientes.forEach(sala => {
-                        select.innerHTML += <option value="${sala}">${sala}</option>;
+                        select.innerHTML += `<option value="${sala}">${sala}</option>`;
                     });
                 });
 
-                // 3. Alimenta a mini lista de remoção na aba ambientes
                 const miniBox = document.getElementById('mini-list-amb-box');
                 miniBox.innerHTML = '';
                 listaDeAmbientes.forEach(sala => {
-                    miniBox.innerHTML += <li><span>${sala}</span><button class="btn-del-mini" onclick="deletarAmbienteServidor('${sala}')"><i class="fa-solid fa-trash"></i></button></li>;
+                    miniBox.innerHTML += `<li><span>${sala}</span><button class="btn-del-mini" onclick="deletarAmbienteServidor('${sala}')"><i class="fa-solid fa-trash"></i></button></li>`;
                 });
 
             } catch(e) { console.error("Erro ambientes:", e); }
@@ -396,24 +392,24 @@
         }
 
         async function deletarAmbienteServidor(nomeSala) {
-            if(!confirm(Deseja remover o ambiente "${nomeSala}"? Itens nessa sala não sumirão, mas o filtro será apagado.)) return;
+            if(!confirm(`Deseja remover o ambiente "${nomeSala}"?`)) return;
             try {
                 await fetch(APPS_SCRIPT_PAT_URL, { method: 'POST', body: JSON.stringify({ operacao: "AMB_DELETAR", ambiente: nomeSala }) });
                 await carregarAmbientesDoServidor();
             } catch(e) { alert("Erro ao deletar."); }
         }
 
-        // MOTOR DE PATRIMÔNIO E VÍNCULOS
         async function carregarPatrimonioDoServidor() {
             try {
-                const response = await fetch(${APPS_SCRIPT_PAT_URL}?aba=patrimonio, { method: 'GET', cache: 'no-cache' });
+                const response = await fetch(`${APPS_SCRIPT_PAT_URL}?aba=patrimonio`, { method: 'GET', cache: 'no-cache' });
                 todosOsPatrimonios = await response.json();
                 renderizarTabelaInventario();
             } catch (error) {
-                document.getElementById('inventory-table-body').innerHTML = <tr><td colspan="7" style="text-align: center; color: red;">Erro.</td></tr>;
+                document.getElementById('inventory-table-body').innerHTML = `<tr><td colspan="7" style="text-align: center; color: red;">Erro ao processar dados da planilha.</td></tr>`;
             }
         }
 
+        // CORREÇÃO DOS DOIS BLOCOS ABAIXO: SEM MISTURAR ASPAS SIMPLES E DUPLAS
         function renderizarTabelaInventario() {
             const tbody = document.getElementById('inventory-table-body');
             tbody.innerHTML = '';
@@ -421,23 +417,24 @@
             let itensFiltrados = salaFiltroAtual === 'TODOS' ? todosOsPatrimonios : todosOsPatrimonios.filter(item => item.localizacao === salaFiltroAtual);
 
             if (itensFiltrados.length === 0) {
-                tbody.innerHTML = <tr><td colspan="7" style="text-align: center; color: #64748b; padding: 20px;">Nenhum item neste local.</td></tr>;
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #64748b; padding: 20px;">Nenhum item neste local.</td></tr>`;
                 return;
             }
 
             itensFiltrados.forEach(item => {
                 let badgeClass = item.status.toLowerCase().includes('manuten') ? 'status-manutencao' : (item.status.toLowerCase().includes('danific') || item.status.toLowerCase().includes('quebr') ? 'status-danificado' : 'status-bom');
                 
-                // RASTREADOR VISUAL: Procura se esse item aponta para algum pai
                 let labelVinculoPai = "";
                 if (item.itemPai) {
                     const paiObjeto = todosOsPatrimonios.find(p => p.codigo === item.itemPai);
-                    labelVinculoPai = <br><span class="item-tag-vinculo"><i class="fa-solid fa-paperclip"></i> Acoplado ao Pai: ${item.itemPai} ${paiObjeto ? '('+paiObjeto.item+')' : ''}</span>;
+                    let nomePai = paiObjeto ? `(${paiObjeto.item})` : '';
+                    labelVinculoPai = `<br><span class="item-tag-vinculo"><i class="fa-solid fa-paperclip"></i> Acoplado ao Pai: ${item.itemPai} ${nomePai}</span>`;
                 }
 
                 let tr = document.createElement('tr');
                 tr.style.cursor = 'pointer';
                 tr.onclick = () => { alternarAbaFormulario('MOVER'); carregarItemNoFormulario(item.codigo); };
+                
                 tr.innerHTML = `
                     <td style="color:#005088; font-weight:bold;">${item.codigo}</td>
                     <td><strong>${item.item}</strong>${labelVinculoPai}</td>
@@ -449,14 +446,6 @@
                 `;
                 tbody.appendChild(tr);
             });
-        }
-
-        function filtrarPorSala(sala, elementoBotao) {
-            salaFiltroAtual = sala;
-            document.querySelectorAll('.room-item').forEach(el => el.classList.remove('active'));
-            elementoBotao.classList.add('active');
-            document.getElementById('panel-title-text').innerText = sala === 'TODOS' ? 'Almoxarifado Geral do Colégio' : Ambiente: ${sala};
-            renderizarTabelaInventario();
         }
 
         function filtrarTabelaPorBusca() {
@@ -475,11 +464,15 @@
 
             correspondencias.forEach(item => {
                 let badgeClass = item.status.toLowerCase().includes('manuten') ? 'status-manutencao' : (item.status.toLowerCase().includes('danific') ? 'status-danificado' : 'status-bom');
+                let labelVinculoPai = item.itemPai ? `<br><span class="item-tag-vinculo">Pai: ${item.itemPai}</span>` : '';
+                
                 let tr = document.createElement('tr');
+                tr.style.cursor = 'pointer';
                 tr.onclick = () => { alternarAbaFormulario('MOVER'); carregarItemNoFormulario(item.codigo); };
+                
                 tr.innerHTML = `
                     <td style="color:#005088; font-weight:bold;">${item.codigo}</td>
-                    <td><strong>${item.item}</strong> ${item.itemPai ? '<br><span class="item-tag-vinculo">Pai: '+item.itemPai+'</span>' : ''}</td>
+                    <td><strong>${item.item}</strong>${labelVinculoPai}</td>
                     <td>${item.categoria}</td>
                     <td><i class="fa-solid fa-location-dot" style="color:#eab308; margin-right:5px;"></i>${item.localizacao}</td>
                     <td>${item.responsavel || '-'}</td>
@@ -490,7 +483,14 @@
             });
         }
 
-        // VALIDAÇÕES EM TEMPO REAL NA INTERFACE
+        function filtrarPorSala(sala, elementoBotao) {
+            salaFiltroAtual = sala;
+            document.querySelectorAll('.room-item').forEach(el => el.classList.remove('active'));
+            elementoBotao.classList.add('active');
+            document.getElementById('panel-title-text').innerText = sala === 'TODOS' ? 'Almoxarifado Geral do Colégio' : `Ambiente: ${sala}`;
+            renderizarTabelaInventario();
+        }
+
         function buscarItemPorCodigoDigitado() {
             const codigo = document.getElementById('trans-code').value.trim();
             const itemEncontrado = todosOsPatrimonios.find(item => item.codigo === codigo);
@@ -503,10 +503,9 @@
                 document.getElementById('prev-local').innerText = itemEncontrado.localizacao;
                 document.getElementById('prev-resp').innerText = itemEncontrado.responsavel || 'Ninguém';
                 
-                // RASTREIO DE FILHOS: Alerta se existirem itens linkados a ele neste momento
                 let subItens = todosOsPatrimonios.filter(p => p.itemPai === itemEncontrado.codigo);
                 if(subItens.length > 0) {
-                    vinculoContainer.innerHTML = <span class="parent-alert-box"><i class="fa-solid fa-boxes-stacked"></i> Alerta: Existem ${subItens.length} itens acoplados fisicamente a este código.</span>;
+                    vinculoContainer.innerHTML = `<span class="parent-alert-box"><i class="fa-solid fa-boxes-stacked"></i> Alerta: Existem ${subItens.length} itens vinculados a este pai.</span>`;
                 } else { vinculoContainer.innerHTML = ''; }
 
                 previewBox.style.display = "block"; btn.disabled = false;
@@ -520,9 +519,9 @@
 
             const pai = todosOsPatrimonios.find(p => p.codigo === codPai);
             if(pai) {
-                label.innerHTML = <i class="fa-solid fa-check" style="color:green;"></i> Item Pai Localizado: <strong>${pai.item}</strong> (${pai.localizacao});
+                label.innerHTML = `<i class="fa-solid fa-check" style="color:green;"></i> Item Pai Localizado: <strong>${pai.item}</strong> (${pai.localizacao})`;
             } else {
-                label.innerHTML = <i class="fa-solid fa-triangle-exclamation" style="color:orange;"></i> Código Pai não cadastrado ainda (ficará linkado assim mesmo).;
+                label.innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="color:orange;"></i> Código Pai não cadastrado (ficará lincado para fins de rastreio).`;
             }
         }
 
@@ -533,7 +532,7 @@
             const btn = document.getElementById('btn-executar-cadastro');
 
             if(itemEncontrado) {
-                h3Title.innerHTML = <i class="fa-solid fa-pen-to-square" style="color:#eab308;"></i> Modo de Edição;
+                h3Title.innerHTML = `<i class="fa-solid fa-pen-to-square" style="color:#eab308;"></i> Modo de Edição`;
                 document.getElementById('reg-item').value = itemEncontrado.item;
                 document.getElementById('reg-cat').value = itemEncontrado.categoria;
                 document.getElementById('reg-room').value = itemEncontrado.localizacao;
@@ -563,7 +562,6 @@
             if(document.getElementById('reg-resp')) document.getElementById('reg-resp').value = usuarioLogado.nome || "";
         }
 
-        // EXECUTORES ASSÍNCRONOS (CONEXÃO COM APPS SCRIPT)
         async function executarTransferenciaPatrimonio() {
             const codigo = document.getElementById('trans-code').value.trim();
             const novaSala = document.getElementById('trans-room').value;
