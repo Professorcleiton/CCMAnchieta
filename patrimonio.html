@@ -16,9 +16,9 @@
             overflow: hidden;
         }
 
-        /* BARRA LATERAL (SIDEBAR) */
+        /* SIDEBAR INTERFACES */
         .sidebar {
-            width: 280px;
+            width: 290px;
             background-color: #005088;
             color: white;
             display: flex;
@@ -34,215 +34,113 @@
             gap: 12px;
         }
         .sidebar-logo {
-            width: 70px;
-            height: 70px;
-            min-width: 70px;
-            object-fit: cover;
-            border-radius: 50%;
-            background-color: white;
-            border: 2px solid white;
+            width: 70px; height: 70px; min-width: 70px;
+            object-fit: cover; border-radius: 50%;
+            background-color: white; border: 2px solid white;
         }
-        .sidebar-title h2 { font-size: 18px; font-weight: bold; }
+        .sidebar-title h2 { font-size: 16px; font-weight: bold; }
         .sidebar-title p { font-size: 11px; color: #cbd5e1; }
         
         .room-list-title {
-            font-size: 11px;
-            text-transform: uppercase;
-            color: #eab308;
-            padding: 15px 15px 5px 15px;
-            font-weight: bold;
-            letter-spacing: 0.5px;
+            font-size: 11px; text-transform: uppercase; color: #eab308;
+            padding: 15px 15px 5px 15px; font-weight: bold; letter-spacing: 0.5px;
         }
         .room-list { list-style: none; padding: 0 10px; overflow-y: auto; flex: 1; }
         .room-item {
-            padding: 10px 15px;
-            margin-bottom: 5px;
-            background-color: rgba(255, 255, 255, 0.05);
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            padding: 10px 15px; margin-bottom: 5px;
+            background-color: rgba(255, 255, 255, 0.05); border-radius: 6px;
+            cursor: pointer; font-size: 13px; font-weight: 600;
+            display: flex; align-items: center; justify-content: space-between;
             transition: background 0.2s;
         }
-        .room-item:hover, .room-item.active {
-            background-color: #eab308;
-            color: #1e293b;
-        }
+        .room-item:hover, .room-item.active { background-color: #eab308; color: #1e293b; }
 
         .sidebar-footer { padding: 15px; border-top: 1px solid rgba(255, 255, 255, 0.1); }
         .btn-back {
-            width: 100%;
-            padding: 10px;
-            background-color: rgba(255,255,255,0.1);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-weight: bold;
-            font-size: 13px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            text-decoration: none;
+            width: 100%; padding: 10px; background-color: rgba(255,255,255,0.1);
+            color: white; border: none; border-radius: 6px; font-weight: bold;
+            font-size: 13px; cursor: pointer; display: flex; align-items: center;
+            justify-content: center; gap: 8px; text-decoration: none;
         }
         .btn-back:hover { background-color: rgba(255,255,255,0.2); }
 
-        /* CONTEÚDO PRINCIPAL */
-        .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-        }
+        /* PRINCIPAL WORKSPACE */
+        .main-content { flex: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         .top-bar {
-            background-color: white;
-            padding: 0 30px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            height: 65px;
-            min-height: 65px;
+            background-color: white; padding: 0 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex; justify-content: space-between; align-items: center; height: 65px; min-height: 65px;
         }
         .top-bar h1 { font-size: 18px; color: #005088; font-weight: bold; }
         
         .search-box {
-            display: flex;
-            align-items: center;
-            background: #f1f5f9;
-            padding: 6px 12px;
-            border-radius: 6px;
-            border: 1px solid #cbd5e1;
-            width: 300px;
+            display: flex; align-items: center; background: #f1f5f9;
+            padding: 6px 12px; border-radius: 6px; border: 1px solid #cbd5e1; width: 300px;
         }
-        .search-box input {
-            background: none;
-            border: none;
-            outline: none;
-            width: 100%;
-            font-size: 14px;
-            margin-left: 8px;
-        }
+        .search-box input { background: none; border: none; outline: none; width: 100%; font-size: 14px; margin-left: 8px; }
 
-        /* DASHBOARD WORKSPACE */
-        .workspace {
-            flex: 1;
-            padding: 25px;
-            overflow-y: auto;
-            display: grid;
-            grid-template-columns: 1fr 400px;
-            gap: 25px;
-        }
+        .workspace { flex: 1; padding: 25px; overflow-y: auto; display: grid; grid-template-columns: 1fr 420px; gap: 25px; }
 
-        /* TABELA DE ITENS */
         .inventory-panel {
-            background: white;
-            border-radius: 8px;
-            border: 1px solid #e2e8f0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            background: white; border-radius: 8px; border: 1px solid #e2e8f0;
+            padding: 20px; display: flex; flex-direction: column; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
         .inventory-panel h3 { font-size: 15px; color: #005088; margin-bottom: 15px; text-transform: uppercase; }
         
         .table-wrapper { flex: 1; overflow-y: auto; }
         table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
         th { position: sticky; top: 0; background: #f8fafc; padding: 10px; font-weight: bold; color: #64748b; border-bottom: 2px solid #e2e8f0; }
-        td { padding: 12px 10px; border-bottom: 1px solid #e2e8f0; }
+        td { padding: 12px 10px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
         tr:hover { background-color: #f8fafc; }
         
-        .status-badge {
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: bold;
+        .item-tag-vinculo {
+            display: inline-block; font-size: 11px; background: #e0f2fe; color: #0369a1;
+            padding: 1px 6px; border-radius: 4px; margin-top: 4px; font-weight: 500;
         }
+        .parent-alert-box {
+            font-size: 11px; background: #fff7ed; color: #c2410c; padding: 2px 6px; border-radius: 4px; margin-top: 4px; display: inline-block;
+        }
+
+        .status-badge { padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; }
         .status-bom { background: #dcfce7; color: #166534; }
         .status-manutencao { background: #fef9c3; color: #854d0e; }
         .status-danificado { background: #fee2e2; color: #991b1b; }
 
-        /* PAINEL CONTROLADOR DE ABAS (DIREITA) */
-        .control-side-panel {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        .tab-menu-right {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            background: #e2e8f0;
-            padding: 4px;
-            border-radius: 8px;
-        }
+        /* PAINEL CONTROLADOR TRIPLO (DIREITA) */
+        .control-side-panel { display: flex; flex-direction: column; gap: 15px; }
+        .tab-menu-right { display: grid; grid-template-columns: 1fr 1fr 1fr; background: #e2e8f0; padding: 4px; border-radius: 8px; }
         .tab-nav-btn {
-            background: none;
-            border: none;
-            padding: 10px;
-            font-weight: bold;
-            font-size: 12px;
-            cursor: pointer;
-            border-radius: 6px;
-            color: #475569;
-            transition: all 0.2s;
+            background: none; border: none; padding: 10px 5px; font-weight: bold;
+            font-size: 11px; cursor: pointer; border-radius: 6px; color: #475569; transition: all 0.2s;
         }
-        .tab-nav-btn.active {
-            background: white;
-            color: #005088;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
+        .tab-nav-btn.active { background: white; color: #005088; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 
         .action-card-panel {
-            background: white;
-            border-radius: 8px;
-            border: 1px solid #e2e8f0;
-            padding: 25px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+            background: white; border-radius: 8px; border: 1px solid #e2e8f0;
+            padding: 22px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); display: flex; flex-direction: column; gap: 14px;
         }
-        .action-card-panel h3 { font-size: 15px; color: #005088; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; text-transform: uppercase; }
+        .action-card-panel h3 { font-size: 14px; color: #005088; border-bottom: 2px solid #f1f5f9; padding-bottom: 6px; text-transform: uppercase; }
         
-        .form-group { display: flex; flex-direction: column; gap: 6px; }
-        .form-group label { font-size: 12px; font-weight: 600; color: #475569; }
-        .form-group input, .form-group select {
-            padding: 10px;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            font-size: 14px;
-            outline: none;
-        }
+        .form-group { display: flex; flex-direction: column; gap: 5px; }
+        .form-group label { font-size: 11px; font-weight: 600; color: #475569; }
+        .form-group input, .form-group select { padding: 9px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none; }
         .form-group input:focus, .form-group select:focus { border-color: #005088; }
         
         .btn-action-trigger {
-            background: #005088;
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 14px;
-            margin-top: 10px;
-            transition: background 0.2s;
+            background: #005088; color: white; border: none; padding: 11px;
+            border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; margin-top: 5px; transition: background 0.2s;
         }
         .btn-action-trigger:hover { background: #0c4a6e; }
         .btn-action-trigger:disabled { background: #cbd5e1; cursor: not-allowed; }
 
-        .selected-item-preview {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            padding: 12px;
-            border-radius: 6px;
-            font-size: 13px;
+        .selected-item-preview { background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px; border-radius: 6px; font-size: 12px; }
+        
+        /* LISTA SIMPLES DE AMBIENTES INTERNOS */
+        .mini-list-ambientes { list-style: none; max-height: 180px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 6px; }
+        .mini-list-ambientes li {
+            padding: 8px 12px; font-size: 13px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9;
         }
-        .selected-item-preview p { margin-bottom: 4px; }
+        .btn-del-mini { background: none; border: none; color: #ef4444; cursor: pointer; font-size: 12px; }
+        .btn-del-mini:hover { color: #b91c1c; }
 
         @media (max-width: 1024px) {
             .workspace { grid-template-columns: 1fr; }
@@ -265,17 +163,9 @@
             
             <div class="room-list-title">Filtrar por Ambiente</div>
             <ul class="room-list" id="room-container-list">
-                <li class="room-item active" onclick="filtrarPorSala('TODOS', this)"><i class="fa-solid fa-boxes-stacked"></i> Ver Tudo</li>
-                <li class="room-item" onclick="filtrarPorSala('Laboratório de Robótica', this)"><i class="fa-solid fa-robot"></i> Lab. de Robótica</li>
-                <li class="room-item" onclick="filtrarPorSala('Sala de Informática', this)"><i class="fa-solid fa-laptop"></i> Sala de Informática</li>
-                <li class="room-item" onclick="filtrarPorSala('Secretaria', this)"><i class="fa-solid fa-folder-open"></i> Secretaria</li>
-                <li class="room-item" onclick="filtrarPorSala('Direção', this)"><i class="fa-solid fa-user-tie"></i> Direção</li>
-                <li class="room-item" onclick="filtrarPorSala('Sala dos Professores', this)"><i class="fa-solid fa-chalkboard-user"></i> Sala dos Professores</li>
-                <li class="room-item" onclick="filtrarPorSala('Almoxarifado', this)"><i class="fa-solid fa-warehouse"></i> Almoxarifado</li>
-                <li class="room-item" onclick="filtrarPorSala('Manutenção', this)"><i class="fa-solid fa-screwdriver-wrench"></i> Manutenção / Fora</li>
+                <li class="room-item active"><i class="fa-solid fa-spinner fa-spin"></i> Carregando salas...</li>
             </ul>
         </div>
-
         <div class="sidebar-footer">
             <a href="restrito.html" class="btn-back"><i class="fa-solid fa-arrow-left"></i> Voltar ao SIGA</a>
         </div>
@@ -286,7 +176,7 @@
             <h1 id="panel-title-text">Almoxarifado Geral do Colégio</h1>
             <div class="search-box">
                 <i class="fa-solid fa-barcode" style="color: #64748b;"></i>
-                <input type="text" id="search-input" placeholder="Pesquisar código ou item..." oninput="filtrarTabelaPorBusca()">
+                <input type="text" id="search-input" placeholder="Pesquisar código, item ou pai..." oninput="filtrarTabelaPorBusca()">
             </div>
         </header>
 
@@ -309,7 +199,7 @@
                         <tbody id="inventory-table-body">
                             <tr>
                                 <td colspan="7" style="text-align: center; padding: 30px; color: #64748b;">
-                                    <i class="fa-solid fa-spinner fa-spin"></i> Carregando inventário da planilha...
+                                    <i class="fa-solid fa-spinner fa-spin"></i> Carregando inventário...
                                 </td>
                             </tr>
                         </tbody>
@@ -320,42 +210,30 @@
             <div class="control-side-panel">
                 <div class="tab-menu-right">
                     <button class="tab-nav-btn active" id="btn-tab-move" onclick="alternarAbaFormulario('MOVER')"><i class="fa-solid fa-right-left"></i> Movimentar</button>
-                    <button class="tab-nav-btn" id="btn-tab-reg" onclick="alternarAbaFormulario('CADASTRAR')"><i class="fa-solid fa-plus"></i> Novo Item</button>
+                    <button class="tab-nav-btn" id="btn-tab-reg" onclick="alternarAbaFormulario('CADASTRAR')"><i class="fa-solid fa-plus"></i> Novo / Editar</button>
+                    <button class="tab-nav-btn" id="btn-tab-amb" onclick="alternarAbaFormulario('AMBIENTES')"><i class="fa-solid fa-school"></i> Ambientes</button>
                 </div>
 
                 <div class="action-card-panel" id="panel-movimentar-bens">
                     <h3>Transferência de Local</h3>
-                    
                     <div class="form-group">
                         <label for="trans-code">Código do Patrimônio (Digite ou Bipe):</label>
                         <input type="text" id="trans-code" placeholder="Ex: 001245" oninput="buscarItemPorCodigoDigitado()">
                     </div>
-
                     <div class="selected-item-preview" id="item-preview-box" style="display: none;">
                         <p><strong>Item:</strong> <span id="prev-nome">-</span></p>
                         <p><strong>Local Atual:</strong> <span id="prev-local">-</span></p>
                         <p><strong>Responsável Atual:</strong> <span id="prev-resp">-</span></p>
+                        <div id="prev-box-vinculos"></div>
                     </div>
-
                     <div class="form-group">
                         <label for="trans-room">Destino / Nova Localização:</label>
-                        <select id="trans-room">
-                            <option value="">-- Selecione o Local de Destino --</option>
-                            <option value="Laboratório de Robótica">Laboratório de Robótica</option>
-                            <option value="Sala de Informática">Sala de Informática</option>
-                            <option value="Secretaria">Secretaria</option>
-                            <option value="Direção">Direção</option>
-                            <option value="Sala dos Professores">Sala dos Professores</option>
-                            <option value="Almoxarifado">Almoxarifado</option>
-                            <option value="Manutenção">Manutenção / Fora da Escola</option>
-                        </select>
+                        <select id="trans-room" class="select-salas-dinamicas"><option value="">Carregando...</option></select>
                     </div>
-
                     <div class="form-group">
                         <label for="trans-resp">Funcionário Responsável pela Retirada:</label>
                         <input type="text" id="trans-resp" placeholder="Nome de quem está levando">
                     </div>
-
                     <div class="form-group">
                         <label for="trans-status">Alterar Estado do Item (Opcional):</label>
                         <select id="trans-status">
@@ -365,60 +243,66 @@
                             <option value="Danificado">Danificado / Quebrado</option>
                         </select>
                     </div>
-
-                    <button class="btn-transfer btn-action-trigger" id="btn-executar-transferencia" onclick="executarTransferenciaPatrimonio()" disabled>Confirmar Movimentação</button>
+                    <button class="btn-action-trigger" id="btn-executar-transferencia" onclick="executarTransferenciaPatrimonio()" disabled>Confirmar Movimentação</button>
                 </div>
 
                 <div class="action-card-panel" id="panel-cadastrar-bens" style="display: none;">
-                    <h3>Cadastrar Novo Patrimônio</h3>
-                    
+                    <h3 id="cad-form-title">Cadastrar Novo Patrimônio</h3>
                     <div class="form-group">
                         <label for="reg-code">Código / Etiqueta do Item:</label>
-                        <input type="text" id="reg-code" placeholder="Ex: 104523">
+                        <input type="text" id="reg-code" placeholder="Ex: 104523" oninput="checarSeCodigoExisteParaEditar()">
                     </div>
-
                     <div class="form-group">
                         <label for="reg-item">Nome / Descrição do Equipamento:</label>
-                        <input type="text" id="reg-item" placeholder="Ex: Projetor Epson PowerLite">
+                        <input type="text" id="reg-item" placeholder="Ex: Notebook Lenovo ThinkPad">
                     </div>
-
                     <div class="form-group">
                         <label for="reg-cat">Categoria:</label>
                         <select id="reg-cat">
                             <option value="Informática">Informática (PC, Note, Monitor)</option>
-                            <option value="Robótica">Robótica (Kits, Sensores, Motores)</option>
-                            <option value="Mobiliário">Mobiliário (Cadeira, Mesa, Armário)</option>
+                            <option value="Robótica">Robótica (Kits, Sensores)</option>
+                            <option value="Mobiliário">Mobiliário (Cadeira, Mesa)</option>
                             <option value="Eletrodomésticos">Eletrodomésticos / Som</option>
                             <option value="Outros">Outros</option>
                         </select>
                     </div>
-
                     <div class="form-group">
-                        <label for="reg-room">Localização de Entrada:</label>
-                        <select id="reg-room">
-                            <option value="Almoxarifado" selected>Almoxarifado (Padrão)</option>
-                            <option value="Laboratório de Robótica">Laboratório de Robótica</option>
-                            <option value="Sala de Informática">Sala de Informática</option>
-                            <option value="Secretaria">Secretaria</option>
-                            <option value="Direção">Direção</option>
-                            <option value="Sala dos Professores">Sala dos Professores</option>
-                        </select>
+                        <label for="reg-room">Localização Inicial:</label>
+                        <select id="reg-room" class="select-salas-dinamicas"><option value="Almoxarifado">Almoxarifado</option></select>
+                    </div>
+                    
+                    <div class="form-group" style="background: #f8fafc; padding: 8px; border-radius: 6px; border: 1px dashed #cbd5e1;">
+                        <label for="reg-parent" style="color: #0269a1;"><i class="fa-solid fa-link"></i> Pertence ao Código Pai? (Opcional):</label>
+                        <input type="text" id="reg-parent" placeholder="Ex: 0052 (Código do Gabinete ou Mesa)" oninput="validarCodigoPaiDigitado()">
+                        <span id="reg-parent-preview" style="font-size: 11px; color:#64748b; display:block; margin-top:3px;"></span>
                     </div>
 
                     <div class="form-group">
-                        <label for="reg-resp">Funcionário Responsável pelo Cadastro:</label>
-                        <input type="text" id="reg-resp" id="reg-resp-name" placeholder="Seu nome">
+                        <label for="reg-resp">Funcionário Responsável:</label>
+                        <input type="text" id="reg-resp" placeholder="Seu nome">
                     </div>
-
                     <div class="form-group">
                         <label for="reg-status">Estado de Conservação:</label>
                         <select id="reg-status">
-                            <option value="Bom" selected>Bom Estado (Novo/Funcionando)</option>
-                            <option value="Em Manutenção">Aguardando Instalação/Manutenção</option>
+                            <option value="Bom">Bom Estado</option>
+                            <option value="Em Manutenção">Em Manutenção</option>
                         </select>
                     </div>
+                    <button class="btn-action-trigger" id="btn-executar-cadastro" onclick="executarCadastroNovoPatrimonio()">Salvar na Planilha</button>
+                </div>
 
-                    <button class="btn-action-trigger" id="btn-executar-cadastro" onclick="executarCadastroNovoPatrimonio()">Salvar Item na Planilha</button>
+                <div class="action-card-panel" id="panel-ambientes-gerenciar" style="display: none;">
+                    <h3>Gerenciar Ambientes da Escola</h3>
+                    <div class="form-group">
+                        <label for="new-amb-name">Nome do Novo Ambiente:</label>
+                        <input type="text" id="new-amb-name" placeholder="Ex: Sala Maker / Bloco B">
+                    </div>
+                    <button class="btn-action-trigger" onclick="adicionarNovoAmbienteServidor()" style="margin-top:0;">+ Adicionar Sala</button>
+                    
+                    <label style="font-size: 11px; font-weight: 600; color: #475569; margin-top: 10px;">Salas Cadastradas Atualmente:</label>
+                    <ul class="mini-list-ambientes" id="mini-list-amb-box">
+                        <li>Carregando salas...</li>
+                    </ul>
                 </div>
             </div>
         </div>
@@ -428,60 +312,105 @@
         const APPS_SCRIPT_PAT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
         
         let todosOsPatrimonios = [];
+        let listaDeAmbientes = [];
         let salaFiltroAtual = 'TODOS';
+        let usuarioLogado = {};
 
-        // TRAVA DE SEGURANÇA MÁXIMA - SÓ ENTRA QUEM É NÍVEL 3
         window.addEventListener('DOMContentLoaded', () => {
             const sessao = localStorage.getItem('sgi_ccma_session');
-            if (!sessao) {
-                alert("Acesso negado. Por favor, faça login no SIGA primeiro.");
-                window.location.href = "index.html";
-                return;
+            if (!sessao) { window.location.href = "index.html"; return; }
+            
+            usuarioLogado = JSON.parse(sessao);
+            if (!usuarioLogado.nivel || parseInt(usuarioLogado.nivel) < 3) {
+                alert("Restrito ao Nível 3."); window.location.href = "restrito.html"; return;
             }
             
-            const usuario = JSON.parse(sessao);
-            if (!usuario.nivel || parseInt(usuario.nivel) < 3) {
-                alert("Acesso restrito! Apenas usuários com Nível 3 podem acessar o Controle de Patrimônio.");
-                window.location.href = "restrito.html";
-                return;
-            }
+            if(document.getElementById('reg-resp')) document.getElementById('reg-resp').value = usuarioLogado.nome || "";
             
-            // Coloca o nome do usuário logado por padrão no campo de responsável
-            if(document.getElementById('reg-resp')) {
-                document.getElementById('reg-resp').value = usuario.nome || "";
-            }
-            
-            carregarPatrimonioDoServidor();
+            inicializarSistemaDinamico();
         });
 
-        // ALTERNADOR DE ABAS DIREITAS
-        function alternarAbaFormulario(abaAlvo) {
-            const tabMove = document.getElementById('btn-tab-move');
-            const tabReg = document.getElementById('btn-tab-reg');
-            const panelMove = document.getElementById('panel-movimentar-bens');
-            const panelReg = document.getElementById('panel-cadastrar-bens');
-
-            if(abaAlvo === 'MOVER') {
-                tabMove.classList.add('active');
-                tabReg.classList.remove('active');
-                panelMove.style.display = "flex";
-                panelReg.style.display = "none";
-            } else {
-                tabMove.classList.remove('active');
-                tabReg.classList.add('active');
-                panelMove.style.display = "none";
-                panelReg.style.display = "flex";
-            }
+        async function inicializarSistemaDinamico() {
+            await carregarAmbientesDoServidor();
+            await carregarPatrimonioDoServidor();
         }
 
+        // CONTROLADOR DE ABAS DIREITAS
+        function alternarAbaFormulario(abaAlvo) {
+            const tabs = { 'MOVER': 'btn-tab-move', 'CADASTRAR': 'btn-tab-reg', 'AMBIENTES': 'btn-tab-amb' };
+            const panels = { 'MOVER': 'panel-movimentar-bens', 'CADASTRAR': 'panel-cadastrar-bens', 'AMBIENTES': 'panel-ambientes-gerenciar' };
+            
+            Object.keys(tabs).forEach(k => {
+                document.getElementById(tabs[k]).classList.toggle('active', k === abaAlvo);
+                document.getElementById(panels[k]).style.display = k === abaAlvo ? "flex" : "none";
+            });
+
+            if(abaAlvo === 'CADASTRAR') resetarFormularioCadastro();
+        }
+
+        // MOTOR DE LEITURA DE AMBIENTES DINÂMICOS
+        async function carregarAmbientesDoServidor() {
+            try {
+                const r = await fetch(${APPS_SCRIPT_PAT_URL}?aba=ambientes, { method: 'GET', cache: 'no-cache' });
+                listaDeAmbientes = await r.json();
+                
+                // 1. Renderiza os filtros na Barra Lateral
+                const sidebarList = document.getElementById('room-container-list');
+                sidebarList.innerHTML = <li class="room-item ${salaFiltroAtual==='TODOS'?'active':''}" onclick="filtrarPorSala('TODOS', this)"><i class="fa-solid fa-boxes-stacked"></i> Ver Tudo</li>;
+                
+                listaDeAmbientes.forEach(sala => {
+                    let li = document.createElement('li');
+                    li.className = room-item ${salaFiltroAtual===sala?'active':''};
+                    li.onclick = () => filtrarPorSala(sala, li);
+                    li.innerHTML = <span><i class="fa-solid fa-location-dot"></i> ${sala}</span>;
+                    sidebarList.appendChild(li);
+                });
+                // 2. Alimenta os seletores de formulários (<select>)
+                document.querySelectorAll('.select-salas-dinamicas').forEach(select => {
+                    select.innerHTML = '<option value="">-- Selecione o Local --</option>';
+                    listaDeAmbientes.forEach(sala => {
+                        select.innerHTML += <option value="${sala}">${sala}</option>;
+                    });
+                });
+
+                // 3. Alimenta a mini lista de remoção na aba ambientes
+                const miniBox = document.getElementById('mini-list-amb-box');
+                miniBox.innerHTML = '';
+                listaDeAmbientes.forEach(sala => {
+                    miniBox.innerHTML += <li><span>${sala}</span><button class="btn-del-mini" onclick="deletarAmbienteServidor('${sala}')"><i class="fa-solid fa-trash"></i></button></li>;
+                });
+
+            } catch(e) { console.error("Erro ambientes:", e); }
+        }
+
+        async function adicionarNovoAmbienteServidor() {
+            const input = document.getElementById('new-amb-name');
+            const nome = input.value.trim();
+            if(!nome) return;
+
+            try {
+                await fetch(APPS_SCRIPT_PAT_URL, { method: 'POST', body: JSON.stringify({ operacao: "AMB_ADICIONAR", ambiente: nome }) });
+                input.value = '';
+                await carregarAmbientesDoServidor();
+            } catch(e) { alert("Erro ao salvar sala."); }
+        }
+
+        async function deletarAmbienteServidor(nomeSala) {
+            if(!confirm(Deseja remover o ambiente "${nomeSala}"? Itens nessa sala não sumirão, mas o filtro será apagado.)) return;
+            try {
+                await fetch(APPS_SCRIPT_PAT_URL, { method: 'POST', body: JSON.stringify({ operacao: "AMB_DELETAR", ambiente: nomeSala }) });
+                await carregarAmbientesDoServidor();
+            } catch(e) { alert("Erro ao deletar."); }
+        }
+
+        // MOTOR DE PATRIMÔNIO E VÍNCULOS
         async function carregarPatrimonioDoServidor() {
             try {
-                const response = await fetch(`${APPS_SCRIPT_PAT_URL}?aba=patrimonio`, { method: 'GET', cache: 'no-cache' });
+                const response = await fetch(${APPS_SCRIPT_PAT_URL}?aba=patrimonio, { method: 'GET', cache: 'no-cache' });
                 todosOsPatrimonios = await response.json();
                 renderizarTabelaInventario();
             } catch (error) {
-                console.error("Erro ao ler patrimônio:", error);
-                document.getElementById('inventory-table-body').innerHTML = `<tr><td colspan="7" style="text-align: center; color: #b91c1c; font-weight: bold;">Falha ao carregar dados do Google Sheets.</td></tr>`;
+                document.getElementById('inventory-table-body').innerHTML = <tr><td colspan="7" style="text-align: center; color: red;">Erro.</td></tr>;
             }
         }
 
@@ -489,30 +418,29 @@
             const tbody = document.getElementById('inventory-table-body');
             tbody.innerHTML = '';
 
-            let itensFiltrados = todosOsPatrimonios;
-            if (salaFiltroAtual !== 'TODOS') {
-                itensFiltrados = todosOsPatrimonios.filter(item => item.localizacao === salaFiltroAtual);
-            }
+            let itensFiltrados = salaFiltroAtual === 'TODOS' ? todosOsPatrimonios : todosOsPatrimonios.filter(item => item.localizacao === salaFiltroAtual);
 
             if (itensFiltrados.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #64748b; padding: 20px;">Nenhum item localizado neste ambiente.</td></tr>`;
+                tbody.innerHTML = <tr><td colspan="7" style="text-align: center; color: #64748b; padding: 20px;">Nenhum item neste local.</td></tr>;
                 return;
             }
 
             itensFiltrados.forEach(item => {
-                let badgeClass = 'status-bom';
-                if (item.status.toLowerCase().includes('manuten')) badgeClass = 'status-manutencao';
-                if (item.status.toLowerCase().includes('danific') || item.status.toLowerCase().includes('quebr')) badgeClass = 'status-danificado';
+                let badgeClass = item.status.toLowerCase().includes('manuten') ? 'status-manutencao' : (item.status.toLowerCase().includes('danific') || item.status.toLowerCase().includes('quebr') ? 'status-danificado' : 'status-bom');
+                
+                // RASTREADOR VISUAL: Procura se esse item aponta para algum pai
+                let labelVinculoPai = "";
+                if (item.itemPai) {
+                    const paiObjeto = todosOsPatrimonios.find(p => p.codigo === item.itemPai);
+                    labelVinculoPai = <br><span class="item-tag-vinculo"><i class="fa-solid fa-paperclip"></i> Acoplado ao Pai: ${item.itemPai} ${paiObjeto ? '('+paiObjeto.item+')' : ''}</span>;
+                }
 
                 let tr = document.createElement('tr');
                 tr.style.cursor = 'pointer';
-                tr.onclick = () => {
-                    alternarAbaFormulario('MOVER');
-                    carregarItemNoFormulario(item.codigo);
-                };
+                tr.onclick = () => { alternarAbaFormulario('MOVER'); carregarItemNoFormulario(item.codigo); };
                 tr.innerHTML = `
                     <td style="color:#005088; font-weight:bold;">${item.codigo}</td>
-                    <td><strong>${item.item}</strong></td>
+                    <td><strong>${item.item}</strong>${labelVinculoPai}</td>
                     <td style="color:#64748b;">${item.categoria}</td>
                     <td><i class="fa-solid fa-location-dot" style="color:#eab308; margin-right:5px;"></i>${item.localizacao}</td>
                     <td>${item.responsavel || '-'}</td>
@@ -527,30 +455,23 @@
             salaFiltroAtual = sala;
             document.querySelectorAll('.room-item').forEach(el => el.classList.remove('active'));
             elementoBotao.classList.add('active');
-            
-            document.getElementById('panel-title-text').innerText = sala === 'TODOS' ? 'Almoxarifado Geral do Colégio' : `Ambiente: ${sala}`;
-            document.getElementById('table-subtitle').innerText = sala === 'TODOS' ? 'Todos os Itens Registrados' : `Itens localizados em: ${sala}`;
-            
+            document.getElementById('panel-title-text').innerText = sala === 'TODOS' ? 'Almoxarifado Geral do Colégio' : Ambiente: ${sala};
             renderizarTabelaInventario();
         }
 
         function filtrarTabelaPorBusca() {
             const termo = document.getElementById('search-input').value.trim().toLowerCase();
-            const tbody = document.getElementById('inventory-table-body');
-            
             if (termo === "") { renderizarTabelaInventario(); return; }
 
+            const tbody = document.getElementById('inventory-table-body');
             tbody.innerHTML = '';
+            
             let correspondencias = todosOsPatrimonios.filter(item => 
                 item.codigo.toLowerCase().includes(termo) || 
                 item.item.toLowerCase().includes(termo) || 
+                item.itemPai.toLowerCase().includes(termo) ||
                 item.categoria.toLowerCase().includes(termo)
             );
-
-            if(correspondencias.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #64748b; padding: 20px;">Nenhum item corresponde à pesquisa.</td></tr>`;
-                return;
-            }
 
             correspondencias.forEach(item => {
                 let badgeClass = item.status.toLowerCase().includes('manuten') ? 'status-manutencao' : (item.status.toLowerCase().includes('danific') ? 'status-danificado' : 'status-bom');
@@ -558,7 +479,7 @@
                 tr.onclick = () => { alternarAbaFormulario('MOVER'); carregarItemNoFormulario(item.codigo); };
                 tr.innerHTML = `
                     <td style="color:#005088; font-weight:bold;">${item.codigo}</td>
-                    <td><strong>${item.item}</strong></td>
+                    <td><strong>${item.item}</strong> ${item.itemPai ? '<br><span class="item-tag-vinculo">Pai: '+item.itemPai+'</span>' : ''}</td>
                     <td>${item.categoria}</td>
                     <td><i class="fa-solid fa-location-dot" style="color:#eab308; margin-right:5px;"></i>${item.localizacao}</td>
                     <td>${item.responsavel || '-'}</td>
@@ -569,22 +490,60 @@
             });
         }
 
+        // VALIDAÇÕES EM TEMPO REAL NA INTERFACE
         function buscarItemPorCodigoDigitado() {
             const codigo = document.getElementById('trans-code').value.trim();
             const itemEncontrado = todosOsPatrimonios.find(item => item.codigo === codigo);
-
             const previewBox = document.getElementById('item-preview-box');
             const btn = document.getElementById('btn-executar-transferencia');
+            const vinculoContainer = document.getElementById('prev-box-vinculos');
 
             if (itemEncontrado) {
                 document.getElementById('prev-nome').innerText = itemEncontrado.item;
                 document.getElementById('prev-local').innerText = itemEncontrado.localizacao;
                 document.getElementById('prev-resp').innerText = itemEncontrado.responsavel || 'Ninguém';
-                previewBox.style.display = "block";
-                btn.disabled = false;
+                
+                // RASTREIO DE FILHOS: Alerta se existirem itens linkados a ele neste momento
+                let subItens = todosOsPatrimonios.filter(p => p.itemPai === itemEncontrado.codigo);
+                if(subItens.length > 0) {
+                    vinculoContainer.innerHTML = <span class="parent-alert-box"><i class="fa-solid fa-boxes-stacked"></i> Alerta: Existem ${subItens.length} itens acoplados fisicamente a este código.</span>;
+                } else { vinculoContainer.innerHTML = ''; }
+
+                previewBox.style.display = "block"; btn.disabled = false;
+            } else { previewBox.style.display = "none"; btn.disabled = true; }
+        }
+
+        function validarCodigoPaiDigitado() {
+            const codPai = document.getElementById('reg-parent').value.trim();
+            const label = document.getElementById('reg-parent-preview');
+            if(!codPai) { label.innerText = ""; return; }
+
+            const pai = todosOsPatrimonios.find(p => p.codigo === codPai);
+            if(pai) {
+                label.innerHTML = <i class="fa-solid fa-check" style="color:green;"></i> Item Pai Localizado: <strong>${pai.item}</strong> (${pai.localizacao});
             } else {
-                previewBox.style.display = "none";
-                btn.disabled = true;
+                label.innerHTML = <i class="fa-solid fa-triangle-exclamation" style="color:orange;"></i> Código Pai não cadastrado ainda (ficará linkado assim mesmo).;
+            }
+        }
+
+        function checarSeCodigoExisteParaEditar() {
+            const codigo = document.getElementById('reg-code').value.trim();
+            const itemEncontrado = todosOsPatrimonios.find(item => item.codigo === codigo);
+            const h3Title = document.getElementById('cad-form-title');
+            const btn = document.getElementById('btn-executar-cadastro');
+
+            if(itemEncontrado) {
+                h3Title.innerHTML = <i class="fa-solid fa-pen-to-square" style="color:#eab308;"></i> Modo de Edição;
+                document.getElementById('reg-item').value = itemEncontrado.item;
+                document.getElementById('reg-cat').value = itemEncontrado.categoria;
+                document.getElementById('reg-room').value = itemEncontrado.localizacao;
+                document.getElementById('reg-parent').value = itemEncontrado.itemPai || "";
+                document.getElementById('reg-status').value = itemEncontrado.status.includes('Manuten') ? 'Em Manutenção' : 'Bom';
+                btn.innerText = "Atualizar Patrimônio";
+                validarCodigoPaiDigitado();
+            } else {
+                h3Title.innerText = "Cadastrar Novo Patrimônio";
+                btn.innerText = "Salvar na Planilha";
             }
         }
 
@@ -594,7 +553,17 @@
             document.getElementById('trans-room').focus();
         }
 
-        // MOTOR 1: ENVIA A ATUALIZAÇÃO / TRANSFERÊNCIA PARA A PLANILHA
+        function resetarFormularioCadastro() {
+            document.getElementById('cad-form-title').innerText = "Cadastrar Novo Patrimônio";
+            document.getElementById('reg-code').value = '';
+            document.getElementById('reg-item').value = '';
+            document.getElementById('reg-parent').value = '';
+            document.getElementById('reg-parent-preview').innerText = '';
+            document.getElementById('btn-executar-cadastro').innerText = "Salvar na Planilha";
+            if(document.getElementById('reg-resp')) document.getElementById('reg-resp').value = usuarioLogado.nome || "";
+        }
+
+        // EXECUTORES ASSÍNCRONOS (CONEXÃO COM APPS SCRIPT)
         async function executarTransferenciaPatrimonio() {
             const codigo = document.getElementById('trans-code').value.trim();
             const novaSala = document.getElementById('trans-room').value;
@@ -602,29 +571,19 @@
             const novoStatus = document.getElementById('trans-status').value;
             const btn = document.getElementById('btn-executar-transferencia');
 
-            if (!codigo || !novaSala || !responsavel) { alert("Por favor, preencha todos os campos da transferência."); return; }
-
+            if (!codigo || !novaSala || !responsavel) { alert("Preencha o Destino e o Responsável."); return; }
             btn.disabled = true; btn.innerText = "Processando...";
 
-            const payload = { operacao: "PAT_TRANSFERIR", codigo: codigo, novaLocalizacao: novaSala, responsavel: responsavel, status: novoStatus || null };
-
             try {
-                const response = await fetch(APPS_SCRIPT_PAT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
-                const resultado = await response.json();
-
-                if (resultado.status === "success") {
-                    document.getElementById('trans-code').value = '';
-                    document.getElementById('trans-room').value = '';
-                    document.getElementById('trans-resp').value = '';
-                    document.getElementById('trans-status').value = '';
-                    document.getElementById('item-preview-box').style.display = "none";
-                    alert("Patrimônio movimentado com sucesso!");
-                    await carregarPatrimonioDoServidor();
-                } else { alert("Código de patrimônio não localizado."); }
-            } catch (error) { alert("Erro de comunicação com o servidor."); } finally { btn.disabled = false; btn.innerText = "Confirmar Movimentação"; }
+                const r = await fetch(APPS_SCRIPT_PAT_URL, { method: 'POST', body: JSON.stringify({ operacao: "PAT_TRANSFERIR", codigo: codigo, novaLocalizacao: novaSala, responsavel: responsavel, status: novoStatus || null }) });
+                const res = await r.json();
+                if (res.status === "success") {
+                    document.getElementById('trans-code').value = ''; document.getElementById('item-preview-box').style.display = "none";
+                    alert("Movimentação concluída!"); await carregarPatrimonioDoServidor();
+                }
+            } catch (e) { alert("Erro de comunicação."); } finally { btn.disabled = false; btn.innerText = "Confirmar Movimentação"; }
         }
 
-        // MOTOR 2: GRAVA UM PRODUTO TOTALMENTE NOVO NA ÚLTIMA LINHA DA PLANILHA
         async function executarCadastroNovoPatrimonio() {
             const codigo = document.getElementById('reg-code').value.trim();
             const item = document.getElementById('reg-item').value.trim();
@@ -632,42 +591,23 @@
             const sala = document.getElementById('reg-room').value;
             const funcionario = document.getElementById('reg-resp').value.trim();
             const status = document.getElementById('reg-status').value;
+            const itemPai = document.getElementById('reg-parent').value.trim();
             const btn = document.getElementById('btn-executar-cadastro');
 
-            if(!codigo || !item || !funcionario) {
-                alert("Por favor, preencha o Código, Descrição e o Nome do Funcionário.");
-                return;
-            }
+            if(!codigo || !item || !funcionario || !sala) { alert("Preencha os campos obrigatórios."); return; }
+            btn.disabled = true;
 
-            btn.disabled = true; btn.innerText = "Gravando Item...";
-
-            const payload = {
-                operacao: "PAT_CADASTRAR",
-                codigo: codigo,
-                item: item,
-                categoria: categoria,
-                localizacao: sala,
-                responsavel: funcionario,
-                status: status
-            };
+            const payload = { operacao: "PAT_CADASTRAR", codigo: codigo, item: item, categoria: categoria, localizacao: sala, responsavel: funcionario, status: status, itemPai: itemPai };
 
             try {
-                const response = await fetch(APPS_SCRIPT_PAT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
-                const resultado = await response.json();
-
-                if(resultado.status === "success") {
-                    document.getElementById('reg-code').value = '';
-                    document.getElementById('reg-item').value = '';
-                    alert("Novo patrimônio cadastrado e inserido no inventário!");
+                const r = await fetch(APPS_SCRIPT_PAT_URL, { method: 'POST', body: JSON.stringify(payload) });
+                const res = await r.json();
+                if(res.status === "success" || res.status === "updated") {
+                    alert(res.status === "updated" ? "Patrimônio atualizado com sucesso!" : "Novo item gravado com sucesso!");
+                    resetarFormularioCadastro();
                     await carregarPatrimonioDoServidor();
-                } else if(resultado.status === "duplicated") {
-                    alert("Atenção! Esse número de código/etiqueta já está cadastrado em outro item.");
                 }
-            } catch (error) {
-                alert("Erro ao gravar dados no servidor.");
-            } finally {
-                btn.disabled = false; btn.innerText = "Salvar Item na Planilha";
-            }
+            } catch (e) { alert("Erro ao salvar."); } finally { btn.disabled = false; }
         }
     </script>
 </body>
