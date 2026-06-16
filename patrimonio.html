@@ -34,8 +34,9 @@
             gap: 12px;
         }
         .sidebar-logo {
-            width: 55px;
-            height: 55px;
+            width: 70px;
+            height: 70px;
+            min-width: 70px;
             object-fit: cover;
             border-radius: 50%;
             background-color: white;
@@ -223,10 +224,12 @@
 </head>
 <body>
 
+    <!-- SIDEBAR - FILTRO POR SALAS -->
     <aside class="sidebar">
         <div class="sidebar-top">
             <div class="sidebar-header">
-                <img src="img/SIGA1.png" alt="Logo" class="sidebar-logo">
+                <!-- AJUSTE 2: Atualizado para buscar o arquivo SIGA.png mantendo o recorte redondo cover perfeito -->
+                <img src="img/SIGA.png" alt="Logo" class="sidebar-logo">
                 <div class="sidebar-title">
                     <h2>PATRIMÔNIO</h2>
                     <p>CCM Anchieta</p>
@@ -251,6 +254,7 @@
         </div>
     </aside>
 
+    <!-- CONTEÚDO PRINCIPAL -->
     <main class="main-content">
         <header class="top-bar">
             <h1 id="panel-title-text">Almoxarifado Geral do Colégio</h1>
@@ -261,6 +265,7 @@
         </header>
 
         <div class="workspace">
+            <!-- TABELA DE PATRIMÔNIOS -->
             <div class="inventory-panel">
                 <h3 id="table-subtitle">Todos os Itens Registrados</h3>
                 <div class="table-wrapper">
@@ -287,6 +292,7 @@
                 </div>
             </div>
 
+            <!-- FORMULÁRIO DE MOVIMENTAÇÃO -->
             <div class="transfer-panel">
                 <h3><i class="fa-solid fa-right-left"></i> Transferência de Local</h3>
                 
@@ -336,15 +342,31 @@
     </main>
 
     <script>
-        // Use EXATAMENTE a mesma URL do seu Apps Script do SIGA
         const APPS_SCRIPT_PAT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
         
         let todosOsPatrimonios = [];
         let salaFiltroAtual = 'TODOS';
 
-        window.addEventListener('DOMContentLoaded', carregarPatrimonioDoServidor);
+        // AJUSTE 1: TRAVA DE SEGURANÇA MÁXIMA - SÓ ENTRA QUEM É NÍVEL 3
+        window.addEventListener('DOMContentLoaded', () => {
+            const sessao = localStorage.getItem('sgi_ccma_session');
+            if (!sessao) {
+                alert("Acesso negado. Por favor, faça login no SIGA primeiro.");
+                window.location.href = "index.html";
+                return;
+            }
+            
+            const usuario = JSON.parse(sessao);
+            if (!usuario.nivel || parseInt(usuario.nivel) < 3) {
+                alert("Acesso restrito! Apenas usuários com Nível 3 (Administração/Direção) podem acessar o Controle de Patrimônio.");
+                window.location.href = "restrito.html";
+                return;
+            }
+            
+            // Se passou na trava, carrega o inventário
+            carregarPatrimonioDoServidor();
+        });
 
-        // BUSCA TODOS OS ITENS DA ABA "PATRIMONIO" DA PLANILHA
         async function carregarPatrimonioDoServidor() {
             try {
                 const response = await fetch(`${APPS_SCRIPT_PAT_URL}?aba=patrimonio`, { method: 'GET', cache: 'no-cache' });
@@ -356,7 +378,6 @@
             }
         }
 
-        // RENDERIZA OS ITENS NA TELA
         function renderizarTabelaInventario() {
             const tbody = document.getElementById('inventory-table-body');
             tbody.innerHTML = '';
@@ -380,7 +401,6 @@
                 tr.style.cursor = 'pointer';
                 tr.onclick = () => carregarItemNoFormulario(item.codigo);
                 tr.innerHTML = `
-                    <style>td { font-weight: 500; }</style>
                     <td style="color:#005088; font-weight:bold;">${item.codigo}</td>
                     <td><strong>${item.item}</strong></td>
                     <td style="color:#64748b;">${item.categoria}</td>
@@ -393,7 +413,6 @@
             });
         }
 
-        // FILTRAGEM CLICANDO NAS SALAS DO MENU LATERAL
         function filtrarPorSala(sala, elementoBotao) {
             salaFiltroAtual = sala;
             document.querySelectorAll('.room-item').forEach(el => el.classList.remove('active'));
@@ -405,7 +424,6 @@
             renderizarTabelaInventario();
         }
 
-        // BARRA DE PESQUISA RÁPIDA
         function filtrarTabelaPorBusca() {
             const termo = document.getElementById('search-input').value.trim().toLowerCase();
             const tbody = document.getElementById('inventory-table-body');
@@ -444,7 +462,6 @@
             });
         }
 
-        // MOTOR DE INDICAÇÃO: AO DIGITAR OU BIPAR O CÓDIGO, EXIBE O PREVIEW DO OBJETO
         function buscarItemPorCodigoDigitado() {
             const codigo = document.getElementById('trans-code').value.trim();
             const itemEncontrado = todosOsPatrimonios.find(item => item.codigo === codigo);
@@ -470,8 +487,7 @@
             document.getElementById('trans-room').focus();
         }
 
-        // EXECUTA A TRANSFERÊNCIA GRAVANDO DIRETO NA PLANILHA
-        async function ejecutarTransferenciaPatrimonio() {
+        async function executarTransferenciaPatrimonio() {
             const codigo = document.getElementById('trans-code').value.trim();
             const novaSala = document.getElementById('trans-room').value;
             const responsavel = document.getElementById('trans-resp').value.trim();
@@ -495,7 +511,7 @@
             };
 
             try {
-                const response = await fetch(APPS_SCRIPT_URL, {
+                const response = await fetch(APPS_SCRIPT_PAT_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain' },
                     body: JSON.stringify(payload)
@@ -503,7 +519,6 @@
                 const resultado = await response.json();
 
                 if (resultado.status === "success") {
-                    // Limpa formulário
                     document.getElementById('trans-code').value = '';
                     document.getElementById('trans-room').value = '';
                     document.getElementById('trans-resp').value = '';
@@ -511,7 +526,6 @@
                     document.getElementById('item-preview-box').style.display = "none";
                     
                     alert("Patrimônio movimentado e registrado com sucesso!");
-                    // Recarrega dados atualizados da planilha
                     await carregarPatrimonioDoServidor();
                 } else {
                     alert("Código de patrimônio não localizado na planilha.");
@@ -519,7 +533,7 @@
             } catch (error) {
                 console.error(error);
                 alert("Erro de comunicação com o servidor.");
-            } finally {
+            } Jack (Bauer) {
                 btn.disabled = false;
                 btn.innerText = "Confirmar Movimentação";
             }
