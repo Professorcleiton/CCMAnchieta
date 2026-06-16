@@ -135,11 +135,11 @@
             padding: 25px;
             overflow-y: auto;
             display: grid;
-            grid-template-columns: 1fr 380px;
+            grid-template-columns: 1fr 400px;
             gap: 25px;
         }
 
-        /* TABELA / LISTA DE ITENS */
+        /* TABELA DE ITENS */
         .inventory-panel {
             background: white;
             border-radius: 8px;
@@ -167,8 +167,37 @@
         .status-manutencao { background: #fef9c3; color: #854d0e; }
         .status-danificado { background: #fee2e2; color: #991b1b; }
 
-        /* PAINEL DE MOVIMENTAÇÃO (DIREITA) */
-        .transfer-panel {
+        /* PAINEL CONTROLADOR DE ABAS (DIREITA) */
+        .control-side-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .tab-menu-right {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            background: #e2e8f0;
+            padding: 4px;
+            border-radius: 8px;
+        }
+        .tab-nav-btn {
+            background: none;
+            border: none;
+            padding: 10px;
+            font-weight: bold;
+            font-size: 12px;
+            cursor: pointer;
+            border-radius: 6px;
+            color: #475569;
+            transition: all 0.2s;
+        }
+        .tab-nav-btn.active {
+            background: white;
+            color: #005088;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .action-card-panel {
             background: white;
             border-radius: 8px;
             border: 1px solid #e2e8f0;
@@ -176,9 +205,9 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.02);
             display: flex;
             flex-direction: column;
-            gap: 18px;
+            gap: 15px;
         }
-        .transfer-panel h3 { font-size: 15px; color: #005088; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; text-transform: uppercase; }
+        .action-card-panel h3 { font-size: 15px; color: #005088; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; text-transform: uppercase; }
         
         .form-group { display: flex; flex-direction: column; gap: 6px; }
         .form-group label { font-size: 12px; font-weight: 600; color: #475569; }
@@ -191,7 +220,7 @@
         }
         .form-group input:focus, .form-group select:focus { border-color: #005088; }
         
-        .btn-transfer {
+        .btn-action-trigger {
             background: #005088;
             color: white;
             border: none;
@@ -203,8 +232,8 @@
             margin-top: 10px;
             transition: background 0.2s;
         }
-        .btn-transfer:hover { background: #0c4a6e; }
-        .btn-transfer:disabled { background: #cbd5e1; cursor: not-allowed; }
+        .btn-action-trigger:hover { background: #0c4a6e; }
+        .btn-action-trigger:disabled { background: #cbd5e1; cursor: not-allowed; }
 
         .selected-item-preview {
             background: #f8fafc;
@@ -224,11 +253,9 @@
 </head>
 <body>
 
-    <!-- SIDEBAR - FILTRO POR SALAS -->
     <aside class="sidebar">
         <div class="sidebar-top">
             <div class="sidebar-header">
-                <!-- AJUSTE 2: Atualizado para buscar o arquivo SIGA.png mantendo o recorte redondo cover perfeito -->
                 <img src="img/SIGA.png" alt="Logo" class="sidebar-logo">
                 <div class="sidebar-title">
                     <h2>PATRIMÔNIO</h2>
@@ -254,7 +281,6 @@
         </div>
     </aside>
 
-    <!-- CONTEÚDO PRINCIPAL -->
     <main class="main-content">
         <header class="top-bar">
             <h1 id="panel-title-text">Almoxarifado Geral do Colégio</h1>
@@ -265,7 +291,6 @@
         </header>
 
         <div class="workspace">
-            <!-- TABELA DE PATRIMÔNIOS -->
             <div class="inventory-panel">
                 <h3 id="table-subtitle">Todos os Itens Registrados</h3>
                 <div class="table-wrapper">
@@ -292,51 +317,109 @@
                 </div>
             </div>
 
-            <!-- FORMULÁRIO DE MOVIMENTAÇÃO -->
-            <div class="transfer-panel">
-                <h3><i class="fa-solid fa-right-left"></i> Transferência de Local</h3>
-                
-                <div class="form-group">
-                    <label for="trans-code">Código do Patrimônio (Digite ou Bipe):</label>
-                    <input type="text" id="trans-code" placeholder="Ex: 001245" oninput="buscarItemPorCodigoDigitado()">
+            <div class="control-side-panel">
+                <div class="tab-menu-right">
+                    <button class="tab-nav-btn active" id="btn-tab-move" onclick="alternarAbaFormulario('MOVER')"><i class="fa-solid fa-right-left"></i> Movimentar</button>
+                    <button class="tab-nav-btn" id="btn-tab-reg" onclick="alternarAbaFormulario('CADASTRAR')"><i class="fa-solid fa-plus"></i> Novo Item</button>
                 </div>
 
-                <div class="selected-item-preview" id="item-preview-box" style="display: none;">
-                    <p><strong>Item:</strong> <span id="prev-nome">-</span></p>
-                    <p><strong>Local Atual:</strong> <span id="prev-local">-</span></p>
-                    <p><strong>Responsável Atual:</strong> <span id="prev-resp">-</span></p>
+                <div class="action-card-panel" id="panel-movimentar-bens">
+                    <h3>Transferência de Local</h3>
+                    
+                    <div class="form-group">
+                        <label for="trans-code">Código do Patrimônio (Digite ou Bipe):</label>
+                        <input type="text" id="trans-code" placeholder="Ex: 001245" oninput="buscarItemPorCodigoDigitado()">
+                    </div>
+
+                    <div class="selected-item-preview" id="item-preview-box" style="display: none;">
+                        <p><strong>Item:</strong> <span id="prev-nome">-</span></p>
+                        <p><strong>Local Atual:</strong> <span id="prev-local">-</span></p>
+                        <p><strong>Responsável Atual:</strong> <span id="prev-resp">-</span></p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="trans-room">Destino / Nova Localização:</label>
+                        <select id="trans-room">
+                            <option value="">-- Selecione o Local de Destino --</option>
+                            <option value="Laboratório de Robótica">Laboratório de Robótica</option>
+                            <option value="Sala de Informática">Sala de Informática</option>
+                            <option value="Secretaria">Secretaria</option>
+                            <option value="Direção">Direção</option>
+                            <option value="Sala dos Professores">Sala dos Professores</option>
+                            <option value="Almoxarifado">Almoxarifado</option>
+                            <option value="Manutenção">Manutenção / Fora da Escola</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="trans-resp">Funcionário Responsável pela Retirada:</label>
+                        <input type="text" id="trans-resp" placeholder="Nome de quem está levando">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="trans-status">Alterar Estado do Item (Opcional):</label>
+                        <select id="trans-status">
+                            <option value="">Manter estado atual</option>
+                            <option value="Bom">Bom Estado</option>
+                            <option value="Em Manutenção">Em Manutenção</option>
+                            <option value="Danificado">Danificado / Quebrado</option>
+                        </select>
+                    </div>
+
+                    <button class="btn-transfer btn-action-trigger" id="btn-executar-transferencia" onclick="executarTransferenciaPatrimonio()" disabled>Confirmar Movimentação</button>
                 </div>
 
-                <div class="form-group">
-                    <label for="trans-room">Destino / Nova Localização:</label>
-                    <select id="trans-room">
-                        <option value="">-- Selecione o Local de Destino --</option>
-                        <option value="Laboratório de Robótica">Laboratório de Robótica</option>
-                        <option value="Sala de Informática">Sala de Informática</option>
-                        <option value="Secretaria">Secretaria</option>
-                        <option value="Direção">Direção</option>
-                        <option value="Sala dos Professores">Sala dos Professores</option>
-                        <option value="Almoxarifado">Almoxarifado</option>
-                        <option value="Manutenção">Manutenção / Fora da Escola</option>
-                    </select>
-                </div>
+                <div class="action-card-panel" id="panel-cadastrar-bens" style="display: none;">
+                    <h3>Cadastrar Novo Patrimônio</h3>
+                    
+                    <div class="form-group">
+                        <label for="reg-code">Código / Etiqueta do Item:</label>
+                        <input type="text" id="reg-code" placeholder="Ex: 104523">
+                    </div>
 
-                <div class="form-group">
-                    <label for="trans-resp">Funcionário Responsável pela Retirada:</label>
-                    <input type="text" id="trans-resp" placeholder="Nome de quem está levando">
-                </div>
+                    <div class="form-group">
+                        <label for="reg-item">Nome / Descrição do Equipamento:</label>
+                        <input type="text" id="reg-item" placeholder="Ex: Projetor Epson PowerLite">
+                    </div>
 
-                <div class="form-group">
-                    <label for="trans-status">Alterar Estado do Item (Opcional):</label>
-                    <select id="trans-status">
-                        <option value="">Manter estado atual</option>
-                        <option value="Bom">Bom Estado</option>
-                        <option value="Em Manutenção">Em Manutenção</option>
-                        <option value="Danificado">Danificado / Quebrado</option>
-                    </select>
-                </div>
+                    <div class="form-group">
+                        <label for="reg-cat">Categoria:</label>
+                        <select id="reg-cat">
+                            <option value="Informática">Informática (PC, Note, Monitor)</option>
+                            <option value="Robótica">Robótica (Kits, Sensores, Motores)</option>
+                            <option value="Mobiliário">Mobiliário (Cadeira, Mesa, Armário)</option>
+                            <option value="Eletrodomésticos">Eletrodomésticos / Som</option>
+                            <option value="Outros">Outros</option>
+                        </select>
+                    </div>
 
-                <button class="btn-transfer" id="btn-executar-transferencia" onclick="executarTransferenciaPatrimonio()" disabled>Confirmar Movimentação</button>
+                    <div class="form-group">
+                        <label for="reg-room">Localização de Entrada:</label>
+                        <select id="reg-room">
+                            <option value="Almoxarifado" selected>Almoxarifado (Padrão)</option>
+                            <option value="Laboratório de Robótica">Laboratório de Robótica</option>
+                            <option value="Sala de Informática">Sala de Informática</option>
+                            <option value="Secretaria">Secretaria</option>
+                            <option value="Direção">Direção</option>
+                            <option value="Sala dos Professores">Sala dos Professores</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reg-resp">Funcionário Responsável pelo Cadastro:</label>
+                        <input type="text" id="reg-resp" id="reg-resp-name" placeholder="Seu nome">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reg-status">Estado de Conservação:</label>
+                        <select id="reg-status">
+                            <option value="Bom" selected>Bom Estado (Novo/Funcionando)</option>
+                            <option value="Em Manutenção">Aguardando Instalação/Manutenção</option>
+                        </select>
+                    </div>
+
+                    <button class="btn-action-trigger" id="btn-executar-cadastro" onclick="executarCadastroNovoPatrimonio()">Salvar Item na Planilha</button>
+                </div>
             </div>
         </div>
     </main>
@@ -347,7 +430,7 @@
         let todosOsPatrimonios = [];
         let salaFiltroAtual = 'TODOS';
 
-        // AJUSTE 1: TRAVA DE SEGURANÇA MÁXIMA - SÓ ENTRA QUEM É NÍVEL 3
+        // TRAVA DE SEGURANÇA MÁXIMA - SÓ ENTRA QUEM É NÍVEL 3
         window.addEventListener('DOMContentLoaded', () => {
             const sessao = localStorage.getItem('sgi_ccma_session');
             if (!sessao) {
@@ -358,14 +441,38 @@
             
             const usuario = JSON.parse(sessao);
             if (!usuario.nivel || parseInt(usuario.nivel) < 3) {
-                alert("Acesso restrito! Apenas usuários com Nível 3 (Administração/Direção) podem acessar o Controle de Patrimônio.");
+                alert("Acesso restrito! Apenas usuários com Nível 3 podem acessar o Controle de Patrimônio.");
                 window.location.href = "restrito.html";
                 return;
             }
             
-            // Se passou na trava, carrega o inventário
+            // Coloca o nome do usuário logado por padrão no campo de responsável
+            if(document.getElementById('reg-resp')) {
+                document.getElementById('reg-resp').value = usuario.nome || "";
+            }
+            
             carregarPatrimonioDoServidor();
         });
+
+        // ALTERNADOR DE ABAS DIREITAS
+        function alternarAbaFormulario(abaAlvo) {
+            const tabMove = document.getElementById('btn-tab-move');
+            const tabReg = document.getElementById('btn-tab-reg');
+            const panelMove = document.getElementById('panel-movimentar-bens');
+            const panelReg = document.getElementById('panel-cadastrar-bens');
+
+            if(abaAlvo === 'MOVER') {
+                tabMove.classList.add('active');
+                tabReg.classList.remove('active');
+                panelMove.style.display = "flex";
+                panelReg.style.display = "none";
+            } else {
+                tabMove.classList.remove('active');
+                tabReg.classList.add('active');
+                panelMove.style.display = "none";
+                panelReg.style.display = "flex";
+            }
+        }
 
         async function carregarPatrimonioDoServidor() {
             try {
@@ -399,7 +506,10 @@
 
                 let tr = document.createElement('tr');
                 tr.style.cursor = 'pointer';
-                tr.onclick = () => carregarItemNoFormulario(item.codigo);
+                tr.onclick = () => {
+                    alternarAbaFormulario('MOVER');
+                    carregarItemNoFormulario(item.codigo);
+                };
                 tr.innerHTML = `
                     <td style="color:#005088; font-weight:bold;">${item.codigo}</td>
                     <td><strong>${item.item}</strong></td>
@@ -428,10 +538,7 @@
             const termo = document.getElementById('search-input').value.trim().toLowerCase();
             const tbody = document.getElementById('inventory-table-body');
             
-            if (termo === "") {
-                renderizarTabelaInventario();
-                return;
-            }
+            if (termo === "") { renderizarTabelaInventario(); return; }
 
             tbody.innerHTML = '';
             let correspondencias = todosOsPatrimonios.filter(item => 
@@ -448,7 +555,7 @@
             correspondencias.forEach(item => {
                 let badgeClass = item.status.toLowerCase().includes('manuten') ? 'status-manutencao' : (item.status.toLowerCase().includes('danific') ? 'status-danificado' : 'status-bom');
                 let tr = document.createElement('tr');
-                tr.onclick = () => carregarItemNoFormulario(item.codigo);
+                tr.onclick = () => { alternarAbaFormulario('MOVER'); carregarItemNoFormulario(item.codigo); };
                 tr.innerHTML = `
                     <td style="color:#005088; font-weight:bold;">${item.codigo}</td>
                     <td><strong>${item.item}</strong></td>
@@ -487,6 +594,7 @@
             document.getElementById('trans-room').focus();
         }
 
+        // MOTOR 1: ENVIA A ATUALIZAÇÃO / TRANSFERÊNCIA PARA A PLANILHA
         async function executarTransferenciaPatrimonio() {
             const codigo = document.getElementById('trans-code').value.trim();
             const novaSala = document.getElementById('trans-room').value;
@@ -494,28 +602,14 @@
             const novoStatus = document.getElementById('trans-status').value;
             const btn = document.getElementById('btn-executar-transferencia');
 
-            if (!codigo || !novaSala || !responsavel) {
-                alert("Por favor, informe a Nova Localização e o Funcionário Responsável.");
-                return;
-            }
+            if (!codigo || !novaSala || !responsavel) { alert("Por favor, preencha todos os campos da transferência."); return; }
 
-            btn.disabled = true;
-            btn.innerText = "Processando Transferência...";
+            btn.disabled = true; btn.innerText = "Processando...";
 
-            const payload = {
-                operacao: "PAT_TRANSFERIR",
-                codigo: codigo,
-                novaLocalizacao: novaSala,
-                responsavel: responsavel,
-                status: novoStatus || null
-            };
+            const payload = { operacao: "PAT_TRANSFERIR", codigo: codigo, novaLocalizacao: novaSala, responsavel: responsavel, status: novoStatus || null };
 
             try {
-                const response = await fetch(APPS_SCRIPT_PAT_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain' },
-                    body: JSON.stringify(payload)
-                });
+                const response = await fetch(APPS_SCRIPT_PAT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
                 const resultado = await response.json();
 
                 if (resultado.status === "success") {
@@ -524,18 +618,55 @@
                     document.getElementById('trans-resp').value = '';
                     document.getElementById('trans-status').value = '';
                     document.getElementById('item-preview-box').style.display = "none";
-                    
-                    alert("Patrimônio movimentado e registrado com sucesso!");
+                    alert("Patrimônio movimentado com sucesso!");
                     await carregarPatrimonioDoServidor();
-                } else {
-                    alert("Código de patrimônio não localizado na planilha.");
+                } else { alert("Código de patrimônio não localizado."); }
+            } catch (error) { alert("Erro de comunicação com o servidor."); } finally { btn.disabled = false; btn.innerText = "Confirmar Movimentação"; }
+        }
+
+        // MOTOR 2: GRAVA UM PRODUTO TOTALMENTE NOVO NA ÚLTIMA LINHA DA PLANILHA
+        async function executarCadastroNovoPatrimonio() {
+            const codigo = document.getElementById('reg-code').value.trim();
+            const item = document.getElementById('reg-item').value.trim();
+            const categoria = document.getElementById('reg-cat').value;
+            const sala = document.getElementById('reg-room').value;
+            const funcionario = document.getElementById('reg-resp').value.trim();
+            const status = document.getElementById('reg-status').value;
+            const btn = document.getElementById('btn-executar-cadastro');
+
+            if(!codigo || !item || !funcionario) {
+                alert("Por favor, preencha o Código, Descrição e o Nome do Funcionário.");
+                return;
+            }
+
+            btn.disabled = true; btn.innerText = "Gravando Item...";
+
+            const payload = {
+                operacao: "PAT_CADASTRAR",
+                codigo: codigo,
+                item: item,
+                categoria: categoria,
+                localizacao: sala,
+                responsavel: funcionario,
+                status: status
+            };
+
+            try {
+                const response = await fetch(APPS_SCRIPT_PAT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
+                const resultado = await response.json();
+
+                if(resultado.status === "success") {
+                    document.getElementById('reg-code').value = '';
+                    document.getElementById('reg-item').value = '';
+                    alert("Novo patrimônio cadastrado e inserido no inventário!");
+                    await carregarPatrimonioDoServidor();
+                } else if(resultado.status === "duplicated") {
+                    alert("Atenção! Esse número de código/etiqueta já está cadastrado em outro item.");
                 }
             } catch (error) {
-                console.error(error);
-                alert("Erro de comunicação com o servidor.");
+                alert("Erro ao gravar dados no servidor.");
             } finally {
-                btn.disabled = false;
-                btn.innerText = "Confirmar Movimentação";
+                btn.disabled = false; btn.innerText = "Salvar Item na Planilha";
             }
         }
     </script>
