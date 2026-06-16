@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Controle de Patrimônio | CCM Anchieta</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -50,7 +51,7 @@
             padding: 10px 15px; margin-bottom: 5px;
             background-color: rgba(255, 255, 255, 0.05); border-radius: 6px;
             cursor: pointer; font-size: 13px; font-weight: 600;
-            display: flex; align-items: center; justify-content: space-between;
+            display: flex; align-items: center; justify-content: flex-start; gap: 10px;
             transition: background 0.2s;
         }
         .room-item:hover, .room-item.active { background-color: #eab308; color: #1e293b; }
@@ -78,7 +79,7 @@
         }
         .search-box input { background: none; border: none; outline: none; width: 100%; font-size: 14px; margin-left: 8px; }
 
-        .workspace { flex: 1; padding: 25px; overflow-y: auto; display: grid; grid-template-columns: 1fr 420px; gap: 25px; }
+        .workspace { flex: 1; padding: 25px; overflow-y: auto; display: grid; grid-template-columns: 1fr 430px; gap: 25px; }
 
         .inventory-panel {
             background: white; border-radius: 8px; border: 1px solid #e2e8f0;
@@ -105,8 +106,8 @@
         .status-manutencao { background: #fef9c3; color: #854d0e; }
         .status-danificado { background: #fee2e2; color: #991b1b; }
 
-        /* PAINEL CONTROLADOR TRIPLO (DIREITA) - OTIMIZADO PARA COMPACTAÇÃO */
-        .control-side-panel { display: flex; flex-direction: column; gap: 15px; }
+        /* PAINEL CONTROLADOR TRIPLO (DIREITA) */
+        .control-side-panel { display: flex; flex-direction: column; gap: 15px; width: 100%; }
         .tab-menu-right { 
             display: grid; 
             grid-template-columns: 1fr 1fr 1fr; 
@@ -118,18 +119,19 @@
         .tab-nav-btn {
             background: none; 
             border: none; 
-            padding: 10px 2px; 
+            padding: 10px 1px; 
             font-weight: bold;
-            font-size: 10.5px; 
+            font-size: 11px; 
             cursor: pointer; 
             border-radius: 6px; 
             color: #475569; 
             transition: all 0.2s;
             white-space: nowrap; 
-            overflow: hidden;
-            text-overflow: ellipsis;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
         }
-        .tab-nav-btn i { margin-right: 3px; }
         .tab-nav-btn.active { background: white; color: #005088; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 
         .action-card-panel {
@@ -140,6 +142,18 @@
         
         .form-group { display: flex; flex-direction: column; gap: 5px; }
         .form-group label { font-size: 11px; font-weight: 600; color: #475569; }
+        
+        /* LINHA COM INPUT + BOTÃO DE CÂMERA */
+        .input-camera-group { display: flex; gap: 8px; width: 100%; }
+        .input-camera-group input { flex: 1; padding: 9px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none; }
+        .input-camera-group input:focus { border-color: #005088; }
+        
+        .btn-camera-scanner {
+            background: #eab308; color: #1e293b; border: none; padding: 0 14px;
+            border-radius: 6px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: background 0.2s;
+        }
+        .btn-camera-scanner:hover { background: #ca8a04; }
+
         .form-group input, .form-group select { padding: 9px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none; }
         .form-group input:focus, .form-group select:focus { border-color: #005088; }
         
@@ -149,6 +163,12 @@
         }
         .btn-action-trigger:hover { background: #0c4a6e; }
         .btn-action-trigger:disabled { background: #cbd5e1; cursor: not-allowed; }
+
+        /* CONTAINER DA CÂMERA DE LEITURA */
+        .camera-scanner-container {
+            width: 100%; background: #000; border-radius: 8px; overflow: hidden;
+            display: none; border: 2px solid #eab308; margin-bottom: 5px; position: relative;
+        }
 
         .selected-item-preview { background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px; border-radius: 6px; font-size: 12px; }
         
@@ -234,10 +254,18 @@
 
                 <div class="action-card-panel" id="panel-movimentar-bens">
                     <h3>Transferência de Local</h3>
+                    
                     <div class="form-group">
-                        <label for="trans-code">Código do Patrimônio (Digite ou Bipe):</label>
-                        <input type="text" id="trans-code" placeholder="Ex: 001245" oninput="buscarItemPorCodigoDigitado()">
+                        <label for="trans-code">Código do Patrimônio:</label>
+                        <div id="scanner-reader-move" class="camera-scanner-container"></div>
+                        <div class="input-camera-group">
+                            <input type="text" id="trans-code" placeholder="Ex: 001245" oninput="buscarItemPorCodigoDigitado()">
+                            <button type="button" class="btn-camera-scanner" onclick="alternarCameraLeitora('trans-code', 'scanner-reader-move')">
+                                <i class="fa-solid fa-camera"></i>
+                            </button>
+                        </div>
                     </div>
+
                     <div class="selected-item-preview" id="item-preview-box" style="display: none;">
                         <p><strong>Item:</strong> <span id="prev-nome">-</span></p>
                         <p><strong>Local Atual:</strong> <span id="prev-local">-</span></p>
@@ -266,10 +294,18 @@
 
                 <div class="action-card-panel" id="panel-cadastrar-bens" style="display: none;">
                     <h3 id="cad-form-title">Cadastrar Novo Patrimônio</h3>
+                    
                     <div class="form-group">
                         <label for="reg-code">Código / Etiqueta do Item:</label>
-                        <input type="text" id="reg-code" placeholder="Ex: 104523" oninput="checarSeCodigoExisteParaEditar()">
+                        <div id="scanner-reader-reg" class="camera-scanner-container"></div>
+                        <div class="input-camera-group">
+                            <input type="text" id="reg-code" placeholder="Ex: 104523" oninput="checarSeCodigoExisteParaEditar()">
+                            <button type="button" class="btn-camera-scanner" onclick="alternarCameraLeitora('reg-code', 'scanner-reader-reg')">
+                                <i class="fa-solid fa-camera"></i>
+                            </button>
+                        </div>
                     </div>
+
                     <div class="form-group">
                         <label for="reg-item">Nome / Descrição do Equipamento:</label>
                         <input type="text" id="reg-item" placeholder="Ex: Notebook Lenovo ThinkPad">
@@ -291,7 +327,7 @@
                     
                     <div class="form-group" style="background: #f8fafc; padding: 8px; border-radius: 6px; border: 1px dashed #cbd5e1;">
                         <label for="reg-parent" style="color: #0269a1;"><i class="fa-solid fa-link"></i> Pertence ao Código Pai? (Opcional):</label>
-                        <input type="text" id="reg-parent" placeholder="Ex: 0052 (Código do Gabinete ou Mesa)" oninput="validarCodigoPaiDigitado()">
+                        <input type="text" id="reg-parent" placeholder="Ex: 0052" oninput="validarCodigoPaiDigitado()">
                         <span id="reg-parent-preview" style="font-size: 11px; color:#64748b; display:block; margin-top:3px;"></span>
                     </div>
 
@@ -333,6 +369,7 @@
         let listaDeAmbientes = [];
         let salaFiltroAtual = 'TODOS';
         let usuarioLogado = {};
+        let html5QrcodeScanner = null; // Instância ativa do scanner de câmera
 
         window.addEventListener('DOMContentLoaded', () => {
             const sessao = localStorage.getItem('sgi_ccma_session');
@@ -353,7 +390,9 @@
             await carregarPatrimonioDoServidor();
         }
 
+        // FECHA A CÂMERA SE O USUÁRIO MUDAR DE ABA
         function alternarAbaFormulario(abaAlvo) {
+            fecharCameraScannerAtiva();
             const tabs = { 'MOVER': 'btn-tab-move', 'CADASTRAR': 'btn-tab-reg', 'AMBIENTES': 'btn-tab-amb' };
             const panels = { 'MOVER': 'panel-movimentar-bens', 'CADASTRAR': 'panel-cadastrar-bens', 'AMBIENTES': 'panel-ambientes-gerenciar' };
             
@@ -363,6 +402,53 @@
             });
 
             if(abaAlvo === 'CADASTRAR') resetarFormularioCadastro();
+        }
+
+        // CONTROLE DA CÂMERA DO CELULAR
+        function alternarCameraLeitora(inputIdAlvo, containerIdDiv) {
+            const containerBox = document.getElementById(containerIdDiv);
+            
+            if (html5QrcodeScanner) {
+                fecharCameraScannerAtiva();
+                return;
+            }
+
+            containerBox.style.display = "block";
+            
+            // Inicia o leitor configurado otimizado para câmera traseira de smartphone
+            html5QrcodeScanner = new Html5Qrcode(containerIdDiv);
+            
+            const configConfig = { fps: 15, qrbox: { width: 250, height: 150 } };
+
+            html5QrcodeScanner.start(
+                { facingMode: "environment" }, // Força o uso da câmera traseira do celular
+                configConfig,
+                (decodedText) => {
+                    // Executado quando lê com sucesso
+                    document.getElementById(inputIdAlvo).value = decodedText.trim();
+                    fecharCameraScannerAtiva();
+                    
+                    // Dispara a busca automática baseada no input preenchido
+                    if (inputIdAlvo === 'trans-code') buscarItemPorCodigoDigitado();
+                    if (inputIdAlvo === 'reg-code') checarSeCodigoExisteParaEditar();
+                },
+                (errorMessage) => { /* Silenciar erros de foco e varredura padrão */ }
+            ).catch(err => {
+                alert("Erro ao acessar a câmera. Certifique-se de dar permissão.");
+                containerBox.style.display = "none";
+                html5QrcodeScanner = null;
+            });
+        }
+
+        function fecharCameraScannerAtiva() {
+            document.querySelectorAll('.camera-scanner-container').forEach(c => c.style.display = 'none');
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.stop().then(() => {
+                    html5QrcodeScanner = null;
+                }).catch(() => {
+                    html5QrcodeScanner = null;
+                });
+            }
         }
 
         async function carregarAmbientesDoServidor() {
@@ -599,7 +685,7 @@
             } catch (e) { alert("Erro de comunicação."); } finally { btn.disabled = false; btn.innerText = "Confirmar Movimentação"; }
         }
 
-        async function ejecutarCadastroNovoPatrimonio() {
+        async function executarCadastroNovoPatrimonio() {
             const codigo = document.getElementById('reg-code').value.trim();
             const item = document.getElementById('reg-item').value.trim();
             const categoria = document.getElementById('reg-cat').value;
