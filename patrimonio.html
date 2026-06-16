@@ -105,13 +105,31 @@
         .status-manutencao { background: #fef9c3; color: #854d0e; }
         .status-danificado { background: #fee2e2; color: #991b1b; }
 
-        /* PAINEL CONTROLADOR TRIPLO (DIREITA) */
+        /* PAINEL CONTROLADOR TRIPLO (DIREITA) - OTIMIZADO PARA COMPACTAÇÃO */
         .control-side-panel { display: flex; flex-direction: column; gap: 15px; }
-        .tab-menu-right { display: grid; grid-template-columns: 1fr 1fr 1fr; background: #e2e8f0; padding: 4px; border-radius: 8px; }
-        .tab-nav-btn {
-            background: none; border: none; padding: 10px 5px; font-weight: bold;
-            font-size: 11px; cursor: pointer; border-radius: 6px; color: #475569; transition: all 0.2s;
+        .tab-menu-right { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr 1fr; 
+            background: #e2e8f0; 
+            padding: 4px; 
+            border-radius: 8px; 
+            width: 100%;
         }
+        .tab-nav-btn {
+            background: none; 
+            border: none; 
+            padding: 10px 2px; 
+            font-weight: bold;
+            font-size: 10.5px; 
+            cursor: pointer; 
+            border-radius: 6px; 
+            color: #475569; 
+            transition: all 0.2s;
+            white-space: nowrap; 
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .tab-nav-btn i { margin-right: 3px; }
         .tab-nav-btn.active { background: white; color: #005088; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 
         .action-card-panel {
@@ -409,7 +427,6 @@
             }
         }
 
-        // CORREÇÃO DOS DOIS BLOCOS ABAIXO: SEM MISTURAR ASPAS SIMPLES E DUPLAS
         function renderizarTabelaInventario() {
             const tbody = document.getElementById('inventory-table-body');
             tbody.innerHTML = '';
@@ -582,7 +599,7 @@
             } catch (e) { alert("Erro de comunicação."); } finally { btn.disabled = false; btn.innerText = "Confirmar Movimentação"; }
         }
 
-        async function executarCadastroNovoPatrimonio() {
+        async function ejecutarCadastroNovoPatrimonio() {
             const codigo = document.getElementById('reg-code').value.trim();
             const item = document.getElementById('reg-item').value.trim();
             const categoria = document.getElementById('reg-cat').value;
