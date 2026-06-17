@@ -44,7 +44,6 @@
             text-align: center;
             border-top: 8px solid #eab308;
         }
-        /* MELHORIA: Logo redondo, maior e com fundo de contraste para leitura das inscrições */
         .login-logo-nova {
             width: 180px;
             height: 180px;
@@ -134,7 +133,7 @@
             flex-direction: row;
         }
         .sidebar {
-            width: 290px; /* Expandido ligeiramente para acomodar o logo maior */
+            width: 290px;
             background-color: #005088;
             color: white;
             display: flex;
@@ -158,7 +157,6 @@
             justify-content: flex-start;
             gap: 12px;
         }
-        /* MELHORIA: Logo da sidebar redondo, maior e com fundo branco de alto contraste */
         .sidebar-logo {
             width: 70px;
             height: 70px;
@@ -198,6 +196,42 @@
             margin-top: 2px;
         }
         
+        /* ESTILOS DOS BOTÕES DE ADMINISTRAÇÃO (NÍVEL 3) */
+        .admin-menu-container {
+            display: none; /* Oculto por padrão, ativado via JS */
+            flex-direction: column;
+            gap: 10px;
+            padding: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: rgba(0, 0, 0, 0.15);
+        }
+        .btn-sidebar-admin {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 15px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+        .btn-admin-yellow {
+            background-color: #eab308;
+            color: #1e293b;
+        }
+        .btn-admin-yellow:hover {
+            background-color: #ca8a04;
+        }
+        .btn-admin-blue {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .btn-admin-blue:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
         .turmas-lista {
             list-style: none;
             padding: 10px;
@@ -649,10 +683,8 @@
 </head>
 <body>
 
-    <!-- 1. TELA DE LOGIN OVERLAY -->
     <div id="login-screen">
         <div class="login-box">
-            <!-- DESIGN REFEITO: Logo redondo, ampliado e com contraste aprimorado -->
             <img src="img/SIGA.png" alt="Brasão SIGA Anchieta" class="login-logo-nova">
             <h2>Área Restrita</h2>
             <p>Sua senha padrão são os números do seu RG</p>
@@ -671,7 +703,6 @@
         </div>
     </div>
 
-    <!-- 2. INTERFACE PRINCIPAL DO PAINEL -->
     <div id="app-interface">
         <div class="mobile-tabs" id="mobile-tabs-container">
             <button class="tab-button active" onclick="alternarAbaMobile('meivs', this)">MEIV'S</button>
@@ -683,7 +714,6 @@
         <aside class="sidebar" id="app-sidebar">
             <div class="sidebar-top">
                 <div class="sidebar-header">
-                    <!-- DESIGN REFEITO: Logo da barra interna redondo, maior e protegido com borda branca de nitidez -->
                     <img src="img/SIGA.png" alt="Logo SIGA" class="sidebar-logo">
                     <div class="sidebar-title-container">
                         <h2>SIGA</h2>
@@ -691,12 +721,16 @@
                         <span class="sidebar-subtitle">CCM Anchieta</span>
                     </div>
                 </div>
-                <!-- Botão de Atalho para o Patrimônio dentro da Sidebar do SIGA -->
-<div style="padding: 10px;">
-    <a href="patrimonio.html" style="display: flex; align-items: center; gap: 10px; padding: 12px 20px; background-color: #eab308; color: #1e293b; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 14px; transition: background 0.2s;">
-        <i class="fa-solid fa-boxes-stacked"></i> Controle de Patrimônio
-    </a>
-</div>
+                
+                <div class="admin-menu-container" id="admin-menus">
+                    <a href="patrimonio.html" class="btn-sidebar-admin btn-admin-yellow">
+                        <i class="fa-solid fa-boxes-stacked"></i> Controle de Patrimônio
+                    </a>
+                    <a href="usuarios.html" class="btn-sidebar-admin btn-admin-blue">
+                        <i class="fa-solid fa-user-shield"></i> Controle de Acessos
+                    </a>
+                </div>
+                
                 <ul class="turmas-lista" id="lista-turmas-sidebar">
                     <li class="turma-item"><i class="fa-solid fa-spinner fa-spin"></i> Lendo turmas...</li>
                 </ul>
@@ -799,7 +833,6 @@
             </div>
 
             <div class="board-container" id="siga-columns-grid">
-                <!-- COLUNA MEIV'S -->
                 <section class="sector-column active" id="col-meivs">
                     <div class="column-header" style="background-color: #0284c7;">MEIV'S</div>
                     <div class="feed-container" id="feed-meivs"></div>
@@ -809,7 +842,6 @@
                     </div>
                 </section>
 
-                <!-- COLUNA PEDAGÓGICO -->
                 <section class="sector-column" id="col-pedagogico">
                     <div class="column-header" style="background-color: #0d9488;">PEDAGÓGICO</div>
                     <div class="feed-container" id="feed-pedagogico"></div>
@@ -819,7 +851,6 @@
                     </div>
                 </section>
 
-                <!-- COLUNA ADM -->
                 <section class="sector-column" id="col-adm">
                     <div class="column-header" style="background-color: #4f46e5;">ADM</div>
                     <div class="feed-container" id="feed-adm"></div>
@@ -829,7 +860,6 @@
                     </div>
                 </section>
 
-                <!-- COLUNA PROFESSORES -->
                 <section class="sector-column" id="col-direcao">
                     <div class="column-header" style="background-color: #b91c1c;">PROFESSORES</div>
                     <div class="feed-container" id="feed-direcao"></div>
@@ -921,6 +951,14 @@
             document.getElementById('user-display').innerHTML = `<i class="fa-solid fa-user-check"></i> ${usuarioLogado.nome} (${cargoTexto})`;
             document.getElementById('txt-boas-vindas-nome').innerText = `Olá, ${usuarioLogado.nome}! Seja bem-vindo ao SIGA`;
 
+            // === TRAVA DE SEGURANÇA PARA A DIREÇÃO (NÍVEL 3) ===
+            const adminMenus = document.getElementById('admin-menus');
+            if (usuarioLogado.nivel && parseInt(usuarioLogado.nivel) === 3) {
+                adminMenus.style.display = 'flex'; // Destranca a visão
+            } else {
+                adminMenus.style.display = 'none'; // Mantém bloqueado
+            }
+
             aplicarBloqueioSetores(usuarioLogado.setor, usuarioLogado.nivel);
             await carregarAlunosETurmas();
             await carregarRegistrosDoServidor();
@@ -1007,7 +1045,7 @@
                 const response = await fetch(APPS_SCRIPT_URL, { method: 'GET', cache: 'no-cache' }); 
                 todosOsRegistros = await response.json(); 
                 calcularDashboardGeralEscola(); 
-            } catch (error) { console.error("Erro ao carregar registros antigos:", error); }
+            } catch (error) { console.error("Erro ao carregar registros:", error); }
         }
 
         function calcularDashboardGeralEscola() {
