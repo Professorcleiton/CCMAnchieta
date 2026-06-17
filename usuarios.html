@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciamento de Usuários | SIGA</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #f1f5f9; color: #1e293b;
+            display: flex; height: 100vh; overflow: hidden;
+        }
+
+        /* SIDEBAR DE ACORDO COM O PADRÃO */
+        .sidebar {
+            width: 290px; background-color: #005088; color: white;
+            display: flex; flex-direction: column; border-right: 4px solid #eab308;
+            justify-content: space-between;
+        }
+        .sidebar-header {
+            padding: 20px 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex; align-items: center; gap: 12px;
+        }
+        .sidebar-logo {
+            width: 70px; height: 70px; border-radius: 50%;
+            background-color: white; border: 2px solid white; object-fit: cover;
+        }
+        .sidebar-title h2 { font-size: 16px; font-weight: bold; }
+        .sidebar-title p { font-size: 11px; color: #cbd5e1; }
+
+        .menu-instructions {
+            padding: 20px 15px; font-size: 12px; color: #cbd5e1; line-height: 1.6;
+        }
+        .menu-instructions h4 { color: #eab308; margin-bottom: 8px; text-transform: uppercase; font-size: 11px; }
+
+        .sidebar-footer { padding: 15px; border-top: 1px solid rgba(255, 255, 255, 0.1); }
+        .btn-back {
+            width: 100%; padding: 10px; background-color: rgba(255,255,255,0.1);
+            color: white; border: none; border-radius: 6px; font-weight: bold;
+            font-size: 13px; cursor: pointer; display: flex; align-items: center;
+            justify-content: center; gap: 8px; text-decoration: none;
+        }
+        .btn-back:hover { background-color: rgba(255,255,255,0.2); }
+
+        /* PAINEL PRINCIPAL */
+        .main-content { flex: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        .top-bar {
+            background-color: white; padding: 0 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex; justify-content: space-between; align-items: center; height: 65px; min-height: 65px;
+        }
+        .top-bar h1 { font-size: 18px; color: #005088; font-weight: bold; }
+
+        .workspace { flex: 1; padding: 25px; overflow-y: auto; display: grid; grid-template-columns: 1fr 400px; gap: 25px; }
+
+        /* LISTA DE USUÁRIOS */
+        .panel-table {
+            background: white; border-radius: 8px; border: 1px solid #e2e8f0;
+            padding: 20px; display: flex; flex-direction: column; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .panel-table h3 { font-size: 15px; color: #005088; margin-bottom: 15px; text-transform: uppercase; }
+        .table-wrapper { flex: 1; overflow-y: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
+        th { position: sticky; top: 0; background: #f8fafc; padding: 12px; font-weight: bold; color: #64748b; border-bottom: 2px solid #e2e8f0; }
+        td { padding: 12px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
+        tr:hover { background-color: #f8fafc; }
+
+        /* BADGES DE NÍVEL */
+        .badge-nivel { padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; }
+        .nivel-3 { background-color: #fef3c7; color: #92400e; border: 1px solid #f59e0b; }
+        .nivel-2 { background-color: #e0f2fe; color: #0369a1; border: 1px solid #38bdf8; }
+        .nivel-1 { background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+
+        /* CARD DE FORMULÁRIO */
+        .action-card-panel {
+            background: white; border-radius: 8px; border: 1px solid #e2e8f0;
+            padding: 22px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); display: flex; flex-direction: column; gap: 14px;
+        }
+        .action-card-panel h3 { font-size: 14px; color: #005088; border-bottom: 2px solid #f1f5f9; padding-bottom: 6px; text-transform: uppercase; }
+        
+        .form-group { display: flex; flex-direction: column; gap: 5px; }
+        .form-group label { font-size: 11px; font-weight: 600; color: #475569; }
+        .form-group input, .form-group select { padding: 9px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none; }
+        .form-group input:focus, .form-group select:focus { border-color: #005088; }
+
+        .btn-action-trigger {
+            background: #005088; color: white; border: none; padding: 11px;
+            border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; margin-top: 5px; transition: background 0.2s;
+        }
+        .btn-action-trigger:hover { background: #0c4a6e; }
+        .btn-action-panel-delete { background: none; border: none; color: #ef4444; cursor: pointer; font-size: 14px; padding: 4px; }
+        .btn-action-panel-delete:hover { color: #b91c1c; }
+
+        @media (max-width: 1024px) {
+            .workspace { grid-template-columns: 1fr; }
+            body { overflow: auto; height: auto; }
+            .main-content { height: auto; }
+        }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="sidebar-top">
+            <div class="sidebar-header">
+                <img src="img/SIGA.png" alt="Logo" class="sidebar-logo">
+                <div class="sidebar-title">
+                    <h2>PAINEL DE ACESSOS</h2>
+                    <p>CCM Anchieta</p>
+                </div>
+            </div>
+            <div class="menu-instructions">
+                <h4>Níveis de Permissão</h4>
+                <p><strong>Nível 3 (Admin):</strong> Acesso total ao Patrimônio, Ambientes e Controle de Usuários.</p><br>
+                <p><strong>Nível 2 (Operador):</strong> Acesso padrão às rotas de lançamentos do SIGA escolar.</p><br>
+                <p><strong>Nível 1 (Consulta):</strong> Acesso restrito apenas para leitura de relatórios básicos.</p>
+            </div>
+        </div>
+        <div class="sidebar-footer">
+            <a href="restrito.html" class="btn-back"><i class="fa-solid fa-arrow-left"></i> Painel Administrativo</a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-bar">
+            <h1>Gerenciamento de Usuários do Sistema</h1>
+        </header>
+
+        <div class="workspace">
+            <div class="panel-table">
+                <h3>Funcionários com Acesso Cadastrado</h3>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>E-mail Institucional</th>
+                                <th>Nome Completo</th>
+                                <th>Setor</th>
+                                <th>Nível</th>
+                                <th style="width: 50px; text-align: center;">Excluir</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-table-body">
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: #64748b; padding: 20px;">
+                                    <i class="fa-solid fa-spinner fa-spin"></i> Sincronizando usuários da planilha...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="action-card-panel">
+                <h3 id="form-user-title">Cadastrar Novo Usuário</h3>
+                
+                <div class="form-group">
+                    <label for="user-email">E-mail Corporativo (Chave de Login):</label>
+                    <input type="email" id="user-email" placeholder="exemplo@escola.pr.gov.br" oninput="checarSeUsuarioExisteParaEditar()">
+                </div>
+
+                <div class="form-group">
+                    <label for="user-name">Nome Completo do Funcionário:</label>
+                    <input type="text" id="user-name" placeholder="Ex: Professor Cleiton">
+                </div>
+
+                <div class="form-group">
+                    <label for="user-sector">Setor / Função:</label>
+                    <select id="user-sector">
+                        <option value="Direção">Direção</option>
+                        <option value="Secretaria">Secretaria</option>
+                        <option value="Pedagógico">Corpo Pedagógico / Professores</option>
+                        <option value="TI / Suporte">TI / Suporte de Robótica</option>
+                        <option value="Administrativo">Administrativo Geral</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="user-level">Nível de Autorização no App:</label>
+                    <select id="user-level">
+                        <option value="1">Nível 1 - Apenas Visualização/Consulta</option>
+                        <option value="2" selected>Nível 2 - Operador de Registros (Padrão)</option>
+                        <option value="3">Nível 3 - Administrador Master (Patrimônio/Acessos)</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="password-group-box">
+                    <label for="user-password">Senha de Acesso (Apenas números do RG):</label>
+                    <input type="password" id="user-password" placeholder="Digite o RG (sem pontos ou traços)">
+                    <span id="password-helper-tip" style="font-size: 10px; color: #64748b; display: none; margin-top: 2px;">Deixe em branco se não quiser alterar a senha atual.</span>
+                </div>
+
+                <button class="btn-action-trigger" id="btn-save-user" onclick="executarSalvarUsuario()">Salvar Credenciais</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
+        
+        let listaCompletaUsuarios = [];
+        let operadorLogado = {};
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const sessao = localStorage.getItem('sgi_ccma_session');
+            if (!sessao) { window.location.href = "index.html"; return; }
+            
+            operadorLogado = JSON.parse(sessao);
+            // TRAVA COMPLETA: Só entra quem tem nível 3 real salvo na sessão local
+            if (!operadorLogado.nivel || parseInt(operadorLogado.nivel) < 3) {
+                alert("Acesso negado! Esta área é restrita à Direção da Escola.");
+                window.location.href = "restrito.html"; return;
+            }
+            
+            carregarUsuariosDoServidor();
+        });
+
+        async function carregarUsuariosDoServidor() {
+            try {
+                const response = await fetch(`${APPS_SCRIPT_URL}?aba=usuarios`, { method: 'GET', cache: 'no-cache' });
+                listaCompletaUsuarios = await response.json();
+                renderizarTabelaUsuarios();
+            } catch (e) {
+                document.getElementById('users-table-body').innerHTML = `<tr><td colspan="5" style="text-align: center; color: red;">Erro ao carregar banco de dados de acessos.</td></tr>`;
+            }
+        }
+
+        function renderizarTabelaUsuarios() {
+            const tbody = document.getElementById('users-table-body');
+            tbody.innerHTML = '';
+
+            if (listaCompletaUsuarios.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #64748b;">Nenhum usuário cadastrado.</td></tr>`;
+                return;
+            }
+
+            listaCompletaUsuarios.forEach(user => {
+                let badgeClass = user.nivel === 3 ? 'nivel-3' : (user.nivel === 2 ? 'nivel-2' : 'nivel-1');
+                let labelTexto = user.nivel === 3 ? 'Nível 3 - Admin' : (user.nivel === 2 ? 'Nível 2 - Operador' : 'Nível 1 - Consulta');
+
+                let tr = document.createElement('tr');
+                tr.style.cursor = 'pointer';
+                tr.onclick = (e) => {
+                    // Impede o clique de disparar se clicar no botão de lixeira
+                    if (e.target.closest('.btn-action-panel-delete')) return;
+                    carregarUsuarioNoFormulario(user);
+                };
+
+                tr.innerHTML = `
+                    <td style="color:#005088; font-weight:bold;">${user.email}</td>
+                    <td><strong>${user.nome}</strong></td>
+                    <td style="color:#475569;">${user.setor}</td>
+                    <td><span class="badge-nivel ${badgeClass}">${labelTexto}</span></td>
+                    <td style="text-align: center;">
+                        <button class="btn-action-panel-delete" onclick="executarExcluirUsuario('${user.email}')">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function checarSeUsuarioExisteParaEditar() {
+            const emailDigitado = document.getElementById('user-email').value.trim().toLowerCase();
+            const usuarioEncontrado = listaCompletaUsuarios.find(u => u.email === emailDigitado);
+            
+            const titleForm = document.getElementById('form-user-title');
+            const btnSave = document.getElementById('btn-save-user');
+            const tipSenha = document.getElementById('password-helper-tip');
+
+            if (usuarioEncontrado) {
+                titleForm.innerHTML = `<i class="fa-solid fa-user-pen" style="color:#eab308;"></i> Modo de Edição`;
+                document.getElementById('user-name').value = usuarioEncontrado.nome;
+                document.getElementById('user-sector').value = usuarioEncontrado.setor;
+                document.getElementById('user-level').value = usuarioEncontrado.nivel;
+                btnSave.innerText = "Atualizar Cadastro";
+                tipSenha.style.display = "block";
+            } else {
+                titleForm.innerText = "Cadastrar Novo Usuário";
+                btnSave.innerText = "Salvar Credenciais";
+                tipSenha.style.display = "none";
+            }
+        }
+
+        function carregarUsuarioNoFormulario(user) {
+            document.getElementById('user-email').value = user.email;
+            checarSeUsuarioExisteParaEditar();
+            document.getElementById('user-name').focus();
+        }
+
+        function resetarFormulario() {
+            document.getElementById('form-user-title').innerText = "Cadastrar Novo Usuário";
+            document.getElementById('user-email').value = '';
+            document.getElementById('user-name').value = '';
+            document.getElementById('user-password').value = '';
+            document.getElementById('user-level').value = "2";
+            document.getElementById('btn-save-user').innerText = "Salvar Credenciais";
+            document.getElementById('password-helper-tip').style.display = "none";
+        }
+
+        // COMUNICAÇÃO DE BACKEND COM VALIDAÇÃO DUPLA DE SEGURANÇA
+        async function executarSalvarUsuario() {
+            const email = document.getElementById('user-email').value.trim().toLowerCase();
+            const nome = document.getElementById('user-name').value.trim();
+            const setor = document.getElementById('user-sector').value;
+            const nivel = document.getElementById('user-level').value;
+            const senha = document.getElementById('user-password').value.trim();
+            const btn = document.getElementById('btn-save-user');
+
+            if (!email || !nome) { alert("Por favor, preencha o E-mail e o Nome do funcionário."); return; }
+            
+            const editando = listaCompletaUsuarios.some(u => u.email === email);
+            if (!editando && !senha) { alert("Para novos usuários, a senha inicial (números do RG) é obrigatória."); return; }
+
+            btn.disabled = true; btn.innerText = "Gravando no servidor...";
+
+            const payload = {
+                operacao: "USER_SALVAR",
+                emailOperador: operadorLogado.email, // BLINDAGEM: O servidor confere se este e-mail é admin real
+                email: email,
+                nome: nome,
+                setor: setor,
+                nivel: nivel,
+                senha: senha
+            };
+
+            try {
+                const response = await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+                const resultado = await response.json();
+
+                if (resultado.status === "success" || resultado.status === "updated") {
+                    alert(resultado.status === "updated" ? "Cadastro de funcionário atualizado!" : "Novo funcionário cadastrado com sucesso!");
+                    resetarFormulario();
+                    await carregarUsuariosDoServidor();
+                } else if (resultado.status === "unauthorized") {
+                    alert("Erro crítico de segurança: Você não tem permissão para fazer alterações.");
+                }
+            } catch (e) { alert("Erro de comunicação com a planilha."); } finally { btn.disabled = false; checarSeUsuarioExisteParaEditar(); }
+        }
+
+        async function executarExcluirUsuario(emailDeletar) {
+            // Impede que o administrador exclua a si mesmo por acidente e perca o acesso
+            if (emailDeletar === operadorLogado.email.trim().toLowerCase()) {
+                alert("Atenção! Você não pode excluir o seu próprio usuário enquanto está logado no sistema.");
+                return;
+            }
+
+            if (!confirm(`Tem certeza absoluta de que deseja revogar o acesso do usuário:\n${emailDeletar}?`)) return;
+
+            const payload = {
+                operacao: "USER_DELETAR",
+                emailOperador: operadorLogado.email, // BLINDAGEM DE SEGURANÇA
+                email: emailDeletar
+            };
+
+            try {
+                const response = await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+                const resultado = await response.json();
+
+                if (resultado.status === "success") {
+                    alert("Acesso revogado com sucesso!");
+                    resetarFormulario();
+                    await carregarUsuariosDoServidor();
+                } else if (resultado.status === "unauthorized") {
+                    alert("Operação não autorizada pelo servidor.");
+                }
+            } catch (e) { alert("Erro ao deletar."); }
+        }
+    </script>
+</body>
+</html>
