@@ -28,7 +28,7 @@
             justify-content: space-between;
         }
         
-        /* 👉 ADICIONE ESTE BLOCO AQUI PARA FORÇAR A BARRA DE ROLAGEM 👈 */
+        /* CORREÇÃO DA BARRA DE ROLAGEM */
         .sidebar-top {
             display: flex;
             flex-direction: column;
@@ -113,6 +113,8 @@
         .status-bom { background: #dcfce7; color: #166534; }
         .status-manutencao { background: #fef9c3; color: #854d0e; }
         .status-danificado { background: #fee2e2; color: #991b1b; }
+        .status-inservivel { background: #e2e8f0; color: #475569; }
+        .status-naolocalizado { background: #1e293b; color: #f8fafc; }
 
         /* PAINEL CONTROLADOR TRIPLO (DIREITA) */
         .control-side-panel { display: flex; flex-direction: column; gap: 15px; width: 100%; }
@@ -284,6 +286,8 @@
                             <option value="Bom">Bom Estado</option>
                             <option value="Em Manutenção">Em Manutenção</option>
                             <option value="Danificado">Danificado / Quebrado</option>
+                            <option value="Inservível">Inservível (Baixa)</option>
+                            <option value="Não Localizado">Não Localizado</option>
                         </select>
                     </div>
                     <button class="btn-action-trigger" id="btn-executar-transferencia" onclick="executarTransferenciaPatrimonio()" disabled>Confirmar Movimentação</button>
@@ -337,9 +341,13 @@
                         <select id="reg-status">
                             <option value="Bom">Bom Estado</option>
                             <option value="Em Manutenção">Em Manutenção</option>
+                            <option value="Danificado">Danificado / Quebrado</option>
+                            <option value="Inservível">Inservível (Baixa)</option>
+                            <option value="Não Localizado">Não Localizado</option>
                         </select>
                     </div>
                     <button class="btn-action-trigger" id="btn-executar-cadastro" onclick="executarCadastroNovoPatrimonio()">Salvar na Planilha</button>
+                    <button class="btn-action-trigger" id="btn-excluir-cadastro" onclick="executarExcluirPatrimonio()" style="background: #ef4444; display: none; margin-top: 10px;"><i class="fa-solid fa-trash-can"></i> Excluir Patrimônio</button>
                 </div>
 
                 <div class="action-card-panel" id="panel-ambientes-gerenciar" style="display: none;">
@@ -410,7 +418,6 @@
                 { facingMode: "environment" },
                 configConfig,
                 (decodedText) => {
-                    // MANTÉM O NÚMERO EXATO E COMPLETO DA LEITURA (EX: 100003506623)
                     let codigoCompletoReal = decodedText.trim();
 
                     document.getElementById(inputIdAlvo).value = codigoCompletoReal;
@@ -505,7 +512,11 @@
             }
 
             itensFiltrados.forEach(item => {
-                let badgeClass = item.status.toLowerCase().includes('manuten') ? 'status-manutencao' : (item.status.toLowerCase().includes('danific') || item.status.toLowerCase().includes('quebr') ? 'status-danificado' : 'status-bom');
+                let statusLimpo = item.status.toLowerCase();
+                let badgeClass = statusLimpo.includes('manuten') ? 'status-manutencao' : 
+                                 statusLimpo.includes('danific') || statusLimpo.includes('quebr') ? 'status-danificado' : 
+                                 statusLimpo.includes('inserv') ? 'status-inservivel' : 
+                                 statusLimpo.includes('localiz') ? 'status-naolocalizado' : 'status-bom';
                 
                 let labelVinculoPai = "";
                 if (item.itemPai) {
@@ -546,7 +557,12 @@
             );
 
             correspondencias.forEach(item => {
-                let badgeClass = item.status.toLowerCase().includes('manuten') ? 'status-manutencao' : (item.status.toLowerCase().includes('danific') ? 'status-danificado' : 'status-bom');
+                let statusLimpo = item.status.toLowerCase();
+                let badgeClass = statusLimpo.includes('manuten') ? 'status-manutencao' : 
+                                 statusLimpo.includes('danific') || statusLimpo.includes('quebr') ? 'status-danificado' : 
+                                 statusLimpo.includes('inserv') ? 'status-inservivel' : 
+                                 statusLimpo.includes('localiz') ? 'status-naolocalizado' : 'status-bom';
+                
                 let labelVinculoPai = item.itemPai ? `<br><span class="item-tag-vinculo">Pai: ${item.itemPai}</span>` : '';
                 
                 let tr = document.createElement('tr');
@@ -612,7 +628,8 @@
             const codigo = document.getElementById('reg-code').value.trim();
             const itemEncontrado = todosOsPatrimonios.find(item => item.codigo === codigo);
             const h3Title = document.getElementById('cad-form-title');
-            const btn = document.getElementById('btn-executar-cadastro');
+            const btnSalvar = document.getElementById('btn-executar-cadastro');
+            const btnExcluir = document.getElementById('btn-excluir-cadastro');
 
             if(itemEncontrado) {
                 h3Title.innerHTML = `<i class="fa-solid fa-pen-to-square" style="color:#eab308;"></i> Modo de Edição`;
@@ -620,12 +637,23 @@
                 document.getElementById('reg-cat').value = itemEncontrado.categoria;
                 document.getElementById('reg-room').value = itemEncontrado.localizacao;
                 document.getElementById('reg-parent').value = itemEncontrado.itemPai || "";
-                document.getElementById('reg-status').value = itemEncontrado.status.includes('Manuten') ? 'Em Manutenção' : 'Bom';
-                btn.innerText = "Atualizar Patrimônio";
+                
+                // Mapear Status Corretamente na Edição
+                let statusLimpo = itemEncontrado.status.toLowerCase();
+                let statusValor = "Bom";
+                if(statusLimpo.includes('manuten')) statusValor = "Em Manutenção";
+                if(statusLimpo.includes('danific')) statusValor = "Danificado";
+                if(statusLimpo.includes('inserv')) statusValor = "Inservível";
+                if(statusLimpo.includes('localiz')) statusValor = "Não Localizado";
+                document.getElementById('reg-status').value = statusValor;
+                
+                btnSalvar.innerText = "Atualizar Patrimônio";
+                btnExcluir.style.display = "block"; // MOSTRA O BOTÃO DE DELETAR
                 validarCodigoPaiDigitado();
             } else {
                 h3Title.innerText = "Cadastrar Novo Patrimônio";
-                btn.innerText = "Salvar na Planilha";
+                btnSalvar.innerText = "Salvar na Planilha";
+                btnExcluir.style.display = "none"; // ESCONDE O BOTÃO DE DELETAR
             }
         }
 
@@ -642,6 +670,7 @@
             document.getElementById('reg-parent').value = '';
             document.getElementById('reg-parent-preview').innerText = '';
             document.getElementById('btn-executar-cadastro').innerText = "Salvar na Planilha";
+            document.getElementById('btn-excluir-cadastro').style.display = "none";
             if(document.getElementById('reg-resp')) document.getElementById('reg-resp').value = usuarioLogado.nome || "";
         }
 
@@ -688,6 +717,25 @@
                     resetarFormularioCadastro(); await carregarPatrimonioDoServidor();
                 }
             } catch (e) { alert("Erro ao salvar."); } finally { btn.disabled = false; }
+        }
+
+        async function executarExcluirPatrimonio() {
+            const codigo = document.getElementById('reg-code').value.trim();
+            if(!codigo) return;
+            if(!confirm(`Atenção Direção: Deseja EXCLUIR DEFINITIVAMENTE o patrimônio ${codigo}? Esta ação não pode ser desfeita.`)) return;
+
+            const btn = document.getElementById('btn-excluir-cadastro');
+            btn.disabled = true; btn.innerText = "Excluindo...";
+
+            try {
+                const r = await fetch(APPS_SCRIPT_PAT_URL, { method: 'POST', body: JSON.stringify({ operacao: "PAT_EXCLUIR", codigo: codigo }) });
+                const res = await r.json();
+                if(res.status === "success") {
+                    alert("Patrimônio apagado do banco de dados!");
+                    resetarFormularioCadastro();
+                    await carregarPatrimonioDoServidor();
+                }
+            } catch(e) { alert("Erro ao excluir item."); } finally { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-trash-can"></i> Excluir Patrimônio'; }
         }
     </script>
 </body>
