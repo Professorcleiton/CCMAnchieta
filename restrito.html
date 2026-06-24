@@ -250,26 +250,26 @@
                 <div class="mural-large-bar-row" onclick="abrirModalRelatorio('direcao')"><div class="mural-bar-label-info"><span>Professores</span><span id="txt-pct-profs">0%</span></div><div class="mural-bar-outer"><div class="mural-bar-inner" id="mural-fill-profs" style="background:#b91c1c;"></div></div></div>
             </div>
 
-            <div class="board-container" id="siga-columns-grid" style="display: none;">
+ <div class="board-container" id="siga-columns-grid" style="display: none;">
                 <section class="sector-column active" id="col-meivs">
                     <div class="column-header" style="background:#0284c7;">MEIV'S</div>
                     <div class="feed-container" id="feed-meivs"></div>
-                    <div class="input-container"><textarea id="text-meivs" onkeydown="verificarTeclaEnter(event, 'meivs')"></textarea><button class="btn-salvar" onclick="salvarPost('meivs')">Salvar</button></div>
+                    <div class="input-container"><textarea id="text-meivs" onkeydown="verificarTeclaEnter(event, 'meivs')"></textarea><button id="btn-meivs" class="btn-salvar" onclick="salvarPost('meivs')">Salvar</button></div>
                 </section>
                 <section class="sector-column" id="col-pedagogico">
                     <div class="column-header" style="background:#0d9488;">PEDAGÓGICO</div>
                     <div class="feed-container" id="feed-pedagogico"></div>
-                    <div class="input-container"><textarea id="text-pedagogico" onkeydown="verificarTeclaEnter(event, 'pedagogico')"></textarea><button class="btn-salvar" onclick="salvarPost('pedagogico')">Salvar</button></div>
+                    <div class="input-container"><textarea id="text-pedagogico" onkeydown="verificarTeclaEnter(event, 'pedagogico')"></textarea><button id="btn-pedagogico" class="btn-salvar" onclick="salvarPost('pedagogico')">Salvar</button></div>
                 </section>
                 <section class="sector-column" id="col-adm">
                     <div class="column-header" style="background:#4f46e5;">ADM</div>
                     <div class="feed-container" id="feed-adm"></div>
-                    <div class="input-container"><textarea id="text-adm" onkeydown="verificarTeclaEnter(event, 'adm')"></textarea><button class="btn-salvar" onclick="salvarPost('adm')">Salvar</button></div>
+                    <div class="input-container"><textarea id="text-adm" onkeydown="verificarTeclaEnter(event, 'adm')"></textarea><button id="btn-adm" class="btn-salvar" onclick="salvarPost('adm')">Salvar</button></div>
                 </section>
                 <section class="sector-column" id="col-direcao">
                     <div class="column-header" style="background:#b91c1c;">PROFESSORES</div>
                     <div class="feed-container" id="feed-direcao"></div>
-                    <div class="input-container"><textarea id="text-direcao" onkeydown="verificarTeclaEnter(event, 'direcao')"></textarea><button class="btn-salvar" onclick="salvarPost('direcao')">Salvar</button></div>
+                    <div class="input-container"><textarea id="text-direcao" onkeydown="verificarTeclaEnter(event, 'direcao')"></textarea><button id="btn-direcao" class="btn-salvar" onclick="salvarPost('direcao')">Salvar</button></div>
                 </section>
             </div>
         </main>
