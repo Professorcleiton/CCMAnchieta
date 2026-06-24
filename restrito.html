@@ -437,25 +437,40 @@
             col.classList.add('active'); col.style.display = 'flex';
         }
 
-        async function carregarAlunosETurmas() {
-            cacheAlunosPorTurma = {};
-            try {
-                const response = await fetch(COLS_ALUNOS_URL);
-                const text = await response.text();
-                const jsonText = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
-                const data = JSON.parse(jsonText);
-                const linhas = data.table.rows;
-                linhas.forEach(r => {
-                    if (r.c && r.c[1] && r.c[1].v) {
-                        const nome = r.c[1].v.toString().trim();
-                        const turma = r.c[2] && r.c[2].v ? r.c[2].v.toString().trim() : 'Sem Turma';
-                        if (!cacheAlunosPorTurma[turma]) cacheAlunosPorTurma[turma] = [];
-                        cacheAlunosPorTurma[turma].push(nome);
-                    }
-                });
-            } catch (e) { console.error(e); }
-            renderizarSidebarTurmas();
-        }
+async function carregarAlunosETurmas() {
+    cacheAlunosPorTurma = {};
+    const ul = document.getElementById('lista-turmas-sidebar');
+    
+    try {
+        const response = await fetch(COLS_ALUNOS_URL);
+        const text = await response.text();
+        
+        // Isola apenas o conteúdo JSON da resposta do Google
+        const jsonText = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
+        const data = JSON.parse(jsonText);
+        
+        // Dispara no console (F12) o que ele conseguiu ler da planilha
+        console.log("Dados lidos da aba Alunos:", data);
+        
+        const linhas = data.table.rows;
+        linhas.forEach(r => {
+            // Verifica se a Coluna B (índice 1) existe e tem valor
+            if (r.c && r.c[1] && r.c[1].v) {
+                const nome = r.c[1].v.toString().trim();
+                const turma = r.c[2] && r.c[2].v ? r.c[2].v.toString().trim() : 'Sem Turma';
+                
+                if (!cacheAlunosPorTurma[turma]) cacheAlunosPorTurma[turma] = [];
+                cacheAlunosPorTurma[turma].push(nome);
+            }
+        });
+        
+        renderizarSidebarTurmas();
+        
+    } catch (e) { 
+        console.error("Falha ao processar os alunos:", e); 
+        ul.innerHTML = '<li class="turma-item" style="color:#f87171;"><i class="fa-solid fa-triangle-exclamation"></i> Erro na Tabela</li>';
+    }
+}
 
         function renderizarSidebarTurmas() {
             const ul = document.getElementById('lista-turmas-sidebar');
