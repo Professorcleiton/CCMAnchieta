@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIGA v2 - Central Pedagógica CCM Anchieta</title>
+    <title>SIGA - Central Pedagógica CCM Anchieta</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
@@ -56,7 +56,7 @@
         .right-nre-logo { height: 40px; width: auto; object-fit: contain; max-width: 120px; }
         #user-display { font-size: 13px; font-weight: 600; background: #eab308; color: #1e293b; padding: 6px 12px; border-radius: 20px; display: inline-flex; align-items: center; gap: 6px; }
 
-        /* MINI DASHBOARD / MURAL */
+        /* MINI DASHBOARD */
         .summary-dashboard-bar { background-color: white; padding: 10px 20px; border-bottom: 1px solid #cbd5e1; display: none; gap: 20px; align-items: center; }
         .metric-mini-card { background: #f8fafc; border: 1px solid #e2e8f0; padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
         .metric-mini-card span.count-number { background: #005088; color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px; }
@@ -101,7 +101,7 @@
         .tab-button { background: none; border: none; color: #94a3b8; padding: 15px 5px; font-size: 12px; font-weight: bold; cursor: pointer; }
         .tab-button.active { color: white; background-color: #005088; }
 
-        /* ========== ESTILOS DO MÓDULO PATRIMÔNIO ========== */
+        /* PATRIMÔNIO */
         #patrimonio-interface { display: none; width: 100%; height: 100vh; flex-direction: row; }
         .pat-sidebar { width: 290px; background-color: #005088; color: white; display: flex; flex-direction: column; border-right: 4px solid #eab308; }
         .pat-sidebar-top { flex: 1; display: flex; flex-direction: column; min-height: 0; }
@@ -428,22 +428,277 @@
             document.getElementById('app-interface').style.display = 'flex';
         }
 
-        // (As demais funções do painel principal permanecem as mesmas do código anterior unificado,
-        //  com os nomes mantidos: alternarMenuLateral, selecionarTurma, filtrarRegistrosPorAluno, etc.)
+        function alternarMenuLateral() { document.getElementById('app-sidebar').classList.toggle('open'); }
+        function alternarAbaMobile(setor, btn) {
+            document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.querySelectorAll('.sector-column').forEach(c => { c.style.display = 'none'; c.classList.remove('active'); });
+            const col = document.getElementById(`col-${setor}`);
+            col.classList.add('active'); col.style.display = 'flex';
+        }
+
+        async function carregarAlunosETurmas() {
+            cacheAlunosPorTurma = {};
+            try {
+                const response = await fetch(COLS_ALUNOS_URL);
+                const text = await response.text();
+                const jsonText = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
+                const data = JSON.parse(jsonText);
+                const linhas = data.table.rows;
+                linhas.forEach(r => {
+                    if (r.c && r.c[1] && r.c[1].v) {
+                        const nome = r.c[1].v.toString().trim();
+                        const turma = r.c[2] && r.c[2].v ? r.c[2].v.toString().trim() : 'Sem Turma';
+                        if (!cacheAlunosPorTurma[turma]) cacheAlunosPorTurma[turma] = [];
+                        cacheAlunosPorTurma[turma].push(nome);
+                    }
+                });
+            } catch (e) { console.error(e); }
+            renderizarSidebarTurmas();
+        }
+
+        function renderizarSidebarTurmas() {
+            const ul = document.getElementById('lista-turmas-sidebar');
+            ul.innerHTML = '';
+            const turmas = Object.keys(cacheAlunosPorTurma).sort();
+            if (!turmas.length) { ul.innerHTML = '<li class="turma-item">Nenhuma turma</li>'; return; }
+            turmas.forEach((turma, idx) => {
+                const li = document.createElement('li');
+                li.className = 'turma-item';
+                li.innerHTML = `<i class="fa-solid fa-users-viewfinder"></i> ${turma}`;
+                li.onclick = () => {
+                    document.querySelectorAll('.turma-item').forEach(el => el.classList.remove('active'));
+                    li.classList.add('active');
+                    selecionarTurma(turma);
+                };
+                ul.appendChild(li);
+                if (idx === 0 && !turmaSelecionadaAtiva) { li.classList.add('active'); selecionarTurma(turma); }
+            });
+        }
+
+        function selecionarTurma(turma) {
+            turmaSelecionadaAtiva = turma;
+            const select = document.getElementById('select-alunos');
+            select.innerHTML = '<option value="">-- Escolha o Aluno --</option>';
+            const alunos = cacheAlunosPorTurma[turma] || [];
+            alunos.sort().forEach(a => { const opt = document.createElement('option'); opt.value = a; opt.textContent = a; select.appendChild(opt); });
+            select.value = '';
+            filtrarRegistrosPorAluno();
+        }
+
+        async function carregarRegistrosDoServidor() {
+            try {
+                const r = await fetch(APPS_SCRIPT_URL, { method: 'GET', cache: 'no-cache' });
+                todosOsRegistros = await r.json();
+                calcularDashboardGeralEscola();
+                if (document.getElementById('select-alunos').value) filtrarRegistrosPorAluno();
+            } catch (e) { console.error(e); }
+        }
+
+        function calcularDashboardGeralEscola() {
+            let total = todosOsRegistros.length;
+            document.getElementById('mural-total-geral').innerText = total;
+            let m=0, p=0, a=0, pf=0;
+            todosOsRegistros.forEach(r => {
+                if (r.setor === 'meivs') m++;
+                else if (r.setor === 'pedagogico') p++;
+                else if (r.setor === 'adm') a++;
+                else if (r.setor === 'professores' || r.setor === 'direcao') pf++;
+            });
+            document.getElementById('mural-total-meivs').innerText = m;
+            document.getElementById('mural-total-pedag').innerText = p;
+            document.getElementById('mural-total-profs').innerText = pf;
+            const pct = (v) => total ? Math.round((v/total)*100) : 0;
+            ['meivs','pedag','adm','profs'].forEach((k,i) => {
+                document.getElementById(`txt-pct-${k}`).innerText = pct([m,p,a,pf][i]) + '%';
+                document.getElementById(`mural-fill-${k}`).style.width = pct([m,p,a,pf][i]) + '%';
+            });
+        }
+
+        function formatarDataEHora(s) {
+            if (!s) return ''; s = s.toString().trim();
+            if (s.match(/^[A-Za-z]{3}\s[A-Za-z]{3}/) || s.includes('GMT')) {
+                const d = new Date(s); if (!isNaN(d)) return `${d.toLocaleDateString('pt-BR')} às ${d.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'})}`;
+            }
+            if (s.includes('-')) {
+                const partes = s.split(' '), data = partes[0].split('-');
+                const hora = partes[1] ? ' às ' + partes[1].substring(0,5) : '';
+                if (data[0].length === 4) return `${data[2]}/${data[1]}/${data[0]}${hora}`;
+            }
+            if (s.includes('/')) return s.replace(' ', ' às ');
+            return s;
+        }
+
+        function encontrarTurmaDoAluno(nome) {
+            for (let t in cacheAlunosPorTurma) if (cacheAlunosPorTurma[t].includes(nome)) return t;
+            return 'Sem Turma';
+        }
+
+        function filtrarRegistrosPorAluno() {
+            const select = document.getElementById('select-alunos');
+            const mural = document.getElementById('welcome-dashboard-mural');
+            const mini = document.getElementById('student-mini-dash');
+            const grid = document.getElementById('siga-columns-grid');
+            const pdf = document.getElementById('btn-gerar-pdf-oficial');
+            const tabs = document.getElementById('mobile-tabs-container');
+            if (!select.value) {
+                mural.style.display = 'flex'; mini.style.display = 'none'; grid.style.display = 'none'; pdf.style.display = 'none'; tabs.style.display = 'none';
+                calcularDashboardGeralEscola(); return;
+            }
+            mural.style.display = 'none'; mini.style.display = 'flex'; grid.style.display = 'grid'; pdf.style.display = 'inline-flex';
+            tabs.style.display = (window.innerWidth <= 768) ? 'grid' : 'none';
+            const aluno = select.value;
+            ['meivs','pedagogico','adm','direcao'].forEach(s => document.getElementById(`feed-${s}`).innerHTML = '');
+            let cm=0, cp=0, ca=0, cf=0;
+            todosOsRegistros.forEach(r => {
+                if (r.aluno && r.aluno.trim() === aluno) {
+                    let setor = r.setor;
+                    if (setor === 'meivs') cm++;
+                    else if (setor === 'pedagogico') cp++;
+                    else if (setor === 'adm') ca++;
+                    else if (setor === 'professores' || setor === 'direcao') cf++;
+                    if (setor === 'professores') setor = 'direcao';
+                    const feed = document.getElementById(`feed-${setor}`);
+                    if (feed) {
+                        const card = document.createElement('div'); card.className = 'post-card';
+                        const botoes = (usuarioLogado && usuarioLogado.nivel >= 3) ? `<div class="card-actions"><button class="btn-action-card btn-edit-card" onclick="editarRegistroServidor(${r.idLinha}, '${r.setor}')"><i class="fa-solid fa-pen-to-square"></i> Editar</button><button class="btn-action-card btn-delete-card" onclick="excluirRegistroServidor(${r.idLinha})"><i class="fa-solid fa-trash-can"></i> Apagar</button></div>` : '';
+                        card.innerHTML = `<p class="post-text" id="text-card-${r.idLinha}">${r.texto}</p><div class="post-footer"><span><i class="fa-solid fa-user"></i>${r.funcionario || 'SIGA'}</span><span><i class="fa-solid fa-clock"></i>${formatarDataEHora(r.dataAtual)}</span></div>${botoes}`;
+                        feed.appendChild(card);
+                    }
+                }
+            });
+            const total = cm+cp+ca+cf;
+            document.getElementById('dash-total-count').innerText = total;
+            ['bar-meivs','bar-pedag','bar-adm','bar-profs'].forEach((id,i) => {
+                const val = [cm,cp,ca,cf][i];
+                document.getElementById(id).style.width = total ? Math.max((val/total)*100, 5) + '%' : '0%';
+            });
+        }
+
+        function verificarTeclaEnter(e, setor) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); salvarPost(setor); } }
+
+        async function salvarPost(setor) {
+            const textarea = document.getElementById(`text-${setor}`), texto = textarea.value.trim(), aluno = document.getElementById('select-alunos').value, btn = document.getElementById(`btn-${setor}`);
+            if (!texto || !aluno) return;
+            btn.disabled = true;
+            const agora = new Date();
+            const data = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            const payload = { operacao: "SALVAR", aluno, setor: setor === 'direcao' ? 'professores' : setor, texto, funcionario: usuarioLogado.nome, dataAtual: data };
+            try {
+                await fetch(APPS_SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
+                textarea.value = ''; await carregarRegistrosDoServidor();
+            } catch (e) { alert('Erro ao salvar'); } finally { btn.disabled = false; }
+        }
+
+        async function excluirRegistroServidor(id) {
+            if (!id || !confirm('Apagar?')) return;
+            try {
+                await fetch(APPS_SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ operacao: "EXCLUIR", idLinha: id }) });
+                todosOsRegistros = todosOsRegistros.filter(r => r.idLinha !== id); filtrarRegistrosPorAluno();
+            } catch (e) { alert('Erro'); }
+        }
+
+        async function editarRegistroServidor(id, setor) {
+            if (!id) return;
+            const el = document.getElementById(`text-card-${id}`);
+            const novo = prompt('Editar:', el.innerText);
+            if (!novo || !novo.trim()) return;
+            try {
+                await fetch(APPS_SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ operacao: "EDITAR", idLinha: id, texto: novo.trim() }) });
+                const reg = todosOsRegistros.find(r => r.idLinha === id); if (reg) reg.texto = novo.trim();
+                filtrarRegistrosPorAluno();
+            } catch (e) { alert('Erro'); }
+        }
+
+        function gerarFichaIndividualConselho() {
+            const aluno = document.getElementById('select-alunos').value;
+            if (!aluno) return;
+            let html = `<div style="padding:25px;font-family:'Segoe UI',Arial;color:#000;background:#fff;">
+                <div style="display:flex;justify-content:space-between;border-bottom:3px double #005088;padding-bottom:12px;margin-bottom:20px;">
+                    <div><h4 style="margin:0;font-size:13px;color:#475569;">SECRETARIA DE ESTADO DA EDUCAÇÃO - SEED</h4><h4 style="margin:2px 0 0;font-size:12px;color:#64748b;">NÚCLEO REGIONAL DE EDUCAÇÃO DE UMUARAMA</h4><h2 style="margin:5px 0 0;color:#005088;font-size:18px;">COLÉGIO CÍVICO-MILITAR ANCHIETA</h2></div>
+                    <div><span style="font-size:10px;border:1px solid #005088;padding:4px 8px;border-radius:4px;">DOCUMENTO INTERNO</span></div>
+                </div>
+                <h3 style="text-align:center;margin-bottom:25px;">Ficha de Acompanhamento Individual do Estudante</h3>
+                <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                    <tr><td style="padding:6px;border:1px solid #94a3b8;background:#f8fafc;font-weight:bold;">Estudante:</td><td style="padding:6px;border:1px solid #94a3b8;">${aluno}</td><td style="padding:6px;border:1px solid #94a3b8;background:#f8fafc;font-weight:bold;">Turma:</td><td style="padding:6px;border:1px solid #94a3b8;">${turmaSelecionadaAtiva}</td></tr>
+                </table>
+                <h4 style="font-size:13px;color:#005088;margin-top:15px;">Histórico de Apontamentos</h4>`;
+            ['meivs','pedagogico','adm','direcao'].forEach(setor => {
+                const registros = todosOsRegistros.filter(r => r.aluno === aluno && (r.setor === setor || (setor === 'direcao' && (r.setor === 'professores' || r.setor === 'direcao'))));
+                if (registros.length) {
+                    html += `<div style="margin-top:10px;background:#f1f5f9;padding:5px 10px;border-radius:4px;font-weight:bold;border-left:5px solid #005088;">${setor.toUpperCase()}</div>`;
+                    registros.forEach(p => html += `<div style="margin:8px 0;padding:8px 12px;background:#fff;border-bottom:1px solid #e2e8f0;"><div>${p.texto}</div><div style="font-size:10px;color:#64748b;text-align:right;">${p.funcionario} | ${formatarDataEHora(p.dataAtual)}</div></div>`);
+                }
+            });
+            html += `</div>`;
+            html2pdf().set({ margin: 12, filename: `Ficha_Conselho_${aluno.replace(/ /g,'_')}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }).from(document.createElement('div')).save();
+        }
+
+        function aplicarBloqueioSetores(setor, nivel) {
+            ['meivs','pedagogico','adm','direcao'].forEach(s => {
+                const ta = document.getElementById(`text-${s}`), btn = document.getElementById(`btn-${s}`);
+                if (nivel >= 2) { ta.disabled = false; btn.disabled = false; }
+                else {
+                    if (setor === s || (setor === 'professores' && s === 'direcao')) { ta.disabled = false; btn.disabled = false; }
+                    else { ta.disabled = true; btn.disabled = true; }
+                }
+            });
+        }
+
+        // MODAL RELATÓRIO
+        function abrirModalRelatorio(setorFiltrado) {
+            modalSetorAtivo = setorFiltrado; modalItensExibidos = 50;
+            document.getElementById('modal-relatorio-setor').style.display = 'flex';
+            document.getElementById('modal-relatorio-titulo').innerHTML = setorFiltrado === 'geral' ? 'Relatório Geral' : setorFiltrado.toUpperCase();
+            let registros = setorFiltrado === 'geral' ? todosOsRegistros : todosOsRegistros.filter(r => r.setor === setorFiltrado || (setorFiltrado === 'direcao' && (r.setor === 'professores' || r.setor === 'direcao')));
+            modalRegistrosFiltrados = [...registros].reverse();
+            const container = document.getElementById('modal-relatorio-lista');
+            container.innerHTML = `<div style="padding:10px;"><input type="text" id="busca-modal" placeholder="Filtrar..." oninput="filtrarBuscaModal(false)" style="width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:6px;"></div><div id="modal-lista-itens-scroll" style="max-height:420px;overflow-y:auto;"></div><div id="modal-container-botao-mais" style="text-align:center;padding:15px;"></div>`;
+            renderizarItensModal(modalRegistrosFiltrados);
+        }
+
+        function renderizarItensModal(lista) {
+            const container = document.getElementById('modal-lista-itens-scroll');
+            const btnContainer = document.getElementById('modal-container-botao-mais');
+            container.innerHTML = ''; btnContainer.innerHTML = '';
+            if (!lista.length) { container.innerHTML = '<p style="text-align:center;color:#64748b;">Nenhum registro.</p>'; return; }
+            const limitados = lista.slice(0, modalItensExibidos);
+            limitados.forEach(r => {
+                const div = document.createElement('div'); div.className = 'modal-list-item';
+                div.innerHTML = `<div style="display:flex;justify-content:space-between;font-size:11px;color:#64748b;"><span>${formatarDataEHora(r.dataAtual)}</span><span>${r.funcionario}</span></div><div style="font-size:14px;margin:4px 0;"><strong>${r.aluno}</strong> <span style="background:#e0f2fe;padding:2px 6px;border-radius:4px;font-size:11px;">${encontrarTurmaDoAluno(r.aluno)}</span></div><div style="font-style:italic;">${r.texto}</div>`;
+                container.appendChild(div);
+            });
+            if (lista.length > modalItensExibidos) {
+                const btn = document.createElement('button');
+                btn.innerText = `Exibir mais (${lista.length - modalItensExibidos} pendentes)`;
+                btn.style = "background:#0f172a;color:white;border:none;padding:10px 22px;border-radius:6px;cursor:pointer;";
+                btn.onclick = () => { modalItensExibidos += 50; filtrarBuscaModal(true); };
+                btnContainer.appendChild(btn);
+            }
+        }
+
+        function filtrarBuscaModal(manter) {
+            const termo = document.getElementById('busca-modal').value.toLowerCase();
+            let lista = termo ? modalRegistrosFiltrados.filter(r => r.aluno.toLowerCase().includes(termo) || encontrarTurmaDoAluno(r.aluno).toLowerCase().includes(termo) || r.texto.toLowerCase().includes(termo)) : modalRegistrosFiltrados;
+            if (!manter) modalItensExibidos = 50;
+            renderizarItensModal(lista);
+        }
+
+        function fecharModalRelatorio() { document.getElementById('modal-relatorio-setor').style.display = 'none'; }
+        function fecharModalRelatorioEvent(e) { if (e.target.id === 'modal-relatorio-setor') fecharModalRelatorio(); }
 
         // ========== MÓDULO PATRIMÔNIO ==========
-        async function patInicializar() {
+        function patInicializar() {
             document.getElementById('pat-reg-resp').value = usuarioLogado.nome || '';
-            await patCarregarAmbientes();
-            await patCarregarItens();
+            patCarregarAmbientes(); patCarregarItens();
         }
 
         function patAlternarAba(aba) {
             document.querySelectorAll('.pat-tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(aba === 'MOVER' ? 'pat-panel-mover' : aba === 'CADASTRAR' ? 'pat-panel-cadastrar' : 'pat-panel-ambientes').style.display = 'flex';
-            document.getElementById(aba !== 'MOVER' ? 'pat-panel-mover' : 'pat-panel-cadastrar').style.display = 'none';
-            document.getElementById(aba !== 'AMBIENTES' ? 'pat-panel-ambientes' : 'pat-panel-cadastrar').style.display = 'none';
             document.querySelector(`.pat-tab-btn:nth-child(${aba === 'MOVER' ? 1 : aba === 'CADASTRAR' ? 2 : 3})`).classList.add('active');
+            document.getElementById('pat-panel-mover').style.display = aba === 'MOVER' ? 'flex' : 'none';
+            document.getElementById('pat-panel-cadastrar').style.display = aba === 'CADASTRAR' ? 'flex' : 'none';
+            document.getElementById('pat-panel-ambientes').style.display = aba === 'AMBIENTES' ? 'flex' : 'none';
             if (aba === 'CADASTRAR') patResetarCadastro();
         }
 
@@ -456,12 +711,12 @@
                 patAmbientes.forEach(s => {
                     sidebar.innerHTML += `<li class="pat-room-item" onclick="patFiltrarSala('${s}', this)"><i class="fa-solid fa-location-dot"></i> ${s}</li>`;
                 });
-                ['pat-trans-room', 'pat-reg-room'].forEach(id => {
+                ['pat-trans-room','pat-reg-room'].forEach(id => {
                     const sel = document.getElementById(id);
                     sel.innerHTML = '<option value="">-- Selecione --</option>';
                     patAmbientes.forEach(s => sel.innerHTML += `<option>${s}</option>`);
                 });
-                document.getElementById('pat-mini-amb-list').innerHTML = patAmbientes.map(s => `<li>${s} <button onclick="patDeletarAmbiente('${s}')" style="background:none;border:none;color:red;">🗑</button></li>`).join('');
+                document.getElementById('pat-mini-amb-list').innerHTML = patAmbientes.map(s => `<li style="display:flex;justify-content:space-between;padding:8px 12px;">${s} <button onclick="patDeletarAmbiente('${s}')" style="background:none;border:none;color:red;">🗑</button></li>`).join('');
             } catch (e) { console.error(e); }
         }
 
@@ -476,7 +731,8 @@
         function patRenderizarTabela() {
             const tbody = document.getElementById('pat-table-body');
             const itens = patSalaFiltro === 'TODOS' ? patTodos : patTodos.filter(i => i.localizacao === patSalaFiltro);
-            tbody.innerHTML = itens.length === 0 ? '<tr><td colspan="7" style="text-align:center;">Nenhum item.</td></tr>' : itens.map(i => {
+            if (!itens.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Nenhum item.</td></tr>'; return; }
+            tbody.innerHTML = itens.map(i => {
                 const st = i.status.toLowerCase(), cls = st.includes('manuten') ? 'status-manutencao' : st.includes('danific') ? 'status-danificado' : st.includes('inserv') ? 'status-inservivel' : st.includes('localiz') ? 'status-naolocalizado' : 'status-bom';
                 const vinculo = i.itemPai ? `<br><span class="pat-item-vinculo">Pai: ${i.itemPai}</span>` : '';
                 return `<tr style="cursor:pointer" onclick="patCarregarMovimentacao('${i.codigo}')"><td>${i.codigo}</td><td>${i.item}${vinculo}</td><td>${i.categoria}</td><td>${i.localizacao}</td><td>${i.responsavel || '-'}</td><td>${i.dataAtualizacao || '-'}</td><td><span class="pat-status-badge ${cls}">${i.status}</span></td></tr>`;
@@ -549,7 +805,7 @@
         }
 
         function patResetarCadastro() {
-            ['pat-reg-code', 'pat-reg-item', 'pat-reg-parent'].forEach(id => document.getElementById(id).value = '');
+            ['pat-reg-code','pat-reg-item','pat-reg-parent'].forEach(id => document.getElementById(id).value = '');
             document.getElementById('pat-cad-title').innerText = 'Cadastrar Novo';
             document.getElementById('pat-btn-cadastrar').innerText = 'Salvar';
             document.getElementById('pat-btn-excluir').style.display = 'none';
@@ -564,8 +820,7 @@
             try {
                 await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ operacao: "PAT_TRANSFERIR", codigo: cod, novaLocalizacao: sala, responsavel: resp, status: status || null }) });
                 alert('Transferência concluída!');
-                document.getElementById('pat-trans-code').value = '';
-                document.getElementById('pat-item-preview').style.display = 'none';
+                document.getElementById('pat-trans-code').value = ''; document.getElementById('pat-item-preview').style.display = 'none';
                 await patCarregarItens();
             } catch (e) { alert('Erro.'); }
         }
@@ -584,8 +839,7 @@
             if (!payload.codigo || !payload.item || !payload.responsavel || !payload.localizacao) return alert('Preencha os campos obrigatórios.');
             try {
                 await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-                alert('Salvo!');
-                patResetarCadastro(); await patCarregarItens();
+                alert('Salvo!'); patResetarCadastro(); await patCarregarItens();
             } catch (e) { alert('Erro.'); }
         }
 
@@ -594,8 +848,7 @@
             if (!cod || !confirm('Excluir permanentemente?')) return;
             try {
                 await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ operacao: "PAT_EXCLUIR", codigo: cod }) });
-                alert('Excluído.');
-                patResetarCadastro(); await patCarregarItens();
+                alert('Excluído.'); patResetarCadastro(); await patCarregarItens();
             } catch (e) { alert('Erro.'); }
         }
 
@@ -604,8 +857,7 @@
             if (!nome) return;
             try {
                 await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ operacao: "AMB_ADICIONAR", ambiente: nome }) });
-                document.getElementById('pat-new-amb').value = '';
-                await patCarregarAmbientes();
+                document.getElementById('pat-new-amb').value = ''; await patCarregarAmbientes();
             } catch (e) { alert('Erro.'); }
         }
 
@@ -622,19 +874,8 @@
             const preview = document.getElementById('pat-reg-parent-preview');
             if (!cod) { preview.innerText = ''; return; }
             const pai = patTodos.find(i => i.codigo === cod);
-            preview.innerHTML = pai ? '✅ Pai encontrado: ' + pai.item : '⚠️ Não localizado.';
+            preview.innerHTML = pai ? '✅ Pai: ' + pai.item : '⚠️ Não localizado.';
         }
-
-        // Replicar funções essenciais do painel principal (versão resumida, sem conflitos)
-        function alternarMenuLateral() { document.getElementById('app-sidebar').classList.toggle('open'); }
-        function alternarAbaMobile(setor, btn) {
-            document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            document.querySelectorAll('.sector-column').forEach(c => { c.style.display = 'none'; c.classList.remove('active'); });
-            const col = document.getElementById(`col-${setor}`);
-            col.classList.add('active'); col.style.display = 'flex';
-        }
-        // ... (as demais funções do painel principal foram omitidas por brevidade, mas devem ser mantidas do código unificado anterior)
     </script>
 </body>
 </html>
