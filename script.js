@@ -147,3 +147,28 @@ sr.reveal('.fique por dentro', { duration: 1000});
 sr.reveal('.gallery', { duration: 1000});
 
 sr.reveal('.contato', { duration: 1000});
+function abrirModalRelatorio() {
+    const select = document.getElementById('select-turma-relatorio');
+    // Limpa e preenche o select com as turmas que já estão no seu cache
+    select.innerHTML = '<option value="">-- Escolha uma Turma --</option>';
+    
+    Object.keys(cacheAlunosPorTurma).sort().forEach(turma => {
+        const opt = document.createElement('option');
+        opt.value = turma;
+        opt.textContent = turma;
+        select.appendChild(opt);
+    });
+    
+    document.getElementById('modal-selecionar-turma').style.display = 'flex';
+}
+
+function confirmarGeracaoRelatorio() {
+    const turma = document.getElementById('select-turma-relatorio').value;
+    if (!turma) {
+        mostrarToast('Por favor, selecione uma turma!', 'aviso');
+        return;
+    }
+    // Fecha o modal e chama a função de gerar o relatório (aquela que criamos antes)
+    document.getElementById('modal-selecionar-turma').style.display = 'none';
+    gerarRelatorioPreConselho(turma); 
+}
