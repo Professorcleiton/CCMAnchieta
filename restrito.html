@@ -1284,7 +1284,7 @@ function filtrarRegistrosPorAluno() {
 
     setDisplay(mural, 'none');
     setDisplay(mini, 'flex');
-    setDisplay(grid, 'grid');
+    setDisplay(grid, 'block'); // Mudamos de 'grid' para 'block'
     setDisplay(pdf, 'inline-flex');
     if (tabs) tabs.style.display = (window.innerWidth <= 768) ? 'grid' : 'none';
 
