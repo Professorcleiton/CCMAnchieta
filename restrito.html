@@ -1295,6 +1295,19 @@ function filtrarRegistrosPorAluno() {
     setDisplay(mural, 'none');
     setDisplay(mini, 'flex');
     if (grid) grid.style.display = 'block';
+    // ... código anterior da sua função ...
+    if (grid) grid.style.display = 'block';
+    
+    // FORÇAR A ATIVAÇÃO DA ABA MEIV'S E DO PRIMEIRO BOTÃO
+    document.querySelectorAll('.sector-column').forEach(c => c.classList.remove('active'));
+    document.getElementById('col-meivs').classList.add('active');
+    
+    // Opcional: marca o botão correspondente como ativo também
+    document.querySelectorAll('#mobile-tabs-container .tab-button').forEach(b => b.classList.remove('active'));
+    document.querySelector('#mobile-tabs-container .tab-button').classList.add('active');
+
+    const aluno = select.value;
+    // ... restante da sua função ...
     setDisplay(pdf, 'inline-flex');
     if (tabs) tabs.style.display = (window.innerWidth <= 768) ? 'grid' : 'none';
 
