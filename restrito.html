@@ -157,13 +157,35 @@
         .pat-btn-action:disabled { background: #cbd5e1; cursor: not-allowed; }
         .pat-btn-delete { background: #ef4444; display: none; margin-top: 10px; }
 
+    /* CORREÇÕES PARA CELULAR E RESPONSIVIDADE */
+        .menu-toggle { background: none; border: none; font-size: 22px; color: #005088; cursor: pointer; padding: 0 10px; display: none; }
+        .dark-mode .menu-toggle { color: #eab308; }
+        .sidebar-top { flex: 1; overflow-y: auto; min-height: 0; } /* Evita que o botão Sair suma */
+
         @media (max-width: 768px) {
-            #app-interface { flex-direction: column !important; }
-            .sidebar { position: fixed; top: 0; left: 0; height: 100vh; width: 260px; transform: translateX(-100%); z-index: 9999; }
-            .sidebar.open { transform: translateX(0); }
-            .pat-workspace { grid-template-columns: 1fr; }
-            .pat-sidebar { width: 260px; position: fixed; top: 0; left: 0; height: 100vh; transform: translateX(-100%); z-index: 9999; }
-            .pat-sidebar.open { transform: translateX(0); }
+            body, .main-content, .pat-main { height: 100dvh; overflow: hidden; }
+            #app-interface { flex-direction: column !important; height: 100dvh; }
+            
+            /* Ajuste dos Menus Laterais (SIGA e Patrimônio) */
+            .sidebar, .pat-sidebar { position: fixed; top: 0; left: 0; height: 100dvh; width: 260px; transform: translateX(-100%); z-index: 9999; box-shadow: 2px 0 10px rgba(0,0,0,0.5); }
+            .sidebar.open, .pat-sidebar.open { transform: translateX(0); }
+            .menu-toggle { display: inline-block; } /* Mostra o botão hambúrguer no celular */
+            
+            /* Barra Superior Flexível (SIGA) */
+            .top-bar-app { height: auto !important; min-height: unset; flex-direction: column; padding: 15px; gap: 12px; align-items: flex-start; }
+            .aluno-selector, .user-and-nre-wrapper { width: 100%; justify-content: space-between; gap: 8px; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 5px; }
+            #input-busca-aluno { max-width: 140px; }
+            #select-alunos { max-width: 120px; }
+            
+            /* Barra Superior Flexível (Patrimônio) */
+            .pat-top-bar { height: auto; flex-direction: column; padding: 15px; gap: 10px; align-items: stretch; }
+            .pat-search-box { width: 100%; }
+            .pat-workspace { grid-template-columns: 1fr; padding: 15px; }
+            
+            /* Impede que a tabela quebre a tela */
+            .pat-table-wrapper { overflow-x: auto; }
+            .summary-dashboard-bar { flex-wrap: wrap; }
+            .mini-chart-bar-container { display: none; } /* Esconde o mini gráfico no celular para poupar espaço */
         }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         /* TOAST NOTIFICATIONS */
@@ -341,9 +363,17 @@
             </div>
         </aside>
         <main class="pat-main">
-            <header class="pat-top-bar">
-                <h1 id="pat-panel-title">Almoxarifado Geral</h1>
-                <div class="pat-search-box"><i class="fa-solid fa-barcode"></i> <input id="pat-search-input" placeholder="Pesquisar código, item..." oninput="patFiltrarTabela()"></div>
+        <header class="pat-top-bar">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <button class="menu-toggle" onclick="document.getElementById('pat-sidebar').classList.toggle('open')">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <h1 id="pat-panel-title">Almoxarifado Geral</h1>
+                </div>
+                <div class="pat-search-box">
+                    <i class="fa-solid fa-barcode"></i> 
+                    <input id="pat-search-input" placeholder="Pesquisar código, item..." oninput="patFiltrarTabela()">
+                </div>
             </header>
             <div class="pat-workspace">
                 <div class="pat-inventory-panel">
