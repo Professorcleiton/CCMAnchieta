@@ -1279,7 +1279,6 @@ function filtrarRegistrosPorAluno() {
     const pdf = document.getElementById('btn-gerar-pdf-oficial');
     const tabs = document.getElementById('mobile-tabs-container');
 
-    // Função auxiliar para mudar estilo apenas se o elemento existir
     const setDisplay = (el, val) => { if (el) el.style.display = val; };
 
     if (!select || !select.value) {
@@ -1288,57 +1287,64 @@ function filtrarRegistrosPorAluno() {
         setDisplay(grid, 'none');
         setDisplay(pdf, 'none');
         setDisplay(tabs, 'none');
-        atualizarGraficosMural();
         return;
     }
 
+    // Exibe os elementos necessários
     setDisplay(mural, 'none');
     setDisplay(mini, 'flex');
     if (grid) grid.style.display = 'block';
-    // ... código anterior da sua função ...
-    if (grid) grid.style.display = 'block';
-    
-    // FORÇAR A ATIVAÇÃO DA ABA MEIV'S E DO PRIMEIRO BOTÃO
+    setDisplay(pdf, 'inline-flex');
+    if (tabs) tabs.style.display = (window.innerWidth <= 768) ? 'grid' : 'none';
+
+    // Garante que o sistema de abas comece ativo na aba MEIV'S
     document.querySelectorAll('.sector-column').forEach(c => c.classList.remove('active'));
     document.getElementById('col-meivs').classList.add('active');
     
-    // Opcional: marca o botão correspondente como ativo também
     document.querySelectorAll('#mobile-tabs-container .tab-button').forEach(b => b.classList.remove('active'));
     document.querySelector('#mobile-tabs-container .tab-button').classList.add('active');
 
     const aluno = select.value;
-    // ... restante da sua função ...
-    setDisplay(pdf, 'inline-flex');
-    if (tabs) tabs.style.display = (window.innerWidth <= 768) ? 'grid' : 'none';
+    
+    // Limpa os feeds anteriores
+    ['meivs','pedagogico','adm','direcao'].forEach(s => {
+        const feed = document.getElementById(`feed-${s}`);
+        if (feed) feed.innerHTML = '';
+    });
 
-    const aluno = select.value;
-    // ... restante da sua função continua igual ...
-            ['meivs','pedagogico','adm','direcao'].forEach(s => document.getElementById(`feed-${s}`).innerHTML = '');
-            let cm=0, cp=0, ca=0, cf=0;
-            todosOsRegistros.forEach(r => {
-                if (r.aluno && r.aluno.trim() === aluno) {
-                    let setor = r.setor;
-                    if (setor === 'meivs') cm++;
-                    else if (setor === 'pedagogico') cp++;
-                    else if (setor === 'adm') ca++;
-                    else if (setor === 'professores' || setor === 'direcao') cf++;
-                    if (setor === 'professores') setor = 'direcao';
-                    const feed = document.getElementById(`feed-${setor}`);
-                    if (feed) {
-                        const card = document.createElement('div'); card.className = 'post-card';
-                        const botoes = (usuarioLogado && usuarioLogado.nivel >= 3) ? `<div class="card-actions"><button class="btn-action-card btn-edit-card" onclick="editarRegistroServidor(${r.idLinha}, '${r.setor}')"><i class="fa-solid fa-pen-to-square"></i> Editar</button><button class="btn-action-card btn-delete-card" onclick="excluirRegistroServidor(${r.idLinha})"><i class="fa-solid fa-trash-can"></i> Apagar</button></div>` : '';
-                        card.innerHTML = `<p class="post-text" id="text-card-${r.idLinha}">${r.texto}</p><div class="post-footer"><span><i class="fa-solid fa-user"></i>${r.funcionario || 'SIGA'}</span><span><i class="fa-solid fa-clock"></i>${formatarDataEHora(r.dataAtual)}</span></div>${botoes}`;
-                        feed.appendChild(card);
-                    }
-                }
-            });
-            const total = cm+cp+ca+cf;
-            document.getElementById('dash-total-count').innerText = total;
-            ['bar-meivs','bar-pedag','bar-adm','bar-profs'].forEach((id,i) => {
-                const val = [cm,cp,ca,cf][i];
-                document.getElementById(id).style.width = total ? Math.max((val/total)*100, 5) + '%' : '0%';
-            });
+    let cm=0, cp=0, ca=0, cf=0;
+
+    todosOsRegistros.forEach(r => {
+        if (r.aluno && r.aluno.trim() === aluno) {
+            let setor = r.setor;
+            if (setor === 'meivs') cm++;
+            else if (setor === 'pedagogico') cp++;
+            else if (setor === 'adm') ca++;
+            else if (setor === 'professores' || setor === 'direcao') cf++;
+            
+            if (setor === 'professores') setor = 'direcao';
+            
+            const feed = document.getElementById(`feed-${setor}`);
+            if (feed) {
+                const card = document.createElement('div'); 
+                card.className = 'post-card';
+                const botoes = (usuarioLogado && usuarioLogado.nivel >= 3) ? 
+                    `<div class="card-actions"><button class="btn-action-card btn-edit-card" onclick="editarRegistroServidor(${r.idLinha}, '${r.setor}')"><i class="fa-solid fa-pen-to-square"></i> Editar</button><button class="btn-action-card btn-delete-card" onclick="excluirRegistroServidor(${r.idLinha})"><i class="fa-solid fa-trash-can"></i> Apagar</button></div>` : '';
+                
+                card.innerHTML = `<p class="post-text" id="text-card-${r.idLinha}">${r.texto}</p><div class="post-footer"><span><i class="fa-solid fa-user"></i>${r.funcionario || 'SIGA'}</span><span><i class="fa-solid fa-clock"></i>${formatarDataEHora(r.dataAtual)}</span></div>${botoes}`;
+                feed.appendChild(card);
+            }
         }
+    });
+
+    const total = cm+cp+ca+cf;
+    document.getElementById('dash-total-count').innerText = total;
+    ['bar-meivs','bar-pedag','bar-adm','bar-profs'].forEach((id,i) => {
+        const val = [cm,cp,ca,cf][i];
+        const bar = document.getElementById(id);
+        if (bar) bar.style.width = total ? Math.max((val/total)*100, 5) + '%' : '0%';
+    });
+}
 
         function verificarTeclaEnter(e, setor) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); salvarPost(setor); } }
 
