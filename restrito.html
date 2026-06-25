@@ -288,13 +288,6 @@
 
     <!-- PAINEL PRINCIPAL -->
     <div id="app-interface">
-        <div class="mobile-tabs" id="mobile-tabs-container">
-            <button class="tab-button active" onclick="alternarAbaMobile('meivs', this)">MEIV'S</button>
-            <button class="tab-button" onclick="alternarAbaMobile('pedagogico', this)">PEDAG.</button>
-            <button class="tab-button" onclick="alternarAbaMobile('adm', this)">ADM</button>
-            <button class="tab-button" onclick="alternarAbaMobile('direcao', this)">PROFS.</button>
-        </div>
-
         <aside class="sidebar" id="app-sidebar">
             <div class="sidebar-top">
                 <div class="sidebar-header">
@@ -548,6 +541,12 @@
 
                 </div>
             </div>
+                    <div class="mobile-tabs" id="mobile-tabs-container">
+            <button class="tab-button active" onclick="alternarAbaMobile('meivs', this)">MEIV'S</button>
+            <button class="tab-button" onclick="alternarAbaMobile('pedagogico', this)">PEDAG.</button>
+            <button class="tab-button" onclick="alternarAbaMobile('adm', this)">ADM</button>
+            <button class="tab-button" onclick="alternarAbaMobile('direcao', this)">PROFS.</button>
+        </div>
 <div class="board-container" id="siga-columns-grid" style="display: none;">
                 <section class="sector-column active" id="col-meivs">
                     <div class="column-header" style="background:#0284c7;">MEIV'S</div>
@@ -1960,98 +1959,112 @@ async function carregarRegistrosPreConselho() {
 }
     </script>
 </body>
-    <!-- ================= NOVO VISUAL EM ABAS (TABS) PARA APONTAMENTOS ================= -->
+<!-- ================= VISUAL DE ABAS CORRIGIDO ================= -->
 <style>
-    /* 1. Ativa os botões de Abas para todas as telas (Celular e PC) */
+    /* 1. Reset e posicionamento correto das abas */
     #mobile-tabs-container {
         display: flex !important;
         justify-content: center;
         flex-wrap: wrap;
         gap: 10px;
-        margin: 20px 0;
-        padding: 15px;
-        background: #f8fafc;
-        border-radius: 8px;
-        border: 1px solid #cbd5e1;
+        margin-bottom: 20px;
+        padding: 0;
+        background: transparent;
+        border: none;
+        width: 100%;
     }
 
-    /* Estilo dos botões das abas */
     #mobile-tabs-container .tab-button {
         padding: 12px 24px !important;
-        font-size: 15px !important;
+        font-size: 14px !important;
         font-weight: bold !important;
-        border-radius: 6px !important;
-        border: none;
+        border-radius: 8px !important;
+        border: none !important;
         cursor: pointer;
         background: #e2e8f0;
         color: #475569;
-        transition: all 0.3s ease;
+        transition: all 0.2s;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
 
-    /* Cor do botão quando a aba está selecionada */
-    #mobile-tabs-container .tab-button.active {
-        background: #0d9488 !important; /* Cor principal */
-        color: white !important;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
+    /* Cores de cada setor quando ativo */
+    #mobile-tabs-container .tab-button:nth-child(1).active { background: #0284c7 !important; color: white !important; }
+    #mobile-tabs-container .tab-button:nth-child(2).active { background: #0d9488 !important; color: white !important; }
+    #mobile-tabs-container .tab-button:nth-child(3).active { background: #4f46e5 !important; color: white !important; }
+    #mobile-tabs-container .tab-button:nth-child(4).active { background: #b91c1c !important; color: white !important; }
 
-    /* 2. Desliga o modelo antigo de colunas espremidas */
+    /* 2. Esconde as colunas antigas e prepara para virarem abas */
     #siga-columns-grid {
         display: block !important; 
         padding: 0 !important;
     }
 
-    /* 3. Esconde todas as áreas de texto por padrão */
     .sector-column {
         display: none !important; 
-        width: 100% !important; /* Força a ocupar 100% da tela */
+        width: 100% !important; 
         background: #ffffff !important;
         border-radius: 8px !important;
         border: 1px solid #e2e8f0 !important;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1) !important;
-        margin-top: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05) !important;
     }
 
-    /* Só mostra a área de texto da aba que o usuário clicou */
+    /* Mostra apenas a aba ativa com uma animação suave */
     .sector-column.active {
         display: block !important;
         animation: fadeIn 0.3s ease-in-out;
     }
 
-    /* 4. Transforma a caixa de texto num espaço gigante e confortável */
+    /* 3. Caixona de texto gigante e confortável para os professores */
     .input-container {
         padding: 20px !important;
         background: #f8fafc !important;
         border-bottom: 2px solid #e2e8f0 !important;
+        border-radius: 8px 8px 0 0 !important;
     }
 
     .input-container textarea {
         width: 100% !important;
-        min-height: 160px !important; /* Altura maravilhosa para textos longos */
-        padding: 15px !important;
-        font-size: 16px !important; /* Impossibilita o zoom ruim no celular */
-        border: 2px solid #cbd5e1 !important;
+        min-height: 200px !important; /* Altura ideal para relatórios grandes */
+        padding: 18px !important;
+        font-size: 16px !important; /* Previne zoom indesejado no celular */
+        line-height: 1.5 !important;
+        border: 1px solid #cbd5e1 !important;
         border-radius: 8px !important;
         resize: vertical !important;
-        background-color: #ffffff !important;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.02) !important;
     }
 
-    /* Deixa o botão de Salvar bem chamativo e fácil de clicar no celular */
+    /* Botão Salvar chamativo */
     .input-container .btn-salvar {
         width: 100% !important;
-        padding: 15px !important;
+        padding: 16px !important;
         font-size: 16px !important;
         margin-top: 15px !important;
         border-radius: 8px !important;
         font-weight: bold !important;
         text-transform: uppercase !important;
+        letter-spacing: 1px !important;
     }
 
-    /* Animação suave na troca de abas */
     @keyframes fadeIn {
         from { opacity: 0; transform: translateY(5px); }
         to { opacity: 1; transform: translateY(0); }
     }
 </style>
-<!-- =============================================================================== -->
+
+<script>
+    // Script de segurança para garantir que a troca de abas funcione perfeitamente no PC
+    function alternarAbaMobile(setor, btn) {
+        // Tira a cor de todos os botões
+        document.querySelectorAll('#mobile-tabs-container .tab-button').forEach(b => b.classList.remove('active'));
+        // Esconde todas as áreas de texto
+        document.querySelectorAll('.sector-column').forEach(c => c.classList.remove('active'));
+        
+        // Pinta o botão clicado
+        btn.classList.add('active');
+        // Mostra a área de texto correspondente
+        document.getElementById('col-' + setor).classList.add('active');
+    }
+</script>
+<!-- ============================================================ -->
 </html>
