@@ -2114,6 +2114,27 @@ async function carregarRegistrosPreConselho() {
     }
 }
     </script>
+    <style>
+    /* 1. Garante visibilidade total do painel */
+    #siga-columns-grid { display: block !important; opacity: 1 !important; }
+    
+    /* 2. Força o botão de Novo Apontamento a aparecer e ter tamanho real */
+    .sector-column button[onclick*="abrirCaixaTexto"] {
+        display: block !important; 
+        visibility: visible !important;
+        opacity: 1 !important;
+        width: 100% !important;
+        height: 50px !important; /* Altura fixa para garantir que apareça */
+        margin: 10px 0 !important;
+        background-color: #0284c7 !important; /* Cor de teste para ver se ele aparece */
+        color: white !important;
+        border: 2px solid white !important;
+    }
+
+    /* 3. Garante que a seção ativa não esconda nada */
+    .sector-column { display: none !important; }
+    .sector-column.active { display: block !important; }
+</style>
 </body>
 <!-- ================= VISUAL DE ABAS CORRIGIDO ================= -->
 <style>
@@ -2206,22 +2227,6 @@ async function carregarRegistrosPreConselho() {
         from { opacity: 0; transform: translateY(5px); }
         to { opacity: 1; transform: translateY(0); }
     }
-/* Garante que o contêiner pai esteja visível */
-    #siga-columns-grid { display: block !important; }
-
-    /* Esconde todas as colunas por padrão */
-    .sector-column { display: none !important; }
-
-    /* Mostra APENAS a coluna ativa */
-    .sector-column.active { display: block !important; }
-
-    /* FORÇA O BOTÃO A APARECER DENTRO DA COLUNA ATIVA */
-    .sector-column.active button[onclick*="abrirCaixaTexto"] {
-        display: block !important; 
-        visibility: visible !important;
-        opacity: 1 !important;
-    }
-</style>
 <script>
     function abrirCaixaTexto(setor) {
         // 1. Pega o aluno que está selecionado na barra do topo
