@@ -1635,68 +1635,83 @@ async function salvarPost(setor) {
             });
         }
 
-        async function enviarPreConselho() {
-            const turma = document.getElementById('pc-turma').value;
-            const disciplina = document.getElementById('pc-disciplina').value.trim();
+    async function enviarPreConselho() {
+    const turma = document.getElementById('pc-turma').value;
+    const disciplina = document.getElementById('pc-disciplina').value.trim();
+    
+    if (!turma || !disciplina) {
+        return mostrarToast('Preencha a Disciplina e selecione a Turma.', 'aviso');
+    }
+
+    const btn = document.getElementById('btn-save-conselho');
+    btn.disabled = true; 
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Enviando...';
+
+    // Coleta dados
+    const checkboxes = document.querySelectorAll('#pc-q12-checkboxes input:checked');
+    let instrumentos = Array.from(checkboxes).map(cb => cb.value);
+    const outros = document.getElementById('pc-q12-outros').value.trim();
+    if (outros) instrumentos.push(`Outros: ${outros}`);
+
+    const payload = {
+        operacao: 'PRE_CONSELHO_SALVAR',
+        professor: usuarioLogado.nome,
+        disciplina: disciplina,
+        turma: turma,
+        trimestre: document.getElementById('pc-trimestre').value,
+        q1: document.getElementById('pc-q1').value,
+        q2: document.getElementById('pc-q2').value,
+        q3: document.getElementById('pc-q3').value,
+        q4: document.getElementById('pc-q4').value,
+        q5: document.getElementById('pc-q5').value,
+        q6: document.getElementById('pc-q6').value.trim(),
+        q7: document.getElementById('pc-q7').value.trim(),
+        q8: document.getElementById('pc-q8').value.trim(),
+        q9: document.getElementById('pc-q9').value.trim(),
+        q10: document.getElementById('pc-q10').value.trim(),
+        q11: document.getElementById('pc-q11').value.trim(),
+        q12: instrumentos.join(', '),
+        q14: document.getElementById('pc-q14').value,
+        q16: document.getElementById('pc-q16').value.trim(),
+        q17: document.getElementById('pc-q17').value,
+        q18: document.getElementById('pc-q18').value.trim()
+    };
+
+    try {
+        const resp = await fetch(APPS_SCRIPT_URL, { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'text/plain' }, // Importante garantir este header
+            body: JSON.stringify(payload) 
+        });
+        
+        const result = await resp.json();
+        
+        if (result.status === 'success') {
+            mostrarToast('Avaliação enviada com sucesso!', 'sucesso');
             
-            if (!turma || !disciplina) {
-                return mostrarToast('Preencha a Disciplina e selecione a Turma.', 'aviso');
-            }
+            // Limpa os campos
+            document.querySelectorAll('#modal-pre-conselho input, #modal-pre-conselho textarea').forEach(el => {
+                if(el.type === 'checkbox') el.checked = false;
+                else el.value = '';
+            });
 
-            const btn = document.getElementById('btn-save-conselho');
-            btn.disabled = true; btn.innerHTML = 'Enviando...';
-
-            // Coleta os instrumentos de avaliação marcados (Checkboxes)
-            const checkboxes = document.querySelectorAll('#pc-q12-checkboxes input:checked');
-            let instrumentos = Array.from(checkboxes).map(cb => cb.value);
-            const outros = document.getElementById('pc-q12-outros').value.trim();
-            if (outros) instrumentos.push(`Outros: ${outros}`);
-
-            const payload = {
-                operacao: 'PRE_CONSELHO_SALVAR',
-                professor: usuarioLogado.nome,
-                disciplina: disciplina,
-                turma: turma,
-                trimestre: document.getElementById('pc-trimestre').value,
-                q1: document.getElementById('pc-q1').value,
-                q2: document.getElementById('pc-q2').value,
-                q3: document.getElementById('pc-q3').value,
-                q4: document.getElementById('pc-q4').value,
-                q5: document.getElementById('pc-q5').value,
-                q6: document.getElementById('pc-q6').value.trim(),
-                q7: document.getElementById('pc-q7').value.trim(),
-                q8: document.getElementById('pc-q8').value.trim(),
-                q9: document.getElementById('pc-q9').value.trim(),
-                q10: document.getElementById('pc-q10').value.trim(),
-                q11: document.getElementById('pc-q11').value.trim(),
-                q12: instrumentos.join(', '), // Junta tudo com vírgula
-                q14: document.getElementById('pc-q14').value,
-                q16: document.getElementById('pc-q16').value.trim(),
-                q17: document.getElementById('pc-q17').value,
-                q18: document.getElementById('pc-q18').value.trim()
-            };
-
-            try {
-                const resp = await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-                const result = await resp.json();
-                
-                if (result.status === 'success') {
-                    mostrarToast('Avaliação enviada com sucesso!', 'sucesso');
-                    document.getElementById('modal-pre-conselho').style.display = 'none';
-                    
-                    // Limpa os campos após o envio
-                    document.querySelectorAll('#modal-pre-conselho input[type="text"], #modal-pre-conselho textarea').forEach(el => el.value = '');
-                    document.querySelectorAll('#modal-pre-conselho input[type="number"]').forEach(el => el.value = '0');
-                    document.querySelectorAll('#modal-pre-conselho input[type="checkbox"]').forEach(el => el.checked = false);
-                } else {
-                    mostrarToast('Erro no servidor ao salvar.', 'erro');
-                }
-            } catch(e) {
-                mostrarToast('Falha na comunicação.', 'erro');
-            } finally {
-                btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Enviar Avaliação da Turma';
-            }
+            // Fecha o modal após 1 segundo para o Toast aparecer
+            setTimeout(() => {
+                document.getElementById('modal-pre-conselho').style.display = 'none';
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Enviar Avaliação';
+            }, 1000);
+            
+        } else {
+            throw new Error(result.message || 'Erro no servidor');
         }
+    } catch(e) {
+        console.error(e);
+        mostrarToast('Falha ao enviar: ' + e.message, 'erro');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Tentar Novamente';
+    }
+}
     </script>
 </body>
 </html>
