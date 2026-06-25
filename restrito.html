@@ -591,14 +591,24 @@ async function carregarAlunosETurmas() {
             });
         }
 
-        function selecionarTurma(turma) {
+function selecionarTurma(turma) {
             turmaSelecionadaAtiva = turma;
             const select = document.getElementById('select-alunos');
             select.innerHTML = '<option value="">-- Escolha o Aluno --</option>';
+            
             const alunos = cacheAlunosPorTurma[turma] || [];
-            alunos.sort().forEach(a => { const opt = document.createElement('option'); opt.value = a; opt.textContent = a; select.appendChild(opt); });
+            alunos.sort().forEach(a => { 
+                const opt = document.createElement('option'); 
+                opt.value = a; 
+                opt.textContent = a; 
+                select.appendChild(opt); 
+            });
+            
             select.value = '';
             filtrarRegistrosPorAluno();
+            
+            // FECHA O MENU LATERAL AUTOMATICAMENTE NO CELULAR
+            document.getElementById('app-sidebar').classList.remove('open');
         }
 
         async function carregarRegistrosDoServidor() {
