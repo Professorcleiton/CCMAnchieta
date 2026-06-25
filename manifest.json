@@ -1,0 +1,21 @@
+{
+  "name": "SIGA - CCM Anchieta",
+  "short_name": "SIGA",
+  "description": "Sistema Integrado de Gestão",
+  "start_url": "restrito.html",
+  "display": "standalone",
+  "background_color": "#f1f5f9",
+  "theme_color": "#005088",
+  "icons": [
+    {
+      "src": "img/SIGA.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "img/SIGA.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
