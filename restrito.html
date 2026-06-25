@@ -160,6 +160,15 @@
             .pat-sidebar.open { transform: translateX(0); }
         }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        /* TOAST NOTIFICATIONS */
+#toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+.toast { padding: 12px 20px; border-radius: 8px; color: white; font-weight: 600; font-size: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 10px; animation: slideInToast 0.3s ease forwards; min-width: 250px; }
+.toast.sucesso { background-color: #10b981; border-left: 5px solid #047857; }
+.toast.erro { background-color: #ef4444; border-left: 5px solid #b91c1c; }
+.toast.aviso { background-color: #f59e0b; border-left: 5px solid #b45309; }
+.toast.fade-out { animation: fadeOutToast 0.4s ease forwards; }
+@keyframes slideInToast { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes fadeOutToast { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
     </style>
 </head>
 <body>
@@ -368,7 +377,7 @@
             <div class="modal-body" id="modal-relatorio-lista"></div>
         </div>
     </div>
-
+<div id="toast-container"></div>
     <script>
         // ========== GLOBAIS ==========
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
@@ -378,6 +387,26 @@
         let modalSetorAtivo = '', modalRegistrosFiltrados = [], modalItensExibidos = 50;
         let patTodos = [], patAmbientes = [], patSalaFiltro = 'TODOS', patCameraAtiva = null;
 
+        function mostrarToast(mensagem, tipo = 'sucesso') {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `toast ${tipo}`;
+    
+    // Define o ícone com base no tipo
+    let icone = 'fa-circle-check';
+    if (tipo === 'erro') icone = 'fa-circle-xmark';
+    if (tipo === 'aviso') icone = 'fa-triangle-exclamation';
+
+    toast.innerHTML = `<i class="fa-solid ${icone}"></i> <span>${mensagem}</span>`;
+    container.appendChild(toast);
+
+    // Remove o toast automaticamente após 3.5 segundos
+    setTimeout(() => {
+        toast.classList.add('fade-out');
+        setTimeout(() => toast.remove(), 400); // Espera a animação terminar
+    }, 3500);
+}
+        
         // ========== SESSÃO ==========
         window.addEventListener('DOMContentLoaded', () => {
             const sessao = localStorage.getItem('sgi_ccma_session');
@@ -592,9 +621,12 @@ async function carregarAlunosETurmas() {
 
         function verificarTeclaEnter(e, setor) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); salvarPost(setor); } }
 
-        async function salvarPost(setor) {
+async function salvarPost(setor) {
             const textarea = document.getElementById(`text-${setor}`), texto = textarea.value.trim(), aluno = document.getElementById('select-alunos').value, btn = document.getElementById(`btn-${setor}`);
-            if (!texto || !aluno) return;
+            if (!texto || !aluno) {
+                mostrarToast('Selecione um aluno e digite algo antes de salvar.', 'aviso');
+                return;
+            }
             btn.disabled = true;
             const agora = new Date();
             const data = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
@@ -602,7 +634,10 @@ async function carregarAlunosETurmas() {
             try {
                 await fetch(APPS_SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
                 textarea.value = ''; await carregarRegistrosDoServidor();
-            } catch (e) { alert('Erro ao salvar'); } finally { btn.disabled = false; }
+                mostrarToast('Apontamento salvo com sucesso!', 'sucesso');
+            } catch (e) { 
+                mostrarToast('Falha ao salvar. Verifique sua conexão.', 'erro'); 
+            } finally { btn.disabled = false; }
         }
 
         async function excluirRegistroServidor(id) {
@@ -610,7 +645,10 @@ async function carregarAlunosETurmas() {
             try {
                 await fetch(APPS_SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ operacao: "EXCLUIR", idLinha: id }) });
                 todosOsRegistros = todosOsRegistros.filter(r => r.idLinha !== id); filtrarRegistrosPorAluno();
-            } catch (e) { alert('Erro'); }
+                mostrarToast('Registro apagado com sucesso.', 'sucesso');
+            } catch (e) { 
+                mostrarToast('Erro ao tentar apagar o registro.', 'erro'); 
+            }
         }
 
         async function editarRegistroServidor(id, setor) {
@@ -622,7 +660,10 @@ async function carregarAlunosETurmas() {
                 await fetch(APPS_SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ operacao: "EDITAR", idLinha: id, texto: novo.trim() }) });
                 const reg = todosOsRegistros.find(r => r.idLinha === id); if (reg) reg.texto = novo.trim();
                 filtrarRegistrosPorAluno();
-            } catch (e) { alert('Erro'); }
+                mostrarToast('Registro editado com sucesso!', 'sucesso');
+            } catch (e) { 
+                mostrarToast('Erro ao tentar editar.', 'erro'); 
+            }
         }
 
         function gerarFichaIndividualConselho() {
@@ -826,18 +867,23 @@ async function carregarAlunosETurmas() {
             document.getElementById('pat-btn-excluir').style.display = 'none';
         }
 
-        async function patExecutarTransferencia() {
+       async function patExecutarTransferencia() {
             const cod = document.getElementById('pat-trans-code').value.trim();
             const sala = document.getElementById('pat-trans-room').value;
             const resp = document.getElementById('pat-trans-resp').value.trim();
             const status = document.getElementById('pat-trans-status').value;
-            if (!cod || !sala || !resp) return alert('Preencha todos os campos.');
+            if (!cod || !sala || !resp) {
+                mostrarToast('Preencha todos os campos da transferência.', 'aviso');
+                return;
+            }
             try {
                 await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ operacao: "PAT_TRANSFERIR", codigo: cod, novaLocalizacao: sala, responsavel: resp, status: status || null }) });
-                alert('Transferência concluída!');
+                mostrarToast('Transferência concluída com sucesso!', 'sucesso');
                 document.getElementById('pat-trans-code').value = ''; document.getElementById('pat-item-preview').style.display = 'none';
                 await patCarregarItens();
-            } catch (e) { alert('Erro.'); }
+            } catch (e) { 
+                mostrarToast('Erro ao processar transferência.', 'erro'); 
+            }
         }
 
         async function patExecutarCadastro() {
@@ -851,11 +897,17 @@ async function carregarAlunosETurmas() {
                 status: document.getElementById('pat-reg-status').value,
                 itemPai: document.getElementById('pat-reg-parent').value.trim()
             };
-            if (!payload.codigo || !payload.item || !payload.responsavel || !payload.localizacao) return alert('Preencha os campos obrigatórios.');
+            if (!payload.codigo || !payload.item || !payload.responsavel || !payload.localizacao) {
+                mostrarToast('Preencha os campos obrigatórios.', 'aviso');
+                return;
+            }
             try {
                 await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-                alert('Salvo!'); patResetarCadastro(); await patCarregarItens();
-            } catch (e) { alert('Erro.'); }
+                mostrarToast('Item salvo com sucesso no patrimônio!', 'sucesso'); 
+                patResetarCadastro(); await patCarregarItens();
+            } catch (e) { 
+                mostrarToast('Erro ao cadastrar item.', 'erro'); 
+            }
         }
 
         async function patExcluirItem() {
@@ -863,10 +915,12 @@ async function carregarAlunosETurmas() {
             if (!cod || !confirm('Excluir permanentemente?')) return;
             try {
                 await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ operacao: "PAT_EXCLUIR", codigo: cod }) });
-                alert('Excluído.'); patResetarCadastro(); await patCarregarItens();
-            } catch (e) { alert('Erro.'); }
+                mostrarToast('Item excluído permanentemente.', 'sucesso'); 
+                patResetarCadastro(); await patCarregarItens();
+            } catch (e) { 
+                mostrarToast('Erro ao excluir item.', 'erro'); 
+            }
         }
-
         async function patAdicionarAmbiente() {
             const nome = document.getElementById('pat-new-amb').value.trim();
             if (!nome) return;
