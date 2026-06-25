@@ -1294,7 +1294,7 @@ function filtrarRegistrosPorAluno() {
 
     setDisplay(mural, 'none');
     setDisplay(mini, 'flex');
-    setDisplay(grid, 'block'); // Mudamos de 'grid' para 'block'
+    if (grid) grid.style.display = 'block';
     setDisplay(pdf, 'inline-flex');
     if (tabs) tabs.style.display = (window.innerWidth <= 768) ? 'grid' : 'none';
 
@@ -2188,6 +2188,20 @@ async function carregarRegistrosPreConselho() {
         to { opacity: 1; transform: translateY(0); }
     }
     
+</style>
+    <style>
+    /* Força o container e todas as abas a aparecerem sempre que o aluno for selecionado */
+    #siga-columns-grid {
+        display: block !important; 
+    }
+    
+    .sector-column {
+        display: none !important; /* Esconde todas as colunas por padrão */
+    }
+    
+    .sector-column.active {
+        display: block !important; /* Só mostra a que estiver ativa */
+    }
 </style>
 <script>
     function abrirCaixaTexto(setor) {
