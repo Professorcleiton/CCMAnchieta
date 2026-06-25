@@ -169,6 +169,28 @@
 .toast.fade-out { animation: fadeOutToast 0.4s ease forwards; }
 @keyframes slideInToast { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 @keyframes fadeOutToast { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
+/* MODO ESCURO (DARK MODE) */
+        body.dark-mode { background-color: #0f172a; color: #f8fafc; }
+        .dark-mode .login-box { background-color: #1e293b; border-color: #334155; }
+        .dark-mode .login-box h2, .dark-mode .login-box p { color: #f8fafc; }
+        .dark-mode .login-logo-nova { background: #0f172a; border-color: #0f172a; }
+        .dark-mode .sidebar { background-color: #020617; border-right-color: #b45309; }
+        .dark-mode .top-bar-app, .dark-mode .summary-dashboard-bar, .dark-mode .pat-top-bar { background-color: #1e293b; border-color: #334155; }
+        .dark-mode .top-bar-app label, .dark-mode .pat-top-bar h1 { color: #f8fafc; }
+        .dark-mode .welcome-dashboard-mural, .dark-mode .board-container, .dark-mode .pat-workspace { background-color: #0f172a; }
+        .dark-mode .mural-card, .dark-mode .mural-large-bar-row, .dark-mode .sector-column, .dark-mode .pat-inventory-panel, .dark-mode .pat-action-card { background-color: #1e293b; color: white; border-color: #334155; }
+        .dark-mode .post-card { background-color: #0f172a; color: #cbd5e1; }
+        .dark-mode .input-container { background-color: #1e293b; border-color: #334155; }
+        .dark-mode .input-container textarea, .dark-mode .pat-search-box, .dark-mode #input-busca-aluno, .dark-mode #select-alunos { background-color: #0f172a; color: white; border-color: #475569; }
+        .dark-mode .mural-card div[style*="color:#0f172a;"] { color: white !important; }
+        .dark-mode .modal-content { background: #1e293b; color: white; }
+        .dark-mode .modal-list-item { border-bottom-color: #334155; }
+        .dark-mode .metric-mini-card { background: #0f172a; border-color: #334155; color: white; }
+        .dark-mode .pat-table th { background-color: #0f172a; color: #94a3b8; border-bottom-color: #334155; }
+        .dark-mode .pat-table td { border-bottom-color: #334155; }
+        .btn-tema { background: none; border: none; color: #94a3b8; font-size: 20px; cursor: pointer; transition: color 0.2s; }
+        .btn-tema:hover { color: #eab308; }
+        
     </style>
 </head>
 <body>
@@ -232,7 +254,11 @@
                     <select id="select-alunos" onchange="filtrarRegistrosPorAluno()"><option>Selecione uma turma...</option></select>
                     <button class="btn-pdf" id="btn-gerar-pdf-oficial" onclick="gerarFichaIndividualConselho()"><i class="fa-solid fa-file-invoice"></i> Ficha Conselho</button>
                 </div>
-                <div class="user-and-nre-wrapper">
+                    <div class="user-and-nre-wrapper">
+                    <button class="btn-tema" onclick="alternarTema()" id="btn-icone-tema">
+                        <i class="fa-solid fa-moon"></i>
+                    </button>
+                    
                     <img src="img/nreumuarama.jpg" alt="NRE" class="right-nre-logo">
                     <button class="btn-patrimonio" id="btn-abrir-patrimonio" onclick="abrirModuloPatrimonio()"><i class="fa-solid fa-boxes-stacked"></i> Patrimônio</button>
                     <div id="user-display"><i class="fa-solid fa-user-check"></i> Carregando...</div>
@@ -1022,6 +1048,33 @@ async function salvarPost(setor) {
                 mostrarToast('Aluno não encontrado na base de dados.', 'aviso');
             }
         }
+
+        // ==== MODO ESCURO ====
+        function alternarTema() {
+            const body = document.body;
+            const btnIcone = document.getElementById('btn-icone-tema');
+            
+            // Ativa ou desativa a classe no corpo inteiro do site
+            body.classList.toggle('dark-mode');
+            
+            // Troca o ícone e salva a preferência do usuário no navegador
+            if (body.classList.contains('dark-mode')) {
+                btnIcone.innerHTML = '<i class="fa-solid fa-sun" style="color: #eab308;"></i>';
+                localStorage.setItem('sgi_ccma_tema', 'escuro');
+            } else {
+                btnIcone.innerHTML = '<i class="fa-solid fa-moon"></i>';
+                localStorage.setItem('sgi_ccma_tema', 'claro');
+            }
+        }
+
+        // Verifica a preferência logo que a página carrega
+        window.addEventListener('DOMContentLoaded', () => {
+            if (localStorage.getItem('sgi_ccma_tema') === 'escuro') {
+                document.body.classList.add('dark-mode');
+                const btnIcone = document.getElementById('btn-icone-tema');
+                if (btnIcone) btnIcone.innerHTML = '<i class="fa-solid fa-sun" style="color: #eab308;"></i>';
+            }
+        });
         
     </script>
 </body>
