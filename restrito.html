@@ -1284,7 +1284,7 @@ function filtrarRegistrosPorAluno() {
     if (!select || !select.value) {
         setDisplay(mural, 'flex');
         setDisplay(mini, 'none');
-        setDisplay(grid, 'none');
+        //setDisplay(grid, 'none');
         setDisplay(pdf, 'none');
         setDisplay(tabs, 'none');
         return;
@@ -2206,17 +2206,20 @@ async function carregarRegistrosPreConselho() {
         from { opacity: 0; transform: translateY(5px); }
         to { opacity: 1; transform: translateY(0); }
     }
-    /* Força o container e todas as abas a aparecerem sempre que o aluno for selecionado */
-    #siga-columns-grid {
+/* Garante que o contêiner pai esteja visível */
+    #siga-columns-grid { display: block !important; }
+
+    /* Esconde todas as colunas por padrão */
+    .sector-column { display: none !important; }
+
+    /* Mostra APENAS a coluna ativa */
+    .sector-column.active { display: block !important; }
+
+    /* FORÇA O BOTÃO A APARECER DENTRO DA COLUNA ATIVA */
+    .sector-column.active button[onclick*="abrirCaixaTexto"] {
         display: block !important; 
-    }
-    
-    .sector-column {
-        display: none !important; /* Esconde todas as colunas por padrão */
-    }
-    
-    .sector-column.active {
-        display: block !important; /* Só mostra a que estiver ativa */
+        visibility: visible !important;
+        opacity: 1 !important;
     }
 </style>
 <script>
