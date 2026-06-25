@@ -1790,10 +1790,10 @@ function confirmarGeracaoRelatorio() {
     document.getElementById('modal-selecionar-turma').style.display = 'none';
     gerarRelatorioPreConselho(turma); 
 }
-        async function carregarRegistrosPreConselho() {
-    // Substitua pelo ID da sua aba de Pré-Conselho se for diferente
-    // Se estiver na mesma planilha, basta mudar o nome da folha no link abaixo:
-    const SHEET_PRE_CONSELHO_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=PreConselho`; 
+async function carregarRegistrosPreConselho() {
+    // Certifique-se de que o nome da aba no link está exatamente: Pre%20Conselho
+    // (o %20 substitui o espaço no nome da aba)
+    const SHEET_PRE_CONSELHO_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=Pre%20Conselho`; 
 
     try {
         const response = await fetch(SHEET_PRE_CONSELHO_URL);
@@ -1801,30 +1801,28 @@ function confirmarGeracaoRelatorio() {
         const jsonText = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
         const data = JSON.parse(jsonText);
         
-        // Mapeia os dados da planilha para o formato que precisamos
-return data.table.rows.map(r => ({
-    data: r.c[0]?.v || '',
-    professor: r.c[1]?.v || '',
-    disciplina: r.c[2]?.v || '',
-    turma: r.c[3]?.v?.toString().trim() || '',
-    trimestre: r.c[4]?.v || '',
-    q1: r.c[5]?.v || '',
-    q2: r.c[6]?.v || '',
-    q3: r.c[7]?.v || '',
-    q4: r.c[8]?.v || '',
-    q5: r.c[9]?.v || '',
-    q6: r.c[10]?.v || '',
-    q7: r.c[11]?.v || '',
-    q8: r.c[12]?.v || '',
-    q9: r.c[13]?.v || '',
-    q10: r.c[14]?.v || '',
-    q11: r.c[15]?.v || '',
-    q12: r.c[16]?.v || '',
-    q14: r.c[17]?.v || '',
-    q16: r.c[18]?.v || '',
-    q17: r.c[19]?.v || '',
-    q18: r.c[20]?.v || ''
-}));
+        return data.table.rows.map(r => ({
+            data: r.c[0]?.v || '',
+            professor: r.c[1]?.v || '',
+            disciplina: r.c[2]?.v || '',
+            turma: r.c[3]?.v?.toString().trim() || '',
+            trimestre: r.c[4]?.v || '',
+            q1: r.c[5]?.v || '',    // Q1_Abaixo
+            q2: r.c[6]?.v || '',    // Q2_Basico
+            q3: r.c[7]?.v || '',    // Q3_Adequado
+            q4: r.c[8]?.v || '',    // Q4_Avancado
+            q5: r.c[9]?.v || '',    // Q5_Comprometimento
+            q6: r.c[10]?.v || '',   // Q6_Positivos
+            q7: r.c[11]?.v || '',   // Q7_Negativos
+            q8: r.c[12]?.v || '',   // Q8_Sugestoes
+            q9: r.c[13]?.v || '',   // Q9_AbaixoMedia
+            q10: r.c[14]?.v || '',  // Q10_Metodologia
+            q11: r.c[15]?.v || '',  // Q11_Recursos
+            q12: r.c[16]?.v || '',  // Q12_Instrumentos
+            q14: r.c[17]?.v || '',  // Q14_AvEspecifica
+            q16: r.c[18]?.v || '',  // Q16_Recuperacao
+            q17: r.c[19]?.v || ''   // Q17_InstDiferenciadas
+        }));
     } catch (e) {
         console.error("Erro ao carregar Pré-Conselho:", e);
         return [];
