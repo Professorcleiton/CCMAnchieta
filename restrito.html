@@ -548,42 +548,169 @@
             <button class="tab-button" onclick="alternarAbaMobile('direcao', this)">PROFS.</button>
         </div>
 <div class="board-container" id="siga-columns-grid" style="display: none;">
-                <section class="sector-column active" id="col-meivs">
-                    <div class="column-header" style="background:#0284c7;">MEIV'S</div>
-                    <div class="input-container">
-                        <textarea id="text-meivs" placeholder="Digite o apontamento..." onkeydown="verificarTeclaEnter(event, 'meivs')"></textarea>
-                        <button id="btn-meivs" class="btn-salvar" style="background:#0284c7;" onclick="salvarPost('meivs')">Salvar</button>
-                    </div>
-                    <div class="feed-container" id="feed-meivs"></div>
-                </section>
                 
-                <section class="sector-column" id="col-pedagogico">
-                    <div class="column-header" style="background:#0d9488;">PEDAGÓGICO</div>
-                    <div class="input-container">
-                        <textarea id="text-pedagogico" placeholder="Digite o apontamento..." onkeydown="verificarTeclaEnter(event, 'pedagogico')"></textarea>
-                        <button id="btn-pedagogico" class="btn-salvar" style="background:#0d9488;" onclick="salvarPost('pedagogico')">Salvar</button>
-                    </div>
-                    <div class="feed-container" id="feed-pedagogico"></div>
-                </section>
-                
-                <section class="sector-column" id="col-adm">
-                    <div class="column-header" style="background:#4f46e5;">ADM</div>
-                    <div class="input-container">
-                        <textarea id="text-adm" placeholder="Digite o apontamento..." onkeydown="verificarTeclaEnter(event, 'adm')"></textarea>
-                        <button id="btn-adm" class="btn-salvar" style="background:#4f46e5;" onclick="salvarPost('adm')">Salvar</button>
-                    </div>
-                    <div class="feed-container" id="feed-adm"></div>
-                </section>
-                
-                <section class="sector-column" id="col-direcao">
-                    <div class="column-header" style="background:#b91c1c;">PROFESSORES</div>
-                    <div class="input-container">
-                        <textarea id="text-direcao" placeholder="Digite o apontamento..." onkeydown="verificarTeclaEnter(event, 'direcao')"></textarea>
-                        <button id="btn-direcao" class="btn-salvar" style="background:#b91c1c;" onclick="salvarPost('direcao')">Salvar</button>
-                    </div>
-                    <div class="feed-container" id="feed-direcao"></div>
-                </section>
+    <section class="sector-column active" id="col-meivs">
+        <div class="column-header" style="background:#0284c7;">MEIV'S</div>
+        <div style="padding: 15px; text-align: center; border-bottom: 1px solid #e2e8f0;">
+            <button onclick="abrirCaixaTexto('meivs')" style="background: #0284c7; color: white; padding: 14px 20px; border: none; border-radius: 8px; font-weight: bold; width: 100%; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                <i class="fa-solid fa-pen-to-square"></i> + Novo Apontamento
+            </button>
+        </div>
+        <div class="overlay-apontamento" id="overlay-text-meivs" style="display: none;">
+            <div class="caixa-dialogo">
+                <h3 style="color: #0284c7; margin-top: 0; text-align: center;"><i class="fa-solid fa-shield-halved"></i> Apontamento MEIV'S</h3>
+                <textarea id="text-meivs" placeholder="Descreva os detalhes aqui..." onkeydown="verificarTeclaEnter(event, 'meivs')"></textarea>
+                <div class="botoes-dialogo">
+                    <button class="btn-cancelar" onclick="fecharCaixaTexto('meivs')">Cancelar</button>
+                    <button id="btn-meivs" class="btn-salvar-modal" style="background:#0284c7;" onclick="salvarPost('meivs'); fecharCaixaTexto('meivs');">Salvar</button>
+                </div>
             </div>
+        </div>
+        <div class="feed-container" id="feed-meivs"></div>
+    </section>
+    
+    <section class="sector-column" id="col-pedagogico">
+        <div class="column-header" style="background:#0d9488;">PEDAGÓGICO</div>
+        <div style="padding: 15px; text-align: center; border-bottom: 1px solid #e2e8f0;">
+            <button onclick="abrirCaixaTexto('pedagogico')" style="background: #0d9488; color: white; padding: 14px 20px; border: none; border-radius: 8px; font-weight: bold; width: 100%; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                <i class="fa-solid fa-pen-to-square"></i> + Novo Apontamento
+            </button>
+        </div>
+        <div class="overlay-apontamento" id="overlay-text-pedagogico" style="display: none;">
+            <div class="caixa-dialogo">
+                <h3 style="color: #0d9488; margin-top: 0; text-align: center;"><i class="fa-solid fa-book-open"></i> Apontamento Pedagógico</h3>
+                <textarea id="text-pedagogico" placeholder="Descreva os detalhes aqui..." onkeydown="verificarTeclaEnter(event, 'pedagogico')"></textarea>
+                <div class="botoes-dialogo">
+                    <button class="btn-cancelar" onclick="fecharCaixaTexto('pedagogico')">Cancelar</button>
+                    <button id="btn-pedagogico" class="btn-salvar-modal" style="background:#0d9488;" onclick="salvarPost('pedagogico'); fecharCaixaTexto('pedagogico');">Salvar</button>
+                </div>
+            </div>
+        </div>
+        <div class="feed-container" id="feed-pedagogico"></div>
+    </section>
+    
+    <section class="sector-column" id="col-adm">
+        <div class="column-header" style="background:#4f46e5;">ADM</div>
+        <div style="padding: 15px; text-align: center; border-bottom: 1px solid #e2e8f0;">
+            <button onclick="abrirCaixaTexto('adm')" style="background: #4f46e5; color: white; padding: 14px 20px; border: none; border-radius: 8px; font-weight: bold; width: 100%; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                <i class="fa-solid fa-pen-to-square"></i> + Novo Apontamento
+            </button>
+        </div>
+        <div class="overlay-apontamento" id="overlay-text-adm" style="display: none;">
+            <div class="caixa-dialogo">
+                <h3 style="color: #4f46e5; margin-top: 0; text-align: center;"><i class="fa-solid fa-folder-open"></i> Apontamento ADM</h3>
+                <textarea id="text-adm" placeholder="Descreva os detalhes aqui..." onkeydown="verificarTeclaEnter(event, 'adm')"></textarea>
+                <div class="botoes-dialogo">
+                    <button class="btn-cancelar" onclick="fecharCaixaTexto('adm')">Cancelar</button>
+                    <button id="btn-adm" class="btn-salvar-modal" style="background:#4f46e5;" onclick="salvarPost('adm'); fecharCaixaTexto('adm');">Salvar</button>
+                </div>
+            </div>
+        </div>
+        <div class="feed-container" id="feed-adm"></div>
+    </section>
+    
+    <section class="sector-column" id="col-direcao">
+        <div class="column-header" style="background:#b91c1c;">PROFESSORES</div>
+        <div style="padding: 15px; text-align: center; border-bottom: 1px solid #e2e8f0;">
+            <button onclick="abrirCaixaTexto('direcao')" style="background: #b91c1c; color: white; padding: 14px 20px; border: none; border-radius: 8px; font-weight: bold; width: 100%; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                <i class="fa-solid fa-pen-to-square"></i> + Novo Apontamento
+            </button>
+        </div>
+        <div class="overlay-apontamento" id="overlay-text-direcao" style="display: none;">
+            <div class="caixa-dialogo">
+                <h3 style="color: #b91c1c; margin-top: 0; text-align: center;"><i class="fa-solid fa-chalkboard-user"></i> Apontamento Professores</h3>
+                <textarea id="text-direcao" placeholder="Descreva os detalhes aqui..." onkeydown="verificarTeclaEnter(event, 'direcao')"></textarea>
+                <div class="botoes-dialogo">
+                    <button class="btn-cancelar" onclick="fecharCaixaTexto('direcao')">Cancelar</button>
+                    <button id="btn-direcao" class="btn-salvar-modal" style="background:#b91c1c;" onclick="salvarPost('direcao'); fecharCaixaTexto('direcao');">Salvar</button>
+                </div>
+            </div>
+        </div>
+        <div class="feed-container" id="feed-direcao"></div>
+    </section>
+
+</div>
+
+<style>
+    /* Fundo escuro desfocado */
+    .overlay-apontamento {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100vw; height: 100vh;
+        background: rgba(15, 23, 42, 0.85);
+        z-index: 999999;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        box-sizing: border-box;
+        backdrop-filter: blur(4px);
+    }
+    
+    /* A caixa branca no meio da tela */
+    .caixa-dialogo {
+        background: white;
+        width: 100%;
+        max-width: 600px;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        animation: scaleUp 0.2s ease-out;
+    }
+    
+    /* A área de texto super confortável */
+    .caixa-dialogo textarea {
+        width: 100%;
+        height: 40vh; /* Ocupa 40% da altura da tela */
+        min-height: 250px;
+        padding: 15px;
+        font-size: 16px !important;
+        line-height: 1.5;
+        border: 2px solid #cbd5e1;
+        border-radius: 8px;
+        resize: none;
+        outline: none;
+    }
+    
+    .caixa-dialogo textarea:focus { border-color: #0d9488; }
+    
+    /* Os botões de baixo */
+    .botoes-dialogo { display: flex; gap: 10px; }
+    
+    .botoes-dialogo button {
+        flex: 1;
+        padding: 15px;
+        border-radius: 8px;
+        font-weight: bold;
+        font-size: 16px;
+        border: none;
+        cursor: pointer;
+        color: white;
+    }
+    
+    .btn-cancelar { background: #94a3b8 !important; }
+    .btn-cancelar:hover { background: #64748b !important; }
+    .btn-salvar-modal:hover { opacity: 0.9; }
+
+    @keyframes scaleUp {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+    }
+</style>
+
+<script>
+    function abrirCaixaTexto(setor) {
+        document.getElementById('overlay-text-' + setor).style.display = 'flex';
+        document.getElementById('text-' + setor).focus();
+    }
+    function fecharCaixaTexto(setor) {
+        document.getElementById('overlay-text-' + setor).style.display = 'none';
+        document.getElementById('text-' + setor).value = ''; // Limpa se cancelar
+    }
+</script>
         </main>
     </div>
 
