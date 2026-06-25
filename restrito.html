@@ -371,37 +371,47 @@
         <!-- NOVO DASHBOARD INICIAL -->
             <div class="dash-container" id="painel-dashboard">
                 
-                <!-- Cartões de Resumo -->
-                <div class="dash-card total">
-                    <div class="dash-card total" style="cursor: pointer;" onclick="abrirModalRelatorio('geral')">
-                        <div class="dash-card-icon"><i class="fa-solid fa-chart-pie"></i></div>
-                        <div class="dash-card-info">
-                            <span class="dash-card-title">Total Registros</span>
-                            <span class="dash-card-value" id="dash-val-total">0</span>
-                        </div>
-                    </div>
-                    <div class="dash-card meivs" style="cursor: pointer;" onclick="abrirModalRelatorio('meivs')">
-                        <div class="dash-card-icon"><i class="fa-solid fa-shield-halved"></i></div>
-                        <div class="dash-card-info">
-                            <span class="dash-card-title">MEIV'S</span>
-                            <span class="dash-card-value" id="dash-val-meivs">0</span>
-                        </div>
-                    </div>
-                    <div class="dash-card pedagogico" style="cursor: pointer;" onclick="abrirModalRelatorio('pedagogico')">
-                        <div class="dash-card-icon"><i class="fa-solid fa-book-open"></i></div>
-                        <div class="dash-card-info">
-                            <span class="dash-card-title">Pedagógico</span>
-                            <span class="dash-card-value" id="dash-val-pedagogico">0</span>
-                        </div>
-                    </div>
-                    <div class="dash-card professores" style="cursor: pointer;" onclick="abrirModalRelatorio('direcao')">
-                        <div class="dash-card-icon"><i class="fa-solid fa-chalkboard-user"></i></div>
-                        <div class="dash-card-info">
-                            <span class="dash-card-title">Professores</span>
-                            <span class="dash-card-value" id="dash-val-professores">0</span>
-                        </div>
-                    </div>
-                </div>
+<div class="dash-cards-grid">
+    <div class="dash-card total" style="cursor: pointer;" onclick="abrirModalRelatorio('geral')">
+        <div class="dash-card-icon"><i class="fa-solid fa-chart-pie"></i></div>
+        <div class="dash-card-info">
+            <span class="dash-card-title">Total Registros</span>
+            <span class="dash-card-value" id="dash-val-total">0</span>
+        </div>
+    </div>
+
+    <div class="dash-card meivs" style="cursor: pointer;" onclick="abrirModalRelatorio('meivs')">
+        <div class="dash-card-icon"><i class="fa-solid fa-shield-halved"></i></div>
+        <div class="dash-card-info">
+            <span class="dash-card-title">MEIV'S</span>
+            <span class="dash-card-value" id="dash-val-meivs">0</span>
+        </div>
+    </div>
+
+    <div class="dash-card pedagogico" style="cursor: pointer;" onclick="abrirModalRelatorio('pedagogico')">
+        <div class="dash-card-icon"><i class="fa-solid fa-book-open"></i></div>
+        <div class="dash-card-info">
+            <span class="dash-card-title">Pedagógico</span>
+            <span class="dash-card-value" id="dash-val-pedagogico">0</span>
+        </div>
+    </div>
+
+    <div class="dash-card adm" style="cursor: pointer;" onclick="abrirModalRelatorio('adm')">
+        <div class="dash-card-icon"><i class="fa-solid fa-folder-open"></i></div>
+        <div class="dash-card-info">
+            <span class="dash-card-title">ADM</span>
+            <span class="dash-card-value" id="dash-val-adm">0</span>
+        </div>
+    </div>
+
+    <div class="dash-card professores" style="cursor: pointer;" onclick="abrirModalRelatorio('direcao')">
+        <div class="dash-card-icon"><i class="fa-solid fa-chalkboard-user"></i></div>
+        <div class="dash-card-info">
+            <span class="dash-card-title">Professores</span>
+            <span class="dash-card-value" id="dash-val-professores">0</span>
+        </div>
+    </div>
+</div>
 
                 <!-- Painéis Inferiores (Barras e Botões) -->
                 <div class="dash-lower-grid">
