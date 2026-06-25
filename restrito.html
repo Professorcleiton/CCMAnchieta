@@ -289,15 +289,21 @@
                     <select id="select-alunos" onchange="filtrarRegistrosPorAluno()"><option>Selecione uma turma...</option></select>
                     <button class="btn-pdf" id="btn-gerar-pdf-oficial" onclick="gerarFichaIndividualConselho()"><i class="fa-solid fa-file-invoice"></i> Ficha Conselho</button>
                 </div>
-                    <div class="user-and-nre-wrapper">
+<div class="user-and-nre-wrapper">
                     <button class="btn-tema" onclick="alternarTema()" id="btn-icone-tema">
                         <i class="fa-solid fa-moon"></i>
                     </button>
                     
                     <img src="img/nreumuarama.jpg" alt="NRE" class="right-nre-logo">
-                    <button class="btn-patrimonio" id="btn-abrir-patrimonio" onclick="abrirModuloPatrimonio()"><i class="fa-solid fa-boxes-stacked"></i> Patrimônio</button>
                     
-                    <button class="btn-patrimonio" id="btn-abrir-gestao" onclick="abrirModuloGestao()" style="background-color: #475569; display: none;"><i class="fa-solid fa-gear"></i> Gestão</button>
+                    <button class="btn-patrimonio" id="btn-abrir-admin" onclick="abrirPainelAdmin()" style="display: none; background-color: #475569; margin-right: 8px;">
+                        <i class="fa-solid fa-gear"></i> Gestão
+                    </button>
+                    
+                    <button class="btn-patrimonio" id="btn-abrir-patrimonio" onclick="abrirModuloPatrimonio()">
+                        <i class="fa-solid fa-boxes-stacked"></i> Patrimônio
+                    </button>
+                    
                     <div id="user-display"><i class="fa-solid fa-user-check"></i> Carregando...</div>
                 </div>
             </header>
