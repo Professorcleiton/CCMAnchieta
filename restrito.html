@@ -969,40 +969,45 @@ function selecionarTurma(turma) {
             } catch (e) { console.error(e); }
         }
 
-        function atualizarGraficosMural() {
-            // Conta os registros
-            const total = todosOsRegistros.length;
-            const meivs = todosOsRegistros.filter(r => r.setor.toLowerCase() === 'meivs').length;
-            const pedagogico = todosOsRegistros.filter(r => r.setor.toLowerCase() === 'pedagogico').length;
-            const adm = todosOsRegistros.filter(r => r.setor.toLowerCase() === 'adm').length;
-            const professores = todosOsRegistros.filter(r => r.setor.toLowerCase() === 'professores' || r.setor.toLowerCase() === 'direcao').length;
+function atualizarGraficosMural() {
+    const total = todosOsRegistros.length;
+    const meivs = todosOsRegistros.filter(r => r.setor.toLowerCase() === 'meivs').length;
+    const pedagogico = todosOsRegistros.filter(r => r.setor.toLowerCase() === 'pedagogico').length;
+    const adm = todosOsRegistros.filter(r => r.setor.toLowerCase() === 'adm').length;
+    const professores = todosOsRegistros.filter(r => r.setor.toLowerCase() === 'professores' || r.setor.toLowerCase() === 'direcao').length;
 
-            // Atualiza os Cartões Superiores
-            document.getElementById('dash-val-total').innerText = total;
-            document.getElementById('dash-val-meivs').innerText = meivs;
-            document.getElementById('dash-val-pedagogico').innerText = pedagogico;
-            document.getElementById('dash-val-professores').innerText = professores;
+    // Atualiza os Cartões (IDs do NOVO Dashboard)
+    const elTotal = document.getElementById('dash-val-total');
+    if(elTotal) elTotal.innerText = total;
+    
+    const elMeivs = document.getElementById('dash-val-meivs');
+    if(elMeivs) elMeivs.innerText = meivs;
+    
+    const elPed = document.getElementById('dash-val-pedagogico');
+    if(elPed) elPed.innerText = pedagogico;
+    
+    const elProfs = document.getElementById('dash-val-professores');
+    if(elProfs) elProfs.innerText = professores;
 
-            // Calcula porcentagens
-            const pctMeivs = total === 0 ? 0 : Math.round((meivs / total) * 100);
-            const pctPed = total === 0 ? 0 : Math.round((pedagogico / total) * 100);
-            const pctAdm = total === 0 ? 0 : Math.round((adm / total) * 100);
-            const pctProf = total === 0 ? 0 : Math.round((professores / total) * 100);
+    // Calcula porcentagens
+    const pctMeivs = total === 0 ? 0 : Math.round((meivs / total) * 100);
+    const pctPed = total === 0 ? 0 : Math.round((pedagogico / total) * 100);
+    const pctAdm = total === 0 ? 0 : Math.round((adm / total) * 100);
+    const pctProf = total === 0 ? 0 : Math.round((professores / total) * 100);
 
-            // Atualiza as Barras e Textos da Distribuição
-            document.getElementById('dash-pct-meivs').innerText = pctMeivs + '%';
-            document.getElementById('dash-bar-meivs').style.width = pctMeivs + '%';
-
-            document.getElementById('dash-pct-pedagogico').innerText = pctPed + '%';
-            document.getElementById('dash-bar-pedagogico').style.width = pctPed + '%';
-
-            document.getElementById('dash-pct-adm').innerText = pctAdm + '%';
-            document.getElementById('dash-bar-adm').style.width = pctAdm + '%';
-
-            document.getElementById('dash-pct-professores').innerText = pctProf + '%';
-            document.getElementById('dash-bar-professores').style.width = pctProf + '%';
-        
-        }
+    // Atualiza as Barras (IDs do NOVO Dashboard)
+    const bMeivs = document.getElementById('dash-bar-meivs');
+    if(bMeivs) { bMeivs.style.width = pctMeivs + '%'; document.getElementById('dash-pct-meivs').innerText = pctMeivs + '%'; }
+    
+    const bPed = document.getElementById('dash-bar-pedagogico');
+    if(bPed) { bPed.style.width = pctPed + '%'; document.getElementById('dash-pct-pedagogico').innerText = pctPed + '%'; }
+    
+    const bAdm = document.getElementById('dash-bar-adm');
+    if(bAdm) { bAdm.style.width = pctAdm + '%'; document.getElementById('dash-pct-adm').innerText = pctAdm + '%'; }
+    
+    const bProf = document.getElementById('dash-bar-professores');
+    if(bProf) { bProf.style.width = pctProf + '%'; document.getElementById('dash-pct-professores').innerText = pctProf + '%'; }
+}
 
         function formatarDataEHora(s) {
             if (!s) return ''; s = s.toString().trim();
