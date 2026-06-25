@@ -2177,6 +2177,16 @@ async function carregarRegistrosPreConselho() {
         from { opacity: 0; transform: translateY(5px); }
         to { opacity: 1; transform: translateY(0); }
     }
+/* Força o container dos apontamentos a ficar sempre visível se a turma estiver selecionada */
+#siga-columns-grid {
+    display: block !important;
+}
+
+/* Garante que os botões de "Novo Apontamento" apareçam sempre */
+.sector-column {
+    display: block !important;
+}
+    
 </style>
 <script>
     function abrirCaixaTexto(setor) {
