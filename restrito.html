@@ -256,7 +256,12 @@
                     <div class="mural-card" onclick="abrirModalRelatorio('pedagogico')"><div style="font-size:11px; color:#64748b;">Pedagógico</div><div id="mural-total-pedag" style="font-size:24px; color:#0d9488;">0</div></div>
                     <div class="mural-card" onclick="abrirModalRelatorio('direcao')"><div style="font-size:11px; color:#64748b;">Professores</div><div id="mural-total-profs" style="font-size:24px; color:#b91c1c;">0</div></div>
                 </div>
-                <h3><i class="fa-solid fa-chart-pie"></i> Distribuição</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3><i class="fa-solid fa-chart-pie"></i> Distribuição</h3>
+                    <button class="btn-pdf" id="btn-exportar-dash" style="display: inline-flex; background-color: #005088;" onclick="gerarRelatorioGeralPDF()">
+                        <i class="fa-solid fa-file-pdf"></i> Baixar Relatório
+                    </button>
+                </div>
                 <div class="mural-large-bar-row" onclick="abrirModalRelatorio('meivs')"><div class="mural-bar-label-info"><span>MEIV'S</span><span id="txt-pct-meivs">0%</span></div><div class="mural-bar-outer"><div class="mural-bar-inner" id="mural-fill-meivs" style="background:#0284c7;"></div></div></div>
                 <div class="mural-large-bar-row" onclick="abrirModalRelatorio('pedagogico')"><div class="mural-bar-label-info"><span>Pedagógico</span><span id="txt-pct-pedag">0%</span></div><div class="mural-bar-outer"><div class="mural-bar-inner" id="mural-fill-pedag" style="background:#0d9488;"></div></div></div>
                 <div class="mural-large-bar-row" onclick="abrirModalRelatorio('adm')"><div class="mural-bar-label-info"><span>ADM</span><span id="txt-pct-adm">0%</span></div><div class="mural-bar-outer"><div class="mural-bar-inner" id="mural-fill-adm" style="background:#4f46e5;"></div></div></div>
@@ -694,6 +699,27 @@ async function salvarPost(setor) {
             html2pdf().set({ margin: 12, filename: `Ficha_Conselho_${aluno.replace(/ /g,'_')}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }).from(document.createElement('div')).save();
         }
 
+        function gerarRelatorioGeralPDF() {
+            mostrarToast('Preparando PDF do Dashboard...', 'aviso');
+            
+            // Pega a tela inteira do mural para "fotografar"
+            const elemento = document.getElementById('welcome-dashboard-mural');
+            
+            // Configurações do PDF
+            const opt = {
+                margin:       15,
+                filename:     'Dashboard_Geral_SIGA.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            
+            // Gera e baixa o arquivo
+            html2pdf().set(opt).from(elemento).save().then(() => {
+                mostrarToast('PDF baixado com sucesso!', 'sucesso');
+            });
+        }
+        
         function aplicarBloqueioSetores(setor, nivel) {
             ['meivs','pedagogico','adm','direcao'].forEach(s => {
                 const ta = document.getElementById(`text-${s}`), btn = document.getElementById(`btn-${s}`);
