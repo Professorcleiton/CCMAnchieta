@@ -336,7 +336,12 @@
                 <div class="mural-large-bar-row" onclick="abrirModalRelatorio('adm')"><div class="mural-bar-label-info"><span>ADM</span><span id="txt-pct-adm">0%</span></div><div class="mural-bar-outer"><div class="mural-bar-inner" id="mural-fill-adm" style="background:#4f46e5;"></div></div></div>
                 <div class="mural-large-bar-row" onclick="abrirModalRelatorio('direcao')"><div class="mural-bar-label-info"><span>Professores</span><span id="txt-pct-profs">0%</span></div><div class="mural-bar-outer"><div class="mural-bar-inner" id="mural-fill-profs" style="background:#b91c1c;"></div></div></div>
             </div>
-
+<!-- BOTÃO ATALHO PRÉ-CONSELHO -->
+            <div style="margin-bottom: 20px; text-align: right; padding: 0 15px;">
+                <button class="btn-salvar" style="background-color: #0d9488; padding: 12px 24px; font-size: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" onclick="abrirPreConselho()">
+                    <i class="fa-solid fa-clipboard-list"></i> Preencher Pré-Conselho
+                </button>
+            </div>
 <div class="board-container" id="siga-columns-grid" style="display: none;">
                 <section class="sector-column active" id="col-meivs">
                     <div class="column-header" style="background:#0284c7;">MEIV'S</div>
@@ -470,7 +475,128 @@
             </div>
         </main>
     </div>
+<!-- MODAL PRÉ-CONSELHO -->
+    <div class="modal-overlay" id="modal-pre-conselho" style="z-index: 10000; display: none;">
+        <div class="modal-content" style="max-width: 900px; height: 90vh; display: flex; flex-direction: column;">
+            <div class="modal-header" style="background-color: #0d9488;">
+                <h3><i class="fa-solid fa-clipboard-check"></i> Ficha de Pré-Conselho de Classe</h3>
+                <button onclick="document.getElementById('modal-pre-conselho').style.display='none'" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;">&times;</button>
+            </div>
+            
+            <div class="modal-body" style="padding: 25px; overflow-y: auto; flex: 1;">
+                
+                <!-- BLOCO 1: IDENTIFICAÇÃO -->
+                <div style="background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #0d9488;">
+                    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 200px;">
+                            <label>Professor:</label>
+                            <input type="text" id="pc-professor" disabled style="background: #e2e8f0; font-weight: bold;">
+                        </div>
+                        <div style="flex: 1; min-width: 200px;">
+                            <label>Componente Curricular (Disciplina):</label>
+                            <input type="text" id="pc-disciplina" placeholder="Ex: Matemática, Robótica...">
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 15px;">
+                        <div style="flex: 1; min-width: 200px;">
+                            <label>Turma Avaliada:</label>
+                            <select id="pc-turma" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1;"></select>
+                        </div>
+                        <div style="flex: 1; min-width: 200px;">
+                            <label>Trimestre:</label>
+                            <select id="pc-trimestre" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1;">
+                                <option value="1º Trimestre">1º Trimestre</option>
+                                <option value="2º Trimestre">2º Trimestre</option>
+                                <option value="3º Trimestre">3º Trimestre</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
 
+                <!-- BLOCO 2: DESEMPENHO (NOTAS) -->
+                <h4 style="color: #005088; margin-bottom: 10px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">1. Desempenho (Quantidade de Alunos)</h4>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                    <div class="input-group">
+                        <label>Abaixo do básico (< 5,9):</label>
+                        <input type="number" id="pc-q1" min="0" value="0">
+                    </div>
+                    <div class="input-group">
+                        <label>Básico (6,0 a 6,9):</label>
+                        <input type="number" id="pc-q2" min="0" value="0">
+                    </div>
+                    <div class="input-group">
+                        <label>Adequado (7,0 a 8,9):</label>
+                        <input type="number" id="pc-q3" min="0" value="0">
+                    </div>
+                    <div class="input-group">
+                        <label>Avançado (>= 9,0):</label>
+                        <input type="number" id="pc-q4" min="0" value="0">
+                    </div>
+                </div>
+
+                <!-- BLOCO 3: COMPORTAMENTO E PERFIL -->
+                <h4 style="color: #005088; margin-bottom: 10px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">2. Perfil da Turma</h4>
+                <div class="input-group">
+                    <label>Comprometimento e responsabilidade na realização de tarefas (Sala e Digital):</label>
+                    <select id="pc-q5" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1;">
+                        <option value="1 - Ruim">1 - Ruim</option>
+                        <option value="2 - Regular">2 - Regular</option>
+                        <option value="3 - Bom" selected>3 - Bom</option>
+                        <option value="4 - Muito Bom">4 - Muito Bom</option>
+                        <option value="5 - Ótimo">5 - Ótimo</option>
+                    </select>
+                </div>
+                <div class="input-group"><label>Destaque os aspectos POSITIVOS da turma:</label><textarea id="pc-q6" rows="2"></textarea></div>
+                <div class="input-group"><label>Destaque os aspectos NEGATIVOS da turma:</label><textarea id="pc-q7" rows="2"></textarea></div>
+                <div class="input-group"><label>Sugestões e procedimentos para melhorar a turma:</label><textarea id="pc-q8" rows="2"></textarea></div>
+
+                <!-- BLOCO 4: FOCO NOS ALUNOS -->
+                <h4 style="color: #005088; margin-bottom: 10px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; margin-top: 25px;">3. Análise Individual</h4>
+                <div class="input-group"><label>Nomes dos alunos com notas ABAIXO da média:</label><textarea id="pc-q9" rows="2" placeholder="Separe os nomes por vírgula..."></textarea></div>
+                <div class="input-group"><label>Quais necessitam de plano de recuperação de estudos?</label><textarea id="pc-q18" rows="2"></textarea></div>
+
+                <!-- BLOCO 5: METODOLOGIA -->
+                <h4 style="color: #005088; margin-bottom: 10px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; margin-top: 25px;">4. Metodologia e Avaliação</h4>
+                <div class="input-group"><label>Principais encaminhamentos metodológicos utilizados:</label><textarea id="pc-q10" rows="2"></textarea></div>
+                <div class="input-group"><label>Recursos didáticos utilizados para dificuldades de aprendizagem:</label><textarea id="pc-q11" rows="2"></textarea></div>
+                
+                <div class="input-group">
+                    <label>Quais instrumentos de avaliação foram utilizados? (Selecione todos que se aplicam)</label>
+                    <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 8px;" id="pc-q12-checkboxes">
+                        <label><input type="checkbox" value="Objetiva"> Objetiva</label>
+                        <label><input type="checkbox" value="Descritiva"> Descritiva</label>
+                        <label><input type="checkbox" value="Prática"> Prática</label>
+                        <label><input type="checkbox" value="Oral"> Oral</label>
+                        <label><input type="checkbox" value="Trabalho/Pesquisa"> Trabalho/Pesquisa</label>
+                    </div>
+                </div>
+                <div class="input-group" style="margin-top: 10px;">
+                    <label>Outros instrumentos (Justifique):</label>
+                    <input type="text" id="pc-q12-outros" placeholder="Descreva caso tenha usado outros...">
+                </div>
+
+                <!-- BLOCO 6: RECUPERAÇÃO -->
+                <h4 style="color: #005088; margin-bottom: 10px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; margin-top: 25px;">5. Recuperação de Estudos</h4>
+                <div class="input-group">
+                    <label>Foram realizadas avaliações específicas para alunos com dificuldades?</label>
+                    <select id="pc-q14" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1;"><option value="Sim">Sim</option><option value="Não">Não</option></select>
+                </div>
+                <div class="input-group"><label>Justifique sua resposta à questão anterior e explique como foi feita a recuperação:</label><textarea id="pc-q16" rows="2"></textarea></div>
+                <div class="input-group">
+                    <label>Foram utilizados instrumentos diferenciados para recuperação?</label>
+                    <select id="pc-q17" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1;"><option value="Sim">Sim</option><option value="Não">Não</option></select>
+                </div>
+
+            </div>
+            
+            <!-- RODAPÉ FIXO PARA SALVAR -->
+            <div style="padding: 15px 25px; background: white; border-top: 1px solid #e2e8f0; text-align: right;">
+                <button class="btn-salvar" style="background-color: #0d9488; width: 100%; font-size: 16px; padding: 14px;" id="btn-save-conselho" onclick="enviarPreConselho()">
+                    <i class="fa-solid fa-paper-plane"></i> Enviar Avaliação da Turma
+                </button>
+            </div>
+        </div>
+    </div>
     <!-- MODAL RELATÓRIO -->
     <div class="modal-overlay" id="modal-relatorio-setor" onclick="fecharModalRelatorioEvent(event)">
         <div class="modal-content">
@@ -1375,7 +1501,81 @@ async function salvarPost(setor) {
                 btn.disabled = false; btn.innerHTML = 'Excluir';
             }
         }
-        
+        // ==== MÓDULO PRÉ-CONSELHO ====
+        function abrirPreConselho() {
+            document.getElementById('modal-pre-conselho').style.display = 'flex';
+            document.getElementById('pc-professor').value = usuarioLogado.nome;
+            
+            // Popula as turmas disponíveis para o conselho
+            const selectTurma = document.getElementById('pc-turma');
+            selectTurma.innerHTML = '<option value="">Selecione a Turma...</option>';
+            Object.keys(cacheAlunosPorTurma).sort().forEach(t => {
+                selectTurma.innerHTML += `<option value="${t}">${t}</option>`;
+            });
+        }
+
+        async function enviarPreConselho() {
+            const turma = document.getElementById('pc-turma').value;
+            const disciplina = document.getElementById('pc-disciplina').value.trim();
+            
+            if (!turma || !disciplina) {
+                return mostrarToast('Preencha a Disciplina e selecione a Turma.', 'aviso');
+            }
+
+            const btn = document.getElementById('btn-save-conselho');
+            btn.disabled = true; btn.innerHTML = 'Enviando...';
+
+            // Coleta os instrumentos de avaliação marcados (Checkboxes)
+            const checkboxes = document.querySelectorAll('#pc-q12-checkboxes input:checked');
+            let instrumentos = Array.from(checkboxes).map(cb => cb.value);
+            const outros = document.getElementById('pc-q12-outros').value.trim();
+            if (outros) instrumentos.push(`Outros: ${outros}`);
+
+            const payload = {
+                operacao: 'PRE_CONSELHO_SALVAR',
+                professor: usuarioLogado.nome,
+                disciplina: disciplina,
+                turma: turma,
+                trimestre: document.getElementById('pc-trimestre').value,
+                q1: document.getElementById('pc-q1').value,
+                q2: document.getElementById('pc-q2').value,
+                q3: document.getElementById('pc-q3').value,
+                q4: document.getElementById('pc-q4').value,
+                q5: document.getElementById('pc-q5').value,
+                q6: document.getElementById('pc-q6').value.trim(),
+                q7: document.getElementById('pc-q7').value.trim(),
+                q8: document.getElementById('pc-q8').value.trim(),
+                q9: document.getElementById('pc-q9').value.trim(),
+                q10: document.getElementById('pc-q10').value.trim(),
+                q11: document.getElementById('pc-q11').value.trim(),
+                q12: instrumentos.join(', '), // Junta tudo com vírgula
+                q14: document.getElementById('pc-q14').value,
+                q16: document.getElementById('pc-q16').value.trim(),
+                q17: document.getElementById('pc-q17').value,
+                q18: document.getElementById('pc-q18').value.trim()
+            };
+
+            try {
+                const resp = await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+                const result = await resp.json();
+                
+                if (result.status === 'success') {
+                    mostrarToast('Avaliação enviada com sucesso!', 'sucesso');
+                    document.getElementById('modal-pre-conselho').style.display = 'none';
+                    
+                    // Limpa os campos após o envio
+                    document.querySelectorAll('#modal-pre-conselho input[type="text"], #modal-pre-conselho textarea').forEach(el => el.value = '');
+                    document.querySelectorAll('#modal-pre-conselho input[type="number"]').forEach(el => el.value = '0');
+                    document.querySelectorAll('#modal-pre-conselho input[type="checkbox"]').forEach(el => el.checked = false);
+                } else {
+                    mostrarToast('Erro no servidor ao salvar.', 'erro');
+                }
+            } catch(e) {
+                mostrarToast('Falha na comunicação.', 'erro');
+            } finally {
+                btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Enviar Avaliação da Turma';
+            }
+        }
     </script>
 </body>
 </html>
