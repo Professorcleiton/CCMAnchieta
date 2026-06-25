@@ -1015,20 +1015,35 @@ function atualizarGraficosMural() {
             return 'Sem Turma';
         }
 
-        function filtrarRegistrosPorAluno() {
-            const select = document.getElementById('select-alunos');
-            const mural = document.getElementById('welcome-dashboard-mural');
-            const mini = document.getElementById('student-mini-dash');
-            const grid = document.getElementById('siga-columns-grid');
-            const pdf = document.getElementById('btn-gerar-pdf-oficial');
-            const tabs = document.getElementById('mobile-tabs-container');
-            if (!select.value) {
-                mural.style.display = 'flex'; mini.style.display = 'none'; grid.style.display = 'none'; pdf.style.display = 'none'; tabs.style.display = 'none';
-                atualizarGraficosMural(); return;
-            }
-            mural.style.display = 'none'; mini.style.display = 'flex'; grid.style.display = 'grid'; pdf.style.display = 'inline-flex';
-            tabs.style.display = (window.innerWidth <= 768) ? 'grid' : 'none';
-            const aluno = select.value;
+function filtrarRegistrosPorAluno() {
+    const select = document.getElementById('select-alunos');
+    const mural = document.getElementById('welcome-dashboard-mural');
+    const mini = document.getElementById('student-mini-dash');
+    const grid = document.getElementById('siga-columns-grid');
+    const pdf = document.getElementById('btn-gerar-pdf-oficial');
+    const tabs = document.getElementById('mobile-tabs-container');
+
+    // Função auxiliar para mudar estilo apenas se o elemento existir
+    const setDisplay = (el, val) => { if (el) el.style.display = val; };
+
+    if (!select || !select.value) {
+        setDisplay(mural, 'flex');
+        setDisplay(mini, 'none');
+        setDisplay(grid, 'none');
+        setDisplay(pdf, 'none');
+        setDisplay(tabs, 'none');
+        atualizarGraficosMural();
+        return;
+    }
+
+    setDisplay(mural, 'none');
+    setDisplay(mini, 'flex');
+    setDisplay(grid, 'grid');
+    setDisplay(pdf, 'inline-flex');
+    if (tabs) tabs.style.display = (window.innerWidth <= 768) ? 'grid' : 'none';
+
+    const aluno = select.value;
+    // ... restante da sua função continua igual ...
             ['meivs','pedagogico','adm','direcao'].forEach(s => document.getElementById(`feed-${s}`).innerHTML = '');
             let cm=0, cp=0, ca=0, cf=0;
             todosOsRegistros.forEach(r => {
