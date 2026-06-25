@@ -1727,15 +1727,22 @@ async function salvarPost(setor) {
         btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Tentar Novamente';
     }
 }
-        function gerarRelatorioPreConselho(turma) {
-    // Filtra apenas os registros de Pré-Conselho da turma selecionada
-    const dadosTurma = todosOsRegistros.filter(r => r.turma === turma && r.operacao === 'PRE_CONSELHO_SALVAR');
+
+function gerarRelatorioPreConselho(turmaSelecionada) {
+    // 1. Pega a lista de alunos daquela turma específica
+    const alunosDaTurma = cacheAlunosPorTurma[turmaSelecionada] || [];
+    
+    // 2. Filtra os registros de PRÉ-CONSELHO que pertencem a esses alunos
+    // Nota: Como o mural salva por aluno, vamos filtrar quem está nessa turma
+    const dadosTurma = todosOsRegistros.filter(r => 
+        alunosDaTurma.includes(r.aluno) && 
+        (r.operacao && r.operacao.includes('PRE_CONSELHO'))
+    );
 
     if (dadosTurma.length === 0) {
-        mostrarToast('Nenhum registro de Pré-Conselho encontrado para esta turma.', 'aviso');
+        mostrarToast('Nenhum registro de Pré-Conselho encontrado para a turma ' + turmaSelecionada, 'aviso');
         return;
     }
-
     let html = `
         <div style="font-family: Arial, sans-serif; padding: 40px; color: #000;">
             <h2 style="text-align:center; border-bottom: 2px solid #000;">Relatório de Pré-Conselho - ${turma}</h2>
