@@ -473,6 +473,31 @@
         </div>
     </div>
 <div id="toast-container"></div>
+<div class="modal-overlay" id="modal-admin" onclick="fecharModalAdminEvent(event)">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header" style="background-color: #475569;">
+                <h3><i class="fa-solid fa-gear"></i> Painel de Gestão SIGA</h3>
+                <button onclick="fecharModalAdmin()" style="background:none;border:none;color:white;font-size:20px;">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 25px; overflow-y: visible;">
+                <h4 style="margin-bottom: 15px; color: #005088;"><i class="fa-solid fa-user-pen"></i> Remanejar / Excluir Aluno</h4>
+                
+                <div class="input-group">
+                    <label>Buscar Aluno:</label>
+                    <input type="text" id="admin-nome-aluno" list="lista-todos-alunos" placeholder="Digite o nome exato do aluno...">
+                </div>
+                
+                <div class="input-group">
+                    <label>Ação / Nova Turma:</label>
+                    <select id="admin-nova-turma" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 16px;">
+                        </select>
+                </div>
+                
+                <button class="btn-salvar" style="background-color: #475569; margin-top: 10px;" onclick="executarAcaoAluno()" id="btn-exec-admin">Confirmar Ação</button>
+            </div>
+        </div>
+    </div>
+    
     <script>
         // ========== GLOBAIS ==========
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
@@ -537,6 +562,10 @@
             document.getElementById('app-interface').style.display = 'flex';
             document.getElementById('user-display').innerHTML = `<i class="fa-solid fa-user-check"></i> ${usuarioLogado.nome} (${usuarioLogado.setor === 'professores' ? 'PROFESSORES' : usuarioLogado.setor.toUpperCase()})`;
             document.getElementById('btn-abrir-patrimonio').style.display = (usuarioLogado.nivel >= 3) ? 'inline-flex' : 'none';
+            
+            // ESSA É A LINHA NOVA PARA MOSTRAR A ENGRENAGEM:
+            document.getElementById('btn-abrir-admin').style.display = (usuarioLogado.nivel >= 3) ? 'inline-flex' : 'none';
+            
             aplicarBloqueioSetores(usuarioLogado.setor, usuarioLogado.nivel);
             carregarAlunosETurmas(); carregarRegistrosDoServidor();
         }
@@ -1145,7 +1174,63 @@ async function salvarPost(setor) {
                 if (btnIcone) btnIcone.innerHTML = '<i class="fa-solid fa-sun" style="color: #eab308;"></i>';
             }
         });
-        
+        // ==== PAINEL DE ADMINISTRAÇÃO ====
+        function abrirPainelAdmin() {
+            document.getElementById('modal-admin').style.display = 'flex';
+            const select = document.getElementById('admin-nova-turma');
+            select.innerHTML = '<option value="">-- Escolha a nova turma --</option><option value="EXCLUIR" style="color: red; font-weight: bold;">❌ EXCLUIR ALUNO DO SISTEMA</option>';
+            
+            // Puxa as turmas automaticamente para o painel
+            Object.keys(cacheAlunosPorTurma).sort().forEach(t => {
+                select.innerHTML += `<option value="${t}">${t}</option>`;
+            });
+        }
+
+        function fecharModalAdmin() { document.getElementById('modal-admin').style.display = 'none'; }
+        function fecharModalAdminEvent(e) { if (e.target.id === 'modal-admin') fecharModalAdmin(); }
+
+        async function executarAcaoAluno() {
+            const nomeAluno = document.getElementById('admin-nome-aluno').value.trim();
+            const novaTurma = document.getElementById('admin-nova-turma').value;
+            const btn = document.getElementById('btn-exec-admin');
+
+            if (!nomeAluno || !novaTurma) return mostrarToast('Preencha o nome do aluno e escolha uma ação.', 'aviso');
+            
+            const operacao = novaTurma === 'EXCLUIR' ? 'ALUNO_EXCLUIR' : 'ALUNO_TRANSFERIR';
+            if (operacao === 'ALUNO_EXCLUIR' && !confirm(`Tem certeza que deseja EXCLUIR ${nomeAluno} do sistema?`)) return;
+            
+            btn.disabled = true;
+            btn.innerHTML = 'Processando...';
+
+            const payload = {
+                operacao: operacao,
+                nome_aluno: nomeAluno,
+                nova_turma: novaTurma,
+                emailOperador: usuarioLogado.email // Para a validação de segurança lá no Sheets
+            };
+
+            try {
+                const response = await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    mostrarToast('Ação concluída com sucesso! Atualizando base...', 'sucesso');
+                    document.getElementById('admin-nome-aluno').value = '';
+                    fecharModalAdmin();
+                    // Força a recarga dos alunos para a tela atualizar
+                    await carregarAlunosETurmas();
+                } else if (result.status === 'not_found') {
+                    mostrarToast('Aluno não encontrado na base de dados.', 'erro');
+                } else {
+                    mostrarToast('Sem permissão para esta ação.', 'erro');
+                }
+            } catch (e) {
+                mostrarToast('Erro de comunicação com o servidor.', 'erro');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Confirmar Ação';
+            }
+        }
     </script>
 </body>
 </html>
