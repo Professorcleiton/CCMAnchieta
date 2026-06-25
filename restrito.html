@@ -352,7 +352,7 @@
                     <span class="mini-label-chart">PROFS</span><div class="visual-bar-fill" id="bar-profs" style="background-color:#b91c1c;"></div>
                 </div>
             </div>
-<button class="btn-siga" onclick="abrirModalRelatorio()">
+<button class="btn-siga" onclick="abrirModalTurmasPreConselho()">
     <i class="fa-solid fa-file-pdf"></i> Gerar Relatório de Pré-Conselho
 </button>
 
@@ -1790,7 +1790,7 @@ let html = `
         win.print();
     }, 500);
 }
-function abrirModalRelatorio() {
+function abrirModalTurmasPreConselho() {
     const select = document.getElementById('select-turma-relatorio');
     // Limpa e preenche o select com as turmas que já estão no seu cache
     select.innerHTML = '<option value="">-- Escolha uma Turma --</option>';
