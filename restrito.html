@@ -1744,16 +1744,40 @@ async function gerarRelatorioPreConselho(turmaSelecionada) {
 
 let html = `
         <div style="font-family: Arial, sans-serif; padding: 40px; color: #000;">
-            <h2 style="text-align:center; border-bottom: 2px solid #000;">Relatório de Pré-Conselho - ${turmaSelecionada}</h2>
+            <h2 style="text-align:center; border-bottom: 2px solid #000; padding-bottom: 10px;">Relatório de Pré-Conselho - ${turmaSelecionada}</h2>
+            
             ${dadosTurma.map(r => `
-                <div style="margin-bottom: 30px; border: 1px solid #ccc; padding: 15px;">
-                    <h3 style="background: #eee; padding: 5px;">Disciplina: ${r.disciplina || 'N/A'} | Professor: ${r.professor || 'N/A'}</h3>
-                    <p><strong>Trimestre:</strong> ${r.trimestre || 'N/A'}</p>
-                    <hr>
-                    <p><strong>Q1 (Abaixo):</strong> ${r.q1 || 'N/A'}</p>
-                    <p><strong>Q12 (Instrumentos):</strong> ${r.q12 || 'N/A'}</p>
-                    <p><strong>Q18 (Plano de Recuperação):</strong> ${r.q18 || 'N/A'}</p>
-                    </div>
+                <div style="margin-bottom: 40px; border: 1px solid #ccc; padding: 20px; border-radius: 8px; page-break-inside: avoid;">
+                    <h3 style="background: #e9ecef; padding: 10px; margin-top: 0; border-radius: 5px;">
+                        Disciplina: ${r.disciplina || 'N/A'} | Professor: ${r.professor || 'N/A'}
+                    </h3>
+                    <p style="font-size: 14px; color: #555;"><strong>Trimestre:</strong> ${r.trimestre || 'N/A'} | <strong>Data de Envio:</strong> ${r.data || 'N/A'}</p>
+                    
+                    <hr style="border-top: 1px dashed #ccc; margin: 15px 0;">
+                    
+                    <h4 style="color: #2c3e50; margin-bottom: 8px;">1. Rendimento da Turma (Quantitativo)</h4>
+                    <p style="margin: 5px 0;"><strong>Abaixo da Média:</strong> ${r.q1 || '0'} | <strong>Básico:</strong> ${r.q2 || '0'} | <strong>Adequado:</strong> ${r.q3 || '0'} | <strong>Avançado:</strong> ${r.q4 || '0'}</p>
+                    
+                    <h4 style="color: #2c3e50; margin-bottom: 8px; margin-top: 15px;">2. Análise da Turma</h4>
+                    <p style="margin: 5px 0;"><strong>Comprometimento:</strong> ${r.q5 || 'N/A'}</p>
+                    <p style="margin: 5px 0;"><strong>Pontos Positivos:</strong> ${r.q6 || 'N/A'}</p>
+                    <p style="margin: 5px 0;"><strong>Pontos Negativos/Dificuldades:</strong> ${r.q7 || 'N/A'}</p>
+                    <p style="margin: 5px 0;"><strong>Sugestões de Melhoria:</strong> ${r.q8 || 'N/A'}</p>
+                    
+                    <h4 style="color: #2c3e50; margin-bottom: 8px; margin-top: 15px;">3. Alunos em Destaque Negativo</h4>
+                    <p style="margin: 5px 0;"><strong>Alunos Abaixo da Média e Motivos:</strong> ${r.q9 || 'N/A'}</p>
+                    
+                    <h4 style="color: #2c3e50; margin-bottom: 8px; margin-top: 15px;">4. Metodologia e Avaliação</h4>
+                    <p style="margin: 5px 0;"><strong>Metodologia Aplicada:</strong> ${r.q10 || 'N/A'}</p>
+                    <p style="margin: 5px 0;"><strong>Recursos Utilizados:</strong> ${r.q11 || 'N/A'}</p>
+                    <p style="margin: 5px 0;"><strong>Instrumentos de Avaliação:</strong> ${r.q12 || 'N/A'}</p>
+                    <p style="margin: 5px 0;"><strong>Houve Avaliação Específica?</strong> ${r.q14 || 'N/A'}</p>
+                    
+                    <h4 style="color: #2c3e50; margin-bottom: 8px; margin-top: 15px;">5. Recuperação de Estudos</h4>
+                    <p style="margin: 5px 0;"><strong>Como foi a Recuperação:</strong> ${r.q16 || 'N/A'}</p>
+                    <p style="margin: 5px 0;"><strong>Usou Instrumentos Diferenciados?</strong> ${r.q17 || 'N/A'}</p>
+                    <p style="margin: 5px 0;"><strong>Plano de Recuperação Paralela:</strong> ${r.q18 || 'N/A'}</p>
+                </div>
             `).join('')}
         </div>
     `;
