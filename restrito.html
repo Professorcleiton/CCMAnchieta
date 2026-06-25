@@ -500,6 +500,50 @@
                 </div>
                 
                 <button class="btn-salvar" style="background-color: #475569; margin-top: 10px;" onclick="executarAcaoAluno()" id="btn-exec-admin">Confirmar Ação</button>
+                <hr style="margin: 25px 0; border: 0; border-top: 1px solid #cbd5e1;">
+
+                <h4 style="margin-bottom: 15px; color: #b45309;"><i class="fa-solid fa-users-gear"></i> Gestão de Equipe (Usuários)</h4>
+                
+                <div class="input-group">
+                    <label>E-mail (Login / Chave de Busca):</label>
+                    <input type="email" id="admin-user-email" placeholder="email@escola.pr.gov.br">
+                </div>
+                
+                <div class="input-group">
+                    <label>Nome Completo:</label>
+                    <input type="text" id="admin-user-nome" placeholder="Nome do Servidor">
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                    <div style="flex: 1;">
+                        <label>Setor:</label>
+                        <select id="admin-user-setor" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                            <option value="professores">Professores</option>
+                            <option value="meivs">MEIV'S</option>
+                            <option value="pedagogico">Pedagógico</option>
+                            <option value="adm">ADM</option>
+                            <option value="direcao">Direção</option>
+                        </select>
+                    </div>
+                    <div style="flex: 1;">
+                        <label>Nível de Acesso:</label>
+                        <select id="admin-user-nivel" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                            <option value="1">1 - Padrão</option>
+                            <option value="2">2 - Intermediário</option>
+                            <option value="3">3 - Administrador</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label>Senha (Somente números - ex: RG):</label>
+                    <input type="text" id="admin-user-senha" placeholder="Deixe em branco para manter a atual (na edição)">
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button class="btn-salvar" style="background-color: #059669; flex: 2;" onclick="salvarUsuarioAdmin()" id="btn-save-user">Salvar Usuário</button>
+                    <button class="btn-salvar" style="background-color: #dc2626; flex: 1;" onclick="deletarUsuarioAdmin()" id="btn-del-user">Excluir</button>
+                </div>
             </div>
         </div>
     </div>
@@ -1258,6 +1302,80 @@ async function salvarPost(setor) {
                 btn.innerHTML = 'Confirmar Ação';
             }
         }
+// ==== GESTÃO DE USUÁRIOS DA EQUIPE ====
+        async function salvarUsuarioAdmin() {
+            const email = document.getElementById('admin-user-email').value.trim();
+            const nome = document.getElementById('admin-user-nome').value.trim();
+            const setor = document.getElementById('admin-user-setor').value;
+            const nivel = document.getElementById('admin-user-nivel').value;
+            const senha = document.getElementById('admin-user-senha').value.trim();
+
+            if (!email || !nome) return mostrarToast('Preencha pelo menos o E-mail e o Nome.', 'aviso');
+
+            const btn = document.getElementById('btn-save-user');
+            btn.disabled = true; btn.innerHTML = 'Processando...';
+
+            const payload = {
+                operacao: 'USER_SALVAR',
+                emailOperador: usuarioLogado.email, // Validação de segurança Nível 3
+                email: email,
+                nome: nome,
+                setor: setor,
+                nivel: nivel,
+                senha: senha
+            };
+
+            try {
+                const resp = await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+                const result = await resp.json();
+                
+                if (result.status === 'success' || result.status === 'updated') {
+                    mostrarToast(result.status === 'success' ? 'Novo usuário cadastrado!' : 'Usuário atualizado!', 'sucesso');
+                    document.getElementById('admin-user-email').value = '';
+                    document.getElementById('admin-user-nome').value = '';
+                    document.getElementById('admin-user-senha').value = '';
+                } else {
+                    mostrarToast('Você não tem permissão para esta ação.', 'erro');
+                }
+            } catch(e) {
+                mostrarToast('Erro ao salvar usuário. Verifique a conexão.', 'erro');
+            } finally {
+                btn.disabled = false; btn.innerHTML = 'Salvar Usuário';
+            }
+        }
+
+        async function deletarUsuarioAdmin() {
+            const email = document.getElementById('admin-user-email').value.trim();
+            if (!email) return mostrarToast('Digite o E-mail do usuário que deseja excluir.', 'aviso');
+            
+            if (!confirm(`ALERTA: Tem certeza que deseja REVOGAR O ACESSO de ${email}?`)) return;
+
+            const btn = document.getElementById('btn-del-user');
+            btn.disabled = true; btn.innerHTML = 'Excluindo...';
+
+            try {
+                const resp = await fetch(APPS_SCRIPT_URL, { 
+                    method: 'POST', 
+                    body: JSON.stringify({ operacao: 'USER_DELETAR', emailOperador: usuarioLogado.email, email: email }) 
+                });
+                const result = await resp.json();
+                
+                if (result.status === 'success') {
+                    mostrarToast('Acesso revogado com sucesso.', 'sucesso');
+                    document.getElementById('admin-user-email').value = '';
+                    document.getElementById('admin-user-nome').value = '';
+                } else if (result.status === 'not_found') {
+                    mostrarToast('Usuário não encontrado na base de dados.', 'aviso');
+                } else {
+                    mostrarToast('Não autorizado.', 'erro');
+                }
+            } catch(e) {
+                mostrarToast('Erro de comunicação.', 'erro');
+            } finally {
+                btn.disabled = false; btn.innerHTML = 'Excluir';
+            }
+        }
+        
     </script>
 </body>
 </html>
