@@ -557,18 +557,28 @@
         }
 
         // ========== PAINEL PRINCIPAL ==========
- function inicializarPainel() {
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('app-interface').style.display = 'flex';
-            document.getElementById('user-display').innerHTML = `<i class="fa-solid fa-user-check"></i> ${usuarioLogado.nome} (${usuarioLogado.setor === 'professores' ? 'PROFESSORES' : usuarioLogado.setor.toUpperCase()})`;
+function inicializarPainel() {
+            // 1. Esconde a tela de login (SE ela existir nessa página)
+            const telaLogin = document.getElementById('login-screen');
+            if (telaLogin) { telaLogin.style.display = 'none'; }
             
-            // Trava de segurança: Só altera o botão Patrimônio se ele existir na tela
+            // 2. Mostra a interface principal
+            const interfaceApp = document.getElementById('app-interface');
+            if (interfaceApp) { interfaceApp.style.display = 'flex'; }
+            
+            // 3. Atualiza o nome de quem está logado
+            const displayUser = document.getElementById('user-display');
+            if (displayUser) {
+                displayUser.innerHTML = `<i class="fa-solid fa-user-check"></i> ${usuarioLogado.nome} (${usuarioLogado.setor === 'professores' ? 'PROFESSORES' : usuarioLogado.setor.toUpperCase()})`;
+            }
+            
+            // 4. Verifica o Botão de Patrimônio
             const btnPat = document.getElementById('btn-abrir-patrimonio');
             if (btnPat) {
                 btnPat.style.display = (usuarioLogado.nivel >= 3) ? 'inline-flex' : 'none';
             }
             
-            // Trava de segurança: Só altera o botão Gestão se ele existir na tela
+            // 5. Verifica o Botão de Gestão (Engrenagem)
             const btnAdmin = document.getElementById('btn-abrir-admin');
             if (btnAdmin) {
                 btnAdmin.style.display = (usuarioLogado.nivel >= 3) ? 'inline-flex' : 'none';
@@ -576,7 +586,7 @@
             
             aplicarBloqueioSetores(usuarioLogado.setor, usuarioLogado.nivel);
             
-            // Agora garantimos que ele sempre chegue nessas duas linhas!
+            // Agora o código flui livremente até aqui sem travar
             carregarAlunosETurmas(); 
             carregarRegistrosDoServidor();
         }
