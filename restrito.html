@@ -352,7 +352,22 @@
                     <span class="mini-label-chart">PROFS</span><div class="visual-bar-fill" id="bar-profs" style="background-color:#b91c1c;"></div>
                 </div>
             </div>
+<button class="btn-siga" onclick="abrirModalRelatorio()">
+    <i class="fa-solid fa-file-pdf"></i> Gerar Relatório de Pré-Conselho
+</button>
 
+<div id="modal-selecionar-turma" class="modal" style="display:none;">
+    <div class="modal-content">
+        <h3>Selecione a Turma</h3>
+        <select id="select-turma-relatorio" class="form-control">
+            <option value="">-- Escolha uma Turma --</option>
+            </select>
+        <div style="margin-top: 20px;">
+            <button onclick="confirmarGeracaoRelatorio()" class="btn-confirmar">Gerar PDF</button>
+            <button onclick="document.getElementById('modal-selecionar-turma').style.display='none'" class="btn-cancelar">Cancelar</button>
+        </div>
+    </div>
+</div>
         <!-- NOVO DASHBOARD INICIAL -->
             <div class="dash-container" id="painel-dashboard">
                 
@@ -1711,6 +1726,36 @@ async function salvarPost(setor) {
         btn.disabled = false;
         btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Tentar Novamente';
     }
+}
+        function gerarRelatorioPreConselho(turma) {
+    // Filtra apenas os registros de Pré-Conselho da turma selecionada
+    const dadosTurma = todosOsRegistros.filter(r => r.turma === turma && r.operacao === 'PRE_CONSELHO_SALVAR');
+
+    if (dadosTurma.length === 0) {
+        mostrarToast('Nenhum registro de Pré-Conselho encontrado para esta turma.', 'aviso');
+        return;
+    }
+
+    let html = `
+        <div style="font-family: Arial, sans-serif; padding: 40px; color: #000;">
+            <h2 style="text-align:center; border-bottom: 2px solid #000;">Relatório de Pré-Conselho - ${turma}</h2>
+            ${dadosTurma.map(r => `
+                <div style="margin-bottom: 30px; border: 1px solid #ccc; padding: 15px;">
+                    <h3 style="background: #eee; padding: 5px;">Disciplina: ${r.disciplina} | Professor: ${r.professor}</h3>
+                    <p><strong>Trimestre:</strong> ${r.trimestre}</p>
+                    <p><strong>Dificuldades de Aprendizagem:</strong> ${r.q1}</p>
+                    <p><strong>Instrumentos de Avaliação:</strong> ${r.q12}</p>
+                    <p><strong>Observações:</strong> ${r.q18}</p>
+                </div>
+            `).join('')}
+        </div>
+    `;
+
+    // Abre uma nova janela para impressão
+    const win = window.open('', '_blank');
+    win.document.write(html);
+    win.document.close();
+    win.print();
 }
     </script>
 </body>
