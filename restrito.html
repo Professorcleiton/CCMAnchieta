@@ -1889,4 +1889,85 @@ async function carregarRegistrosPreConselho() {
 }
     </script>
 </body>
+    <style>
+    /* Transforma a área dos 4 setores em um Grid Inteligente */
+    #siga-columns-grid {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)) !important;
+        gap: 20px !important;
+        padding: 20px 0 !important;
+        align-items: start;
+    }
+
+    /* Estiliza cada coluna individualmente */
+    .sector-column {
+        background: #ffffff !important;
+        border-radius: 8px !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+        overflow: hidden !important;
+        display: flex !important;
+        flex-direction: column !important;
+        border: 1px solid #e2e8f0;
+    }
+
+    /* O cabeçalho colorido de cada coluna */
+    .column-header {
+        color: white !important;
+        font-weight: bold !important;
+        text-align: center !important;
+        padding: 12px !important;
+        font-size: 15px !important;
+        letter-spacing: 0.5px;
+    }
+
+    /* A área onde o professor digita */
+    .input-container {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 10px !important;
+        padding: 15px !important;
+        background: #f8fafc !important;
+        border-bottom: 2px solid #e2e8f0 !important;
+    }
+
+    /* A caixa de texto grande e confortável */
+    .input-container textarea {
+        width: 100% !important;
+        min-height: 90px !important; /* Altura excelente para textos */
+        padding: 12px !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 6px !important;
+        font-size: 16px !important; /* Evita zoom automático no celular */
+        font-family: inherit !important;
+        resize: vertical !important;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.03) !important;
+    }
+
+    /* O botão de Salvar de cada coluna */
+    .input-container .btn-salvar {
+        width: 100% !important;
+        padding: 12px !important;
+        border: none !important;
+        border-radius: 6px !important;
+        color: white !important;
+        font-weight: bold !important;
+        font-size: 14px !important;
+        cursor: pointer !important;
+        text-transform: uppercase !important;
+        transition: 0.2s !important;
+    }
+    
+    .input-container .btn-salvar:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+    }
+
+    /* Onde aparecem os apontamentos antigos */
+    .feed-container {
+        padding: 15px !important;
+        max-height: 400px !important;
+        overflow-y: auto !important;
+        background: #ffffff !important;
+    }
+</style>
 </html>
