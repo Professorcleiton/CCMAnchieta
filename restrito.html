@@ -225,7 +225,42 @@
         .dark-mode .pat-table td { border-bottom-color: #334155; }
         .btn-tema { background: none; border: none; color: #94a3b8; font-size: 20px; cursor: pointer; transition: color 0.2s; }
         .btn-tema:hover { color: #eab308; }
+        /* ==========================================
+           NOVO DASHBOARD MODERNO
+           ========================================== */
+        .dash-container { display: flex; flex-direction: column; gap: 20px; padding: 15px; }
         
+        /* Cartões Superiores */
+        .dash-cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .dash-card { display: flex; align-items: center; padding: 20px; border-radius: 12px; background: white; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-left: 5px solid #cbd5e1; transition: transform 0.2s; }
+        .dash-card:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,0,0,0.1); }
+        .dash-card.total { border-left-color: #475569; }
+        .dash-card.meivs { border-left-color: #0284c7; }
+        .dash-card.pedagogico { border-left-color: #0d9488; }
+        .dash-card.professores { border-left-color: #b91c1c; }
+        
+        .dash-card-icon { font-size: 32px; margin-right: 15px; opacity: 0.8; }
+        .dash-card.total .dash-card-icon { color: #475569; }
+        .dash-card.meivs .dash-card-icon { color: #0284c7; }
+        .dash-card.pedagogico .dash-card-icon { color: #0d9488; }
+        .dash-card.professores .dash-card-icon { color: #b91c1c; }
+        
+        .dash-card-info { display: flex; flex-direction: column; }
+        .dash-card-title { font-size: 13px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+        .dash-card-value { font-size: 28px; font-weight: bold; color: #1e293b; margin-top: 5px; }
+
+        /* Parte Inferior: Barras e Ações */
+        .dash-lower-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+        @media (max-width: 768px) { .dash-lower-grid { grid-template-columns: 1fr; } }
+        
+        .dash-panel { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .dash-panel-title { font-size: 16px; font-weight: bold; color: #334155; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px; }
+        
+        /* Novas Barras de Progresso */
+        .dash-bar-item { margin-bottom: 15px; }
+        .dash-bar-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; font-weight: 600; color: #475569; }
+        .dash-bar-track { width: 100%; height: 12px; background-color: #e2e8f0; border-radius: 10px; overflow: hidden; }
+        .dash-bar-fill { height: 100%; border-radius: 10px; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); }
     </style>
 </head>
 <body>
@@ -331,16 +366,80 @@
                         <i class="fa-solid fa-file-pdf"></i> Baixar Relatório
                     </button>
                 </div>
-                <div class="mural-large-bar-row" onclick="abrirModalRelatorio('meivs')"><div class="mural-bar-label-info"><span>MEIV'S</span><span id="txt-pct-meivs">0%</span></div><div class="mural-bar-outer"><div class="mural-bar-inner" id="mural-fill-meivs" style="background:#0284c7;"></div></div></div>
-                <div class="mural-large-bar-row" onclick="abrirModalRelatorio('pedagogico')"><div class="mural-bar-label-info"><span>Pedagógico</span><span id="txt-pct-pedag">0%</span></div><div class="mural-bar-outer"><div class="mural-bar-inner" id="mural-fill-pedag" style="background:#0d9488;"></div></div></div>
-                <div class="mural-large-bar-row" onclick="abrirModalRelatorio('adm')"><div class="mural-bar-label-info"><span>ADM</span><span id="txt-pct-adm">0%</span></div><div class="mural-bar-outer"><div class="mural-bar-inner" id="mural-fill-adm" style="background:#4f46e5;"></div></div></div>
-                <div class="mural-large-bar-row" onclick="abrirModalRelatorio('direcao')"><div class="mural-bar-label-info"><span>Professores</span><span id="txt-pct-profs">0%</span></div><div class="mural-bar-outer"><div class="mural-bar-inner" id="mural-fill-profs" style="background:#b91c1c;"></div></div></div>
-            </div>
-<!-- BOTÃO ATALHO PRÉ-CONSELHO -->
-            <div style="margin-bottom: 20px; text-align: right; padding: 0 15px;">
-                <button class="btn-salvar" style="background-color: #0d9488; padding: 12px 24px; font-size: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" onclick="abrirPreConselho()">
-                    <i class="fa-solid fa-clipboard-list"></i> Preencher Pré-Conselho
-                </button>
+        <!-- NOVO DASHBOARD INICIAL -->
+            <div class="dash-container" id="painel-dashboard">
+                
+                <!-- Cartões de Resumo -->
+                <div class="dash-cards-grid">
+                    <div class="dash-card total">
+                        <div class="dash-card-icon"><i class="fa-solid fa-chart-pie"></i></div>
+                        <div class="dash-card-info">
+                            <span class="dash-card-title">Total Registros</span>
+                            <span class="dash-card-value" id="dash-val-total">0</span>
+                        </div>
+                    </div>
+                    <div class="dash-card meivs">
+                        <div class="dash-card-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                        <div class="dash-card-info">
+                            <span class="dash-card-title">MEIV'S</span>
+                            <span class="dash-card-value" id="dash-val-meivs">0</span>
+                        </div>
+                    </div>
+                    <div class="dash-card pedagogico">
+                        <div class="dash-card-icon"><i class="fa-solid fa-book-open"></i></div>
+                        <div class="dash-card-info">
+                            <span class="dash-card-title">Pedagógico</span>
+                            <span class="dash-card-value" id="dash-val-pedagogico">0</span>
+                        </div>
+                    </div>
+                    <div class="dash-card professores">
+                        <div class="dash-card-icon"><i class="fa-solid fa-chalkboard-user"></i></div>
+                        <div class="dash-card-info">
+                            <span class="dash-card-title">Professores</span>
+                            <span class="dash-card-value" id="dash-val-professores">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Painéis Inferiores (Barras e Botões) -->
+                <div class="dash-lower-grid">
+                    
+                    <!-- Painel de Distribuição -->
+                    <div class="dash-panel">
+                        <div class="dash-panel-title"><i class="fa-solid fa-chart-column"></i> Distribuição de Apontamentos</div>
+                        
+                        <div class="dash-bar-item">
+                            <div class="dash-bar-header"><span>MEIV'S</span><span id="dash-pct-meivs">0%</span></div>
+                            <div class="dash-bar-track"><div class="dash-bar-fill" id="dash-bar-meivs" style="background-color: #0284c7; width: 0%;"></div></div>
+                        </div>
+                        
+                        <div class="dash-bar-item">
+                            <div class="dash-bar-header"><span>Pedagógico</span><span id="dash-pct-pedagogico">0%</span></div>
+                            <div class="dash-bar-track"><div class="dash-bar-fill" id="dash-bar-pedagogico" style="background-color: #0d9488; width: 0%;"></div></div>
+                        </div>
+                        
+                        <div class="dash-bar-item">
+                            <div class="dash-bar-header"><span>ADM</span><span id="dash-pct-adm">0%</span></div>
+                            <div class="dash-bar-track"><div class="dash-bar-fill" id="dash-bar-adm" style="background-color: #4f46e5; width: 0%;"></div></div>
+                        </div>
+                        
+                        <div class="dash-bar-item">
+                            <div class="dash-bar-header"><span>Professores</span><span id="dash-pct-professores">0%</span></div>
+                            <div class="dash-bar-track"><div class="dash-bar-fill" id="dash-bar-professores" style="background-color: #b91c1c; width: 0%;"></div></div>
+                        </div>
+                    </div>
+
+                    <!-- Painel de Ações Rápidas -->
+                    <div class="dash-panel">
+                        <div class="dash-panel-title"><i class="fa-solid fa-bolt"></i> Ações Rápidas</div>
+                        <p style="font-size: 13px; color: #64748b; margin-bottom: 15px;">Acesse as ferramentas gerenciais e relatórios pedagógicos.</p>
+                        
+                        <button class="btn-salvar" style="background-color: #0d9488; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(13, 148, 136, 0.2);" onclick="abrirPreConselho()">
+                            <i class="fa-solid fa-clipboard-check" style="font-size: 18px;"></i> Preencher Pré-Conselho
+                        </button>
+                    </div>
+
+                </div>
             </div>
 <div class="board-container" id="siga-columns-grid" style="display: none;">
                 <section class="sector-column active" id="col-meivs">
@@ -865,28 +964,44 @@ function selecionarTurma(turma) {
             try {
                 const r = await fetch(APPS_SCRIPT_URL, { method: 'GET', cache: 'no-cache' });
                 todosOsRegistros = await r.json();
-                calcularDashboardGeralEscola();
+                atualizarGraficosMural();
                 if (document.getElementById('select-alunos').value) filtrarRegistrosPorAluno();
             } catch (e) { console.error(e); }
         }
 
-        function calcularDashboardGeralEscola() {
-            let total = todosOsRegistros.length;
-            document.getElementById('mural-total-geral').innerText = total;
-            let m=0, p=0, a=0, pf=0;
-            todosOsRegistros.forEach(r => {
-                if (r.setor === 'meivs') m++;
-                else if (r.setor === 'pedagogico') p++;
-                else if (r.setor === 'adm') a++;
-                else if (r.setor === 'professores' || r.setor === 'direcao') pf++;
-            });
-            document.getElementById('mural-total-meivs').innerText = m;
-            document.getElementById('mural-total-pedag').innerText = p;
-            document.getElementById('mural-total-profs').innerText = pf;
-            const pct = (v) => total ? Math.round((v/total)*100) : 0;
-            ['meivs','pedag','adm','profs'].forEach((k,i) => {
-                document.getElementById(`txt-pct-${k}`).innerText = pct([m,p,a,pf][i]) + '%';
-                document.getElementById(`mural-fill-${k}`).style.width = pct([m,p,a,pf][i]) + '%';
+        function atualizarGraficosMural() {
+            // Conta os registros
+            const total = todosOsRegistros.length;
+            const meivs = todosOsRegistros.filter(r => r.setor.toLowerCase() === 'meivs').length;
+            const pedagogico = todosOsRegistros.filter(r => r.setor.toLowerCase() === 'pedagogico').length;
+            const adm = todosOsRegistros.filter(r => r.setor.toLowerCase() === 'adm').length;
+            const professores = todosOsRegistros.filter(r => r.setor.toLowerCase() === 'professores' || r.setor.toLowerCase() === 'direcao').length;
+
+            // Atualiza os Cartões Superiores
+            document.getElementById('dash-val-total').innerText = total;
+            document.getElementById('dash-val-meivs').innerText = meivs;
+            document.getElementById('dash-val-pedagogico').innerText = pedagogico;
+            document.getElementById('dash-val-professores').innerText = professores;
+
+            // Calcula porcentagens
+            const pctMeivs = total === 0 ? 0 : Math.round((meivs / total) * 100);
+            const pctPed = total === 0 ? 0 : Math.round((pedagogico / total) * 100);
+            const pctAdm = total === 0 ? 0 : Math.round((adm / total) * 100);
+            const pctProf = total === 0 ? 0 : Math.round((professores / total) * 100);
+
+            // Atualiza as Barras e Textos da Distribuição
+            document.getElementById('dash-pct-meivs').innerText = pctMeivs + '%';
+            document.getElementById('dash-bar-meivs').style.width = pctMeivs + '%';
+
+            document.getElementById('dash-pct-pedagogico').innerText = pctPed + '%';
+            document.getElementById('dash-bar-pedagogico').style.width = pctPed + '%';
+
+            document.getElementById('dash-pct-adm').innerText = pctAdm + '%';
+            document.getElementById('dash-bar-adm').style.width = pctAdm + '%';
+
+            document.getElementById('dash-pct-professores').innerText = pctProf + '%';
+            document.getElementById('dash-bar-professores').style.width = pctProf + '%';
+        }
             });
         }
 
@@ -918,7 +1033,7 @@ function selecionarTurma(turma) {
             const tabs = document.getElementById('mobile-tabs-container');
             if (!select.value) {
                 mural.style.display = 'flex'; mini.style.display = 'none'; grid.style.display = 'none'; pdf.style.display = 'none'; tabs.style.display = 'none';
-                calcularDashboardGeralEscola(); return;
+                atualizarGraficosMural(); return;
             }
             mural.style.display = 'none'; mini.style.display = 'flex'; grid.style.display = 'grid'; pdf.style.display = 'inline-flex';
             tabs.style.display = (window.innerWidth <= 768) ? 'grid' : 'none';
