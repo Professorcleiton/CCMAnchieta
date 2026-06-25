@@ -314,30 +314,36 @@
 
         <main class="main-content">
             <header class="top-bar-app">
-<div class="aluno-selector" style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap; width: 100%;">
-                    <button class="menu-toggle" onclick="alternarMenuLateral()"><i class="fa-solid fa-bars"></i></button>
-                    
-                    <div style="display: flex; align-items: center; gap: 5px;">
-                        <label style="font-weight: bold; color: #2c3e50;"><i class="fa-solid fa-magnifying-glass"></i> Buscar:</label>
-                        <input type="text" id="input-busca-aluno" list="lista-todos-alunos" placeholder="Digite o nome..." onchange="buscarAlunoGlobal()" style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; width: 220px; outline: none;">
-                        <datalist id="lista-todos-alunos"></datalist>
-                    </div>
+<div class="aluno-selector" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; width: 100%;">
+    
+    <!-- Botão Menu Lateral -->
+    <button class="menu-toggle" onclick="alternarMenuLateral()"><i class="fa-solid fa-bars"></i></button>
+    
+    <!-- Campo de Busca -->
+    <label style="font-weight: bold; color: #2c3e50;"><i class="fa-solid fa-magnifying-glass"></i> Buscar:</label>
+    <input type="text" id="input-busca-aluno" list="lista-todos-alunos" placeholder="Digite o nome..." onchange="buscarAlunoGlobal()" style="padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; width: 180px; outline: none;">
+    <datalist id="lista-todos-alunos"></datalist>
 
-                    <div style="display: flex; align-items: center; gap: 5px;">
-                        <label style="font-weight: bold; color: #2c3e50; margin-left: 10px;"><i class="fa-solid fa-user-graduated"></i> Aluno:</label>
-                        <select id="select-alunos" onchange="filtrarRegistrosPorAluno()" style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; width: 220px; outline: none;">
-                            <option>Selecione uma turma...</option>
-                        </select>
-                    </div>
+    <!-- Campo do Aluno -->
+    <label style="font-weight: bold; color: #2c3e50; margin-left: 5px;"><i class="fa-solid fa-user-graduate"></i> Aluno:</label>
+    <select id="select-alunos" onchange="filtrarRegistrosPorAluno()" style="padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; width: 180px; outline: none;">
+        <option>Selecione uma turma...</option>
+    </select>
 
-                    <div style="display: flex; gap: 10px; margin-left: auto;">
-                        <button class="btn-pdf" id="btn-gerar-pdf-oficial" onclick="gerarFichaIndividualConselho()" style="background-color: #34495e; color: white; padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.2s;">
-                            <i class="fa-solid fa-file-pdf"></i> Apontamentos
-                        </button>
-                        <button onclick="abrirModalTurmasPreConselho()" style="background-color: #1abc9c; color: white; padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.2s;">
-                            <i class="fa-solid fa-users-gear"></i> Pré-Conselho
-                        </button>
-                    </div>
+    <!-- Espaçador invisível que empurra os botões para o canto direito -->
+    <div style="flex-grow: 1;"></div>
+
+    <!-- Botão Ficha de Apontamentos (AZUL) -->
+    <button id="btn-gerar-pdf-oficial" onclick="gerarFichaIndividualConselho()" style="background-color: #2563eb; color: white; padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <i class="fa-solid fa-file-invoice"></i> Apontamentos
+    </button>
+
+    <!-- Botão Pré-Conselho (ROXO) -->
+    <button onclick="abrirModalTurmasPreConselho()" style="background-color: #8b5cf6; color: white; padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <i class="fa-solid fa-users-gear"></i> Pré-Conselho
+    </button>
+
+</div>
                 </div>
 <div class="user-and-nre-wrapper">
                     <button class="btn-tema" onclick="alternarTema()" id="btn-icone-tema">
