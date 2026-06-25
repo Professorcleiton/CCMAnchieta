@@ -314,15 +314,30 @@
 
         <main class="main-content">
             <header class="top-bar-app">
-                <div class="aluno-selector">
+<div class="aluno-selector" style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap; width: 100%;">
                     <button class="menu-toggle" onclick="alternarMenuLateral()"><i class="fa-solid fa-bars"></i></button>
-                    <label><i class="fa-solid fa-magnifying-glass"></i> Buscar:</label>
-                    <input type="text" id="input-busca-aluno" list="lista-todos-alunos" placeholder="Digite o nome..." onchange="buscarAlunoGlobal()" style="padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; width: 200px; outline: none;">
-                    <datalist id="lista-todos-alunos"></datalist>
+                    
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <label style="font-weight: bold; color: #2c3e50;"><i class="fa-solid fa-magnifying-glass"></i> Buscar:</label>
+                        <input type="text" id="input-busca-aluno" list="lista-todos-alunos" placeholder="Digite o nome..." onchange="buscarAlunoGlobal()" style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; width: 220px; outline: none;">
+                        <datalist id="lista-todos-alunos"></datalist>
+                    </div>
 
-                    <label style="margin-left: 10px;"><i class="fa-solid fa-user-graduated"></i> Aluno:</label>
-                    <select id="select-alunos" onchange="filtrarRegistrosPorAluno()"><option>Selecione uma turma...</option></select>
-                    <button class="btn-pdf" id="btn-gerar-pdf-oficial" onclick="gerarFichaIndividualConselho()"><i class="fa-solid fa-file-invoice"></i> Ficha Conselho</button>
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <label style="font-weight: bold; color: #2c3e50; margin-left: 10px;"><i class="fa-solid fa-user-graduated"></i> Aluno:</label>
+                        <select id="select-alunos" onchange="filtrarRegistrosPorAluno()" style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; width: 220px; outline: none;">
+                            <option>Selecione uma turma...</option>
+                        </select>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; margin-left: auto;">
+                        <button class="btn-pdf" id="btn-gerar-pdf-oficial" onclick="gerarFichaIndividualConselho()" style="background-color: #34495e; color: white; padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.2s;">
+                            <i class="fa-solid fa-file-pdf"></i> Apontamentos
+                        </button>
+                        <button onclick="abrirModalTurmasPreConselho()" style="background-color: #1abc9c; color: white; padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.2s;">
+                            <i class="fa-solid fa-users-gear"></i> Pré-Conselho
+                        </button>
+                    </div>
                 </div>
 <div class="user-and-nre-wrapper">
                     <button class="btn-tema" onclick="alternarTema()" id="btn-icone-tema">
@@ -352,9 +367,6 @@
                     <span class="mini-label-chart">PROFS</span><div class="visual-bar-fill" id="bar-profs" style="background-color:#b91c1c;"></div>
                 </div>
             </div>
-<button class="btn-siga" onclick="abrirModalTurmasPreConselho()">
-    <i class="fa-solid fa-file-pdf"></i> Gerar Relatório de Pré-Conselho
-</button>
 
 <div id="modal-selecionar-turma" class="modal" style="display:none;">
     <div class="modal-content">
