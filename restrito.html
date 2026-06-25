@@ -224,7 +224,11 @@
             <header class="top-bar-app">
                 <div class="aluno-selector">
                     <button class="menu-toggle" onclick="alternarMenuLateral()"><i class="fa-solid fa-bars"></i></button>
-                    <label><i class="fa-solid fa-user-graduated"></i> Aluno:</label>
+                    <label><i class="fa-solid fa-magnifying-glass"></i> Buscar:</label>
+                    <input type="text" id="input-busca-aluno" list="lista-todos-alunos" placeholder="Digite o nome..." onchange="buscarAlunoGlobal()" style="padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; width: 200px; outline: none;">
+                    <datalist id="lista-todos-alunos"></datalist>
+
+                    <label style="margin-left: 10px;"><i class="fa-solid fa-user-graduated"></i> Aluno:</label>
                     <select id="select-alunos" onchange="filtrarRegistrosPorAluno()"><option>Selecione uma turma...</option></select>
                     <button class="btn-pdf" id="btn-gerar-pdf-oficial" onclick="gerarFichaIndividualConselho()"><i class="fa-solid fa-file-invoice"></i> Ficha Conselho</button>
                 </div>
@@ -494,7 +498,7 @@ async function carregarAlunosETurmas() {
         });
         
         renderizarSidebarTurmas();
-        
+        preencherBuscaGlobal();
     } catch (e) { 
         console.error("Falha ao processar os alunos:", e); 
         ul.innerHTML = '<li class="turma-item" style="color:#f87171;"><i class="fa-solid fa-triangle-exclamation"></i> Erro na Tabela</li>';
@@ -945,6 +949,54 @@ async function salvarPost(setor) {
             const pai = patTodos.find(i => i.codigo === cod);
             preview.innerHTML = pai ? '✅ Pai: ' + pai.item : '⚠️ Não localizado.';
         }
+// ==== BUSCA GLOBAL DE ALUNOS ====
+        function preencherBuscaGlobal() {
+            const datalist = document.getElementById('lista-todos-alunos');
+            datalist.innerHTML = '';
+            let todosAlunos = [];
+            
+            // Junta todos os alunos de todas as turmas em uma lista só
+            for (let turma in cacheAlunosPorTurma) {
+                todosAlunos = todosAlunos.concat(cacheAlunosPorTurma[turma]);
+            }
+            
+            // Remove possíveis nomes duplicados e organiza em ordem alfabética
+            todosAlunos = [...new Set(todosAlunos)].sort();
+            
+            // Coloca os nomes no Datalist (motor de sugestão do HTML)
+            todosAlunos.forEach(a => {
+                const opt = document.createElement('option');
+                opt.value = a;
+                datalist.appendChild(opt);
+            });
+        }
+
+        function buscarAlunoGlobal() {
+            const nomeBuscado = document.getElementById('input-busca-aluno').value.trim();
+            if (!nomeBuscado) return;
+            
+            const turma = encontrarTurmaDoAluno(nomeBuscado);
+            if (turma && turma !== 'Sem Turma') {
+                // 1. Destaca a turma no menu lateral esquerdo
+                document.querySelectorAll('.turma-item').forEach(el => el.classList.remove('active'));
+                const itensTurma = Array.from(document.querySelectorAll('.turma-item'));
+                const itemEncontrado = itensTurma.find(el => el.innerText.includes(turma));
+                if (itemEncontrado) itemEncontrado.classList.add('active');
+                
+                // 2. Seleciona a turma no sistema e depois marca o aluno no menu suspenso
+                selecionarTurma(turma);
+                document.getElementById('select-alunos').value = nomeBuscado;
+                
+                // 3. Atualiza os murais com os dados dele
+                filtrarRegistrosPorAluno();
+                
+                // Limpa a barra de pesquisa para a próxima
+                document.getElementById('input-busca-aluno').value = '';
+            } else {
+                mostrarToast('Aluno não encontrado na base de dados.', 'aviso');
+            }
+        }
+        
     </script>
 </body>
 </html>
