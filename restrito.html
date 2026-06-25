@@ -1728,41 +1728,42 @@ async function salvarPost(setor) {
     }
 }
 
-function gerarRelatorioPreConselho(turmaSelecionada) {
-    // 1. Pega a lista de alunos daquela turma específica
-    const alunosDaTurma = cacheAlunosPorTurma[turmaSelecionada] || [];
+async function gerarRelatorioPreConselho(turmaSelecionada) {
+    const todosRegistrosPC = await carregarRegistrosPreConselho(); 
     
-    // 2. Filtra os registros de PRÉ-CONSELHO que pertencem a esses alunos
-    // Nota: Como o mural salva por aluno, vamos filtrar quem está nessa turma
-    const dadosTurma = todosOsRegistros.filter(r => 
-        alunosDaTurma.includes(r.aluno) && 
-        (r.operacao && r.operacao.includes('PRE_CONSELHO'))
+    const turmaLimpa = turmaSelecionada.toString().trim().toLowerCase();
+
+    const dadosTurma = todosRegistrosPC.filter(r => 
+        r.turma && r.turma.toString().trim().toLowerCase() === turmaLimpa
     );
 
     if (dadosTurma.length === 0) {
-        mostrarToast('Nenhum registro de Pré-Conselho encontrado para a turma ' + turmaSelecionada, 'aviso');
+        mostrarToast('Nenhum registro encontrado na aba Pré-Conselho para a turma ' + turmaSelecionada, 'aviso');
         return;
     }
+
     let html = `
         <div style="font-family: Arial, sans-serif; padding: 40px; color: #000;">
-            <h2 style="text-align:center; border-bottom: 2px solid #000;">Relatório de Pré-Conselho - ${turma}</h2>
+            <h2 style="text-align:center; border-bottom: 2px solid #000;">Relatório de Pré-Conselho - ${turmaSelecionada}</h2>
             ${dadosTurma.map(r => `
                 <div style="margin-bottom: 30px; border: 1px solid #ccc; padding: 15px;">
-                    <h3 style="background: #eee; padding: 5px;">Disciplina: ${r.disciplina} | Professor: ${r.professor}</h3>
-                    <p><strong>Trimestre:</strong> ${r.trimestre}</p>
-                    <p><strong>Dificuldades de Aprendizagem:</strong> ${r.q1}</p>
-                    <p><strong>Instrumentos de Avaliação:</strong> ${r.q12}</p>
-                    <p><strong>Observações:</strong> ${r.q18}</p>
+                    <h3 style="background: #eee; padding: 5px;">Disciplina: ${r.disciplina || 'N/A'} | Professor: ${r.professor || 'N/A'}</h3>
+                    <p><strong>Trimestre:</strong> ${r.trimestre || 'N/A'}</p>
+                    <p><strong>Dificuldades de Aprendizagem:</strong> ${r.q1 || 'N/A'}</p>
+                    <p><strong>Instrumentos de Avaliação:</strong> ${r.q12 || 'N/A'}</p>
+                    <p><strong>Observações:</strong> ${r.q18 || 'N/A'}</p>
                 </div>
             `).join('')}
         </div>
     `;
 
-    // Abre uma nova janela para impressão
     const win = window.open('', '_blank');
     win.document.write(html);
     win.document.close();
-    win.print();
+    // Pequeno delay para garantir que o conteúdo carregou antes de chamar o print
+    setTimeout(() => {
+        win.print();
+    }, 500);
 }
 function abrirModalRelatorio() {
     const select = document.getElementById('select-turma-relatorio');
@@ -1789,7 +1790,31 @@ function confirmarGeracaoRelatorio() {
     document.getElementById('modal-selecionar-turma').style.display = 'none';
     gerarRelatorioPreConselho(turma); 
 }
+        async function carregarRegistrosPreConselho() {
+    // Substitua pelo ID da sua aba de Pré-Conselho se for diferente
+    // Se estiver na mesma planilha, basta mudar o nome da folha no link abaixo:
+    const SHEET_PRE_CONSELHO_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=PreConselho`; 
+
+    try {
+        const response = await fetch(SHEET_PRE_CONSELHO_URL);
+        const text = await response.text();
+        const jsonText = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
+        const data = JSON.parse(jsonText);
         
+        // Mapeia os dados da planilha para o formato que precisamos
+        return data.table.rows.map(r => ({
+            data: r.c[0] ? r.c[0].v : '',
+            professor: r.c[1] ? r.c[1].v : '',
+            disciplina: r.c[2] ? r.c[2].v : '',
+            turma: r.c[3] ? r.c[3].v.toString().trim() : '',
+            trimestre: r.c[4] ? r.c[4].v : ''
+            // ... adicione outros campos conforme a ordem das colunas da foto
+        }));
+    } catch (e) {
+        console.error("Erro ao carregar Pré-Conselho:", e);
+        return [];
+    }
+}
     </script>
 </body>
 </html>
