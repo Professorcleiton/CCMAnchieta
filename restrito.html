@@ -557,17 +557,28 @@
         }
 
         // ========== PAINEL PRINCIPAL ==========
-        function inicializarPainel() {
+ function inicializarPainel() {
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('app-interface').style.display = 'flex';
             document.getElementById('user-display').innerHTML = `<i class="fa-solid fa-user-check"></i> ${usuarioLogado.nome} (${usuarioLogado.setor === 'professores' ? 'PROFESSORES' : usuarioLogado.setor.toUpperCase()})`;
-            document.getElementById('btn-abrir-patrimonio').style.display = (usuarioLogado.nivel >= 3) ? 'inline-flex' : 'none';
             
-            // ESSA É A LINHA NOVA PARA MOSTRAR A ENGRENAGEM:
-            document.getElementById('btn-abrir-admin').style.display = (usuarioLogado.nivel >= 3) ? 'inline-flex' : 'none';
+            // Trava de segurança: Só altera o botão Patrimônio se ele existir na tela
+            const btnPat = document.getElementById('btn-abrir-patrimonio');
+            if (btnPat) {
+                btnPat.style.display = (usuarioLogado.nivel >= 3) ? 'inline-flex' : 'none';
+            }
+            
+            // Trava de segurança: Só altera o botão Gestão se ele existir na tela
+            const btnAdmin = document.getElementById('btn-abrir-admin');
+            if (btnAdmin) {
+                btnAdmin.style.display = (usuarioLogado.nivel >= 3) ? 'inline-flex' : 'none';
+            }
             
             aplicarBloqueioSetores(usuarioLogado.setor, usuarioLogado.nivel);
-            carregarAlunosETurmas(); carregarRegistrosDoServidor();
+            
+            // Agora garantimos que ele sempre chegue nessas duas linhas!
+            carregarAlunosETurmas(); 
+            carregarRegistrosDoServidor();
         }
 
         function abrirModuloPatrimonio() {
