@@ -1802,14 +1802,29 @@ function confirmarGeracaoRelatorio() {
         const data = JSON.parse(jsonText);
         
         // Mapeia os dados da planilha para o formato que precisamos
-        return data.table.rows.map(r => ({
-            data: r.c[0] ? r.c[0].v : '',
-            professor: r.c[1] ? r.c[1].v : '',
-            disciplina: r.c[2] ? r.c[2].v : '',
-            turma: r.c[3] ? r.c[3].v.toString().trim() : '',
-            trimestre: r.c[4] ? r.c[4].v : ''
-            // ... adicione outros campos conforme a ordem das colunas da foto
-        }));
+return data.table.rows.map(r => ({
+    data: r.c[0]?.v || '',
+    professor: r.c[1]?.v || '',
+    disciplina: r.c[2]?.v || '',
+    turma: r.c[3]?.v?.toString().trim() || '',
+    trimestre: r.c[4]?.v || '',
+    q1: r.c[5]?.v || '',
+    q2: r.c[6]?.v || '',
+    q3: r.c[7]?.v || '',
+    q4: r.c[8]?.v || '',
+    q5: r.c[9]?.v || '',
+    q6: r.c[10]?.v || '',
+    q7: r.c[11]?.v || '',
+    q8: r.c[12]?.v || '',
+    q9: r.c[13]?.v || '',
+    q10: r.c[14]?.v || '',
+    q11: r.c[15]?.v || '',
+    q12: r.c[16]?.v || '',
+    q14: r.c[17]?.v || '',
+    q16: r.c[18]?.v || '',
+    q17: r.c[19]?.v || '',
+    q18: r.c[20]?.v || ''
+}));
     } catch (e) {
         console.error("Erro ao carregar Pré-Conselho:", e);
         return [];
