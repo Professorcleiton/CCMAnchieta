@@ -1271,38 +1271,55 @@ function atualizarGraficosMural() {
             return 'Sem Turma';
         }
 
-function filtrarRegistrosPorAluno() {
+    function filtrarRegistrosPorAluno() {
     const select = document.getElementById('select-alunos');
     const mural = document.getElementById('welcome-dashboard-mural');
     const mini = document.getElementById('student-mini-dash');
-    const grid = document.getElementById('siga-columns-grid');
+    const grid = document.getElementById('siga-columns-grid'); // Este é o nosso contêiner das abas
     const pdf = document.getElementById('btn-gerar-pdf-oficial');
     const tabs = document.getElementById('mobile-tabs-container');
 
     const setDisplay = (el, val) => { if (el) el.style.display = val; };
 
-    if (!select || !select.value) {
+    // CASO NENHUM ALUNO SELECIONADO
+    if (!select || !select.value || select.value === "Selecione uma turma...") {
         setDisplay(mural, 'flex');
         setDisplay(mini, 'none');
-        //setDisplay(grid, 'none');
+        setDisplay(grid, 'none'); // Esconde as abas se não houver aluno
         setDisplay(pdf, 'none');
         setDisplay(tabs, 'none');
         return;
     }
 
-    // Exibe os elementos necessários
+    // CASO ALUNO SELECIONADO: FORÇA A EXIBIÇÃO
     setDisplay(mural, 'none');
     setDisplay(mini, 'flex');
-    if (grid) grid.style.display = 'block';
-    setDisplay(pdf, 'inline-flex');
-    if (tabs) tabs.style.display = (window.innerWidth <= 768) ? 'grid' : 'none';
-
-    // Garante que o sistema de abas comece ativo na aba MEIV'S
-    document.querySelectorAll('.sector-column').forEach(c => c.classList.remove('active'));
-    document.getElementById('col-meivs').classList.add('active');
     
-    document.querySelectorAll('#mobile-tabs-container .tab-button').forEach(b => b.classList.remove('active'));
-    document.querySelector('#mobile-tabs-container .tab-button').classList.add('active');
+    // Força o container das abas a aparecer e garante que tenha altura
+    if (grid) {
+        grid.style.display = 'block'; 
+        grid.style.visibility = 'visible';
+        grid.style.opacity = '1';
+    }
+    
+    setDisplay(pdf, 'inline-flex');
+    if (tabs) tabs.style.display = (window.innerWidth <= 768) ? 'flex' : 'flex'; // Mudamos para flex para alinhar melhor
+
+    // ATIVAÇÃO FORÇADA DA ABA MEIV'S
+    const colMeivs = document.getElementById('col-meivs');
+    if (colMeivs) {
+        document.querySelectorAll('.sector-column').forEach(c => c.classList.remove('active'));
+        colMeivs.classList.add('active');
+    }
+    
+    // ATIVAÇÃO FORÇADA DO BOTÃO MEIV'S
+    const btnMeivs = document.querySelector('#mobile-tabs-container .tab-button');
+    if (btnMeivs) {
+        document.querySelectorAll('#mobile-tabs-container .tab-button').forEach(b => b.classList.remove('active'));
+        btnMeivs.classList.add('active');
+    }
+    
+    // ... (o restante da sua função permanece exatamente igual)
 
     const aluno = select.value;
     
@@ -2114,30 +2131,29 @@ async function carregarRegistrosPreConselho() {
     }
 }
     </script>
-    <style>
-    /* 1. Garante visibilidade total do painel */
-    #siga-columns-grid { display: block !important; opacity: 1 !important; }
+<style>
+    /* Oculta tudo por padrão para evitar o "layout quebrado" inicial */
+    #siga-columns-grid { display: none !important; }
     
-    /* 2. Força o botão de Novo Apontamento a aparecer e ter tamanho real */
-    .sector-column button[onclick*="abrirCaixaTexto"] {
+    /* Quando o grid estiver ativo, ele vira um container de abas */
+    #siga-columns-grid.ativo { 
         display: block !important; 
+    }
+
+    /* Esconde as colunas */
+    .sector-column { display: none !important; }
+    
+    /* Mostra apenas a aba ativa */
+    .sector-column.active { display: block !important; }
+
+    /* Força o botão de Novo Apontamento a ser sempre visível e clicável */
+    .sector-column.active button[onclick*="abrirCaixaTexto"] {
+        display: block !important;
         visibility: visible !important;
         opacity: 1 !important;
         width: 100% !important;
-        height: 50px !important; /* Altura fixa para garantir que apareça */
-        margin: 10px 0 !important;
-        background-color: #0284c7 !important; /* Cor de teste para ver se ele aparece */
-        color: white !important;
-        border: 2px solid white !important;
+        margin-bottom: 20px !important;
     }
-
-    /* 3. Garante que a seção ativa não esconda nada */
-    .sector-column { display: none !important; }
-    .sector-column.active { display: block !important; }
-        .sector-column, .sector-column * {
-    overflow: visible !important;
-    height: auto !important;
-}
 </style>
 </body>
 <!-- ================= VISUAL DE ABAS CORRIGIDO ================= -->
