@@ -2134,6 +2134,10 @@ async function carregarRegistrosPreConselho() {
     /* 3. Garante que a seção ativa não esconda nada */
     .sector-column { display: none !important; }
     .sector-column.active { display: block !important; }
+        .sector-column, .sector-column * {
+    overflow: visible !important;
+    height: auto !important;
+}
 </style>
 </body>
 <!-- ================= VISUAL DE ABAS CORRIGIDO ================= -->
