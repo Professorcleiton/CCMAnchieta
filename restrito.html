@@ -72,25 +72,40 @@
 
         .welcome-dashboard-mural { padding: 20px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 15px; background: #f8fafc; }
         .mural-cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
-/* NOVOS CARDS DO MURAL */
-        .mural-card { background: linear-gradient(145deg, #ffffff, #f8fafc); padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-top: 5px solid #005088; text-align: center; cursor: pointer; transition: all 0.3s ease; display: flex; flex-direction: column; justify-content: center; border-left: none; }
-        .mural-card:hover { transform: translateY(-5px); box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
         
-        /* Cores específicas do topo de cada card */
-        .mural-card:nth-child(1) { border-top-color: #1e293b; } /* Geral */
-        .mural-card:nth-child(2) { border-top-color: #0284c7; } /* MEIVS */
-        .mural-card:nth-child(3) { border-top-color: #0d9488; } /* Pedagógico */
-        .mural-card:nth-child(4) { border-top-color: #b91c1c; } /* Professores */
+        /* DASHBOARD INICIAL */
+        .dash-container { display: flex; flex-direction: column; gap: 20px; padding: 15px; }
+        .dash-cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .dash-card { display: flex; align-items: center; padding: 20px; border-radius: 12px; background: white; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-left: 5px solid #cbd5e1; transition: transform 0.2s; }
+        .dash-card:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,0,0,0.1); }
+        .dash-card.total { border-left-color: #475569; }
+        .dash-card.meivs { border-left-color: #0284c7; }
+        .dash-card.pedagogico { border-left-color: #0d9488; }
+        .dash-card.professores { border-left-color: #b91c1c; }
+        .dash-card-icon { font-size: 32px; margin-right: 15px; opacity: 0.8; }
+        .dash-card.total .dash-card-icon { color: #475569; }
+        .dash-card.meivs .dash-card-icon { color: #0284c7; }
+        .dash-card.pedagogico .dash-card-icon { color: #0d9488; }
+        .dash-card.professores .dash-card-icon { color: #b91c1c; }
+        .dash-card-info { display: flex; flex-direction: column; }
+        .dash-card-title { font-size: 13px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+        .dash-card-value { font-size: 28px; font-weight: bold; color: #1e293b; margin-top: 5px; }
 
-        /* BARRAS DE DISTRIBUIÇÃO */
-        .mural-large-bar-row { background: white; padding: 18px 20px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); transition: transform 0.2s; margin-bottom: 12px; border: 1px solid #f1f5f9; }
-        .mural-bar-outer { background: #e2e8f0; height: 14px; border-radius: 10px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); }
-        .mural-bar-inner { height: 100%; width: 0%; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 10px; }
+        /* Parte Inferior: Barras e Ações */
+        .dash-lower-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+        .dash-panel { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .dash-panel-title { font-size: 16px; font-weight: bold; color: #334155; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px; }
+        .dash-bar-item { margin-bottom: 15px; }
+        .dash-bar-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; font-weight: 600; color: #475569; }
+        .dash-bar-track { width: 100%; height: 12px; background-color: #e2e8f0; border-radius: 10px; overflow: hidden; }
+        .dash-bar-fill { height: 100%; border-radius: 10px; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); }
 
-        /* GRID DE COLUNAS */
-        .board-container { flex: 1; display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; padding: 15px; background-color: #f8fafc; height: calc(100vh - 110px); overflow: hidden; }
-        .sector-column { background-color: white; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+        /* GRID DE COLUNAS E ABAS (CORRIGIDO) */
+        .board-container { flex: 1; padding: 15px; background-color: #f8fafc; height: calc(100vh - 110px); overflow: hidden; display: none; }
+        .sector-column { background-color: white; border-radius: 8px; border: 1px solid #e2e8f0; display: none; flex-direction: column; height: 100%; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .sector-column.active { display: flex; animation: fadeIn 0.3s ease-in-out; }
         .column-header { padding: 12px; background-color: #1e293b; color: white; border-top-left-radius: 7px; border-top-right-radius: 7px; text-align: center; font-weight: bold; font-size: 14px; }
+        
         .feed-container { flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; min-height: 0; }
         .post-card { background-color: #f1f5f9; padding: 12px; border-radius: 6px; border-left: 4px solid #005088; animation: fadeIn 0.3s ease; }
         .post-footer { font-size: 11px; color: #475569; margin-top: 8px; border-top: 1px dashed #cbd5e1; padding-top: 6px; display: flex; justify-content: space-between; }
@@ -98,21 +113,33 @@
         .btn-action-card { background: none; border: none; cursor: pointer; font-size: 11px; font-weight: bold; padding: 2px 6px; border-radius: 3px; }
         .btn-edit-card { color: #4f46e5; }
         .btn-delete-card { color: #b91c1c; }
-        .input-container { padding: 12px; border-top: 1px solid #e2e8f0; background: white; }
-        .input-container textarea { width: 100%; height: 50px; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; resize: none; margin-bottom: 8px; }
         .btn-salvar { width: 100%; padding: 8px; background-color: #005088; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
 
-        /* MODAL */
+        /* MOBILE TABS PARA APONTAMENTOS */
+        #mobile-tabs-container { display: none; justify-content: center; flex-wrap: wrap; gap: 10px; margin: 15px 15px 0 15px; padding: 0; background: transparent; border: none; width: auto; }
+        #mobile-tabs-container .tab-button { padding: 12px 24px; font-size: 14px; font-weight: bold; border-radius: 8px; border: none; cursor: pointer; background: #e2e8f0; color: #475569; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        #mobile-tabs-container .tab-button:nth-child(1).active { background: #0284c7; color: white; }
+        #mobile-tabs-container .tab-button:nth-child(2).active { background: #0d9488; color: white; }
+        #mobile-tabs-container .tab-button:nth-child(3).active { background: #4f46e5; color: white; }
+        #mobile-tabs-container .tab-button:nth-child(4).active { background: #b91c1c; color: white; }
+
+        /* CAIXA DE DIÁLOGO DE APONTAMENTOS */
+        .overlay-apontamento { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.85); z-index: 999999; display: flex; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; backdrop-filter: blur(4px); }
+        .caixa-dialogo { background: white; width: 100%; max-width: 600px; border-radius: 12px; padding: 25px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); display: flex; flex-direction: column; gap: 15px; animation: scaleUp 0.2s ease-out; }
+        .caixa-dialogo textarea { width: 100%; height: 40vh; min-height: 250px; padding: 15px; font-size: 16px !important; line-height: 1.5; border: 2px solid #cbd5e1; border-radius: 8px; resize: none; outline: none; }
+        .caixa-dialogo textarea:focus { border-color: #0d9488; }
+        .botoes-dialogo { display: flex; gap: 10px; }
+        .botoes-dialogo button { flex: 1; padding: 15px; border-radius: 8px; font-weight: bold; font-size: 16px; border: none; cursor: pointer; color: white; }
+        .btn-cancelar { background: #94a3b8 !important; }
+        .btn-cancelar:hover { background: #64748b !important; }
+        .btn-salvar-modal:hover { opacity: 0.9; }
+
+        /* MODAIS GERAIS */
         .modal-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(15, 23, 42, 0.6); z-index: 100; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
         .modal-content { background: white; width: 90%; max-width: 650px; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; max-height: 85vh; }
         .modal-header { background: #0f172a; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
         .modal-body { padding: 0; overflow-y: auto; flex: 1; }
         .modal-list-item { padding: 15px 20px; border-bottom: 1px solid #f1f5f9; }
-
-        /* MOBILE TABS */
-        .mobile-tabs { display: none; background: #1e293b; grid-template-columns: repeat(4, 1fr); border-bottom: 3px solid #eab308; }
-        .tab-button { background: none; border: none; color: #94a3b8; padding: 15px 5px; font-size: 12px; font-weight: bold; cursor: pointer; }
-        .tab-button.active { color: white; background-color: #005088; }
 
         /* PATRIMÔNIO */
         #patrimonio-interface { display: none; width: 100%; height: 100vh; flex-direction: row; }
@@ -164,47 +191,44 @@
         .pat-btn-action:disabled { background: #cbd5e1; cursor: not-allowed; }
         .pat-btn-delete { background: #ef4444; display: none; margin-top: 10px; }
 
-    /* CORREÇÕES PARA CELULAR E RESPONSIVIDADE */
+        /* RESPONSIVIDADE E CELULAR */
         .menu-toggle { background: none; border: none; font-size: 22px; color: #005088; cursor: pointer; padding: 0 10px; display: none; }
         .dark-mode .menu-toggle { color: #eab308; }
-        .sidebar-top { flex: 1; overflow-y: auto; min-height: 0; } /* Evita que o botão Sair suma */
-
+        
         @media (max-width: 768px) {
             body, .main-content, .pat-main { height: 100dvh; overflow: hidden; }
             #app-interface { flex-direction: column !important; height: 100dvh; }
-            
-            /* Ajuste dos Menus Laterais (SIGA e Patrimônio) */
             .sidebar, .pat-sidebar { position: fixed; top: 0; left: 0; height: 100dvh; width: 260px; transform: translateX(-100%); z-index: 9999; box-shadow: 2px 0 10px rgba(0,0,0,0.5); }
             .sidebar.open, .pat-sidebar.open { transform: translateX(0); }
-            .menu-toggle { display: inline-block; } /* Mostra o botão hambúrguer no celular */
-            
-            /* Barra Superior Flexível (SIGA) */
+            .menu-toggle { display: inline-block; }
             .top-bar-app { height: auto !important; min-height: unset; flex-direction: column; padding: 15px; gap: 12px; align-items: flex-start; }
-            .aluno-selector, .user-and-nre-wrapper { width: 100%; justify-content: space-between; gap: 8px; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 5px; }
-            #input-busca-aluno { max-width: 140px; }
-            #select-alunos { max-width: 120px; }
-            
-            /* Barra Superior Flexível (Patrimônio) */
+            .aluno-selector { flex-direction: column; align-items: stretch !important; gap: 12px !important; padding: 15px !important; }
+            .aluno-selector > div { width: 100%; justify-content: space-between; }
+            .aluno-selector input, .aluno-selector select { width: 100% !important; flex-grow: 1; }
+            .aluno-selector > div:last-child { display: flex; flex-direction: row; gap: 10px; }
+            .aluno-selector > div:last-child button { flex: 1; padding: 12px 5px !important; font-size: 13px !important; }
             .pat-top-bar { height: auto; flex-direction: column; padding: 15px; gap: 10px; align-items: stretch; }
             .pat-search-box { width: 100%; }
             .pat-workspace { grid-template-columns: 1fr; padding: 15px; }
-            
-            /* Impede que a tabela quebre a tela */
             .pat-table-wrapper { overflow-x: auto; }
             .summary-dashboard-bar { flex-wrap: wrap; }
-            .mini-chart-bar-container { display: none; } /* Esconde o mini gráfico no celular para poupar espaço */
+            .mini-chart-bar-container { display: none; }
+            .dash-lower-grid { grid-template-columns: 1fr; }
         }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
         /* TOAST NOTIFICATIONS */
-#toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
-.toast { padding: 12px 20px; border-radius: 8px; color: white; font-weight: 600; font-size: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 10px; animation: slideInToast 0.3s ease forwards; min-width: 250px; }
-.toast.sucesso { background-color: #10b981; border-left: 5px solid #047857; }
-.toast.erro { background-color: #ef4444; border-left: 5px solid #b91c1c; }
-.toast.aviso { background-color: #f59e0b; border-left: 5px solid #b45309; }
-.toast.fade-out { animation: fadeOutToast 0.4s ease forwards; }
-@keyframes slideInToast { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-@keyframes fadeOutToast { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
-/* MODO ESCURO (DARK MODE) */
+        #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .toast { padding: 12px 20px; border-radius: 8px; color: white; font-weight: 600; font-size: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 10px; animation: slideInToast 0.3s ease forwards; min-width: 250px; }
+        .toast.sucesso { background-color: #10b981; border-left: 5px solid #047857; }
+        .toast.erro { background-color: #ef4444; border-left: 5px solid #b91c1c; }
+        .toast.aviso { background-color: #f59e0b; border-left: 5px solid #b45309; }
+        .toast.fade-out { animation: fadeOutToast 0.4s ease forwards; }
+        @keyframes slideInToast { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes fadeOutToast { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
+        @keyframes scaleUp { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* MODO ESCURO */
         body.dark-mode { background-color: #0f172a; color: #f8fafc; }
         .dark-mode .login-box { background-color: #1e293b; border-color: #334155; }
         .dark-mode .login-box h2, .dark-mode .login-box p { color: #f8fafc; }
@@ -213,11 +237,10 @@
         .dark-mode .top-bar-app, .dark-mode .summary-dashboard-bar, .dark-mode .pat-top-bar { background-color: #1e293b; border-color: #334155; }
         .dark-mode .top-bar-app label, .dark-mode .pat-top-bar h1 { color: #f8fafc; }
         .dark-mode .welcome-dashboard-mural, .dark-mode .board-container, .dark-mode .pat-workspace { background-color: #0f172a; }
-        .dark-mode .mural-card, .dark-mode .mural-large-bar-row, .dark-mode .sector-column, .dark-mode .pat-inventory-panel, .dark-mode .pat-action-card { background-color: #1e293b; color: white; border-color: #334155; }
+        .dark-mode .dash-card, .dark-mode .dash-panel, .dark-mode .sector-column, .dark-mode .pat-inventory-panel, .dark-mode .pat-action-card { background-color: #1e293b; color: white; border-color: #334155; }
         .dark-mode .post-card { background-color: #0f172a; color: #cbd5e1; }
         .dark-mode .input-container { background-color: #1e293b; border-color: #334155; }
         .dark-mode .input-container textarea, .dark-mode .pat-search-box, .dark-mode #input-busca-aluno, .dark-mode #select-alunos { background-color: #0f172a; color: white; border-color: #475569; }
-        .dark-mode .mural-card div[style*="color:#0f172a;"] { color: white !important; }
         .dark-mode .modal-content { background: #1e293b; color: white; }
         .dark-mode .modal-list-item { border-bottom-color: #334155; }
         .dark-mode .metric-mini-card { background: #0f172a; border-color: #334155; color: white; }
@@ -225,61 +248,15 @@
         .dark-mode .pat-table td { border-bottom-color: #334155; }
         .btn-tema { background: none; border: none; color: #94a3b8; font-size: 20px; cursor: pointer; transition: color 0.2s; }
         .btn-tema:hover { color: #eab308; }
-        /* ==========================================
-           NOVO DASHBOARD MODERNO
-           ========================================== */
-        .dash-container { display: flex; flex-direction: column; gap: 20px; padding: 15px; }
-        
-        /* Cartões Superiores */
-        .dash-cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
-        .dash-card { display: flex; align-items: center; padding: 20px; border-radius: 12px; background: white; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-left: 5px solid #cbd5e1; transition: transform 0.2s; }
-        .dash-card:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,0,0,0.1); }
-        .dash-card.total { border-left-color: #475569; }
-        .dash-card.meivs { border-left-color: #0284c7; }
-        .dash-card.pedagogico { border-left-color: #0d9488; }
-        .dash-card.professores { border-left-color: #b91c1c; }
-        
-        .dash-card-icon { font-size: 32px; margin-right: 15px; opacity: 0.8; }
-        .dash-card.total .dash-card-icon { color: #475569; }
-        .dash-card.meivs .dash-card-icon { color: #0284c7; }
-        .dash-card.pedagogico .dash-card-icon { color: #0d9488; }
-        .dash-card.professores .dash-card-icon { color: #b91c1c; }
-        
-        .dash-card-info { display: flex; flex-direction: column; }
-        .dash-card-title { font-size: 13px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
-        .dash-card-value { font-size: 28px; font-weight: bold; color: #1e293b; margin-top: 5px; }
-
-        /* Parte Inferior: Barras e Ações */
-        .dash-lower-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
-        @media (max-width: 768px) { .dash-lower-grid { grid-template-columns: 1fr; } }
-        
-        .dash-panel { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .dash-panel-title { font-size: 16px; font-weight: bold; color: #334155; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px; }
-        
-        /* Novas Barras de Progresso */
-        .dash-bar-item { margin-bottom: 15px; }
-        .dash-bar-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; font-weight: 600; color: #475569; }
-        .dash-bar-track { width: 100%; height: 12px; background-color: #e2e8f0; border-radius: 10px; overflow: hidden; }
-        .dash-bar-fill { height: 100%; border-radius: 10px; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); }
-/* Força o container dos apontamentos a ficar sempre visível se a turma estiver selecionada */
-#siga-columns-grid {
-    display: block !important;
-}
-
-/* Garante que os botões de "Novo Apontamento" apareçam sempre */
-.sector-column {
-    display: block !important;
-}
         
     </style>
 </head>
 <body>
 
-    <!-- LOGIN -->
     <div id="login-screen">
         <div class="login-box">
             <img src="img/SIGA.png" alt="Brasão" class="login-logo-nova">
-            <h2>Área Restrira - SIGA</h2>
+            <h2>Área Restrita - SIGA</h2>
             <p>Sua senha padrão são os números do seu RG</p>
             <div class="input-group">
                 <label><i class="fa-solid fa-envelope"></i> E-mail:</label>
@@ -296,7 +273,6 @@
         </div>
     </div>
 
-    <!-- PAINEL PRINCIPAL -->
     <div id="app-interface">
         <aside class="sidebar" id="app-sidebar">
             <div class="sidebar-top">
@@ -316,62 +292,50 @@
         </aside>
 
         <main class="main-content">
-    <header class="top-bar-app" style="display: flex; flex-direction: column; gap: 15px; padding: 15px; height: auto;">
-    
-    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-        
-        <button class="menu-toggle" onclick="alternarMenuLateral()"><i class="fa-solid fa-bars"></i></button>
-        
-        <div class="user-and-nre-wrapper" style="display: flex; align-items: center; gap: 12px;">
-            <button class="btn-tema" onclick="alternarTema()" id="btn-icone-tema">
-                <i class="fa-solid fa-moon"></i>
-            </button>
-            
-            <img src="img/nreumuarama.jpg" alt="NRE" class="right-nre-logo" style="height: 35px; border-radius: 4px;">
-            
-            <button class="btn-patrimonio" id="btn-abrir-admin" onclick="abrirPainelAdmin()" style="display: none; background-color: #475569;">
-                <i class="fa-solid fa-gear"></i> Gestão
-            </button>
-            
-            <button class="btn-patrimonio" id="btn-abrir-patrimonio" onclick="abrirModuloPatrimonio()">
-                <i class="fa-solid fa-boxes-stacked"></i> Patrimônio
-            </button>
-            
-            <div id="user-display" style="background: #e2e8f0; padding: 6px 12px; border-radius: 20px; font-weight: bold; color: #334155;">
-                <i class="fa-solid fa-user-check"></i> Carregando...
-            </div>
-        </div>
-    </div>
+            <header class="top-bar-app" style="display: flex; flex-direction: column; gap: 15px; padding: 15px; height: auto;">
+                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                    <button class="menu-toggle" onclick="alternarMenuLateral()"><i class="fa-solid fa-bars"></i></button>
+                    
+                    <div class="user-and-nre-wrapper" style="display: flex; align-items: center; gap: 12px;">
+                        <button class="btn-tema" onclick="alternarTema()" id="btn-icone-tema">
+                            <i class="fa-solid fa-moon"></i>
+                        </button>
+                        <img src="img/nreumuarama.jpg" alt="NRE" class="right-nre-logo" style="height: 35px; border-radius: 4px;">
+                        <button class="btn-patrimonio" id="btn-abrir-admin" onclick="abrirPainelAdmin()" style="display: none; background-color: #475569;">
+                            <i class="fa-solid fa-gear"></i> Gestão
+                        </button>
+                        <button class="btn-patrimonio" id="btn-abrir-patrimonio" onclick="abrirModuloPatrimonio()">
+                            <i class="fa-solid fa-boxes-stacked"></i> Patrimônio
+                        </button>
+                        <div id="user-display" style="background: #e2e8f0; padding: 6px 12px; border-radius: 20px; font-weight: bold; color: #334155;">
+                            <i class="fa-solid fa-user-check"></i> Carregando...
+                        </div>
+                    </div>
+                </div>
 
-    <div class="aluno-selector" style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap; width: 100%; background: #f8fafc; padding: 12px 15px; border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-        
-        <div style="display: flex; align-items: center; gap: 8px;">
-            <label style="font-weight: bold; color: #0f172a;"><i class="fa-solid fa-magnifying-glass"></i> Buscar:</label>
-            <input type="text" id="input-busca-aluno" list="lista-todos-alunos" placeholder="Digite o nome..." onchange="buscarAlunoGlobal()" style="padding: 8px 12px; border: 1px solid #94a3b8; border-radius: 6px; font-size: 14px; width: 220px; outline: none;">
-            <datalist id="lista-todos-alunos"></datalist>
-        </div>
-
-        <div style="display: flex; align-items: center; gap: 8px;">
-            <label style="font-weight: bold; color: #0f172a;"><i class="fa-solid fa-user-graduate"></i> Aluno:</label>
-            <select id="select-alunos" onchange="filtrarRegistrosPorAluno()" style="padding: 8px 12px; border: 1px solid #94a3b8; border-radius: 6px; font-size: 14px; width: 220px; outline: none;">
-                <option value="">Selecione uma turma...</option>
-            </select>
-        </div>
-
-        <div style="flex-grow: 1;"></div>
-
-        <div style="display: flex; gap: 10px;">
-            <button id="btn-gerar-pdf-oficial" onclick="gerarFichaIndividualConselho()" style="background-color: #2563eb; color: white; padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);">
-                <i class="fa-solid fa-file-invoice"></i> Apontamentos
-            </button>
-
-            <button onclick="abrirModalTurmasPreConselho()" style="background-color: #8b5cf6; color: white; padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; box-shadow: 0 2px 4px rgba(139, 92, 246, 0.2);">
-                <i class="fa-solid fa-users-gear"></i> Pré-Conselho
-            </button>
-        </div>
-        
-    </div>
-</header>
+                <div class="aluno-selector" style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap; width: 100%; background: #f8fafc; padding: 12px 15px; border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <label style="font-weight: bold; color: #0f172a;"><i class="fa-solid fa-magnifying-glass"></i> Buscar:</label>
+                        <input type="text" id="input-busca-aluno" list="lista-todos-alunos" placeholder="Digite o nome..." onchange="buscarAlunoGlobal()" style="padding: 8px 12px; border: 1px solid #94a3b8; border-radius: 6px; font-size: 14px; width: 220px; outline: none;">
+                        <datalist id="lista-todos-alunos"></datalist>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <label style="font-weight: bold; color: #0f172a;"><i class="fa-solid fa-user-graduate"></i> Aluno:</label>
+                        <select id="select-alunos" onchange="filtrarRegistrosPorAluno()" style="padding: 8px 12px; border: 1px solid #94a3b8; border-radius: 6px; font-size: 14px; width: 220px; outline: none;">
+                            <option value="">Selecione uma turma...</option>
+                        </select>
+                    </div>
+                    <div style="flex-grow: 1;"></div>
+                    <div style="display: flex; gap: 10px;">
+                        <button id="btn-gerar-pdf-oficial" onclick="gerarFichaIndividualConselho()" style="background-color: #2563eb; color: white; padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2); display: none;">
+                            <i class="fa-solid fa-file-invoice"></i> Apontamentos
+                        </button>
+                        <button onclick="abrirModalTurmasPreConselho()" style="background-color: #8b5cf6; color: white; padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; box-shadow: 0 2px 4px rgba(139, 92, 246, 0.2);">
+                            <i class="fa-solid fa-users-gear"></i> Pré-Conselho
+                        </button>
+                    </div>
+                </div>
+            </header>
 
             <div class="summary-dashboard-bar" id="student-mini-dash">
                 <div class="metric-mini-card"><i class="fa-solid fa-chart-line"></i> Apontamentos: <span class="count-number" id="dash-total-count">0</span></div>
@@ -383,348 +347,167 @@
                 </div>
             </div>
 
-<div id="modal-selecionar-turma" class="modal" style="display:none;">
-    <div class="modal-content">
-        <h3>Selecione a Turma</h3>
-        <select id="select-turma-relatorio" class="form-control">
-            <option value="">-- Escolha uma Turma --</option>
-            </select>
-        <div style="margin-top: 20px;">
-            <button onclick="confirmarGeracaoRelatorio()" class="btn-confirmar">Gerar PDF</button>
-            <button onclick="document.getElementById('modal-selecionar-turma').style.display='none'" class="btn-cancelar">Cancelar</button>
-        </div>
-    </div>
-</div>
-            <!-- ================= ESTILOS OTIMIZADOS PARA CELULAR ================= -->
-<style>
-    /* 1. Otimiza a caixa de texto de Apontamentos */
-    .input-container {
-        display: flex;
-        flex-direction: column; /* Coloca o botão embaixo da caixa de texto */
-        gap: 12px;
-        padding: 15px;
-        background: #f8fafc;
-        border-bottom: 2px solid #e2e8f0;
-    }
-    
-    .input-container textarea {
-        width: 100%;
-        min-height: 120px; /* Caixona com boa altura para facilitar a digitação */
-        padding: 12px;
-        border-radius: 8px;
-        border: 1px solid #94a3b8;
-        font-size: 16px !important; /* Regra mágica para o celular não dar zoom */
-        font-family: inherit;
-        background: #ffffff;
-        box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
-        resize: vertical;
-    }
+            <div class="dash-container" id="welcome-dashboard-mural" style="overflow-y: auto;">
+                <div class="dash-cards-grid">
+                    <div class="dash-card total" style="cursor: pointer;" onclick="abrirModalRelatorio('geral')">
+                        <div class="dash-card-icon"><i class="fa-solid fa-chart-pie"></i></div>
+                        <div class="dash-card-info">
+                            <span class="dash-card-title">Total Registros</span>
+                            <span class="dash-card-value" id="dash-val-total">0</span>
+                        </div>
+                    </div>
+                    <div class="dash-card meivs" style="cursor: pointer;" onclick="abrirModalRelatorio('meivs')">
+                        <div class="dash-card-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                        <div class="dash-card-info">
+                            <span class="dash-card-title">MEIV'S</span>
+                            <span class="dash-card-value" id="dash-val-meivs">0</span>
+                        </div>
+                    </div>
+                    <div class="dash-card pedagogico" style="cursor: pointer;" onclick="abrirModalRelatorio('pedagogico')">
+                        <div class="dash-card-icon"><i class="fa-solid fa-book-open"></i></div>
+                        <div class="dash-card-info">
+                            <span class="dash-card-title">Pedagógico</span>
+                            <span class="dash-card-value" id="dash-val-pedagogico">0</span>
+                        </div>
+                    </div>
+                    <div class="dash-card adm" style="cursor: pointer;" onclick="abrirModalRelatorio('adm')">
+                        <div class="dash-card-icon"><i class="fa-solid fa-folder-open"></i></div>
+                        <div class="dash-card-info">
+                            <span class="dash-card-title">ADM</span>
+                            <span class="dash-card-value" id="dash-val-adm">0</span>
+                        </div>
+                    </div>
+                    <div class="dash-card professores" style="cursor: pointer;" onclick="abrirModalRelatorio('direcao')">
+                        <div class="dash-card-icon"><i class="fa-solid fa-chalkboard-user"></i></div>
+                        <div class="dash-card-info">
+                            <span class="dash-card-title">Professores</span>
+                            <span class="dash-card-value" id="dash-val-professores">0</span>
+                        </div>
+                    </div>
+                </div>
 
-    .input-container .btn-salvar {
-        width: 100%;
-        padding: 14px;
-        border-radius: 8px;
-        font-size: 16px;
-        font-weight: bold;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-
-    /* 2. Compacta a barra do topo no celular para sobrar tela para o teclado */
-    @media (max-width: 768px) {
-        .aluno-selector {
-            flex-direction: column;
-            align-items: stretch !important;
-            gap: 12px !important;
-            padding: 15px !important;
-        }
-        
-        .aluno-selector > div {
-            width: 100%;
-            justify-content: space-between;
-        }
-        
-        /* Estica a barra de busca e seleção */
-        .aluno-selector input, .aluno-selector select {
-            width: 100% !important;
-            flex-grow: 1;
-        }
-        
-        /* Agrupa os botões de relatório lado a lado */
-        .aluno-selector > div:last-child {
-            display: flex;
-            flex-direction: row;
-            gap: 10px;
-        }
-        
-        .aluno-selector > div:last-child button {
-            flex: 1; /* Divide o espaço 50/50 entre os dois botões */
-            padding: 12px 5px !important;
-            font-size: 13px !important;
-        }
-    }
-</style>
-<!-- ================================================================== -->
-        <!-- NOVO DASHBOARD INICIAL -->
-            <div class="dash-container" id="painel-dashboard">
-                
-<div class="dash-cards-grid">
-    <div class="dash-card total" style="cursor: pointer;" onclick="abrirModalRelatorio('geral')">
-        <div class="dash-card-icon"><i class="fa-solid fa-chart-pie"></i></div>
-        <div class="dash-card-info">
-            <span class="dash-card-title">Total Registros</span>
-            <span class="dash-card-value" id="dash-val-total">0</span>
-        </div>
-    </div>
-
-    <div class="dash-card meivs" style="cursor: pointer;" onclick="abrirModalRelatorio('meivs')">
-        <div class="dash-card-icon"><i class="fa-solid fa-shield-halved"></i></div>
-        <div class="dash-card-info">
-            <span class="dash-card-title">MEIV'S</span>
-            <span class="dash-card-value" id="dash-val-meivs">0</span>
-        </div>
-    </div>
-
-    <div class="dash-card pedagogico" style="cursor: pointer;" onclick="abrirModalRelatorio('pedagogico')">
-        <div class="dash-card-icon"><i class="fa-solid fa-book-open"></i></div>
-        <div class="dash-card-info">
-            <span class="dash-card-title">Pedagógico</span>
-            <span class="dash-card-value" id="dash-val-pedagogico">0</span>
-        </div>
-    </div>
-
-    <div class="dash-card adm" style="cursor: pointer;" onclick="abrirModalRelatorio('adm')">
-        <div class="dash-card-icon"><i class="fa-solid fa-folder-open"></i></div>
-        <div class="dash-card-info">
-            <span class="dash-card-title">ADM</span>
-            <span class="dash-card-value" id="dash-val-adm">0</span>
-        </div>
-    </div>
-
-    <div class="dash-card professores" style="cursor: pointer;" onclick="abrirModalRelatorio('direcao')">
-        <div class="dash-card-icon"><i class="fa-solid fa-chalkboard-user"></i></div>
-        <div class="dash-card-info">
-            <span class="dash-card-title">Professores</span>
-            <span class="dash-card-value" id="dash-val-professores">0</span>
-        </div>
-    </div>
-</div>
-
-                <!-- Painéis Inferiores (Barras e Botões) -->
                 <div class="dash-lower-grid">
-                    
-                    <!-- Painel de Distribuição -->
                     <div class="dash-panel">
                         <div class="dash-panel-title"><i class="fa-solid fa-chart-column"></i> Distribuição de Apontamentos</div>
-                        
                         <div class="dash-bar-item">
                             <div class="dash-bar-header"><span>MEIV'S</span><span id="dash-pct-meivs">0%</span></div>
                             <div class="dash-bar-track"><div class="dash-bar-fill" id="dash-bar-meivs" style="background-color: #0284c7; width: 0%;"></div></div>
                         </div>
-                        
                         <div class="dash-bar-item">
                             <div class="dash-bar-header"><span>Pedagógico</span><span id="dash-pct-pedagogico">0%</span></div>
                             <div class="dash-bar-track"><div class="dash-bar-fill" id="dash-bar-pedagogico" style="background-color: #0d9488; width: 0%;"></div></div>
                         </div>
-                        
                         <div class="dash-bar-item">
                             <div class="dash-bar-header"><span>ADM</span><span id="dash-pct-adm">0%</span></div>
                             <div class="dash-bar-track"><div class="dash-bar-fill" id="dash-bar-adm" style="background-color: #4f46e5; width: 0%;"></div></div>
                         </div>
-                        
                         <div class="dash-bar-item">
                             <div class="dash-bar-header"><span>Professores</span><span id="dash-pct-professores">0%</span></div>
                             <div class="dash-bar-track"><div class="dash-bar-fill" id="dash-bar-professores" style="background-color: #b91c1c; width: 0%;"></div></div>
                         </div>
                     </div>
-
-                    <!-- Painel de Ações Rápidas -->
                     <div class="dash-panel">
                         <div class="dash-panel-title"><i class="fa-solid fa-bolt"></i> Ações Rápidas</div>
                         <p style="font-size: 13px; color: #64748b; margin-bottom: 15px;">Acesse as ferramentas gerenciais e relatórios pedagógicos.</p>
-                        
                         <button class="btn-salvar" style="background-color: #0d9488; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(13, 148, 136, 0.2);" onclick="abrirPreConselho()">
                             <i class="fa-solid fa-clipboard-check" style="font-size: 18px;"></i> Preencher Pré-Conselho
                         </button>
                     </div>
-
                 </div>
             </div>
-                    <div class="mobile-tabs" id="mobile-tabs-container">
-            <button class="tab-button active" onclick="alternarAbaMobile('meivs', this)">MEIV'S</button>
-            <button class="tab-button" onclick="alternarAbaMobile('pedagogico', this)">PEDAG.</button>
-            <button class="tab-button" onclick="alternarAbaMobile('adm', this)">ADM</button>
-            <button class="tab-button" onclick="alternarAbaMobile('direcao', this)">PROFS.</button>
-        </div>
-<div class="board-container" id="siga-columns-grid" style="display: none;">
+
+            <div id="mobile-tabs-container">
+                <button class="tab-button active" onclick="alternarAbaMobile('meivs', this)">MEIV'S</button>
+                <button class="tab-button" onclick="alternarAbaMobile('pedagogico', this)">PEDAG.</button>
+                <button class="tab-button" onclick="alternarAbaMobile('adm', this)">ADM</button>
+                <button class="tab-button" onclick="alternarAbaMobile('direcao', this)">PROFS.</button>
+            </div>
+
+            <div class="board-container" id="siga-columns-grid">
                 
-    <section class="sector-column active" id="col-meivs">
-        <div class="column-header" style="background:#0284c7;">MEIV'S</div>
-        <div style="padding: 15px; text-align: center; border-bottom: 1px solid #e2e8f0;">
-            <button onclick="abrirCaixaTexto('meivs')" style="background: #0284c7; color: white; padding: 14px 20px; border: none; border-radius: 8px; font-weight: bold; width: 100%; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                <i class="fa-solid fa-pen-to-square"></i> + Novo Apontamento
-            </button>
-        </div>
-        <div class="overlay-apontamento" id="overlay-text-meivs" style="display: none;">
-            <div class="caixa-dialogo">
-                <h3 style="color: #0284c7; margin-top: 0; text-align: center;"><i class="fa-solid fa-shield-halved"></i> Apontamento MEIV'S</h3>
-                <textarea id="text-meivs" placeholder="Descreva os detalhes aqui..." onkeydown="verificarTeclaEnter(event, 'meivs')"></textarea>
-                <div class="botoes-dialogo">
-                    <button class="btn-cancelar" onclick="fecharCaixaTexto('meivs')">Cancelar</button>
-                    <button id="btn-meivs" class="btn-salvar-modal" style="background:#0284c7;" onclick="salvarPost('meivs'); fecharCaixaTexto('meivs');">Salvar</button>
-                </div>
+                <section class="sector-column active" id="col-meivs">
+                    <div class="column-header" style="background:#0284c7;">MEIV'S</div>
+                    <div style="padding: 15px; text-align: center; border-bottom: 1px solid #e2e8f0;">
+                        <button onclick="abrirCaixaTexto('meivs')" style="background: #0284c7; color: white; padding: 14px 20px; border: none; border-radius: 8px; font-weight: bold; width: 100%; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                            <i class="fa-solid fa-pen-to-square"></i> + Novo Apontamento
+                        </button>
+                    </div>
+                    <div class="overlay-apontamento" id="overlay-text-meivs" style="display: none;">
+                        <div class="caixa-dialogo">
+                            <h3 style="color: #0284c7; margin-top: 0; text-align: center;"><i class="fa-solid fa-shield-halved"></i> Apontamento MEIV'S</h3>
+                            <textarea id="text-meivs" placeholder="Descreva os detalhes aqui..." onkeydown="verificarTeclaEnter(event, 'meivs')"></textarea>
+                            <div class="botoes-dialogo">
+                                <button class="btn-cancelar" onclick="fecharCaixaTexto('meivs')">Cancelar</button>
+                                <button id="btn-meivs" class="btn-salvar-modal" style="background:#0284c7;" onclick="salvarPost('meivs'); fecharCaixaTexto('meivs');">Salvar</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="feed-container" id="feed-meivs"></div>
+                </section>
+                
+                <section class="sector-column" id="col-pedagogico">
+                    <div class="column-header" style="background:#0d9488;">PEDAGÓGICO</div>
+                    <div style="padding: 15px; text-align: center; border-bottom: 1px solid #e2e8f0;">
+                        <button onclick="abrirCaixaTexto('pedagogico')" style="background: #0d9488; color: white; padding: 14px 20px; border: none; border-radius: 8px; font-weight: bold; width: 100%; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                            <i class="fa-solid fa-pen-to-square"></i> + Novo Apontamento
+                        </button>
+                    </div>
+                    <div class="overlay-apontamento" id="overlay-text-pedagogico" style="display: none;">
+                        <div class="caixa-dialogo">
+                            <h3 style="color: #0d9488; margin-top: 0; text-align: center;"><i class="fa-solid fa-book-open"></i> Apontamento Pedagógico</h3>
+                            <textarea id="text-pedagogico" placeholder="Descreva os detalhes aqui..." onkeydown="verificarTeclaEnter(event, 'pedagogico')"></textarea>
+                            <div class="botoes-dialogo">
+                                <button class="btn-cancelar" onclick="fecharCaixaTexto('pedagogico')">Cancelar</button>
+                                <button id="btn-pedagogico" class="btn-salvar-modal" style="background:#0d9488;" onclick="salvarPost('pedagogico'); fecharCaixaTexto('pedagogico');">Salvar</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="feed-container" id="feed-pedagogico"></div>
+                </section>
+                
+                <section class="sector-column" id="col-adm">
+                    <div class="column-header" style="background:#4f46e5;">ADM</div>
+                    <div style="padding: 15px; text-align: center; border-bottom: 1px solid #e2e8f0;">
+                        <button onclick="abrirCaixaTexto('adm')" style="background: #4f46e5; color: white; padding: 14px 20px; border: none; border-radius: 8px; font-weight: bold; width: 100%; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                            <i class="fa-solid fa-pen-to-square"></i> + Novo Apontamento
+                        </button>
+                    </div>
+                    <div class="overlay-apontamento" id="overlay-text-adm" style="display: none;">
+                        <div class="caixa-dialogo">
+                            <h3 style="color: #4f46e5; margin-top: 0; text-align: center;"><i class="fa-solid fa-folder-open"></i> Apontamento ADM</h3>
+                            <textarea id="text-adm" placeholder="Descreva os detalhes aqui..." onkeydown="verificarTeclaEnter(event, 'adm')"></textarea>
+                            <div class="botoes-dialogo">
+                                <button class="btn-cancelar" onclick="fecharCaixaTexto('adm')">Cancelar</button>
+                                <button id="btn-adm" class="btn-salvar-modal" style="background:#4f46e5;" onclick="salvarPost('adm'); fecharCaixaTexto('adm');">Salvar</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="feed-container" id="feed-adm"></div>
+                </section>
+                
+                <section class="sector-column" id="col-direcao">
+                    <div class="column-header" style="background:#b91c1c;">PROFESSORES</div>
+                    <div style="padding: 15px; text-align: center; border-bottom: 1px solid #e2e8f0;">
+                        <button onclick="abrirCaixaTexto('direcao')" style="background: #b91c1c; color: white; padding: 14px 20px; border: none; border-radius: 8px; font-weight: bold; width: 100%; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                            <i class="fa-solid fa-pen-to-square"></i> + Novo Apontamento
+                        </button>
+                    </div>
+                    <div class="overlay-apontamento" id="overlay-text-direcao" style="display: none;">
+                        <div class="caixa-dialogo">
+                            <h3 style="color: #b91c1c; margin-top: 0; text-align: center;"><i class="fa-solid fa-chalkboard-user"></i> Apontamento Professores</h3>
+                            <textarea id="text-direcao" placeholder="Descreva os detalhes aqui..." onkeydown="verificarTeclaEnter(event, 'direcao')"></textarea>
+                            <div class="botoes-dialogo">
+                                <button class="btn-cancelar" onclick="fecharCaixaTexto('direcao')">Cancelar</button>
+                                <button id="btn-direcao" class="btn-salvar-modal" style="background:#b91c1c;" onclick="salvarPost('direcao'); fecharCaixaTexto('direcao');">Salvar</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="feed-container" id="feed-direcao"></div>
+                </section>
             </div>
-        </div>
-        <div class="feed-container" id="feed-meivs"></div>
-    </section>
-    
-    <section class="sector-column" id="col-pedagogico">
-        <div class="column-header" style="background:#0d9488;">PEDAGÓGICO</div>
-        <div style="padding: 15px; text-align: center; border-bottom: 1px solid #e2e8f0;">
-            <button onclick="abrirCaixaTexto('pedagogico')" style="background: #0d9488; color: white; padding: 14px 20px; border: none; border-radius: 8px; font-weight: bold; width: 100%; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                <i class="fa-solid fa-pen-to-square"></i> + Novo Apontamento
-            </button>
-        </div>
-        <div class="overlay-apontamento" id="overlay-text-pedagogico" style="display: none;">
-            <div class="caixa-dialogo">
-                <h3 style="color: #0d9488; margin-top: 0; text-align: center;"><i class="fa-solid fa-book-open"></i> Apontamento Pedagógico</h3>
-                <textarea id="text-pedagogico" placeholder="Descreva os detalhes aqui..." onkeydown="verificarTeclaEnter(event, 'pedagogico')"></textarea>
-                <div class="botoes-dialogo">
-                    <button class="btn-cancelar" onclick="fecharCaixaTexto('pedagogico')">Cancelar</button>
-                    <button id="btn-pedagogico" class="btn-salvar-modal" style="background:#0d9488;" onclick="salvarPost('pedagogico'); fecharCaixaTexto('pedagogico');">Salvar</button>
-                </div>
-            </div>
-        </div>
-        <div class="feed-container" id="feed-pedagogico"></div>
-    </section>
-    
-    <section class="sector-column" id="col-adm">
-        <div class="column-header" style="background:#4f46e5;">ADM</div>
-        <div style="padding: 15px; text-align: center; border-bottom: 1px solid #e2e8f0;">
-            <button onclick="abrirCaixaTexto('adm')" style="background: #4f46e5; color: white; padding: 14px 20px; border: none; border-radius: 8px; font-weight: bold; width: 100%; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                <i class="fa-solid fa-pen-to-square"></i> + Novo Apontamento
-            </button>
-        </div>
-        <div class="overlay-apontamento" id="overlay-text-adm" style="display: none;">
-            <div class="caixa-dialogo">
-                <h3 style="color: #4f46e5; margin-top: 0; text-align: center;"><i class="fa-solid fa-folder-open"></i> Apontamento ADM</h3>
-                <textarea id="text-adm" placeholder="Descreva os detalhes aqui..." onkeydown="verificarTeclaEnter(event, 'adm')"></textarea>
-                <div class="botoes-dialogo">
-                    <button class="btn-cancelar" onclick="fecharCaixaTexto('adm')">Cancelar</button>
-                    <button id="btn-adm" class="btn-salvar-modal" style="background:#4f46e5;" onclick="salvarPost('adm'); fecharCaixaTexto('adm');">Salvar</button>
-                </div>
-            </div>
-        </div>
-        <div class="feed-container" id="feed-adm"></div>
-    </section>
-    
-    <section class="sector-column" id="col-direcao">
-        <div class="column-header" style="background:#b91c1c;">PROFESSORES</div>
-        <div style="padding: 15px; text-align: center; border-bottom: 1px solid #e2e8f0;">
-            <button onclick="abrirCaixaTexto('direcao')" style="background: #b91c1c; color: white; padding: 14px 20px; border: none; border-radius: 8px; font-weight: bold; width: 100%; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                <i class="fa-solid fa-pen-to-square"></i> + Novo Apontamento
-            </button>
-        </div>
-        <div class="overlay-apontamento" id="overlay-text-direcao" style="display: none;">
-            <div class="caixa-dialogo">
-                <h3 style="color: #b91c1c; margin-top: 0; text-align: center;"><i class="fa-solid fa-chalkboard-user"></i> Apontamento Professores</h3>
-                <textarea id="text-direcao" placeholder="Descreva os detalhes aqui..." onkeydown="verificarTeclaEnter(event, 'direcao')"></textarea>
-                <div class="botoes-dialogo">
-                    <button class="btn-cancelar" onclick="fecharCaixaTexto('direcao')">Cancelar</button>
-                    <button id="btn-direcao" class="btn-salvar-modal" style="background:#b91c1c;" onclick="salvarPost('direcao'); fecharCaixaTexto('direcao');">Salvar</button>
-                </div>
-            </div>
-        </div>
-        <div class="feed-container" id="feed-direcao"></div>
-    </section>
-
-</div>
-
-<style>
-    /* Fundo escuro desfocado */
-    .overlay-apontamento {
-        position: fixed;
-        top: 0; left: 0;
-        width: 100vw; height: 100vh;
-        background: rgba(15, 23, 42, 0.85);
-        z-index: 999999;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 20px;
-        box-sizing: border-box;
-        backdrop-filter: blur(4px);
-    }
-    
-    /* A caixa branca no meio da tela */
-    .caixa-dialogo {
-        background: white;
-        width: 100%;
-        max-width: 600px;
-        border-radius: 12px;
-        padding: 25px;
-        box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-        animation: scaleUp 0.2s ease-out;
-    }
-    
-    /* A área de texto super confortável */
-    .caixa-dialogo textarea {
-        width: 100%;
-        height: 40vh; /* Ocupa 40% da altura da tela */
-        min-height: 250px;
-        padding: 15px;
-        font-size: 16px !important;
-        line-height: 1.5;
-        border: 2px solid #cbd5e1;
-        border-radius: 8px;
-        resize: none;
-        outline: none;
-    }
-    
-    .caixa-dialogo textarea:focus { border-color: #0d9488; }
-    
-    /* Os botões de baixo */
-    .botoes-dialogo { display: flex; gap: 10px; }
-    
-    .botoes-dialogo button {
-        flex: 1;
-        padding: 15px;
-        border-radius: 8px;
-        font-weight: bold;
-        font-size: 16px;
-        border: none;
-        cursor: pointer;
-        color: white;
-    }
-    
-    .btn-cancelar { background: #94a3b8 !important; }
-    .btn-cancelar:hover { background: #64748b !important; }
-    .btn-salvar-modal:hover { opacity: 0.9; }
-
-    @keyframes scaleUp {
-        from { opacity: 0; transform: scale(0.95); }
-        to { opacity: 1; transform: scale(1); }
-    }
-</style>
-
-<script>
-    function abrirCaixaTexto(setor) {
-        document.getElementById('overlay-text-' + setor).style.display = 'flex';
-        document.getElementById('text-' + setor).focus();
-    }
-    function fecharCaixaTexto(setor) {
-        document.getElementById('overlay-text-' + setor).style.display = 'none';
-        document.getElementById('text-' + setor).value = ''; // Limpa se cancelar
-    }
-</script>
         </main>
     </div>
 
-    <!-- MÓDULO PATRIMÔNIO -->
     <div id="patrimonio-interface">
         <aside class="pat-sidebar" id="pat-sidebar">
             <div class="pat-sidebar-top">
@@ -740,7 +523,7 @@
             </div>
         </aside>
         <main class="pat-main">
-        <header class="pat-top-bar">
+            <header class="pat-top-bar">
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <button class="menu-toggle" onclick="document.getElementById('pat-sidebar').classList.toggle('open')">
                         <i class="fa-solid fa-bars"></i>
@@ -817,26 +600,23 @@
             </div>
         </main>
     </div>
-<!-- MODAL PRÉ-CONSELHO -->
+
     <div class="modal-overlay" id="modal-pre-conselho" style="z-index: 10000; display: none;">
         <div class="modal-content" style="max-width: 900px; height: 90vh; display: flex; flex-direction: column;">
             <div class="modal-header" style="background-color: #0d9488;">
                 <h3><i class="fa-solid fa-clipboard-check"></i> Ficha de Pré-Conselho de Classe</h3>
                 <button onclick="document.getElementById('modal-pre-conselho').style.display='none'" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;">&times;</button>
             </div>
-            
             <div class="modal-body" style="padding: 25px; overflow-y: auto; flex: 1;">
-                
-                <!-- BLOCO 1: IDENTIFICAÇÃO -->
                 <div style="background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #0d9488;">
                     <div style="display: flex; gap: 15px; flex-wrap: wrap;">
                         <div style="flex: 1; min-width: 200px;">
                             <label>Professor:</label>
-                            <input type="text" id="pc-professor" disabled style="background: #e2e8f0; font-weight: bold;">
+                            <input type="text" id="pc-professor" disabled style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; background: #e2e8f0; font-weight: bold;">
                         </div>
                         <div style="flex: 1; min-width: 200px;">
                             <label>Componente Curricular (Disciplina):</label>
-                            <input type="text" id="pc-disciplina" placeholder="Ex: Matemática, Robótica...">
+                            <input type="text" id="pc-disciplina" placeholder="Ex: Matemática..." style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
                         </div>
                     </div>
                     <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 15px;">
@@ -855,7 +635,6 @@
                     </div>
                 </div>
 
-                <!-- BLOCO 2: DESEMPENHO (NOTAS) -->
                 <h4 style="color: #005088; margin-bottom: 10px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">1. Desempenho (Quantidade de Alunos)</h4>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
                     <div class="input-group">
@@ -876,7 +655,6 @@
                     </div>
                 </div>
 
-                <!-- BLOCO 3: COMPORTAMENTO E PERFIL -->
                 <h4 style="color: #005088; margin-bottom: 10px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">2. Perfil da Turma</h4>
                 <div class="input-group">
                     <label>Comprometimento e responsabilidade na realização de tarefas (Sala e Digital):</label>
@@ -888,20 +666,17 @@
                         <option value="5 - Ótimo">5 - Ótimo</option>
                     </select>
                 </div>
-                <div class="input-group"><label>Destaque os aspectos POSITIVOS da turma:</label><textarea id="pc-q6" rows="2"></textarea></div>
-                <div class="input-group"><label>Destaque os aspectos NEGATIVOS da turma:</label><textarea id="pc-q7" rows="2"></textarea></div>
-                <div class="input-group"><label>Sugestões e procedimentos para melhorar a turma:</label><textarea id="pc-q8" rows="2"></textarea></div>
+                <div class="input-group"><label>Destaque os aspectos POSITIVOS da turma:</label><textarea id="pc-q6" rows="2" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px;"></textarea></div>
+                <div class="input-group"><label>Destaque os aspectos NEGATIVOS da turma:</label><textarea id="pc-q7" rows="2" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px;"></textarea></div>
+                <div class="input-group"><label>Sugestões e procedimentos para melhorar a turma:</label><textarea id="pc-q8" rows="2" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px;"></textarea></div>
 
-                <!-- BLOCO 4: FOCO NOS ALUNOS -->
                 <h4 style="color: #005088; margin-bottom: 10px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; margin-top: 25px;">3. Análise Individual</h4>
-                <div class="input-group"><label>Nomes dos alunos com notas ABAIXO da média:</label><textarea id="pc-q9" rows="2" placeholder="Separe os nomes por vírgula..."></textarea></div>
-                <div class="input-group"><label>Quais necessitam de plano de recuperação de estudos?</label><textarea id="pc-q18" rows="2"></textarea></div>
+                <div class="input-group"><label>Nomes dos alunos com notas ABAIXO da média:</label><textarea id="pc-q9" rows="2" placeholder="Separe os nomes por vírgula..." style="width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px;"></textarea></div>
+                <div class="input-group"><label>Quais necessitam de plano de recuperação de estudos?</label><textarea id="pc-q18" rows="2" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px;"></textarea></div>
 
-                <!-- BLOCO 5: METODOLOGIA -->
                 <h4 style="color: #005088; margin-bottom: 10px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; margin-top: 25px;">4. Metodologia e Avaliação</h4>
-                <div class="input-group"><label>Principais encaminhamentos metodológicos utilizados:</label><textarea id="pc-q10" rows="2"></textarea></div>
-                <div class="input-group"><label>Recursos didáticos utilizados para dificuldades de aprendizagem:</label><textarea id="pc-q11" rows="2"></textarea></div>
-                
+                <div class="input-group"><label>Principais encaminhamentos metodológicos utilizados:</label><textarea id="pc-q10" rows="2" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px;"></textarea></div>
+                <div class="input-group"><label>Recursos didáticos utilizados para dificuldades de aprendizagem:</label><textarea id="pc-q11" rows="2" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px;"></textarea></div>
                 <div class="input-group">
                     <label>Quais instrumentos de avaliação foram utilizados? (Selecione todos que se aplicam)</label>
                     <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 8px;" id="pc-q12-checkboxes">
@@ -917,21 +692,18 @@
                     <input type="text" id="pc-q12-outros" placeholder="Descreva caso tenha usado outros...">
                 </div>
 
-                <!-- BLOCO 6: RECUPERAÇÃO -->
                 <h4 style="color: #005088; margin-bottom: 10px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; margin-top: 25px;">5. Recuperação de Estudos</h4>
                 <div class="input-group">
                     <label>Foram realizadas avaliações específicas para alunos com dificuldades?</label>
                     <select id="pc-q14" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1;"><option value="Sim">Sim</option><option value="Não">Não</option></select>
                 </div>
-                <div class="input-group"><label>Justifique sua resposta à questão anterior e explique como foi feita a recuperação:</label><textarea id="pc-q16" rows="2"></textarea></div>
+                <div class="input-group"><label>Justifique sua resposta à questão anterior e explique como foi feita a recuperação:</label><textarea id="pc-q16" rows="2" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px;"></textarea></div>
                 <div class="input-group">
                     <label>Foram utilizados instrumentos diferenciados para recuperação?</label>
                     <select id="pc-q17" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1;"><option value="Sim">Sim</option><option value="Não">Não</option></select>
                 </div>
-
             </div>
             
-            <!-- RODAPÉ FIXO PARA SALVAR -->
             <div style="padding: 15px 25px; background: white; border-top: 1px solid #e2e8f0; text-align: right;">
                 <button class="btn-salvar" style="background-color: #0d9488; width: 100%; font-size: 16px; padding: 14px;" id="btn-save-conselho" onclick="enviarPreConselho()">
                     <i class="fa-solid fa-paper-plane"></i> Enviar Avaliação da Turma
@@ -939,15 +711,29 @@
             </div>
         </div>
     </div>
-    <!-- MODAL RELATÓRIO -->
+
+    <div id="modal-selecionar-turma" class="modal-overlay" onclick="fecharModalSelecaoEvent(event)">
+        <div class="modal-content" style="max-width: 400px; padding: 25px;">
+            <h3 style="margin-bottom: 15px; color: #005088;">Selecione a Turma</h3>
+            <select id="select-turma-relatorio" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; margin-bottom: 20px;">
+                <option value="">-- Escolha uma Turma --</option>
+            </select>
+            <div style="display: flex; gap: 10px;">
+                <button onclick="document.getElementById('modal-selecionar-turma').style.display='none'" class="btn-cancelar" style="padding: 10px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; flex: 1;">Cancelar</button>
+                <button onclick="confirmarGeracaoRelatorio()" style="background: #005088; color: white; padding: 10px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; flex: 1;">Gerar PDF</button>
+            </div>
+        </div>
+    </div>
+
     <div class="modal-overlay" id="modal-relatorio-setor" onclick="fecharModalRelatorioEvent(event)">
         <div class="modal-content">
             <div class="modal-header"><h3 id="modal-relatorio-titulo"></h3><button onclick="fecharModalRelatorio()" style="background:none;border:none;color:white;font-size:20px;">&times;</button></div>
             <div class="modal-body" id="modal-relatorio-lista"></div>
         </div>
     </div>
-<div id="toast-container"></div>
-<div class="modal-overlay" id="modal-admin" onclick="fecharModalAdminEvent(event)">
+    <div id="toast-container"></div>
+
+    <div class="modal-overlay" id="modal-admin" onclick="fecharModalAdminEvent(event)">
         <div class="modal-content" style="max-width: 600px;">
             <div class="modal-header" style="background-color: #475569;">
                 <h3><i class="fa-solid fa-gear"></i> Painel de Gestão SIGA</h3>
@@ -955,36 +741,30 @@
             </div>
             <div class="modal-body" style="padding: 25px; overflow-y: visible;">
                 <h4 style="margin-bottom: 15px; color: #005088;"><i class="fa-solid fa-user-pen"></i> Remanejar / Excluir Aluno</h4>
-                
                 <div class="input-group">
                     <label>Buscar Aluno:</label>
                     <input type="text" id="admin-nome-aluno" list="lista-todos-alunos" placeholder="Digite o nome exato do aluno...">
                 </div>
-                
                 <div class="input-group">
                     <label>Ação / Nova Turma:</label>
                     <select id="admin-nova-turma" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 16px;">
-                        </select>
+                    </select>
                 </div>
-                
                 <button class="btn-salvar" style="background-color: #475569; margin-top: 10px;" onclick="executarAcaoAluno()" id="btn-exec-admin">Confirmar Ação</button>
                 <hr style="margin: 25px 0; border: 0; border-top: 1px solid #cbd5e1;">
 
                 <h4 style="margin-bottom: 15px; color: #b45309;"><i class="fa-solid fa-users-gear"></i> Gestão de Equipe (Usuários)</h4>
-                
                 <div class="input-group">
                     <label>E-mail (Login / Chave de Busca):</label>
                     <input type="email" id="admin-user-email" placeholder="email@escola.pr.gov.br">
                 </div>
-                
                 <div class="input-group">
                     <label>Nome Completo:</label>
                     <input type="text" id="admin-user-nome" placeholder="Nome do Servidor">
                 </div>
-                
                 <div style="display: flex; gap: 10px; margin-bottom: 15px;">
                     <div style="flex: 1;">
-                        <label>Setor:</label>
+                        <label style="font-weight: bold; font-size: 14px; margin-bottom: 5px; display: block;">Setor:</label>
                         <select id="admin-user-setor" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;">
                             <option value="professores">Professores</option>
                             <option value="meivs">MEIV'S</option>
@@ -994,7 +774,7 @@
                         </select>
                     </div>
                     <div style="flex: 1;">
-                        <label>Nível de Acesso:</label>
+                        <label style="font-weight: bold; font-size: 14px; margin-bottom: 5px; display: block;">Nível de Acesso:</label>
                         <select id="admin-user-nivel" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;">
                             <option value="1">1 - Padrão</option>
                             <option value="2">2 - Intermediário</option>
@@ -1002,12 +782,10 @@
                         </select>
                     </div>
                 </div>
-                
                 <div class="input-group">
                     <label>Senha (Somente números - ex: RG):</label>
                     <input type="text" id="admin-user-senha" placeholder="Deixe em branco para manter a atual (na edição)">
                 </div>
-                
                 <div style="display: flex; gap: 10px; margin-top: 10px;">
                     <button class="btn-salvar" style="background-color: #059669; flex: 2;" onclick="salvarUsuarioAdmin()" id="btn-save-user">Salvar Usuário</button>
                     <button class="btn-salvar" style="background-color: #dc2626; flex: 1;" onclick="deletarUsuarioAdmin()" id="btn-del-user">Excluir</button>
@@ -1026,24 +804,21 @@
         let patTodos = [], patAmbientes = [], patSalaFiltro = 'TODOS', patCameraAtiva = null;
 
         function mostrarToast(mensagem, tipo = 'sucesso') {
-    const container = document.getElementById('toast-container');
-    const toast = document.createElement('div');
-    toast.className = `toast ${tipo}`;
-    
-    // Define o ícone com base no tipo
-    let icone = 'fa-circle-check';
-    if (tipo === 'erro') icone = 'fa-circle-xmark';
-    if (tipo === 'aviso') icone = 'fa-triangle-exclamation';
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${tipo}`;
+            let icone = 'fa-circle-check';
+            if (tipo === 'erro') icone = 'fa-circle-xmark';
+            if (tipo === 'aviso') icone = 'fa-triangle-exclamation';
 
-    toast.innerHTML = `<i class="fa-solid ${icone}"></i> <span>${mensagem}</span>`;
-    container.appendChild(toast);
+            toast.innerHTML = `<i class="fa-solid ${icone}"></i> <span>${mensagem}</span>`;
+            container.appendChild(toast);
 
-    // Remove o toast automaticamente após 3.5 segundos
-    setTimeout(() => {
-        toast.classList.add('fade-out');
-        setTimeout(() => toast.remove(), 400); // Espera a animação terminar
-    }, 3500);
-}
+            setTimeout(() => {
+                toast.classList.add('fade-out');
+                setTimeout(() => toast.remove(), 400); 
+            }, 3500);
+        }
         
         // ========== SESSÃO ==========
         window.addEventListener('DOMContentLoaded', () => {
@@ -1075,36 +850,26 @@
         }
 
         // ========== PAINEL PRINCIPAL ==========
-function inicializarPainel() {
-            // 1. Esconde a tela de login (SE ela existir nessa página)
+        function inicializarPainel() {
             const telaLogin = document.getElementById('login-screen');
             if (telaLogin) { telaLogin.style.display = 'none'; }
             
-            // 2. Mostra a interface principal
             const interfaceApp = document.getElementById('app-interface');
             if (interfaceApp) { interfaceApp.style.display = 'flex'; }
             
-            // 3. Atualiza o nome de quem está logado
             const displayUser = document.getElementById('user-display');
             if (displayUser) {
                 displayUser.innerHTML = `<i class="fa-solid fa-user-check"></i> ${usuarioLogado.nome} (${usuarioLogado.setor === 'professores' ? 'PROFESSORES' : usuarioLogado.setor.toUpperCase()})`;
             }
             
-            // 4. Verifica o Botão de Patrimônio
             const btnPat = document.getElementById('btn-abrir-patrimonio');
-            if (btnPat) {
-                btnPat.style.display = (usuarioLogado.nivel >= 3) ? 'inline-flex' : 'none';
-            }
+            if (btnPat) { btnPat.style.display = (usuarioLogado.nivel >= 3) ? 'inline-flex' : 'none'; }
             
-            // 5. Verifica o Botão de Gestão (Engrenagem)
             const btnAdmin = document.getElementById('btn-abrir-admin');
-            if (btnAdmin) {
-                btnAdmin.style.display = (usuarioLogado.nivel >= 3) ? 'inline-flex' : 'none';
-            }
+            if (btnAdmin) { btnAdmin.style.display = (usuarioLogado.nivel >= 3) ? 'inline-flex' : 'none'; }
             
             aplicarBloqueioSetores(usuarioLogado.setor, usuarioLogado.nivel);
             
-            // Agora o código flui livremente até aqui sem travar
             carregarAlunosETurmas(); 
             carregarRegistrosDoServidor();
         }
@@ -1124,45 +889,38 @@ function inicializarPainel() {
         function alternarAbaMobile(setor, btn) {
             document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            document.querySelectorAll('.sector-column').forEach(c => { c.style.display = 'none'; c.classList.remove('active'); });
+            document.querySelectorAll('.sector-column').forEach(c => { c.classList.remove('active'); });
             const col = document.getElementById(`col-${setor}`);
-            col.classList.add('active'); col.style.display = 'flex';
+            if (col) col.classList.add('active'); 
         }
 
-async function carregarAlunosETurmas() {
-    cacheAlunosPorTurma = {};
-    const ul = document.getElementById('lista-turmas-sidebar');
-    
-    try {
-        const response = await fetch(COLS_ALUNOS_URL);
-        const text = await response.text();
-        
-        // Isola apenas o conteúdo JSON da resposta do Google
-        const jsonText = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
-        const data = JSON.parse(jsonText);
-        
-        // Dispara no console (F12) o que ele conseguiu ler da planilha
-        console.log("Dados lidos da aba Alunos:", data);
-        
-        const linhas = data.table.rows;
-        linhas.forEach(r => {
-            // Verifica se a Coluna B (índice 1) existe e tem valor
-            if (r.c && r.c[1] && r.c[1].v) {
-                const nome = r.c[1].v.toString().trim();
-                const turma = r.c[2] && r.c[2].v ? r.c[2].v.toString().trim() : 'Sem Turma';
+        async function carregarAlunosETurmas() {
+            cacheAlunosPorTurma = {};
+            const ul = document.getElementById('lista-turmas-sidebar');
+            
+            try {
+                const response = await fetch(COLS_ALUNOS_URL);
+                const text = await response.text();
+                const jsonText = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
+                const data = JSON.parse(jsonText);
                 
-                if (!cacheAlunosPorTurma[turma]) cacheAlunosPorTurma[turma] = [];
-                cacheAlunosPorTurma[turma].push(nome);
+                const linhas = data.table.rows;
+                linhas.forEach(r => {
+                    if (r.c && r.c[1] && r.c[1].v) {
+                        const nome = r.c[1].v.toString().trim();
+                        const turma = r.c[2] && r.c[2].v ? r.c[2].v.toString().trim() : 'Sem Turma';
+                        if (!cacheAlunosPorTurma[turma]) cacheAlunosPorTurma[turma] = [];
+                        cacheAlunosPorTurma[turma].push(nome);
+                    }
+                });
+                
+                renderizarSidebarTurmas();
+                preencherBuscaGlobal();
+            } catch (e) { 
+                console.error("Falha ao processar os alunos:", e); 
+                ul.innerHTML = '<li class="turma-item" style="color:#f87171;"><i class="fa-solid fa-triangle-exclamation"></i> Erro na Tabela</li>';
             }
-        });
-        
-        renderizarSidebarTurmas();
-        preencherBuscaGlobal();
-    } catch (e) { 
-        console.error("Falha ao processar os alunos:", e); 
-        ul.innerHTML = '<li class="turma-item" style="color:#f87171;"><i class="fa-solid fa-triangle-exclamation"></i> Erro na Tabela</li>';
-    }
-}
+        }
 
         function renderizarSidebarTurmas() {
             const ul = document.getElementById('lista-turmas-sidebar');
@@ -1183,7 +941,7 @@ async function carregarAlunosETurmas() {
             });
         }
 
-function selecionarTurma(turma) {
+        function selecionarTurma(turma) {
             turmaSelecionadaAtiva = turma;
             const select = document.getElementById('select-alunos');
             select.innerHTML = '<option value="">-- Escolha o Aluno --</option>';
@@ -1198,8 +956,6 @@ function selecionarTurma(turma) {
             
             select.value = '';
             filtrarRegistrosPorAluno();
-            
-            // FECHA O MENU LATERAL AUTOMATICAMENTE NO CELULAR
             document.getElementById('app-sidebar').classList.remove('open');
         }
 
@@ -1212,45 +968,28 @@ function selecionarTurma(turma) {
             } catch (e) { console.error(e); }
         }
 
-function atualizarGraficosMural() {
-    const total = todosOsRegistros.length;
-    const meivs = todosOsRegistros.filter(r => r.setor.toLowerCase() === 'meivs').length;
-    const pedagogico = todosOsRegistros.filter(r => r.setor.toLowerCase() === 'pedagogico').length;
-    const adm = todosOsRegistros.filter(r => r.setor.toLowerCase() === 'adm').length;
-    const professores = todosOsRegistros.filter(r => r.setor.toLowerCase() === 'professores' || r.setor.toLowerCase() === 'direcao').length;
+        function atualizarGraficosMural() {
+            const total = todosOsRegistros.length;
+            const meivs = todosOsRegistros.filter(r => r.setor.toLowerCase() === 'meivs').length;
+            const pedagogico = todosOsRegistros.filter(r => r.setor.toLowerCase() === 'pedagogico').length;
+            const adm = todosOsRegistros.filter(r => r.setor.toLowerCase() === 'adm').length;
+            const professores = todosOsRegistros.filter(r => r.setor.toLowerCase() === 'professores' || r.setor.toLowerCase() === 'direcao').length;
 
-    // Atualiza os Cartões (IDs do NOVO Dashboard)
-    const elTotal = document.getElementById('dash-val-total');
-    if(elTotal) elTotal.innerText = total;
-    
-    const elMeivs = document.getElementById('dash-val-meivs');
-    if(elMeivs) elMeivs.innerText = meivs;
-    
-    const elPed = document.getElementById('dash-val-pedagogico');
-    if(elPed) elPed.innerText = pedagogico;
-    
-    const elProfs = document.getElementById('dash-val-professores');
-    if(elProfs) elProfs.innerText = professores;
+            const elTotal = document.getElementById('dash-val-total'); if(elTotal) elTotal.innerText = total;
+            const elMeivs = document.getElementById('dash-val-meivs'); if(elMeivs) elMeivs.innerText = meivs;
+            const elPed = document.getElementById('dash-val-pedagogico'); if(elPed) elPed.innerText = pedagogico;
+            const elProfs = document.getElementById('dash-val-professores'); if(elProfs) elProfs.innerText = professores;
 
-    // Calcula porcentagens
-    const pctMeivs = total === 0 ? 0 : Math.round((meivs / total) * 100);
-    const pctPed = total === 0 ? 0 : Math.round((pedagogico / total) * 100);
-    const pctAdm = total === 0 ? 0 : Math.round((adm / total) * 100);
-    const pctProf = total === 0 ? 0 : Math.round((professores / total) * 100);
+            const pctMeivs = total === 0 ? 0 : Math.round((meivs / total) * 100);
+            const pctPed = total === 0 ? 0 : Math.round((pedagogico / total) * 100);
+            const pctAdm = total === 0 ? 0 : Math.round((adm / total) * 100);
+            const pctProf = total === 0 ? 0 : Math.round((professores / total) * 100);
 
-    // Atualiza as Barras (IDs do NOVO Dashboard)
-    const bMeivs = document.getElementById('dash-bar-meivs');
-    if(bMeivs) { bMeivs.style.width = pctMeivs + '%'; document.getElementById('dash-pct-meivs').innerText = pctMeivs + '%'; }
-    
-    const bPed = document.getElementById('dash-bar-pedagogico');
-    if(bPed) { bPed.style.width = pctPed + '%'; document.getElementById('dash-pct-pedagogico').innerText = pctPed + '%'; }
-    
-    const bAdm = document.getElementById('dash-bar-adm');
-    if(bAdm) { bAdm.style.width = pctAdm + '%'; document.getElementById('dash-pct-adm').innerText = pctAdm + '%'; }
-    
-    const bProf = document.getElementById('dash-bar-professores');
-    if(bProf) { bProf.style.width = pctProf + '%'; document.getElementById('dash-pct-professores').innerText = pctProf + '%'; }
-}
+            const bMeivs = document.getElementById('dash-bar-meivs'); if(bMeivs) { bMeivs.style.width = pctMeivs + '%'; document.getElementById('dash-pct-meivs').innerText = pctMeivs + '%'; }
+            const bPed = document.getElementById('dash-bar-pedagogico'); if(bPed) { bPed.style.width = pctPed + '%'; document.getElementById('dash-pct-pedagogico').innerText = pctPed + '%'; }
+            const bAdm = document.getElementById('dash-bar-adm'); if(bAdm) { bAdm.style.width = pctAdm + '%'; document.getElementById('dash-pct-adm').innerText = pctAdm + '%'; }
+            const bProf = document.getElementById('dash-bar-professores'); if(bProf) { bProf.style.width = pctProf + '%'; document.getElementById('dash-pct-professores').innerText = pctProf + '%'; }
+        }
 
         function formatarDataEHora(s) {
             if (!s) return ''; s = s.toString().trim();
@@ -1271,101 +1010,87 @@ function atualizarGraficosMural() {
             return 'Sem Turma';
         }
 
-    function filtrarRegistrosPorAluno() {
-    const select = document.getElementById('select-alunos');
-    const mural = document.getElementById('welcome-dashboard-mural');
-    const mini = document.getElementById('student-mini-dash');
-    const grid = document.getElementById('siga-columns-grid'); // Este é o nosso contêiner das abas
-    const pdf = document.getElementById('btn-gerar-pdf-oficial');
-    const tabs = document.getElementById('mobile-tabs-container');
+        function filtrarRegistrosPorAluno() {
+            const select = document.getElementById('select-alunos');
+            const mural = document.getElementById('welcome-dashboard-mural');
+            const mini = document.getElementById('student-mini-dash');
+            const grid = document.getElementById('siga-columns-grid'); 
+            const pdf = document.getElementById('btn-gerar-pdf-oficial');
+            const tabs = document.getElementById('mobile-tabs-container');
 
-    const setDisplay = (el, val) => { if (el) el.style.display = val; };
+            const setDisplay = (el, val) => { if (el) el.style.display = val; };
 
-    // CASO NENHUM ALUNO SELECIONADO
-    if (!select || !select.value || select.value === "Selecione uma turma...") {
-        setDisplay(mural, 'flex');
-        setDisplay(mini, 'none');
-        setDisplay(grid, 'none'); // Esconde as abas se não houver aluno
-        setDisplay(pdf, 'none');
-        setDisplay(tabs, 'none');
-        return;
-    }
-
-    // CASO ALUNO SELECIONADO: FORÇA A EXIBIÇÃO
-    setDisplay(mural, 'none');
-    setDisplay(mini, 'flex');
-    
-    // Força o container das abas a aparecer e garante que tenha altura
-    if (grid) {
-        grid.style.display = 'block'; 
-        grid.style.visibility = 'visible';
-        grid.style.opacity = '1';
-    }
-    
-    setDisplay(pdf, 'inline-flex');
-    if (tabs) tabs.style.display = (window.innerWidth <= 768) ? 'flex' : 'flex'; // Mudamos para flex para alinhar melhor
-
-    // ATIVAÇÃO FORÇADA DA ABA MEIV'S
-    const colMeivs = document.getElementById('col-meivs');
-    if (colMeivs) {
-        document.querySelectorAll('.sector-column').forEach(c => c.classList.remove('active'));
-        colMeivs.classList.add('active');
-    }
-    
-    // ATIVAÇÃO FORÇADA DO BOTÃO MEIV'S
-    const btnMeivs = document.querySelector('#mobile-tabs-container .tab-button');
-    if (btnMeivs) {
-        document.querySelectorAll('#mobile-tabs-container .tab-button').forEach(b => b.classList.remove('active'));
-        btnMeivs.classList.add('active');
-    }
-    
-    // ... (o restante da sua função permanece exatamente igual)
-
-    const aluno = select.value;
-    
-    // Limpa os feeds anteriores
-    ['meivs','pedagogico','adm','direcao'].forEach(s => {
-        const feed = document.getElementById(`feed-${s}`);
-        if (feed) feed.innerHTML = '';
-    });
-
-    let cm=0, cp=0, ca=0, cf=0;
-
-    todosOsRegistros.forEach(r => {
-        if (r.aluno && r.aluno.trim() === aluno) {
-            let setor = r.setor;
-            if (setor === 'meivs') cm++;
-            else if (setor === 'pedagogico') cp++;
-            else if (setor === 'adm') ca++;
-            else if (setor === 'professores' || setor === 'direcao') cf++;
-            
-            if (setor === 'professores') setor = 'direcao';
-            
-            const feed = document.getElementById(`feed-${setor}`);
-            if (feed) {
-                const card = document.createElement('div'); 
-                card.className = 'post-card';
-                const botoes = (usuarioLogado && usuarioLogado.nivel >= 3) ? 
-                    `<div class="card-actions"><button class="btn-action-card btn-edit-card" onclick="editarRegistroServidor(${r.idLinha}, '${r.setor}')"><i class="fa-solid fa-pen-to-square"></i> Editar</button><button class="btn-action-card btn-delete-card" onclick="excluirRegistroServidor(${r.idLinha})"><i class="fa-solid fa-trash-can"></i> Apagar</button></div>` : '';
-                
-                card.innerHTML = `<p class="post-text" id="text-card-${r.idLinha}">${r.texto}</p><div class="post-footer"><span><i class="fa-solid fa-user"></i>${r.funcionario || 'SIGA'}</span><span><i class="fa-solid fa-clock"></i>${formatarDataEHora(r.dataAtual)}</span></div>${botoes}`;
-                feed.appendChild(card);
+            if (!select || !select.value || select.value === "Selecione uma turma...") {
+                setDisplay(mural, 'flex');
+                setDisplay(mini, 'none');
+                setDisplay(grid, 'none'); 
+                setDisplay(pdf, 'none');
+                setDisplay(tabs, 'none');
+                return;
             }
-        }
-    });
 
-    const total = cm+cp+ca+cf;
-    document.getElementById('dash-total-count').innerText = total;
-    ['bar-meivs','bar-pedag','bar-adm','bar-profs'].forEach((id,i) => {
-        const val = [cm,cp,ca,cf][i];
-        const bar = document.getElementById(id);
-        if (bar) bar.style.width = total ? Math.max((val/total)*100, 5) + '%' : '0%';
-    });
-}
+            setDisplay(mural, 'none');
+            setDisplay(mini, 'flex');
+            setDisplay(grid, 'block');
+            setDisplay(pdf, 'inline-flex');
+            setDisplay(tabs, 'flex'); 
+
+            const colMeivs = document.getElementById('col-meivs');
+            if (colMeivs) {
+                document.querySelectorAll('.sector-column').forEach(c => c.classList.remove('active'));
+                colMeivs.classList.add('active');
+            }
+            
+            const btnMeivs = document.querySelector('#mobile-tabs-container .tab-button');
+            if (btnMeivs) {
+                document.querySelectorAll('#mobile-tabs-container .tab-button').forEach(b => b.classList.remove('active'));
+                btnMeivs.classList.add('active');
+            }
+
+            const aluno = select.value;
+            
+            ['meivs','pedagogico','adm','direcao'].forEach(s => {
+                const feed = document.getElementById(`feed-${s}`);
+                if (feed) feed.innerHTML = '';
+            });
+
+            let cm=0, cp=0, ca=0, cf=0;
+
+            todosOsRegistros.forEach(r => {
+                if (r.aluno && r.aluno.trim() === aluno) {
+                    let setor = r.setor;
+                    if (setor === 'meivs') cm++;
+                    else if (setor === 'pedagogico') cp++;
+                    else if (setor === 'adm') ca++;
+                    else if (setor === 'professores' || setor === 'direcao') cf++;
+                    
+                    if (setor === 'professores') setor = 'direcao';
+                    
+                    const feed = document.getElementById(`feed-${setor}`);
+                    if (feed) {
+                        const card = document.createElement('div'); 
+                        card.className = 'post-card';
+                        const botoes = (usuarioLogado && usuarioLogado.nivel >= 3) ? 
+                            `<div class="card-actions"><button class="btn-action-card btn-edit-card" onclick="editarRegistroServidor(${r.idLinha}, '${r.setor}')"><i class="fa-solid fa-pen-to-square"></i> Editar</button><button class="btn-action-card btn-delete-card" onclick="excluirRegistroServidor(${r.idLinha})"><i class="fa-solid fa-trash-can"></i> Apagar</button></div>` : '';
+                        
+                        card.innerHTML = `<p class="post-text" id="text-card-${r.idLinha}">${r.texto}</p><div class="post-footer"><span><i class="fa-solid fa-user"></i>${r.funcionario || 'SIGA'}</span><span><i class="fa-solid fa-clock"></i>${formatarDataEHora(r.dataAtual)}</span></div>${botoes}`;
+                        feed.appendChild(card);
+                    }
+                }
+            });
+
+            const total = cm+cp+ca+cf;
+            document.getElementById('dash-total-count').innerText = total;
+            ['bar-meivs','bar-pedag','bar-adm','bar-profs'].forEach((id,i) => {
+                const val = [cm,cp,ca,cf][i];
+                const bar = document.getElementById(id);
+                if (bar) bar.style.width = total ? Math.max((val/total)*100, 5) + '%' : '0%';
+            });
+        }
 
         function verificarTeclaEnter(e, setor) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); salvarPost(setor); } }
 
-async function salvarPost(setor) {
+        async function salvarPost(setor) {
             const textarea = document.getElementById(`text-${setor}`), texto = textarea.value.trim(), aluno = document.getElementById('select-alunos').value, btn = document.getElementById(`btn-${setor}`);
             if (!texto || !aluno) {
                 mostrarToast('Selecione um aluno e digite algo antes de salvar.', 'aviso');
@@ -1436,11 +1161,7 @@ async function salvarPost(setor) {
 
         function gerarRelatorioGeralPDF() {
             mostrarToast('Preparando PDF do Dashboard...', 'aviso');
-            
-            // Pega a tela inteira do mural para "fotografar"
             const elemento = document.getElementById('welcome-dashboard-mural');
-            
-            // Configurações do PDF
             const opt = {
                 margin:       15,
                 filename:     'Dashboard_Geral_SIGA.pdf',
@@ -1448,8 +1169,6 @@ async function salvarPost(setor) {
                 html2canvas:  { scale: 2, useCORS: true },
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
-            
-            // Gera e baixa o arquivo
             html2pdf().set(opt).from(elemento).save().then(() => {
                 mostrarToast('PDF baixado com sucesso!', 'sucesso');
             });
@@ -1507,6 +1226,7 @@ async function salvarPost(setor) {
 
         function fecharModalRelatorio() { document.getElementById('modal-relatorio-setor').style.display = 'none'; }
         function fecharModalRelatorioEvent(e) { if (e.target.id === 'modal-relatorio-setor') fecharModalRelatorio(); }
+        function fecharModalSelecaoEvent(e) { if (e.target.id === 'modal-selecionar-turma') document.getElementById('modal-selecionar-turma').style.display = 'none'; }
 
         // ========== MÓDULO PATRIMÔNIO ==========
         function patInicializar() {
@@ -1710,21 +1430,19 @@ async function salvarPost(setor) {
             const pai = patTodos.find(i => i.codigo === cod);
             preview.innerHTML = pai ? '✅ Pai: ' + pai.item : '⚠️ Não localizado.';
         }
-// ==== BUSCA GLOBAL DE ALUNOS ====
+
+        // ==== BUSCA GLOBAL DE ALUNOS ====
         function preencherBuscaGlobal() {
             const datalist = document.getElementById('lista-todos-alunos');
             datalist.innerHTML = '';
             let todosAlunos = [];
             
-            // Junta todos os alunos de todas as turmas em uma lista só
             for (let turma in cacheAlunosPorTurma) {
                 todosAlunos = todosAlunos.concat(cacheAlunosPorTurma[turma]);
             }
             
-            // Remove possíveis nomes duplicados e organiza em ordem alfabética
             todosAlunos = [...new Set(todosAlunos)].sort();
             
-            // Coloca os nomes no Datalist (motor de sugestão do HTML)
             todosAlunos.forEach(a => {
                 const opt = document.createElement('option');
                 opt.value = a;
@@ -1738,20 +1456,14 @@ async function salvarPost(setor) {
             
             const turma = encontrarTurmaDoAluno(nomeBuscado);
             if (turma && turma !== 'Sem Turma') {
-                // 1. Destaca a turma no menu lateral esquerdo
                 document.querySelectorAll('.turma-item').forEach(el => el.classList.remove('active'));
                 const itensTurma = Array.from(document.querySelectorAll('.turma-item'));
                 const itemEncontrado = itensTurma.find(el => el.innerText.includes(turma));
                 if (itemEncontrado) itemEncontrado.classList.add('active');
                 
-                // 2. Seleciona a turma no sistema e depois marca o aluno no menu suspenso
                 selecionarTurma(turma);
                 document.getElementById('select-alunos').value = nomeBuscado;
-                
-                // 3. Atualiza os murais com os dados dele
                 filtrarRegistrosPorAluno();
-                
-                // Limpa a barra de pesquisa para a próxima
                 document.getElementById('input-busca-aluno').value = '';
             } else {
                 mostrarToast('Aluno não encontrado na base de dados.', 'aviso');
@@ -1763,10 +1475,8 @@ async function salvarPost(setor) {
             const body = document.body;
             const btnIcone = document.getElementById('btn-icone-tema');
             
-            // Ativa ou desativa a classe no corpo inteiro do site
             body.classList.toggle('dark-mode');
             
-            // Troca o ícone e salva a preferência do usuário no navegador
             if (body.classList.contains('dark-mode')) {
                 btnIcone.innerHTML = '<i class="fa-solid fa-sun" style="color: #eab308;"></i>';
                 localStorage.setItem('sgi_ccma_tema', 'escuro');
@@ -1776,7 +1486,6 @@ async function salvarPost(setor) {
             }
         }
 
-        // Verifica a preferência logo que a página carrega
         window.addEventListener('DOMContentLoaded', () => {
             if (localStorage.getItem('sgi_ccma_tema') === 'escuro') {
                 document.body.classList.add('dark-mode');
@@ -1784,13 +1493,13 @@ async function salvarPost(setor) {
                 if (btnIcone) btnIcone.innerHTML = '<i class="fa-solid fa-sun" style="color: #eab308;"></i>';
             }
         });
+
         // ==== PAINEL DE ADMINISTRAÇÃO ====
         function abrirPainelAdmin() {
             document.getElementById('modal-admin').style.display = 'flex';
             const select = document.getElementById('admin-nova-turma');
             select.innerHTML = '<option value="">-- Escolha a nova turma --</option><option value="EXCLUIR" style="color: red; font-weight: bold;">❌ EXCLUIR ALUNO DO SISTEMA</option>';
             
-            // Puxa as turmas automaticamente para o painel
             Object.keys(cacheAlunosPorTurma).sort().forEach(t => {
                 select.innerHTML += `<option value="${t}">${t}</option>`;
             });
@@ -1816,7 +1525,7 @@ async function salvarPost(setor) {
                 operacao: operacao,
                 nome_aluno: nomeAluno,
                 nova_turma: novaTurma,
-                emailOperador: usuarioLogado.email // Para a validação de segurança lá no Sheets
+                emailOperador: usuarioLogado.email 
             };
 
             try {
@@ -1827,7 +1536,6 @@ async function salvarPost(setor) {
                     mostrarToast('Ação concluída com sucesso! Atualizando base...', 'sucesso');
                     document.getElementById('admin-nome-aluno').value = '';
                     fecharModalAdmin();
-                    // Força a recarga dos alunos para a tela atualizar
                     await carregarAlunosETurmas();
                 } else if (result.status === 'not_found') {
                     mostrarToast('Aluno não encontrado na base de dados.', 'erro');
@@ -1841,7 +1549,8 @@ async function salvarPost(setor) {
                 btn.innerHTML = 'Confirmar Ação';
             }
         }
-// ==== GESTÃO DE USUÁRIOS DA EQUIPE ====
+
+        // ==== GESTÃO DE USUÁRIOS DA EQUIPE ====
         async function salvarUsuarioAdmin() {
             const email = document.getElementById('admin-user-email').value.trim();
             const nome = document.getElementById('admin-user-nome').value.trim();
@@ -1856,7 +1565,7 @@ async function salvarPost(setor) {
 
             const payload = {
                 operacao: 'USER_SALVAR',
-                emailOperador: usuarioLogado.email, // Validação de segurança Nível 3
+                emailOperador: usuarioLogado.email, 
                 email: email,
                 nome: nome,
                 setor: setor,
@@ -1914,12 +1623,12 @@ async function salvarPost(setor) {
                 btn.disabled = false; btn.innerHTML = 'Excluir';
             }
         }
+
         // ==== MÓDULO PRÉ-CONSELHO ====
         function abrirPreConselho() {
             document.getElementById('modal-pre-conselho').style.display = 'flex';
             document.getElementById('pc-professor').value = usuarioLogado.nome;
             
-            // Popula as turmas disponíveis para o conselho
             const selectTurma = document.getElementById('pc-turma');
             selectTurma.innerHTML = '<option value="">Selecione a Turma...</option>';
             Object.keys(cacheAlunosPorTurma).sort().forEach(t => {
@@ -1927,362 +1636,234 @@ async function salvarPost(setor) {
             });
         }
 
-    async function enviarPreConselho() {
-    const turma = document.getElementById('pc-turma').value;
-    const disciplina = document.getElementById('pc-disciplina').value.trim();
-    
-    if (!turma || !disciplina) {
-        return mostrarToast('Preencha a Disciplina e selecione a Turma.', 'aviso');
-    }
-
-    const btn = document.getElementById('btn-save-conselho');
-    btn.disabled = true; 
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Enviando...';
-
-    // Coleta dados
-    const checkboxes = document.querySelectorAll('#pc-q12-checkboxes input:checked');
-    let instrumentos = Array.from(checkboxes).map(cb => cb.value);
-    const outros = document.getElementById('pc-q12-outros').value.trim();
-    if (outros) instrumentos.push(`Outros: ${outros}`);
-
-    const payload = {
-        operacao: 'PRE_CONSELHO_SALVAR',
-        professor: usuarioLogado.nome,
-        disciplina: disciplina,
-        turma: turma,
-        trimestre: document.getElementById('pc-trimestre').value,
-        q1: document.getElementById('pc-q1').value,
-        q2: document.getElementById('pc-q2').value,
-        q3: document.getElementById('pc-q3').value,
-        q4: document.getElementById('pc-q4').value,
-        q5: document.getElementById('pc-q5').value,
-        q6: document.getElementById('pc-q6').value.trim(),
-        q7: document.getElementById('pc-q7').value.trim(),
-        q8: document.getElementById('pc-q8').value.trim(),
-        q9: document.getElementById('pc-q9').value.trim(),
-        q10: document.getElementById('pc-q10').value.trim(),
-        q11: document.getElementById('pc-q11').value.trim(),
-        q12: instrumentos.join(', '),
-        q14: document.getElementById('pc-q14').value,
-        q16: document.getElementById('pc-q16').value.trim(),
-        q17: document.getElementById('pc-q17').value,
-        q18: document.getElementById('pc-q18').value.trim()
-    };
-
-    try {
-        const resp = await fetch(APPS_SCRIPT_URL, { 
-            method: 'POST', 
-            headers: { 'Content-Type': 'text/plain' }, // Importante garantir este header
-            body: JSON.stringify(payload) 
-        });
-        
-        const result = await resp.json();
-        
-        if (result.status === 'success') {
-            mostrarToast('Avaliação enviada com sucesso!', 'sucesso');
+        async function enviarPreConselho() {
+            const turma = document.getElementById('pc-turma').value;
+            const disciplina = document.getElementById('pc-disciplina').value.trim();
             
-            // Limpa os campos
-            document.querySelectorAll('#modal-pre-conselho input, #modal-pre-conselho textarea').forEach(el => {
-                if(el.type === 'checkbox') el.checked = false;
-                else el.value = '';
-            });
+            if (!turma || !disciplina) {
+                return mostrarToast('Preencha a Disciplina e selecione a Turma.', 'aviso');
+            }
 
-            // Fecha o modal após 1 segundo para o Toast aparecer
-            setTimeout(() => {
-                document.getElementById('modal-pre-conselho').style.display = 'none';
+            const btn = document.getElementById('btn-save-conselho');
+            btn.disabled = true; 
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Enviando...';
+
+            const checkboxes = document.querySelectorAll('#pc-q12-checkboxes input:checked');
+            let instrumentos = Array.from(checkboxes).map(cb => cb.value);
+            const outros = document.getElementById('pc-q12-outros').value.trim();
+            if (outros) instrumentos.push(`Outros: ${outros}`);
+
+            const payload = {
+                operacao: 'PRE_CONSELHO_SALVAR',
+                professor: usuarioLogado.nome,
+                disciplina: disciplina,
+                turma: turma,
+                trimestre: document.getElementById('pc-trimestre').value,
+                q1: document.getElementById('pc-q1').value,
+                q2: document.getElementById('pc-q2').value,
+                q3: document.getElementById('pc-q3').value,
+                q4: document.getElementById('pc-q4').value,
+                q5: document.getElementById('pc-q5').value,
+                q6: document.getElementById('pc-q6').value.trim(),
+                q7: document.getElementById('pc-q7').value.trim(),
+                q8: document.getElementById('pc-q8').value.trim(),
+                q9: document.getElementById('pc-q9').value.trim(),
+                q10: document.getElementById('pc-q10').value.trim(),
+                q11: document.getElementById('pc-q11').value.trim(),
+                q12: instrumentos.join(', '),
+                q14: document.getElementById('pc-q14').value,
+                q16: document.getElementById('pc-q16').value.trim(),
+                q17: document.getElementById('pc-q17').value,
+                q18: document.getElementById('pc-q18').value.trim()
+            };
+
+            try {
+                const resp = await fetch(APPS_SCRIPT_URL, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'text/plain' }, 
+                    body: JSON.stringify(payload) 
+                });
+                
+                const result = await resp.json();
+                
+                if (result.status === 'success') {
+                    mostrarToast('Avaliação enviada com sucesso!', 'sucesso');
+                    
+                    document.querySelectorAll('#modal-pre-conselho input, #modal-pre-conselho textarea').forEach(el => {
+                        if(el.type === 'checkbox') el.checked = false;
+                        else el.value = '';
+                    });
+
+                    setTimeout(() => {
+                        document.getElementById('modal-pre-conselho').style.display = 'none';
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Enviar Avaliação';
+                    }, 1000);
+                    
+                } else {
+                    throw new Error(result.message || 'Erro no servidor');
+                }
+            } catch(e) {
+                mostrarToast('Falha ao enviar: ' + e.message, 'erro');
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Enviar Avaliação';
-            }, 1000);
-            
-        } else {
-            throw new Error(result.message || 'Erro no servidor');
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Tentar Novamente';
+            }
         }
-    } catch(e) {
-        console.error(e);
-        mostrarToast('Falha ao enviar: ' + e.message, 'erro');
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Tentar Novamente';
-    }
-}
 
-async function gerarRelatorioPreConselho(turmaSelecionada) {
-    const todosRegistrosPC = await carregarRegistrosPreConselho(); 
-    
-    const turmaLimpa = turmaSelecionada.toString().trim().toLowerCase();
+        async function gerarRelatorioPreConselho(turmaSelecionada) {
+            const todosRegistrosPC = await carregarRegistrosPreConselho(); 
+            const turmaLimpa = turmaSelecionada.toString().trim().toLowerCase();
 
-    const dadosTurma = todosRegistrosPC.filter(r => 
-        r.turma && r.turma.toString().trim().toLowerCase() === turmaLimpa
-    );
+            const dadosTurma = todosRegistrosPC.filter(r => 
+                r.turma && r.turma.toString().trim().toLowerCase() === turmaLimpa
+            );
 
-    if (dadosTurma.length === 0) {
-        mostrarToast('Nenhum registro encontrado na aba Pré-Conselho para a turma ' + turmaSelecionada, 'aviso');
-        return;
-    }
+            if (dadosTurma.length === 0) {
+                mostrarToast('Nenhum registro encontrado na aba Pré-Conselho para a turma ' + turmaSelecionada, 'aviso');
+                return;
+            }
 
-let html = `
-        <div style="font-family: Arial, sans-serif; padding: 40px; color: #000;">
-            <h2 style="text-align:center; border-bottom: 2px solid #000; padding-bottom: 10px;">Relatório de Pré-Conselho - ${turmaSelecionada}</h2>
-            
-            ${dadosTurma.map(r => `
-                <div style="margin-bottom: 40px; border: 1px solid #ccc; padding: 20px; border-radius: 8px; page-break-inside: avoid;">
-                    <h3 style="background: #e9ecef; padding: 10px; margin-top: 0; border-radius: 5px;">
-                        Disciplina: ${r.disciplina || 'N/A'} | Professor: ${r.professor || 'N/A'}
-                    </h3>
-                    <p style="font-size: 14px; color: #555;"><strong>Trimestre:</strong> ${r.trimestre || 'N/A'} | <strong>Data de Envio:</strong> ${r.data || 'N/A'}</p>
+            let html = `
+                <div style="font-family: Arial, sans-serif; padding: 40px; color: #000;">
+                    <h2 style="text-align:center; border-bottom: 2px solid #000; padding-bottom: 10px;">Relatório de Pré-Conselho - ${turmaSelecionada}</h2>
                     
-                    <hr style="border-top: 1px dashed #ccc; margin: 15px 0;">
-                    
-                    <h4 style="color: #2c3e50; margin-bottom: 8px;">1. Rendimento da Turma (Quantitativo)</h4>
-                    <p style="margin: 5px 0;"><strong>Abaixo da Média:</strong> ${r.q1 || '0'} | <strong>Básico:</strong> ${r.q2 || '0'} | <strong>Adequado:</strong> ${r.q3 || '0'} | <strong>Avançado:</strong> ${r.q4 || '0'}</p>
-                    
-                    <h4 style="color: #2c3e50; margin-bottom: 8px; margin-top: 15px;">2. Análise da Turma</h4>
-                    <p style="margin: 5px 0;"><strong>Comprometimento:</strong> ${r.q5 || 'N/A'}</p>
-                    <p style="margin: 5px 0;"><strong>Pontos Positivos:</strong> ${r.q6 || 'N/A'}</p>
-                    <p style="margin: 5px 0;"><strong>Pontos Negativos/Dificuldades:</strong> ${r.q7 || 'N/A'}</p>
-                    <p style="margin: 5px 0;"><strong>Sugestões de Melhoria:</strong> ${r.q8 || 'N/A'}</p>
-                    
-                    <h4 style="color: #2c3e50; margin-bottom: 8px; margin-top: 15px;">3. Alunos em Destaque Negativo</h4>
-                    <p style="margin: 5px 0;"><strong>Alunos Abaixo da Média e Motivos:</strong> ${r.q9 || 'N/A'}</p>
-                    
-                    <h4 style="color: #2c3e50; margin-bottom: 8px; margin-top: 15px;">4. Metodologia e Avaliação</h4>
-                    <p style="margin: 5px 0;"><strong>Metodologia Aplicada:</strong> ${r.q10 || 'N/A'}</p>
-                    <p style="margin: 5px 0;"><strong>Recursos Utilizados:</strong> ${r.q11 || 'N/A'}</p>
-                    <p style="margin: 5px 0;"><strong>Instrumentos de Avaliação:</strong> ${r.q12 || 'N/A'}</p>
-                    <p style="margin: 5px 0;"><strong>Houve Avaliação Específica?</strong> ${r.q14 || 'N/A'}</p>
-                    
-                    <h4 style="color: #2c3e50; margin-bottom: 8px; margin-top: 15px;">5. Recuperação de Estudos</h4>
-                    <p style="margin: 5px 0;"><strong>Como foi a Recuperação:</strong> ${r.q16 || 'N/A'}</p>
-                    <p style="margin: 5px 0;"><strong>Usou Instrumentos Diferenciados?</strong> ${r.q17 || 'N/A'}</p>
-                    <p style="margin: 5px 0;"><strong>Plano de Recuperação Paralela:</strong> ${r.q18 || 'N/A'}</p>
+                    ${dadosTurma.map(r => `
+                        <div style="margin-bottom: 40px; border: 1px solid #ccc; padding: 20px; border-radius: 8px; page-break-inside: avoid;">
+                            <h3 style="background: #e9ecef; padding: 10px; margin-top: 0; border-radius: 5px;">
+                                Disciplina: ${r.disciplina || 'N/A'} | Professor: ${r.professor || 'N/A'}
+                            </h3>
+                            <p style="font-size: 14px; color: #555;"><strong>Trimestre:</strong> ${r.trimestre || 'N/A'} | <strong>Data de Envio:</strong> ${r.data || 'N/A'}</p>
+                            
+                            <hr style="border-top: 1px dashed #ccc; margin: 15px 0;">
+                            
+                            <h4 style="color: #2c3e50; margin-bottom: 8px;">1. Rendimento da Turma (Quantitativo)</h4>
+                            <p style="margin: 5px 0;"><strong>Abaixo da Média:</strong> ${r.q1 || '0'} | <strong>Básico:</strong> ${r.q2 || '0'} | <strong>Adequado:</strong> ${r.q3 || '0'} | <strong>Avançado:</strong> ${r.q4 || '0'}</p>
+                            
+                            <h4 style="color: #2c3e50; margin-bottom: 8px; margin-top: 15px;">2. Análise da Turma</h4>
+                            <p style="margin: 5px 0;"><strong>Comprometimento:</strong> ${r.q5 || 'N/A'}</p>
+                            <p style="margin: 5px 0;"><strong>Pontos Positivos:</strong> ${r.q6 || 'N/A'}</p>
+                            <p style="margin: 5px 0;"><strong>Pontos Negativos/Dificuldades:</strong> ${r.q7 || 'N/A'}</p>
+                            <p style="margin: 5px 0;"><strong>Sugestões de Melhoria:</strong> ${r.q8 || 'N/A'}</p>
+                            
+                            <h4 style="color: #2c3e50; margin-bottom: 8px; margin-top: 15px;">3. Alunos em Destaque Negativo</h4>
+                            <p style="margin: 5px 0;"><strong>Alunos Abaixo da Média e Motivos:</strong> ${r.q9 || 'N/A'}</p>
+                            
+                            <h4 style="color: #2c3e50; margin-bottom: 8px; margin-top: 15px;">4. Metodologia e Avaliação</h4>
+                            <p style="margin: 5px 0;"><strong>Metodologia Aplicada:</strong> ${r.q10 || 'N/A'}</p>
+                            <p style="margin: 5px 0;"><strong>Recursos Utilizados:</strong> ${r.q11 || 'N/A'}</p>
+                            <p style="margin: 5px 0;"><strong>Instrumentos de Avaliação:</strong> ${r.q12 || 'N/A'}</p>
+                            <p style="margin: 5px 0;"><strong>Houve Avaliação Específica?</strong> ${r.q14 || 'N/A'}</p>
+                            
+                            <h4 style="color: #2c3e50; margin-bottom: 8px; margin-top: 15px;">5. Recuperação de Estudos</h4>
+                            <p style="margin: 5px 0;"><strong>Como foi a Recuperação:</strong> ${r.q16 || 'N/A'}</p>
+                            <p style="margin: 5px 0;"><strong>Usou Instrumentos Diferenciados?</strong> ${r.q17 || 'N/A'}</p>
+                            <p style="margin: 5px 0;"><strong>Plano de Recuperação Paralela:</strong> ${r.q18 || 'N/A'}</p>
+                        </div>
+                    `).join('')}
                 </div>
-            `).join('')}
-        </div>
-    `;
+            `;
 
-    const win = window.open('', '_blank');
-    win.document.write(html);
-    win.document.close();
-    // Pequeno delay para garantir que o conteúdo carregou antes de chamar o print
-    setTimeout(() => {
-        win.print();
-    }, 500);
-}
-function abrirModalTurmasPreConselho() {
-    const select = document.getElementById('select-turma-relatorio');
-    // Limpa e preenche o select com as turmas que já estão no seu cache
-    select.innerHTML = '<option value="">-- Escolha uma Turma --</option>';
-    
-    Object.keys(cacheAlunosPorTurma).sort().forEach(turma => {
-        const opt = document.createElement('option');
-        opt.value = turma;
-        opt.textContent = turma;
-        select.appendChild(opt);
-    });
-    
-    document.getElementById('modal-selecionar-turma').style.display = 'flex';
-}
+            const win = window.open('', '_blank');
+            win.document.write(html);
+            win.document.close();
+            setTimeout(() => {
+                win.print();
+            }, 500);
+        }
 
-function confirmarGeracaoRelatorio() {
-    const turma = document.getElementById('select-turma-relatorio').value;
-    if (!turma) {
-        mostrarToast('Por favor, selecione uma turma!', 'aviso');
-        return;
-    }
-    // Fecha o modal e chama a função de gerar o relatório (aquela que criamos antes)
-    document.getElementById('modal-selecionar-turma').style.display = 'none';
-    gerarRelatorioPreConselho(turma); 
-}
-async function carregarRegistrosPreConselho() {
-    // Usamos Pre_Conselho exatamente como está na aba
-    const SHEET_PRE_CONSELHO_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=Pre_Conselho`; 
+        function abrirModalTurmasPreConselho() {
+            const select = document.getElementById('select-turma-relatorio');
+            select.innerHTML = '<option value="">-- Escolha uma Turma --</option>';
+            
+            Object.keys(cacheAlunosPorTurma).sort().forEach(turma => {
+                const opt = document.createElement('option');
+                opt.value = turma;
+                opt.textContent = turma;
+                select.appendChild(opt);
+            });
+            
+            document.getElementById('modal-selecionar-turma').style.display = 'flex';
+        }
 
-    try {
-        const response = await fetch(SHEET_PRE_CONSELHO_URL);
-        const text = await response.text();
-        const jsonText = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
-        const data = JSON.parse(jsonText);
-        
-        return data.table.rows.map(r => ({
-            data: r.c[0]?.v || '',
-            professor: r.c[1]?.v || '',
-            disciplina: r.c[2]?.v || '',
-            turma: r.c[3]?.v?.toString().trim() || '',
-            trimestre: r.c[4]?.v || '',
-            q1: r.c[5]?.v || '',
-            q2: r.c[6]?.v || '',
-            q3: r.c[7]?.v || '',
-            q4: r.c[8]?.v || '',
-            q5: r.c[9]?.v || '',
-            q6: r.c[10]?.v || '',
-            q7: r.c[11]?.v || '',
-            q8: r.c[12]?.v || '',
-            q9: r.c[13]?.v || '',
-            q10: r.c[14]?.v || '',
-            q11: r.c[15]?.v || '',
-            q12: r.c[16]?.v || '',
-            q14: r.c[17]?.v || '',
-            q16: r.c[18]?.v || '',
-            q17: r.c[19]?.v || '',
-            q18: r.c[20]?.v || '' // Coluna U
-        }));
-    } catch (e) {
-        console.error("Erro ao carregar Pré-Conselho:", e);
-        return [];
-    }
-}
+        function confirmarGeracaoRelatorio() {
+            const turma = document.getElementById('select-turma-relatorio').value;
+            if (!turma) {
+                mostrarToast('Por favor, selecione uma turma!', 'aviso');
+                return;
+            }
+            document.getElementById('modal-selecionar-turma').style.display = 'none';
+            gerarRelatorioPreConselho(turma); 
+        }
+
+        async function carregarRegistrosPreConselho() {
+            const SHEET_PRE_CONSELHO_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=Pre_Conselho`; 
+
+            try {
+                const response = await fetch(SHEET_PRE_CONSELHO_URL);
+                const text = await response.text();
+                const jsonText = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
+                const data = JSON.parse(jsonText);
+                
+                return data.table.rows.map(r => ({
+                    data: r.c[0]?.v || '',
+                    professor: r.c[1]?.v || '',
+                    disciplina: r.c[2]?.v || '',
+                    turma: r.c[3]?.v?.toString().trim() || '',
+                    trimestre: r.c[4]?.v || '',
+                    q1: r.c[5]?.v || '',
+                    q2: r.c[6]?.v || '',
+                    q3: r.c[7]?.v || '',
+                    q4: r.c[8]?.v || '',
+                    q5: r.c[9]?.v || '',
+                    q6: r.c[10]?.v || '',
+                    q7: r.c[11]?.v || '',
+                    q8: r.c[12]?.v || '',
+                    q9: r.c[13]?.v || '',
+                    q10: r.c[14]?.v || '',
+                    q11: r.c[15]?.v || '',
+                    q12: r.c[16]?.v || '',
+                    q14: r.c[17]?.v || '',
+                    q16: r.c[18]?.v || '',
+                    q17: r.c[19]?.v || '',
+                    q18: r.c[20]?.v || '' 
+                }));
+            } catch (e) {
+                console.error("Erro ao carregar Pré-Conselho:", e);
+                return [];
+            }
+        }
+
+        function abrirCaixaTexto(setor) {
+            const selectAlunos = document.getElementById('select-alunos');
+            const alunoSelecionado = selectAlunos.options[selectAlunos.selectedIndex].text;
+            const alunoValor = selectAlunos.value;
+
+            if (!alunoValor || alunoValor === "Selecione uma turma..." || alunoValor === "") {
+                alert("⚠️ Por favor, selecione um ALUNO na barra superior antes de criar um apontamento!");
+                selectAlunos.focus(); 
+                return; 
+            }
+
+            const titulos = {
+                'meivs': '<i class="fa-solid fa-shield-halved"></i> MEIV\'S',
+                'pedagogico': '<i class="fa-solid fa-book-open"></i> Pedagógico',
+                'adm': '<i class="fa-solid fa-folder-open"></i> ADM',
+                'direcao': '<i class="fa-solid fa-chalkboard-user"></i> Professores'
+            };
+
+            const h3 = document.querySelector('#overlay-text-' + setor + ' h3');
+            if (h3) {
+                h3.innerHTML = titulos[setor] + '<br><span style="font-size: 16px; color: #475569; display: block; margin-top: 8px; font-weight: normal;">Para o aluno(a): <strong>' + alunoSelecionado + '</strong></span>';
+            }
+
+            document.getElementById('overlay-text-' + setor).style.display = 'flex';
+            document.getElementById('text-' + setor).focus();
+        }
+
+        function fecharCaixaTexto(setor) {
+            document.getElementById('overlay-text-' + setor).style.display = 'none';
+            document.getElementById('text-' + setor).value = ''; 
+        }
     </script>
-<style>
-    /* Oculta tudo por padrão para evitar o "layout quebrado" inicial */
-    #siga-columns-grid { display: none !important; }
-    
-    /* Quando o grid estiver ativo, ele vira um container de abas */
-    #siga-columns-grid.ativo { 
-        display: block !important; 
-    }
-
-    /* Esconde as colunas */
-    .sector-column { display: none !important; }
-    
-    /* Mostra apenas a aba ativa */
-    .sector-column.active { display: block !important; }
-
-    /* Força o botão de Novo Apontamento a ser sempre visível e clicável */
-    .sector-column.active button[onclick*="abrirCaixaTexto"] {
-        display: block !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        width: 100% !important;
-        margin-bottom: 20px !important;
-    }
-</style>
 </body>
-<!-- ================= VISUAL DE ABAS CORRIGIDO ================= -->
-<style>
-    /* 1. Reset e posicionamento correto das abas */
-    #mobile-tabs-container {
-        display: flex !important;
-        justify-content: center;
-        flex-wrap: wrap;
-        gap: 10px;
-        margin-bottom: 20px;
-        padding: 0;
-        background: transparent;
-        border: none;
-        width: 100%;
-    }
-
-    #mobile-tabs-container .tab-button {
-        padding: 12px 24px !important;
-        font-size: 14px !important;
-        font-weight: bold !important;
-        border-radius: 8px !important;
-        border: none !important;
-        cursor: pointer;
-        background: #e2e8f0;
-        color: #475569;
-        transition: all 0.2s;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-
-    /* Cores de cada setor quando ativo */
-    #mobile-tabs-container .tab-button:nth-child(1).active { background: #0284c7 !important; color: white !important; }
-    #mobile-tabs-container .tab-button:nth-child(2).active { background: #0d9488 !important; color: white !important; }
-    #mobile-tabs-container .tab-button:nth-child(3).active { background: #4f46e5 !important; color: white !important; }
-    #mobile-tabs-container .tab-button:nth-child(4).active { background: #b91c1c !important; color: white !important; }
-
-    /* 2. Esconde as colunas antigas e prepara para virarem abas */
-    #siga-columns-grid {
-        display: block !important; 
-        padding: 0 !important;
-    }
-
-    .sector-column {
-        display: none !important; 
-        width: 100% !important; 
-        background: #ffffff !important;
-        border-radius: 8px !important;
-        border: 1px solid #e2e8f0 !important;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.05) !important;
-    }
-
-    /* Mostra apenas a aba ativa com uma animação suave */
-    .sector-column.active {
-        display: block !important;
-        animation: fadeIn 0.3s ease-in-out;
-    }
-
-    /* 3. Caixona de texto gigante e confortável para os professores */
-    .input-container {
-        padding: 20px !important;
-        background: #f8fafc !important;
-        border-bottom: 2px solid #e2e8f0 !important;
-        border-radius: 8px 8px 0 0 !important;
-    }
-
-    .input-container textarea {
-        width: 100% !important;
-        min-height: 200px !important; /* Altura ideal para relatórios grandes */
-        padding: 18px !important;
-        font-size: 16px !important; /* Previne zoom indesejado no celular */
-        line-height: 1.5 !important;
-        border: 1px solid #cbd5e1 !important;
-        border-radius: 8px !important;
-        resize: vertical !important;
-        box-shadow: inset 0 2px 4px rgba(0,0,0,0.02) !important;
-    }
-
-    /* Botão Salvar chamativo */
-    .input-container .btn-salvar {
-        width: 100% !important;
-        padding: 16px !important;
-        font-size: 16px !important;
-        margin-top: 15px !important;
-        border-radius: 8px !important;
-        font-weight: bold !important;
-        text-transform: uppercase !important;
-        letter-spacing: 1px !important;
-    }
-
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(5px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-<script>
-    function abrirCaixaTexto(setor) {
-        // 1. Pega o aluno que está selecionado na barra do topo
-        const selectAlunos = document.getElementById('select-alunos');
-        const alunoSelecionado = selectAlunos.options[selectAlunos.selectedIndex].text;
-        const alunoValor = selectAlunos.value;
-
-        // 2. Trava de Segurança: Verifica se o professor realmente escolheu um aluno
-        if (!alunoValor || alunoValor === "Selecione uma turma..." || alunoValor === "") {
-            alert("⚠️ Por favor, selecione um ALUNO na barra superior antes de criar um apontamento!");
-            selectAlunos.focus(); // Pisca o campo do aluno para ele ver onde é
-            return; // Bloqueia a abertura da caixa
-        }
-
-        // 3. Atualiza o título da caixa para mostrar o nome do aluno
-        const titulos = {
-            'meivs': '<i class="fa-solid fa-shield-halved"></i> MEIV\'S',
-            'pedagogico': '<i class="fa-solid fa-book-open"></i> Pedagógico',
-            'adm': '<i class="fa-solid fa-folder-open"></i> ADM',
-            'direcao': '<i class="fa-solid fa-chalkboard-user"></i> Professores'
-        };
-
-        const h3 = document.querySelector('#overlay-text-' + setor + ' h3');
-        if (h3) {
-            h3.innerHTML = titulos[setor] + '<br><span style="font-size: 16px; color: #475569; display: block; margin-top: 8px; font-weight: normal;">Para o aluno(a): <strong>' + alunoSelecionado + '</strong></span>';
-        }
-
-        // 4. Se tudo estiver certo, abre a caixa com foco no texto
-        document.getElementById('overlay-text-' + setor).style.display = 'flex';
-        document.getElementById('text-' + setor).focus();
-    }
-
-    function fecharCaixaTexto(setor) {
-        document.getElementById('overlay-text-' + setor).style.display = 'none';
-        document.getElementById('text-' + setor).value = ''; // Limpa o texto se ele cancelar
-    }
-</script>
-<!-- ============================================================ -->
 </html>
