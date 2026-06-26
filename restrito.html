@@ -100,7 +100,7 @@
         .dash-bar-track { width: 100%; height: 12px; background-color: #e2e8f0; border-radius: 10px; overflow: hidden; }
         .dash-bar-fill { height: 100%; border-radius: 10px; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); }
 
-        /* GRID DE COLUNAS E ABAS (CORRIGIDO) */
+        /* GRID DE COLUNAS E ABAS */
         .board-container { flex: 1; padding: 15px; background-color: #f8fafc; height: calc(100vh - 110px); overflow: hidden; display: none; }
         .sector-column { background-color: white; border-radius: 8px; border: 1px solid #e2e8f0; display: none; flex-direction: column; height: 100%; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         .sector-column.active { display: flex; animation: fadeIn 0.3s ease-in-out; }
@@ -249,6 +249,19 @@
         .btn-tema { background: none; border: none; color: #94a3b8; font-size: 20px; cursor: pointer; transition: color 0.2s; }
         .btn-tema:hover { color: #eab308; }
         
+        /* CORREÇÕES DE LEITURA DO MODO ESCURO */
+        .dark-mode .dash-card-value, 
+        .dark-mode .dash-panel-title,
+        .dark-mode .dash-bar-header,
+        .dark-mode .modal-content h3,
+        .dark-mode .modal-content h4,
+        .dark-mode .modal-content label,
+        .dark-mode .pat-form-group label { color: #f8fafc !important; }
+        .dark-mode .dash-card-title { color: #94a3b8 !important; }
+        .dark-mode select, .dark-mode input[type="text"], .dark-mode input[type="number"], .dark-mode input[type="email"], .dark-mode input[type="password"] { background-color: #0f172a !important; color: #f8fafc !important; border-color: #475569 !important; }
+        .dark-mode input:disabled { background-color: #1e293b !important; color: #94a3b8 !important; }
+        .dark-mode .modal-body div[style*="background: #f8fafc"] { background-color: #1e293b !important; }
+
     </style>
 </head>
 <body>
@@ -257,15 +270,18 @@
         <div class="login-box">
             <img src="img/SIGA.png" alt="Brasão" class="login-logo-nova">
             <h2>Área Restrita - SIGA</h2>
-            <p>Sua senha padrão são os números do seu RG</p>
+            <p>Uso exclusivo para servidores do CCM Anchieta</p>
+            
             <div class="input-group">
-                <label><i class="fa-solid fa-envelope"></i> E-mail:</label>
-                <input type="email" id="user-email" placeholder="nome.sobrenome@escola.pr.gov.br">
+                <label><i class="fa-solid fa-envelope"></i> E-mail Institucional:</label>
+                <input type="email" id="user-email" placeholder="Digite seu e-mail">
             </div>
+            
             <div class="input-group">
-                <label><i class="fa-solid fa-key"></i> Senha (RG):</label>
-                <input type="password" id="user-password" placeholder="Apenas números">
+                <label><i class="fa-solid fa-key"></i> Senha de Acesso:</label>
+                <input type="password" id="user-password" placeholder="Digite sua senha">
             </div>
+            
             <div id="error-message">E-mail ou Senha incorretos!</div>
             <button class="btn-login" id="btn-entrar-login" onclick="autenticarUsuario()">Entrar</button>
             <br>
@@ -330,8 +346,8 @@
                         <button id="btn-gerar-pdf-oficial" onclick="gerarFichaIndividualConselho()" style="background-color: #2563eb; color: white; padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2); display: none;">
                             <i class="fa-solid fa-file-invoice"></i> Apontamentos
                         </button>
-                        <button onclick="abrirModalTurmasPreConselho()" style="background-color: #8b5cf6; color: white; padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; box-shadow: 0 2px 4px rgba(139, 92, 246, 0.2);">
-                            <i class="fa-solid fa-users-gear"></i> Pré-Conselho
+                        <button id="btn-gerar-pdf-pre-conselho" onclick="abrirModalTurmasPreConselho()" style="display: none; background-color: #8b5cf6; color: white; padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; box-shadow: 0 2px 4px rgba(139, 92, 246, 0.2);">
+                            <i class="fa-solid fa-users-gear"></i> Relatório Pré-Conselho
                         </button>
                     </div>
                 </div>
@@ -731,6 +747,7 @@
             <div class="modal-body" id="modal-relatorio-lista"></div>
         </div>
     </div>
+    
     <div id="toast-container"></div>
 
     <div class="modal-overlay" id="modal-admin" onclick="fecharModalAdminEvent(event)">
@@ -867,6 +884,9 @@
             
             const btnAdmin = document.getElementById('btn-abrir-admin');
             if (btnAdmin) { btnAdmin.style.display = (usuarioLogado.nivel >= 3) ? 'inline-flex' : 'none'; }
+
+            const btnPdfPre = document.getElementById('btn-gerar-pdf-pre-conselho');
+            if (btnPdfPre) { btnPdfPre.style.display = (usuarioLogado.nivel >= 3) ? 'inline-flex' : 'none'; }
             
             aplicarBloqueioSetores(usuarioLogado.setor, usuarioLogado.nivel);
             
@@ -886,6 +906,7 @@
         }
 
         function alternarMenuLateral() { document.getElementById('app-sidebar').classList.toggle('open'); }
+        
         function alternarAbaMobile(setor, btn) {
             document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
@@ -1035,16 +1056,20 @@
             setDisplay(pdf, 'inline-flex');
             setDisplay(tabs, 'flex'); 
 
-            const colMeivs = document.getElementById('col-meivs');
-            if (colMeivs) {
+            // ATIVAÇÃO DINÂMICA DA ABA
+            let abaPadrao = usuarioLogado.setor === 'professores' ? 'direcao' : usuarioLogado.setor;
+            if (!['meivs', 'pedagogico', 'adm', 'direcao'].includes(abaPadrao)) abaPadrao = 'meivs';
+
+            const colAtiva = document.getElementById(`col-${abaPadrao}`);
+            if (colAtiva) {
                 document.querySelectorAll('.sector-column').forEach(c => c.classList.remove('active'));
-                colMeivs.classList.add('active');
+                colAtiva.classList.add('active');
             }
             
-            const btnMeivs = document.querySelector('#mobile-tabs-container .tab-button');
-            if (btnMeivs) {
+            const btnAtivo = document.querySelector(`.tab-button[onclick*="'${abaPadrao}'"]`);
+            if (btnAtivo) {
                 document.querySelectorAll('#mobile-tabs-container .tab-button').forEach(b => b.classList.remove('active'));
-                btnMeivs.classList.add('active');
+                btnAtivo.classList.add('active');
             }
 
             const aluno = select.value;
@@ -1175,12 +1200,32 @@
         }
         
         function aplicarBloqueioSetores(setor, nivel) {
-            ['meivs','pedagogico','adm','direcao'].forEach(s => {
-                const ta = document.getElementById(`text-${s}`), btn = document.getElementById(`btn-${s}`);
-                if (nivel >= 2) { ta.disabled = false; btn.disabled = false; }
+            const setoresDefinidos = ['meivs', 'pedagogico', 'adm', 'direcao'];
+            
+            setoresDefinidos.forEach(s => {
+                const ta = document.getElementById(`text-${s}`);
+                const btn = document.getElementById(`btn-${s}`);
+                const tabBtn = document.querySelector(`.tab-button[onclick*="'${s}'"]`);
+                
+                let liberado = false;
+                
+                if (nivel >= 2) { 
+                    liberado = true; 
+                } 
                 else {
-                    if (setor === s || (setor === 'professores' && s === 'direcao')) { ta.disabled = false; btn.disabled = false; }
-                    else { ta.disabled = true; btn.disabled = true; }
+                    if (setor === s || (setor === 'professores' && s === 'direcao')) { 
+                        liberado = true; 
+                    }
+                }
+                
+                if (liberado) {
+                    if (ta) ta.disabled = false; 
+                    if (btn) btn.disabled = false;
+                    if (tabBtn) tabBtn.style.display = 'inline-block';
+                } else {
+                    if (ta) ta.disabled = true; 
+                    if (btn) btn.disabled = true;
+                    if (tabBtn) tabBtn.style.display = 'none';
                 }
             });
         }
@@ -1697,7 +1742,7 @@
                     setTimeout(() => {
                         document.getElementById('modal-pre-conselho').style.display = 'none';
                         btn.disabled = false;
-                        btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Enviar Avaliação';
+                        btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Enviar Avaliação da Turma';
                     }, 1000);
                     
                 } else {
