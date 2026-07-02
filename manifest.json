@@ -8,13 +8,13 @@
   "theme_color": "#005088",
   "icons": [
     {
-      "src": "/img/SIGA-192px.png",
+      "src": "/img/SIGA-192x.png",
       "sizes": "192x192",
       "type": "image/png"
       "purpose": "any maskable"
     },
     {
-      "src": "/img/SIGA-512px.png",
+      "src": "/img/SIGA-512x.png",
       "sizes": "512x512",
       "type": "image/png"
       "purpose": "any maskable"
