@@ -1,12 +1,20 @@
 {
   "name": "SIGA - Anchieta",
   "short_name": "SIGA",
-  "start_url": "index.html",
+  "start_url": "/index.html",
   "display": "standalone",
   "background_color": "#005088",
   "theme_color": "#005088",
   "icons": [
-    { "src": "img/SIGA.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "img/SIGA.png", "sizes": "512x512", "type": "image/png" }
+    {
+      "src": "/img/SIGA.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/img/SIGA.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
   ]
 }
