@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CCM Anchieta | Colégio Cívico-Militar</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="manifest" href="Manifest.json">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <style>
         :root {
             --primary-blue: #0056a0;
@@ -366,4 +370,17 @@
                 showSlide(0);
             }
         });
+    // Adicione isto ao script principal
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  // Aqui você pode mostrar um botão na tela:
+  document.getElementById('btn-instalar').style.display = 'block';
+});
+
+// Ao clicar no botão
+document.getElementById('btn-instalar').addEventListener('click', () => {
+  deferredPrompt.prompt();
+});
     </script>
