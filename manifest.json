@@ -16,6 +16,7 @@
       "src": "/img/SIGA-512px.png",
       "sizes": "512x512",
       "type": "image/png"
+      "purpose": "maskable"
     }
   ]
 }
