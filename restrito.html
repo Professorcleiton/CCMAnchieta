@@ -229,7 +229,7 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
         /* MODO ESCURO */
-        body.dark-mode { background-color: #0f172a; color: #f8fafc; }
+        .dark-mode { background-color: #0f172a; color: #f8fafc; }
         .dark-mode .login-box { background-color: #1e293b; border-color: #334155; }
         .dark-mode .login-box h2, .dark-mode .login-box p { color: #f8fafc; }
         .dark-mode .login-logo-nova { background: #0f172a; border-color: #0f172a; }
@@ -260,11 +260,11 @@
         .dark-mode .dash-card-title { color: #94a3b8 !important; }
         .dark-mode select, .dark-mode input[type="text"], .dark-mode input[type="number"], .dark-mode input[type="email"], .dark-mode input[type="password"] { background-color: #0f172a !important; color: #f8fafc !important; border-color: #475569 !important; }
         .dark-mode input:disabled { background-color: #1e293b !important; color: #94a3b8 !important; }
-        .dark-mode .modal-body div[style*="background: #f8fafc"] { background-color: #1e293b !important; }
+        .dark-mode .modal- div[style*="background: #f8fafc"] { background-color: #1e293b !important; }
 
     </style>
 </head>
-<body>
+<>
 
     <div id="login-screen">
         <div class="login-box">
@@ -556,7 +556,7 @@
                     <h3 id="pat-table-subtitle">Itens Registrados</h3>
                     <div class="pat-table-wrapper">
                         <table class="pat-table"><thead><tr><th>Código</th><th>Item</th><th>Categoria</th><th>Local</th><th>Responsável</th><th>Última Mov.</th><th>Status</th></tr></thead>
-                            <tbody id="pat-table-body"><tr><td colspan="7" style="text-align:center;">Carregando...</td></tr></tbody>
+                            <t id="pat-table-"><tr><td colspan="7" style="text-align:center;">Carregando...</td></tr></t>
                         </table>
                     </div>
                 </div>
@@ -623,7 +623,7 @@
                 <h3><i class="fa-solid fa-clipboard-check"></i> Ficha de Pré-Conselho de Classe</h3>
                 <button onclick="document.getElementById('modal-pre-conselho').style.display='none'" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;">&times;</button>
             </div>
-            <div class="modal-body" style="padding: 25px; overflow-y: auto; flex: 1;">
+            <div class="modal-" style="padding: 25px; overflow-y: auto; flex: 1;">
                 <div style="background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #0d9488;">
                     <div style="display: flex; gap: 15px; flex-wrap: wrap;">
                         <div style="flex: 1; min-width: 200px;">
@@ -744,7 +744,7 @@
     <div class="modal-overlay" id="modal-relatorio-setor" onclick="fecharModalRelatorioEvent(event)">
         <div class="modal-content">
             <div class="modal-header"><h3 id="modal-relatorio-titulo"></h3><button onclick="fecharModalRelatorio()" style="background:none;border:none;color:white;font-size:20px;">&times;</button></div>
-            <div class="modal-body" id="modal-relatorio-lista"></div>
+            <div class="modal-" id="modal-relatorio-lista"></div>
         </div>
     </div>
     
@@ -756,7 +756,7 @@
                 <h3><i class="fa-solid fa-gear"></i> Painel de Gestão SIGA</h3>
                 <button onclick="fecharModalAdmin()" style="background:none;border:none;color:white;font-size:20px;">&times;</button>
             </div>
-            <div class="modal-body" style="padding: 25px; overflow-y: visible;">
+            <div class="modal-" style="padding: 25px; overflow-y: visible;">
                 <h4 style="margin-bottom: 15px; color: #005088;"><i class="fa-solid fa-user-pen"></i> Remanejar / Excluir Aluno</h4>
                 <div class="input-group">
                     <label>Buscar Aluno:</label>
@@ -1910,5 +1910,10 @@
             document.getElementById('text-' + setor).value = ''; 
         }
     </script>
+    <script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js');
+    }
+</script>
 </body>
 </html>
