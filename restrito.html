@@ -1167,29 +1167,49 @@
             }
         }
 
-        function gerarFichaIndividualConselho() {
-            const aluno = document.getElementById('select-alunos').value;
-            if (!aluno) return;
-            let html = `<div style="padding:25px;font-family:'Segoe UI',Arial;color:#000;background:#fff;">
-                <div style="display:flex;justify-content:space-between;border-bottom:3px double #005088;padding-bottom:12px;margin-bottom:20px;">
-                    <div><h4 style="margin:0;font-size:13px;color:#475569;">SECRETARIA DE ESTADO DA EDUCAÇÃO - SEED</h4><h4 style="margin:2px 0 0;font-size:12px;color:#64748b;">NÚCLEO REGIONAL DE EDUCAÇÃO DE UMUARAMA</h4><h2 style="margin:5px 0 0;color:#005088;font-size:18px;">COLÉGIO CÍVICO-MILITAR ANCHIETA</h2></div>
-                    <div><span style="font-size:10px;border:1px solid #005088;padding:4px 8px;border-radius:4px;">DOCUMENTO INTERNO</span></div>
-                </div>
-                <h3 style="text-align:center;margin-bottom:25px;">Ficha de Acompanhamento Individual do Estudante</h3>
-                <table style="width:100%;border-collapse:collapse;font-size:13px;">
-                    <tr><td style="padding:6px;border:1px solid #94a3b8;background:#f8fafc;font-weight:bold;">Estudante:</td><td style="padding:6px;border:1px solid #94a3b8;">${aluno}</td><td style="padding:6px;border:1px solid #94a3b8;background:#f8fafc;font-weight:bold;">Turma:</td><td style="padding:6px;border:1px solid #94a3b8;">${turmaSelecionadaAtiva}</td></tr>
-                </table>
-                <h4 style="font-size:13px;color:#005088;margin-top:15px;">Histórico de Apontamentos</h4>`;
-            ['meivs','pedagogico','adm','direcao'].forEach(setor => {
-                const registros = todosOsRegistros.filter(r => r.aluno === aluno && (r.setor === setor || (setor === 'direcao' && (r.setor === 'professores' || r.setor === 'direcao'))));
-                if (registros.length) {
-                    html += `<div style="margin-top:10px;background:#f1f5f9;padding:5px 10px;border-radius:4px;font-weight:bold;border-left:5px solid #005088;">${setor.toUpperCase()}</div>`;
-                    registros.forEach(p => html += `<div style="margin:8px 0;padding:8px 12px;background:#fff;border-bottom:1px solid #e2e8f0;"><div>${p.texto}</div><div style="font-size:10px;color:#64748b;text-align:right;">${p.funcionario} | ${formatarDataEHora(p.dataAtual)}</div></div>`);
-                }
-            });
-            html += `</div>`;
-            html2pdf().set({ margin: 12, filename: `Ficha_Conselho_${aluno.replace(/ /g,'_')}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }).from(document.createElement('div')).save();
+    function gerarFichaIndividualConselho() {
+    const aluno = document.getElementById('select-alunos').value;
+    if (!aluno) return;
+    
+    let html = `<div style="padding:25px;font-family:'Segoe UI',Arial;color:#000;background:#fff;">
+        <div style="display:flex;justify-content:space-between;border-bottom:3px double #005088;padding-bottom:12px;margin-bottom:20px;">
+            <div><h4 style="margin:0;font-size:13px;color:#475569;">SECRETARIA DE ESTADO DA EDUCAÇÃO - SEED</h4><h4 style="margin:2px 0 0;font-size:12px;color:#64748b;">NÚCLEO REGIONAL DE EDUCAÇÃO DE UMUARAMA</h4><h2 style="margin:5px 0 0;color:#005088;font-size:18px;">COLÉGIO CÍVICO-MILITAR ANCHIETA</h2></div>
+            <div><span style="font-size:10px;border:1px solid #005088;padding:4px 8px;border-radius:4px;">DOCUMENTO INTERNO</span></div>
+        </div>
+        <h3 style="text-align:center;margin-bottom:25px;">Ficha de Acompanhamento Individual do Estudante</h3>
+        <table style="width:100%;border-collapse:collapse;font-size:13px;">
+            <tr><td style="padding:6px;border:1px solid #94a3b8;background:#f8fafc;font-weight:bold;">Estudante:</td><td style="padding:6px;border:1px solid #94a3b8;">${aluno}</td><td style="padding:6px;border:1px solid #94a3b8;background:#f8fafc;font-weight:bold;">Turma:</td><td style="padding:6px;border:1px solid #94a3b8;">${turmaSelecionadaAtiva}</td></tr>
+        </table>
+        <h4 style="font-size:13px;color:#005088;margin-top:15px;">Histórico de Apontamentos</h4>`;
+        
+    ['meivs','pedagogico','adm','direcao'].forEach(setor => {
+        const registros = todosOsRegistros.filter(r => r.aluno === aluno && (r.setor === setor || (setor === 'direcao' && (r.setor === 'professores' || r.setor === 'direcao'))));
+        if (registros.length) {
+            html += `<div style="margin-top:10px;background:#f1f5f9;padding:5px 10px;border-radius:4px;font-weight:bold;border-left:5px solid #005088;">${setor.toUpperCase()}</div>`;
+            registros.forEach(p => html += `<div style="margin:8px 0;padding:8px 12px;background:#fff;border-bottom:1px solid #e2e8f0;"><div>${p.texto}</div><div style="font-size:10px;color:#64748b;text-align:right;">${p.funcionario} | ${formatarDataEHora(p.dataAtual)}</div></div>`);
         }
+    });
+    
+    html += `</div>`;
+    
+    // CORREÇÃO AQUI: Criar o elemento e colocar o HTML construído dentro dele
+    const elementoParaImprimir = document.createElement('div');
+    elementoParaImprimir.innerHTML = html;
+
+    const opcoesPdf = { 
+        margin: 12, 
+        filename: `Ficha_Conselho_${aluno.replace(/ /g,'_')}.pdf`, 
+        image: { type: 'jpeg', quality: 0.98 }, 
+        html2canvas: { scale: 2 }, 
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
+    };
+
+    // Abre em nova aba
+    html2pdf().set(opcoesPdf).from(elementoParaImprimir).toPdf().get('pdf').then(function (pdf) {
+        window.open(pdf.output('bloburl'), '_blank');
+    });
+}
+
 
 function gerarPDF() {
     // 1. Defina aqui o ID exato da div que contém a tabela/apontamentos que você quer imprimir
@@ -1220,12 +1240,14 @@ function gerarPDF() {
         margin:       10,
         filename:     'Apontamentos_SIGA.pdf',
         image:        { type: 'jpeg', quality: 1.0 },
-        html2canvas:  { scale: 2, useCORS: true }, // scale 2 garante que não saia borrado
+        html2canvas:  { scale: 2, useCORS: true }, 
         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
-    // 4. Gera o PDF a partir da div virtual
-    html2pdf().set(opcoes).from(divImpressao).save();
+    // 4. Gera o PDF a partir da div virtual usando os nomes corretos das variáveis e abre em nova aba
+    html2pdf().set(opcoes).from(divImpressao).toPdf().get('pdf').then(function (pdf) {
+        window.open(pdf.output('bloburl'), '_blank');
+    });
 }
         function aplicarBloqueioSetores(setor, nivel) {
             const setoresDefinidos = ['meivs', 'pedagogico', 'adm', 'direcao'];
