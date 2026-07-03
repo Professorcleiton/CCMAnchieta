@@ -11,11 +11,21 @@
             font-family: Arial, sans-serif;
             background-color: #f4f6f8;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
             height: 100vh;
             margin: 0;
             color: #333;
+        }
+        #aviso-eleitoral {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            text-align: center;
+            font-size: 14px;
+            border-bottom: 2px solid #ffeeba;
+            width: 100%;
+            box-sizing: border-box;
         }
         .container {
             background: white;
@@ -25,6 +35,8 @@
             text-align: center;
             width: 90%;
             max-width: 400px;
+            margin-top: auto;
+            margin-bottom: auto;
         }
         h1 {
             font-size: 28px;
@@ -68,19 +80,26 @@
     </style>
 </head>
 <body>
-    <!-- Banner Eleitoral -->
-<div id="aviso-eleitoral" style="background-color: #fff3cd; color: #856404; padding: 15px; text-align: center; font-size: 14px; border-bottom: 2px solid #ffeeba; margin-bottom: 20px;">
-    <strong>Aviso Importante:</strong> Em observância à Lei nº 9.504/1997, este portal encontra-se em adequação ao período eleitoral, mantendo apenas serviços essenciais.
-</div>
+
+    <!-- Banner de Aviso Eleitoral -->
+    <div id="aviso-eleitoral">
+        <strong>Aviso Importante:</strong> Em observância à Lei nº 9.504/1997, este portal encontra-se em adequação ao período eleitoral, mantendo o acesso estrito aos serviços essenciais de gestão.
+    </div>
+
+    <!-- Caixa Principal de Botões -->
     <div class="container">
         <h1>SIGA</h1>
         <span class="subtitle">Sistema Integrado de Gestão</span>
 
-        <!-- NOVOS BOTÕES ATUALIZADOS -->
+        <!-- Botões -->
         <a href="https://anchietafrequencia.vercel.app" class="btn">Frequenciômetro</a>
         <a href="https://rco.paas.pr.gov.br" class="btn">RCO</a>
         <a href="https://registrofrequenciaseed.paas.pr.gov.br" class="btn">Registro Ponto</a>
-        <a href="Arq/calendario_escolar2026.pdf" class="btn">Calendário</a>
+        
+        <!-- NOVO BOTÃO ADICIONADO AQUI -->
+        <a href="https://ccm-fatos.seed.pr.gov.br/login" class="btn" target="_blank">Fatos CCM</a>
+        
+        <a href="Arq/calendario_escolar2026.pdf" class="btn" target="_blank">Calendário</a>
         <a href="restrito.html" class="btn btn-restrito">Área Restrita</a>
 
         <div class="aviso">
