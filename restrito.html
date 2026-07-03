@@ -362,7 +362,14 @@
                     <span class="mini-label-chart">PROFS</span><div class="visual-bar-fill" id="bar-profs" style="background-color:#b91c1c;"></div>
                 </div>
             </div>
-
+<!-- CABEÇALHO OCULTO EXCLUSIVO PARA IMPRESSÃO EM PDF -->
+<div id="pdf-header" style="display:none; text-align:center; margin-bottom: 30px; color: #000; padding: 20px; font-family: Arial, sans-serif;">
+    <h2 style="margin: 0; font-size: 20px;">Colégio Cívico Militar Anchieta</h2>
+    <p style="margin: 5px 0; font-size: 14px;">Cruzeiro do Oeste - PR</p>
+    <p style="margin: 5px 0; font-size: 14px;">Direção e Secretaria Escolar</p>
+    <hr style="border: 1px solid #000; margin-top: 15px;">
+    <h3 style="margin-top: 15px; font-size: 18px;">Relatório de Apontamentos</h3>
+</div>
             <div class="dash-container" id="welcome-dashboard-mural" style="overflow-y: auto;">
                 <div class="dash-cards-grid">
                     <div class="dash-card total" style="cursor: pointer;" onclick="abrirModalRelatorio('geral')">
@@ -1184,21 +1191,42 @@
             html2pdf().set({ margin: 12, filename: `Ficha_Conselho_${aluno.replace(/ /g,'_')}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }).from(document.createElement('div')).save();
         }
 
-        function gerarRelatorioGeralPDF() {
-            mostrarToast('Preparando PDF do Dashboard...', 'aviso');
-            const elemento = document.getElementById('welcome-dashboard-mural');
-            const opt = {
-                margin:       15,
-                filename:     'Dashboard_Geral_SIGA.pdf',
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-            html2pdf().set(opt).from(elemento).save().then(() => {
-                mostrarToast('PDF baixado com sucesso!', 'sucesso');
-            });
-        }
-        
+function gerarPDF() {
+    // 1. Defina aqui o ID exato da div que contém a tabela/apontamentos que você quer imprimir
+    const idDoConteudo = 'conteudo-apontamento'; // <-- MUDE ESTE NOME SE NECESSÁRIO
+    
+    const elementoConteudo = document.getElementById(idDoConteudo);
+    const cabecalhoPDF = document.getElementById('pdf-header');
+
+    if (!elementoConteudo) {
+        alert("Erro: Não foi possível encontrar o conteúdo para gerar o PDF.");
+        return;
+    }
+
+    // 2. Cria uma "página virtual" temporária para juntar o cabeçalho e os dados
+    const divImpressao = document.createElement('div');
+    divImpressao.style.padding = '20px';
+    
+    // Clona o cabeçalho e força ele a aparecer no PDF
+    const cabecalhoClone = cabecalhoPDF.cloneNode(true);
+    cabecalhoClone.style.display = 'block'; 
+    divImpressao.appendChild(cabecalhoClone);
+    
+    // Clona o conteúdo da página
+    divImpressao.appendChild(elementoConteudo.cloneNode(true));
+
+    // 3. Configurações de alta qualidade para o PDF
+    const opcoes = {
+        margin:       10,
+        filename:     'Apontamentos_SIGA.pdf',
+        image:        { type: 'jpeg', quality: 1.0 },
+        html2canvas:  { scale: 2, useCORS: true }, // scale 2 garante que não saia borrado
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    // 4. Gera o PDF a partir da div virtual
+    html2pdf().set(opcoes).from(divImpressao).save();
+}
         function aplicarBloqueioSetores(setor, nivel) {
             const setoresDefinidos = ['meivs', 'pedagogico', 'adm', 'direcao'];
             
