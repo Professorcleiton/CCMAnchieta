@@ -142,16 +142,46 @@ function salvarDocumento() {
 
 async function carregarDocumentos() {
     const tbody = document.getElementById('tabela-documentos-body');
-    tbody.innerHTML = '<tr><td colspan="5">Carregando...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Carregando...</td></tr>';
+
     try {
-        const resposta = await fetch(APPS_SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ operacao: "listar_documentos" }) });
+        const resposta = await fetch(APPS_SCRIPT_URL, { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'text/plain' }, 
+            body: JSON.stringify({ operacao: "listar_documentos" }) 
+        });
+        
         const linhasPlanilha = await resposta.json();
         tbody.innerHTML = ''; 
+
+        if (linhasPlanilha.length <= 1) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Nenhum documento registrado.</td></tr>';
+            return;
+        }
+
+        // Criamos um array para acumular o HTML antes de inserir no DOM (mais rápido)
+        let htmlRows = '';
         for (let i = linhasPlanilha.length - 1; i > 0; i--) {
             let linha = linhasPlanilha[i];
-            tbody.innerHTML += `<tr><td>${linha[1] || '-'}</td><td>${linha[0]}</td><td>${linha[2]}</td><td>${linha[3]}</td><td>${linha[4]}</td></tr>`;
+            
+            // Usando sua função de formatação existente no script
+            let dataFormatada = formatarDataEHora(linha[4]);
+            
+            // Definição das colunas baseada na sua planilha:
+            // 0: Aluno | 1: Turma | 2: Documento | 3: Status | 4: Data
+            htmlRows += `<tr>
+                <td>${linha[1] || '-'}</td>
+                <td>${linha[0] || '-'}</td>
+                <td>${linha[2] || '-'}</td>
+                <td>${linha[3] || '-'}</td>
+                <td>${dataFormatada}</td>
+            </tr>`;
         }
-    } catch (e) { tbody.innerHTML = '<tr><td colspan="5">Erro ao carregar.</td></tr>'; }
+        tbody.innerHTML = htmlRows;
+        
+    } catch (e) { 
+        tbody.innerHTML = '<tr><td colspan="5" style="color: red; text-align: center;">Erro ao carregar documentos.</td></tr>'; 
+    }
 }
 
 function inicializarPainel() {
