@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Responsável - SIGA Anchieta</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .header {
+            background-color: #2e7d32;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .header h2 {
+            margin: 0;
+        }
+        .logout {
+            display: inline-block;
+            margin-top: 10px;
+            color: #fff;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+        .filtro {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .filtro select {
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            width: 100%;
+            max-width: 300px;
+        }
+        .registros {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .registro {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border-left: 5px solid #005088;
+        }
+        .registro .setor {
+            font-weight: bold;
+        }
+        .registro .data {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        .registro .texto {
+            margin-top: 8px;
+            font-size: 15px;
+        }
+        .sem-registros {
+            text-align: center;
+            padding: 30px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>Painel do Responsável</h2>
+        <p id="nome-responsavel">Carregando...</p>
+        <a class="logout" onclick="logout()">Sair</a>
+    </div>
+
+    <div class="filtro">
+        <label>Selecione o filho:</label>
+        <select id="filho-select" onchange="filtrarRegistros()">
+            <option value="">Todos os filhos</option>
+        </select>
+    </div>
+
+    <div class="registros" id="lista-registros">
+        <div class="sem-registros">Nenhum registro encontrado.</div>
+    </div>
+
+    <script>
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
+
+        let dadosResponsavel = null;
+        let todosRegistros = [];
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const sessao = sessionStorage.getItem('resp_logado');
+            if (!sessao) {
+                window.location.href = 'responsaveis.html';
+                return;
+            }
+            dadosResponsavel = JSON.parse(sessao);
+            document.getElementById('nome-responsavel').innerText = `Bem-vindo(a), ${dadosResponsavel.nome}`;
+
+            const select = document.getElementById('filho-select');
+            dadosResponsavel.alunos.forEach(aluno => {
+                const opt = document.createElement('option');
+                opt.value = aluno;
+                opt.textContent = aluno;
+                select.appendChild(opt);
+            });
+
+            carregarRegistros();
+        });
+
+        function logout() {
+            sessionStorage.removeItem('resp_logado');
+            window.location.href = 'responsaveis.html';
+        }
+
+        async function carregarRegistros() {
+            try {
+                const res = await fetch(APPS_SCRIPT_URL + '?aba=todos_os_dados');
+                const data = await res.json();
+
+                const alunosVinculados = dadosResponsavel.alunos;
+                todosRegistros = [
+                    ...data.apontamentos.filter(r => alunosVinculados.includes(r.aluno)).map(r => ({...r, tipo: 'apontamento'})),
+                    ...data.documentos.filter(d => alunosVinculados.includes(d.aluno)).map(d => ({
+                        aluno: d.aluno,
+                        setor: 'adm',
+                        texto: `📄 Documento: ${d.documento} - Status: ${d.status}`,
+                        funcionario: 'Secretaria',
+                        dataAtual: d.data,
+                        tipo: 'documento'
+                    })),
+                    ...data.saidas.filter(s => alunosVinculados.includes(s.aluno)).map(s => ({
+                        aluno: s.aluno,
+                        setor: 'adm',
+                        texto: `🚪 Saída Antecipada: ${s.motivo} | Autorizado por: ${s.autorizador}`,
+                        funcionario: 'Secretaria',
+                        dataAtual: s.data,
+                        tipo: 'saida'
+                    }))
+                ];
+
+                filtrarRegistros();
+            } catch (e) {
+                document.getElementById('lista-registros').innerHTML = '<div class="sem-registros">Erro ao carregar dados.</div>';
+            }
+        }
+
+        function filtrarRegistros() {
+            const filhoSelecionado = document.getElementById('filho-select').value;
+            const container = document.getElementById('lista-registros');
+
+            let registros = todosRegistros;
+            if (filhoSelecionado) {
+                registros = registros.filter(r => r.aluno === filhoSelecionado);
+            }
+
+            registros.sort((a, b) => (b.dataAtual || '').localeCompare(a.dataAtual || ''));
+
+            if (registros.length === 0) {
+                container.innerHTML = '<div class="sem-registros">Nenhum registro encontrado.</div>';
+                return;
+            }
+
+            container.innerHTML = registros.map(r => {
+                const setor = r.setor === 'meivs' ? 'MEIV\'S' :
+                               r.setor === 'pedagogico' ? 'Pedagógico' :
+                               r.setor === 'adm' ? 'ADM' : 'Professores';
+                const corSetor = r.setor === 'meivs' ? '#0284c7' :
+                                 r.setor === 'pedagogico' ? '#0d9488' :
+                                 r.setor === 'adm' ? '#4f46e5' : '#b91c1c';
+                return `
+                <div class="registro" style="border-left-color: ${corSetor}">
+                    <div class="setor" style="color: ${corSetor}">${setor}</div>
+                    <div class="texto">${r.texto}</div>
+                    <div class="data">${r.dataAtual} • ${r.funcionario || 'SIGA'}</div>
+                </div>`;
+            }).join('');
+        }
+    </script>
+</body>
+</html>
