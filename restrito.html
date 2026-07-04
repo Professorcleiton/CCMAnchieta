@@ -301,7 +301,18 @@
                     </section>
                 </div>
             </div> <!-- FIM DA CAIXA DE APONTAMENTOS -->
-
+    <!-- Modal Saída Antecipada -->
+<div id="modal-saida" style="display:none; position:fixed; top:20%; left:30%; width:40%; background:white; padding:20px; border:1px solid #ccc; z-index:1000;">
+    <h4>Registrar Saída Antecipada</h4>
+    <select id="saida-aluno"></select> <!-- Popule via JS -->
+    <input type="text" id="saida-motivo" placeholder="Motivo da saída" class="form-control">
+    <select id="saida-autorizador" class="form-control">
+        <option value="Responsavel">Responsável Legal</option>
+        <option value="Pedagogico">Autorização Pedagógica</option>
+    </select>
+    <button onclick="registrarSaidaAntecipada()" class="btn btn-success">Confirmar Saída</button>
+    <button onclick="fecharModalSaida()" class="btn btn-secondary">Fechar</button>
+</div>
             <!-- ========================================== -->
             <!-- CAIXA DA SECRETARIA (Aba de Documentos) -->
             <!-- ========================================== -->
