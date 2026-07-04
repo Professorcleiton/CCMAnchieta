@@ -5,7 +5,7 @@ const COLS_ALUNOS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz
 let usuarioLogado = null, todosOsRegistros = [], cacheAlunosPorTurma = {}, turmaSelecionadaAtiva = '';
 let modalSetorAtivo = '', modalRegistrosFiltrados = [], modalItensExibidos = 50;
 let patTodos = [], patAmbientes = [], patSalaFiltro = 'TODOS', patCameraAtiva = null;
-let totalRegistrosAnterior = 0; // Para o alerta de tempo real
+let totalRegistrosAnterior = 0; 
 
 if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
 
@@ -52,17 +52,14 @@ async function autenticarUsuario() {
         
         if (data.status === "success") {
             let setor = data.setor.toString().trim().toLowerCase();
-            
             if (setor === 'secretaria' || setor === 'direcao' || data.nivel === 3) {
                 const btnSec = document.getElementById('btn-aba-secretaria');
                 if (btnSec) btnSec.style.display = 'inline-block';
             }
-
             if (setor === 'direcao' || setor === 'professor' || setor === 'professores') setor = 'professores';
             
             usuarioLogado = { email, nome: data.nome, setorExibicao: 'PROFESSORES', setor, nivel: data.nivel };
             localStorage.setItem('sgi_ccma_session', JSON.stringify(usuarioLogado));
-            
             inicializarPainel();
         } else { 
             err.style.display = 'block'; btn.disabled = false; btn.innerHTML = 'Entrar no Sistema'; 
@@ -72,9 +69,7 @@ async function autenticarUsuario() {
     }
 }
 
-function fazerLogout() {
-    localStorage.removeItem('sgi_ccma_session'); location.reload();
-}
+function fazerLogout() { localStorage.removeItem('sgi_ccma_session'); location.reload(); }
 
 // ========== NAVEGAÇÃO ENTRE ABAS ==========
 function mostrarTab(tabSelecionada) {
@@ -90,34 +85,26 @@ function mostrarTab(tabSelecionada) {
 
 // ==== FUNÇÕES DE APONTAMENTO E DOCUMENTO ====
 function salvarDocumento() {
-    const aluno = document.getElementById('doc-aluno').value.trim();
+    const alunoInput = document.getElementById('doc-aluno');
+    const aluno = alunoInput.value.trim();
     const documento = document.getElementById('doc-tipo').value;
     const status = document.getElementById('doc-status').value;
-    const turma = encontrarTurmaDoAluno(aluno);
+    const turmaDoAluno = encontrarTurmaDoAluno(aluno);
+    const btnSalvar = document.getElementById('btn-salvar-doc');
+    const msgDoc = document.getElementById('msg-doc');
 
-    fetch(APPS_SCRIPT_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify({ operacao: "salvar_documento", aluno, turma, documento, status, data: new Date().toLocaleDateString('pt-BR') })
-    }).then(() => {
-        mostrarToast("Documento salvo com sucesso!");
-        carregarDocumentos();
-        carregarRegistrosDoServidor(); // Atualiza o feed da ADM
-    });
-}
-
-    // Identifica a turma automaticamente
-   const turmaDoAluno = encontrarTurmaDoAluno(aluno.trim());
+    if (!aluno) {
+        mostrarToast("Por favor, digite o nome do aluno.", "aviso");
+        return;
+    }
 
     btnSalvar.innerText = "Salvando...";
     btnSalvar.disabled = true;
-    btnSalvar.style.opacity = "0.7";
-    msgDoc.style.display = "none";
 
     const dadosParaEnviar = {
         operacao: "salvar_documento",
         aluno: aluno,
-        turma: turmaDoAluno, // Enviando a turma identificada
+        turma: turmaDoAluno,
         documento: documento,
         status: status,
         data: new Date().toLocaleDateString('pt-BR')
@@ -128,91 +115,43 @@ function salvarDocumento() {
         headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify(dadosParaEnviar)
     })
-    .then(response => {
-        msgDoc.innerText = "✅ Documento salvo com sucesso!";
-        msgDoc.style.color = "#15803d";
+    .then(() => {
+        msgDoc.innerText = "✅ Documento salvo!";
         msgDoc.style.display = "block";
-        document.getElementById('doc-aluno').value = ""; 
+        alunoInput.value = ""; 
         carregarDocumentos(); 
         
         // --- APONTAMENTO AUTOMÁTICO NA ADM ---
-        const textoApontamento = `📄 Solicitação de Documento: ${documento} | Status: ${status}`;
         const payloadADM = { 
             operacao: "SALVAR", 
             aluno: aluno, 
             setor: 'adm', 
-            texto: textoApontamento, 
+            texto: `📄 Documento solicitado: ${documento} | Status: ${status}`, 
             funcionario: usuarioLogado.nome, 
             dataAtual: new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
         };
         fetch(APPS_SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payloadADM) })
         .then(() => carregarRegistrosDoServidor()); 
-        // -------------------------------------
-    })
-    .catch(error => {
-        msgDoc.innerText = "❌ Erro de conexão. Tente novamente.";
-        msgDoc.style.color = "#b91c1c";
-        msgDoc.style.display = "block";
     })
     .finally(() => {
-        setTimeout(() => {
-            btnSalvar.innerText = "Salvar no Sistema";
-            btnSalvar.disabled = false;
-            btnSalvar.style.opacity = "1";
-            setTimeout(() => { msgDoc.style.display = "none"; }, 3000);
-        }, 1000);
+        btnSalvar.innerText = "Salvar no Sistema";
+        btnSalvar.disabled = false;
+        setTimeout(() => { msgDoc.style.display = "none"; }, 3000);
     });
 }
 
 async function carregarDocumentos() {
     const tbody = document.getElementById('tabela-documentos-body');
-    tbody.innerHTML = '<tr><td colspan="5" style="padding: 15px; text-align: center;"><i class="fa-solid fa-spinner fa-spin"></i> Buscando documentos...</td></tr>';
-
+    tbody.innerHTML = '<tr><td colspan="5">Carregando...</td></tr>';
     try {
-        const resposta = await fetch(APPS_SCRIPT_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain' },
-            body: JSON.stringify({ operacao: "listar_documentos" })
-        });
-        
+        const resposta = await fetch(APPS_SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ operacao: "listar_documentos" }) });
         const linhasPlanilha = await resposta.json();
         tbody.innerHTML = ''; 
-
-        if (linhasPlanilha.length <= 1) {
-            tbody.innerHTML = '<tr><td colspan="5" style="padding: 15px; text-align: center; color: #64748b;">Nenhum documento registrado ainda.</td></tr>';
-            return;
-        }
-        
         for (let i = linhasPlanilha.length - 1; i > 0; i--) {
             let linha = linhasPlanilha[i];
-            
-            // Tratamento de cor do Status (que agora é a posição [3] na planilha)
-            let corStatus = linha[3] === "Pendente" 
-                ? "color: #b91c1c; font-weight: bold; background: #fee2e2; padding: 2px 6px; border-radius: 4px;" 
-                : "color: #15803d; font-weight: bold; background: #dcfce3; padding: 2px 6px; border-radius: 4px;";
-            
-            let dataAjustada = linha[4];
-            try {
-                let d = new Date(linha[4]);
-                if (!isNaN(d.getTime())) {
-                    dataAjustada = d.toLocaleDateString('pt-BR');
-                }
-            } catch(e) {}
-
-            // Nova ordem com a Turma
-            let htmlLinha = `
-                <tr style="border-bottom: 1px solid #e2e8f0; transition: background 0.2s;">
-                    <td style="padding: 12px 10px; font-weight: bold; color: #005088;">${linha[1] || '-'}</td>
-                    <td style="padding: 12px 10px;">${linha[0]}</td>
-                    <td style="padding: 12px 10px;">${linha[2]}</td>
-                    <td style="padding: 12px 10px;"><span style="${corStatus}">${linha[3]}</span></td>
-                    <td style="padding: 12px 10px; color: #64748b;">${dataAjustada}</td>
-                </tr>`;
-            tbody.innerHTML += htmlLinha;
+            tbody.innerHTML += `<tr><td>${linha[1] || '-'}</td><td>${linha[0]}</td><td>${linha[2]}</td><td>${linha[3]}</td><td>${linha[4]}</td></tr>`;
         }
-    } catch (e) {
-        tbody.innerHTML = '<tr><td colspan="5" style="padding: 15px; text-align: center; color: #b91c1c;">Erro ao conectar com a base de dados.</td></tr>';
-    }
+    } catch (e) { tbody.innerHTML = '<tr><td colspan="5">Erro ao carregar.</td></tr>'; }
 }
 
 function inicializarPainel() {
@@ -220,10 +159,8 @@ function inicializarPainel() {
     if (telaLogin) telaLogin.style.display = 'none';
     const interfaceApp = document.getElementById('app-interface');
     if (interfaceApp) interfaceApp.style.display = 'flex';
-    
     const displayUser = document.getElementById('user-display');
-    if (displayUser) displayUser.innerHTML = `<i class="fa-solid fa-user-check"></i> ${usuarioLogado.nome} (${usuarioLogado.setor.toUpperCase()})`;
-    
+    if (displayUser) displayUser.innerHTML = `<i class="fa-solid fa-user-check"></i> ${usuarioLogado.nome}`;
     aplicarBloqueioSetores(usuarioLogado.setor, usuarioLogado.nivel);
     carregarAlunosETurmas(); 
     carregarRegistrosDoServidor();
@@ -236,16 +173,41 @@ setInterval(async () => {
             const r = await fetch(APPS_SCRIPT_URL, { method: 'GET', cache: 'no-cache' });
             const data = await r.json();
             const contagemAtual = data.apontamentos ? data.apontamentos.length : 0;
-            
             if (totalRegistrosAnterior !== 0 && contagemAtual !== totalRegistrosAnterior) {
-                mostrarToast('Novos apontamentos recebidos!', 'sucesso');
+                mostrarToast('Novos apontamentos!', 'sucesso');
                 carregarRegistrosDoServidor();
             }
             totalRegistrosAnterior = contagemAtual;
         } catch (e) { console.log("Atualização em background falhou."); }
     }
-}, 60000); // Checa a cada 1 minuto
+}, 60000);
+// ==== CARREGAMENTO DE ALUNOS ====
+async function carregarAlunosETurmas() {
+    cacheAlunosPorTurma = {};
+    try {
+        const response = await fetch(COLS_ALUNOS_URL);
+        const text = await response.text();
+        const jsonText = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
+        const data = JSON.parse(jsonText);
+        data.table.rows.forEach(r => {
+            if (r.c && r.c[1] && r.c[1].v) {
+                const nome = r.c[1].v.toString().trim();
+                const turma = (r.c[2] && r.c[2].v) ? r.c[2].v.toString().trim() : 'Sem Turma';
+                if (!cacheAlunosPorTurma[turma]) cacheAlunosPorTurma[turma] = [];
+                if (!cacheAlunosPorTurma[turma].includes(nome)) cacheAlunosPorTurma[turma].push(nome);
+            }
+        });
+        renderizarSidebarTurmas();
+    } catch (e) { console.error(e); }
+}
 
+function encontrarTurmaDoAluno(nome) {
+    const nomeLimpo = nome.trim().toLowerCase();
+    for (let t in cacheAlunosPorTurma) {
+        if (cacheAlunosPorTurma[t].map(n => n.trim().toLowerCase()).includes(nomeLimpo)) return t;
+    }
+    return 'Sem Turma';
+}
 function abrirModuloPatrimonio() {
     document.getElementById('app-interface').style.display = 'none';
     document.getElementById('patrimonio-interface').style.display = 'flex';
