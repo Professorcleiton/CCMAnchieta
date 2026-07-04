@@ -196,7 +196,15 @@ function inicializarPainel() {
     if (interfaceApp) interfaceApp.style.display = 'flex';
     const displayUser = document.getElementById('user-display');
     if (displayUser) displayUser.innerHTML = `<i class="fa-solid fa-user-check"></i> ${usuarioLogado.nome}`;
+    
     aplicarBloqueioSetores(usuarioLogado.setor, usuarioLogado.nivel);
+    
+    // Exibe o botão de Gestão apenas para administradores (nível >= 3)
+    if (usuarioLogado.nivel >= 3) {
+        const btnGestao = document.getElementById('btn-abrir-admin');
+        if (btnGestao) btnGestao.style.display = 'inline-flex';
+    }
+    
     carregarAlunosETurmas(); 
     carregarRegistrosDoServidor();
 }
