@@ -25,10 +25,6 @@ window.addEventListener('DOMContentLoaded', () => {
     const sessao = localStorage.getItem('sgi_ccma_session');
     if (sessao) { 
         usuarioLogado = JSON.parse(sessao); 
-        if (usuarioLogado.setor === 'secretaria' || usuarioLogado.setor === 'direcao' || usuarioLogado.nivel === 3) {
-            const btnSec = document.getElementById('btn-aba-secretaria');
-            if (btnSec) btnSec.style.display = 'inline-block';
-        }
         inicializarPainel(); 
     }
 });
@@ -199,16 +195,30 @@ function inicializarPainel() {
     
     aplicarBloqueioSetores(usuarioLogado.setor, usuarioLogado.nivel);
     
-    // Exibe o botão de Gestão apenas para administradores (nível >= 3)
-    if (usuarioLogado.nivel >= 3) {
-        const btnGestao = document.getElementById('btn-abrir-admin');
-        if (btnGestao) btnGestao.style.display = 'inline-flex';
+    // Botão Gestão: apenas nível 4
+    const btnGestao = document.getElementById('btn-abrir-admin');
+    if (btnGestao) {
+        btnGestao.style.display = (usuarioLogado.nivel >= 4) ? 'inline-flex' : 'none';
+    }
+
+    // Botão Patrimônio (se ainda existir na barra): nível 4 ou nível 2+
+    // Se quiser restringir totalmente para nível 3, deixe apenas >= 4
+    const btnPatrimonio = document.getElementById('btn-abrir-patrimonio');
+    if (btnPatrimonio) {
+        btnPatrimonio.style.display = (usuarioLogado.nivel >= 4) ? 'inline-flex' : 'none';
+    }
+
+    // Aba Secretaria: nível 4, ou direção/secretaria, ou nível 3 (se desejar manter)
+    const btnSec = document.getElementById('btn-aba-secretaria');
+    if (btnSec) {
+        if (usuarioLogado.nivel >= 4 || usuarioLogado.setor === 'secretaria' || usuarioLogado.setor === 'direcao') {
+            btnSec.style.display = 'inline-block';
+        }
     }
     
     carregarAlunosETurmas(); 
     carregarRegistrosDoServidor();
 }
-
 // ==== ALERTA EM TEMPO REAL ====
 setInterval(async () => {
     if (usuarioLogado) { 
@@ -604,7 +614,11 @@ function aplicarBloqueioSetores(setor, nivel) {
         
         let liberado = false;
         
-        if (nivel >= 2) { 
+        // Nível 4 = acesso total a todos os setores
+        if (nivel >= 4) { 
+            liberado = true; 
+        } 
+        else if (nivel >= 2) { 
             liberado = true; 
         } 
         else {
