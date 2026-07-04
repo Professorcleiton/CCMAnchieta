@@ -306,21 +306,23 @@ async function carregarAlunosETurmas() {
         
         const linhas = data.table.rows;
 linhas.forEach(r => {
-    // r.c[1] é a Coluna B (Nome), r.c[2] é a Coluna C (Turma)
-    if (r.c && r.c[1] && r.c[1].v) {
-        const nome = r.c[1].v.toString().trim();
-        const turma = r.c[2] && r.c[2].v ? r.c[2].v.toString().trim() : 'Sem Turma';
+    // Vamos verificar o que tem em cada coluna (índices 0, 1, 2, 3...)
+    console.log("Linha lida:", r.c); 
+
+    if (r.c && r.c[1]) {
+        const nome = r.c[1] && r.c[1].v ? r.c[1].v.toString().trim() : "Sem Nome";
         
-        // Inicializa o array se a turma ainda não existir no cache
+        // Vamos testar os índices 0, 1, 2, 3 até achar onde está a turma
+        const turma = (r.c[2] && r.c[2].v) ? r.c[2].v.toString().trim() : "TURMA NÃO ACHADA";
+        
+        console.log("Nome encontrado:", nome, "| Turma tentativa (índice 2):", turma);
+
         if (!cacheAlunosPorTurma[turma]) {
             cacheAlunosPorTurma[turma] = [];
         }
-        
-        // Adiciona o nome ao array da turma
         cacheAlunosPorTurma[turma].push(nome);
     }
-});
-        
+});    
         renderizarSidebarTurmas();
         preencherBuscaGlobal();
     } catch (e) { 
