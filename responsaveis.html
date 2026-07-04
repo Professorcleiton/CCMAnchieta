@@ -65,13 +65,18 @@
             font-size: 14px;
             margin-bottom: 3px;
         }
-        input, select {
+        input, textarea, select {
             padding: 12px;
             border: 1px solid #ccc;
             border-radius: 5px;
             font-size: 15px;
             width: 100%;
             box-sizing: border-box;
+        }
+        textarea {
+            resize: vertical;
+            height: 100px;
+            font-family: Arial, sans-serif;
         }
         button {
             padding: 14px;
@@ -93,14 +98,6 @@
             margin-top: 10px;
             text-align: center;
         }
-        .alunos-checkboxes {
-            max-height: 200px;
-            overflow-y: auto;
-            border: 1px solid #ccc;
-            padding: 10px;
-            border-radius: 5px;
-            background: #fafafa;
-        }
         .voltar {
             display: block;
             text-align: center;
@@ -111,6 +108,12 @@
         }
         .voltar:hover {
             text-decoration: underline;
+        }
+        .instrucao {
+            font-size: 12px;
+            color: #666;
+            margin-top: -10px;
+            margin-bottom: 5px;
         }
     </style>
 </head>
@@ -152,8 +155,10 @@
             <label>Telefone (opcional)</label>
             <input type="text" id="cad-telefone" placeholder="(44) 99999-9999">
 
-            <label>Selecione o(s) filho(s):</label>
-            <div class="alunos-checkboxes" id="lista-alunos">Carregando alunos...</div>
+            <label>Nome(s) do(s) filho(s)</label>
+            <textarea id="cad-filhos" placeholder="Digite um nome completo por linha, sem abreviar.
+O sistema reconhece mesmo sem acentos ou letras maiúsculas."></textarea>
+            <div class="instrucao">Escreva o nome completo de cada filho, um por linha. Não abrevie. Acentos e letras maiúsculas/minúsculas não fazem diferença.</div>
 
             <button onclick="cadastrar()">Cadastrar</button>
             <div class="msg" id="msg-cadastro"></div>
@@ -163,10 +168,9 @@
     <a href="index.html" class="voltar">← Voltar ao site</a>
 
     <script>
-        // URL do Apps Script (a mesma usada no sistema SIGA)
+        // URL do Apps Script
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
 
-        // Alternar entre abas
         function mostrarAba(tipo) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.form').forEach(f => f.classList.remove('active'));
@@ -176,24 +180,6 @@
             } else {
                 document.querySelector('.tab:last-child').classList.add('active');
                 document.getElementById('form-cadastro').classList.add('active');
-                carregarAlunos(); // Garante que a lista de alunos esteja atualizada
-            }
-        }
-
-        // Carregar lista de alunos para o cadastro
-        async function carregarAlunos() {
-            const container = document.getElementById('lista-alunos');
-            container.innerHTML = 'Carregando...';
-            try {
-                const res = await fetch(APPS_SCRIPT_URL + '?aba=alunos');
-                const alunos = await res.json();
-                container.innerHTML = alunos.map(nome => `
-                    <label style="font-weight: normal; display: block;">
-                        <input type="checkbox" value="${nome}"> ${nome}
-                    </label>
-                `).join('');
-            } catch (e) {
-                container.innerHTML = 'Erro ao carregar alunos.';
             }
         }
 
@@ -222,9 +208,7 @@
                 const data = await res.json();
                 if (data.status === "success") {
                     msg.innerText = '✅ Login bem-sucedido! Redirecionando...';
-                    // Armazena dados na sessão
                     sessionStorage.setItem('resp_logado', JSON.stringify(data));
-                    // Redireciona para o painel do responsável (a ser criado)
                     setTimeout(() => {
                         window.location.href = 'painel-responsavel.html';
                     }, 1500);
@@ -242,12 +226,21 @@
             const email = document.getElementById('cad-email').value.trim().toLowerCase();
             const senha = document.getElementById('cad-senha').value.trim().replace(/\D/g, '');
             const telefone = document.getElementById('cad-telefone').value.trim();
-            const filhos = Array.from(document.querySelectorAll('#lista-alunos input:checked'))
-                                  .map(cb => cb.value);
+            const filhosTexto = document.getElementById('cad-filhos').value.trim();
             const msg = document.getElementById('msg-cadastro');
 
-            if (!nome || !email || !senha || filhos.length === 0) {
-                msg.innerText = 'Preencha todos os campos e selecione ao menos um filho.';
+            if (!nome || !email || !senha || !filhosTexto) {
+                msg.innerText = 'Preencha todos os campos obrigatórios.';
+                return;
+            }
+
+            // Divide por linha, remove linhas vazias e espaços extras
+            const filhos = filhosTexto.split('\n')
+                                     .map(f => f.trim())
+                                     .filter(f => f !== '');
+
+            if (filhos.length === 0) {
+                msg.innerText = 'Informe pelo menos um nome de filho.';
                 return;
             }
 
@@ -268,13 +261,11 @@
                 const resposta = await res.text();
                 if (resposta === 'success') {
                     msg.innerText = '✅ Cadastro realizado! Agora você pode entrar.';
-                    // Limpa campos
                     document.getElementById('cad-nome').value = '';
                     document.getElementById('cad-email').value = '';
                     document.getElementById('cad-senha').value = '';
                     document.getElementById('cad-telefone').value = '';
-                    document.querySelectorAll('#lista-alunos input').forEach(cb => cb.checked = false);
-                    // Opcional: trocar para aba de login
+                    document.getElementById('cad-filhos').value = '';
                     mostrarAba('login');
                 } else {
                     msg.innerText = '❌ ' + resposta;
@@ -283,9 +274,6 @@
                 msg.innerText = 'Erro de conexão.';
             }
         }
-
-        // Já carrega os alunos ao abrir a página
-        carregarAlunos();
     </script>
 </body>
 </html>
