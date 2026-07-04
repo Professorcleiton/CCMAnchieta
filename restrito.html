@@ -896,7 +896,7 @@ function mostrarTab(tabSelecionada) {
         msgDoc.style.display = "none";
 
         const dadosParaEnviar = {
-            acao: "salvar_documento",
+            operacao: "salvar_documento",
             aluno: aluno,
             documento: documento,
             status: status,
@@ -958,10 +958,20 @@ function mostrarTab(tabSelecionada) {
             }, 3500);
         }
         
-        // ========== SESSÃO ==========
+// ========== SESSÃO ==========
         window.addEventListener('DOMContentLoaded', () => {
             const sessao = localStorage.getItem('sgi_ccma_session');
-            if (sessao) { usuarioLogado = JSON.parse(sessao); inicializarPainel(); }
+            if (sessao) { 
+                usuarioLogado = JSON.parse(sessao); 
+                
+                // Se a página for recarregada, garante que a aba de secretaria apareça se o usuário tiver permissão
+                if (usuarioLogado.setor === 'secretaria' || usuarioLogado.setor === 'direcao' || usuarioLogado.nivel === 3) {
+                    const btnSec = document.getElementById('btn-aba-secretaria');
+                    if (btnSec) btnSec.style.display = 'inline-block';
+                }
+                
+                inicializarPainel(); 
+            }
         });
 
         async function autenticarUsuario() {
@@ -969,18 +979,39 @@ function mostrarTab(tabSelecionada) {
             const senha = document.getElementById('user-password').value.trim().replace(/\D/g, '');
             const err = document.getElementById('error-message'), btn = document.getElementById('btn-entrar-login');
             if (!email || !senha) return;
+            
             btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+            
             try {
-                const r = await fetch(APPS_SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ operacao: "LOGIN", email, senha }) });
+                const r = await fetch(APPS_SCRIPT_URL, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'text/plain' }, 
+                    body: JSON.stringify({ operacao: "LOGIN", email, senha }) 
+                });
+                
                 const data = await r.json();
+                
                 if (data.status === "success") {
                     let setor = data.setor.toString().trim().toLowerCase();
+                    
+                    // Lógica para mostrar a aba de Secretaria antes de alterar a variável 'setor'
+                    if (setor === 'secretaria' || setor === 'direcao' || data.nivel === 3) {
+                        const btnSec = document.getElementById('btn-aba-secretaria');
+                        if (btnSec) btnSec.style.display = 'inline-block';
+                    }
+
                     if (setor === 'direcao' || setor === 'professor' || setor === 'professores') setor = 'professores';
+                    
                     usuarioLogado = { email, nome: data.nome, setorExibicao: 'PROFESSORES', setor, nivel: data.nivel };
                     localStorage.setItem('sgi_ccma_session', JSON.stringify(usuarioLogado));
+                    
                     inicializarPainel();
-                } else { err.style.display = 'block'; btn.disabled = false; btn.innerHTML = 'Entrar no Sistema'; }
-            } catch (e) { err.style.display = 'block'; btn.disabled = false; }
+                } else { 
+                    err.style.display = 'block'; btn.disabled = false; btn.innerHTML = 'Entrar no Sistema'; 
+                }
+            } catch (e) { 
+                err.style.display = 'block'; btn.disabled = false; btn.innerHTML = 'Entrar no Sistema'; 
+            }
         }
 
         function fazerLogout() {
