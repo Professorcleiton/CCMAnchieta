@@ -48,7 +48,7 @@ async function autenticarUsuario() {
         
         if (data.status === "success") {
             let setor = data.setor.toString().trim().toLowerCase();
-            if (setor === 'secretaria' || setor === 'direcao' || data.nivel === 3) {
+            if (setor === 'secretaria' || setor === 'direcao' || data.nivel >= 4) {
                 const btnSec = document.getElementById('btn-aba-secretaria');
                 if (btnSec) btnSec.style.display = 'inline-block';
             }
@@ -117,7 +117,6 @@ function salvarDocumento() {
         alunoInput.value = ""; 
         carregarDocumentos(); 
         
-        // --- APONTAMENTO AUTOMÁTICO NA ADM ---
         const payloadADM = { 
             operacao: "SALVAR", 
             aluno: aluno, 
@@ -192,33 +191,28 @@ function inicializarPainel() {
     if (interfaceApp) interfaceApp.style.display = 'flex';
     const displayUser = document.getElementById('user-display');
     if (displayUser) displayUser.innerHTML = `<i class="fa-solid fa-user-check"></i> ${usuarioLogado.nome}`;
-    
     aplicarBloqueioSetores(usuarioLogado.setor, usuarioLogado.nivel);
     
     // Botão Gestão: apenas nível 4
     const btnGestao = document.getElementById('btn-abrir-admin');
-    if (btnGestao) {
-        btnGestao.style.display = (usuarioLogado.nivel >= 4) ? 'inline-flex' : 'none';
-    }
+    if (btnGestao) btnGestao.style.display = (usuarioLogado.nivel >= 4) ? 'inline-flex' : 'none';
 
-    // Botão Patrimônio (se ainda existir na barra): nível 4 ou nível 2+
-    // Se quiser restringir totalmente para nível 3, deixe apenas >= 4
+    // Botão Patrimônio: apenas nível 4
     const btnPatrimonio = document.getElementById('btn-abrir-patrimonio');
-    if (btnPatrimonio) {
-        btnPatrimonio.style.display = (usuarioLogado.nivel >= 4) ? 'inline-flex' : 'none';
-    }
+    if (btnPatrimonio) btnPatrimonio.style.display = (usuarioLogado.nivel >= 4) ? 'inline-flex' : 'none';
 
-    // Aba Secretaria: nível 4, ou direção/secretaria, ou nível 3 (se desejar manter)
+    // Aba Secretaria: nível 4, ou setor secretaria/direção
     const btnSec = document.getElementById('btn-aba-secretaria');
     if (btnSec) {
         if (usuarioLogado.nivel >= 4 || usuarioLogado.setor === 'secretaria' || usuarioLogado.setor === 'direcao') {
             btnSec.style.display = 'inline-block';
         }
     }
-    
+
     carregarAlunosETurmas(); 
     carregarRegistrosDoServidor();
 }
+
 // ==== ALERTA EM TEMPO REAL ====
 setInterval(async () => {
     if (usuarioLogado) { 
@@ -352,16 +346,21 @@ async function carregarRegistrosDoServidor() {
             });
         });
 
-        data.saidas.forEach(s => {
-            todosOsRegistros.push({
-                aluno: s.aluno,
-                setor: 'adm',
-                texto: `🚪 Saída Antecipada: ${s.motivo} | Autorizado por: ${s.autorizador}`,
-                funcionario: 'Secretaria',
-                dataAtual: s.data,
-                tipo: 'saida'
+        // Ocorrências (nova aba)
+        if (data.ocorrencias) {
+            data.ocorrencias.forEach(oc => {
+                const icone = oc.tipo === "Saída Antecipada" ? "🚪" : "⏰";
+                const horario = oc.data ? oc.data.split(' ')[1] : '';
+                todosOsRegistros.push({
+                    aluno: oc.aluno,
+                    setor: 'adm',
+                    texto: `${icone} ${oc.tipo}: ${oc.motivo} | Autorizado por: ${oc.autorizador} | Horário: ${horario}`,
+                    funcionario: oc.autorizador || 'Secretaria',
+                    dataAtual: oc.data,
+                    tipo: 'ocorrencia'
+                });
             });
-        });
+        }
 
         atualizarGraficosMural();
         if (document.getElementById('select-alunos').value) filtrarRegistrosPorAluno();
@@ -614,7 +613,6 @@ function aplicarBloqueioSetores(setor, nivel) {
         
         let liberado = false;
         
-        // Nível 4 = acesso total a todos os setores
         if (nivel >= 4) { 
             liberado = true; 
         } 
@@ -1053,7 +1051,7 @@ function fecharCaixaTexto(setor) {
     document.getElementById('text-' + setor).value = ''; 
 }
 
-// ==== MÓDULO SAÍDA ANTECIPADA (UNIFICADO E CORRIGIDO) ====
+// ==== MÓDULO DE OCORRÊNCIAS (SAÍDA ANTECIPADA / ENTRADA ATRASADA) ====
 function abrirModalSaida() {
     const modal = document.getElementById('modal-saida');
     const selectAluno = document.getElementById('saida-aluno');
@@ -1062,13 +1060,13 @@ function abrirModalSaida() {
     document.getElementById('saida-motivo').value = '';
     document.getElementById('ocorrencia-tipo').value = 'Saída Antecipada';
     
-    // Define hora atual no formato HH:MM
+    // Define hora atual
     const agora = new Date();
     const hora = String(agora.getHours()).padStart(2, '0');
     const minutos = String(agora.getMinutes()).padStart(2, '0');
     document.getElementById('ocorrencia-horario').value = hora + ':' + minutos;
     
-    // Popula alunos (todos do cache)
+    // Popula alunos
     selectAluno.innerHTML = '<option value="">-- Selecione o Aluno --</option>';
     let todosAlunos = [];
     for (let turma in cacheAlunosPorTurma) {
@@ -1111,7 +1109,6 @@ async function registrarSaidaAntecipada() {
         return;
     }
 
-    // Formata a data/hora completa
     const agora = new Date();
     const data = agora.toLocaleDateString('pt-BR');
     const dataHora = data + ' ' + horario;
@@ -1139,6 +1136,7 @@ async function registrarSaidaAntecipada() {
         mostrarToast('Erro ao registrar a ocorrência.', 'erro');
     }
 }
+
 // ========== MÓDULO PATRIMÔNIO ==========
 function patInicializar() {
     document.getElementById('pat-reg-resp').value = usuarioLogado.nome || '';
