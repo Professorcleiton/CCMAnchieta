@@ -352,7 +352,18 @@
                     </div>
                 </div>
             </header>
+            <!-- NAVEGAÇÃO DE ABAS -->
+<div style="display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; margin-top: 20px;">
+    <button onclick="mostrarTab('apontamentos')" style="padding: 10px 20px; background: #005088; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+        <i class="fa-solid fa-chalkboard-user"></i> Apontamentos
+    </button>
+    <button id="btn-aba-secretaria" onclick="mostrarTab('documentos')" style="padding: 10px 20px; background: #64748b; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+        <i class="fa-solid fa-folder-open"></i> Secretaria / Docs
+    </button>
+</div>
 
+<!-- ABRE A CAIXA DOS APONTAMENTOS -->
+<div id="aba-apontamentos" style="display: block;">
             <div class="summary-dashboard-bar" id="student-mini-dash">
                 <div class="metric-mini-card"><i class="fa-solid fa-chart-line"></i> Apontamentos: <span class="count-number" id="dash-total-count">0</span></div>
                 <div class="mini-chart-bar-container">
@@ -817,8 +828,111 @@
             </div>
         </div>
     </div>
+    </div> <!-- ISSO AQUI FECHA A CAIXA DE APONTAMENTOS -->
+
+<!-- ========================================== -->
+<!-- CAIXA DA SECRETARIA (Nova Aba de Documentos) -->
+<!-- ========================================== -->
+<div id="aba-documentos" style="display: none; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-top: 20px;">
+    <h3 style="color: #005088; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px;">Controle de Documentação Pendente</h3>
     
+    <div style="display: flex; flex-direction: column; gap: 15px; max-width: 400px; margin-top: 20px;">
+        <div>
+            <label style="font-weight: bold; font-size: 14px; color: #475569;">Nome do Estudante:</label>
+            <input type="text" id="doc-aluno" placeholder="Ex: João da Silva" style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box;">
+        </div>
+        <div>
+            <label style="font-weight: bold; font-size: 14px; color: #475569;">Documento Solicitado:</label>
+            <select id="doc-tipo" style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box;">
+                <option value="Histórico Escolar">Histórico Escolar</option>
+                <option value="Certidão de Nascimento">Certidão de Nascimento</option>
+                <option value="Comprovante de Residência">Comprovante de Residência</option>
+                <option value="RG / CPF">RG / CPF</option>
+                <option value="Carteira de Vacinação">Carteira de Vacinação</option>
+            </select>
+        </div>
+        <div>
+            <label style="font-weight: bold; font-size: 14px; color: #475569;">Status:</label>
+            <select id="doc-status" style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box;">
+                <option value="Pendente">Pendente (Falta Entregar)</option>
+                <option value="Entregue">Entregue</option>
+            </select>
+        </div>
+        <button id="btn-salvar-doc" onclick="salvarDocumento()" style="padding: 12px; background: #0d9488; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 10px;">
+            <i class="fa-solid fa-cloud-arrow-up"></i> Salvar no Sistema
+        </button>
+        <div id="msg-doc" style="font-size: 14px; margin-top: 10px; display: none; text-align: center; font-weight: bold;"></div>
+    </div>
+</div>
     <script>
+    // Função para alternar entre as abas Apontamentos / Documentos
+function mostrarTab(tabSelecionada) {
+    if (tabSelecionada === 'apontamentos') {
+        document.getElementById('aba-apontamentos').style.display = 'block';
+        document.getElementById('aba-documentos').style.display = 'none';
+    } else if (tabSelecionada === 'documentos') {
+        document.getElementById('aba-apontamentos').style.display = 'none';
+        document.getElementById('aba-documentos').style.display = 'block';
+    }
+}
+        function salvarDocumento() {
+        const aluno = document.getElementById('doc-aluno').value.trim();
+        const documento = document.getElementById('doc-tipo').value;
+        const status = document.getElementById('doc-status').value;
+        
+        const btnSalvar = document.getElementById('btn-salvar-doc');
+        const msgDoc = document.getElementById('msg-doc');
+
+        if (!aluno) {
+            msgDoc.innerText = "⚠️ Por favor, digite o nome do aluno.";
+            msgDoc.style.color = "#b91c1c";
+            msgDoc.style.display = "block";
+            return;
+        }
+
+        btnSalvar.innerText = "Salvando...";
+        btnSalvar.disabled = true;
+        btnSalvar.style.opacity = "0.7";
+        msgDoc.style.display = "none";
+
+        const dadosParaEnviar = {
+            acao: "salvar_documento",
+            aluno: aluno,
+            documento: documento,
+            status: status,
+            data: new Date().toLocaleDateString('pt-BR')
+        };
+
+        // Envia para o seu Google Apps Script
+        fetch('https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec', {
+            method: 'POST',
+            mode: 'no-cors', 
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(dadosParaEnviar)
+        })
+        .then(() => {
+            msgDoc.innerText = "✅ Documento salvo com sucesso!";
+            msgDoc.style.color = "#15803d";
+            msgDoc.style.display = "block";
+            document.getElementById('doc-aluno').value = ""; 
+        })
+        .catch(error => {
+            msgDoc.innerText = "❌ Erro de conexão. Tente novamente.";
+            msgDoc.style.color = "#b91c1c";
+            msgDoc.style.display = "block";
+        })
+        .finally(() => {
+            setTimeout(() => {
+                btnSalvar.innerText = "Salvar no Sistema";
+                btnSalvar.disabled = false;
+                btnSalvar.style.opacity = "1";
+                setTimeout(() => { msgDoc.style.display = "none"; }, 3000);
+            }, 1000);
+        });
+    }
+</script>
         // ========== GLOBAIS ==========
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
         const SHEET_ID = '1UUiVcCaSb_9Lx7gdEpmBzeRQPlBwDZRouQC2pf1q8Vg';
