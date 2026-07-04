@@ -64,11 +64,13 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f1f5f9; di
 .dash-card.total { border-left-color: #475569; }
 .dash-card.meivs { border-left-color: #0284c7; }
 .dash-card.pedagogico { border-left-color: #0d9488; }
+.dash-card.adm { border-left-color: #4f46e5; }          /* NOVO */
 .dash-card.professores { border-left-color: #b91c1c; }
 .dash-card-icon { font-size: 32px; margin-right: 15px; opacity: 0.8; }
 .dash-card.total .dash-card-icon { color: #475569; }
 .dash-card.meivs .dash-card-icon { color: #0284c7; }
 .dash-card.pedagogico .dash-card-icon { color: #0d9488; }
+.dash-card.adm .dash-card-icon { color: #4f46e5; }     /* NOVO */
 .dash-card.professores .dash-card-icon { color: #b91c1c; }
 .dash-card-info { display: flex; flex-direction: column; }
 .dash-card-title { font-size: 13px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
