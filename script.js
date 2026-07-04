@@ -94,11 +94,11 @@ function mostrarTab(tabSelecionada) {
     } else if (tabSelecionada === 'documentos') {
         document.getElementById('aba-apontamentos').style.display = 'none';
         document.getElementById('aba-documentos').style.display = 'block';
-        carregarDocumentos(); // Atualiza a lista automaticamente ao abrir a aba
+        carregarDocumentos(); 
     }
 }
 
-// ========== ABA SECRETARIA ==========
+// ========== ABA SECRETARIA (ATUALIZADO) ==========
 function salvarDocumento() {
     const aluno = document.getElementById('doc-aluno').value.trim();
     const documento = document.getElementById('doc-tipo').value;
@@ -114,6 +114,9 @@ function salvarDocumento() {
         return;
     }
 
+    // Identifica a turma automaticamente
+    const turmaDoAluno = encontrarTurmaDoAluno(aluno);
+
     btnSalvar.innerText = "Salvando...";
     btnSalvar.disabled = true;
     btnSalvar.style.opacity = "0.7";
@@ -122,6 +125,7 @@ function salvarDocumento() {
     const dadosParaEnviar = {
         operacao: "salvar_documento",
         aluno: aluno,
+        turma: turmaDoAluno, // Enviando a turma identificada
         documento: documento,
         status: status,
         data: new Date().toLocaleDateString('pt-BR')
@@ -129,9 +133,7 @@ function salvarDocumento() {
 
     fetch(APPS_SCRIPT_URL, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'text/plain',
-        },
+        headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify(dadosParaEnviar)
     })
     .then(response => {
@@ -139,7 +141,21 @@ function salvarDocumento() {
         msgDoc.style.color = "#15803d";
         msgDoc.style.display = "block";
         document.getElementById('doc-aluno').value = ""; 
-        carregarDocumentos(); // Recarrega a tabela para mostrar o novo documento
+        carregarDocumentos(); 
+        
+        // --- APONTAMENTO AUTOMÁTICO NA ADM ---
+        const textoApontamento = `📄 Solicitação de Documento: ${documento} | Status: ${status}`;
+        const payloadADM = { 
+            operacao: "SALVAR", 
+            aluno: aluno, 
+            setor: 'adm', 
+            texto: textoApontamento, 
+            funcionario: usuarioLogado.nome, 
+            dataAtual: new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+        };
+        fetch(APPS_SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payloadADM) })
+        .then(() => carregarRegistrosDoServidor()); 
+        // -------------------------------------
     })
     .catch(error => {
         msgDoc.innerText = "❌ Erro de conexão. Tente novamente.";
@@ -158,7 +174,7 @@ function salvarDocumento() {
 
 async function carregarDocumentos() {
     const tbody = document.getElementById('tabela-documentos-body');
-    tbody.innerHTML = '<tr><td colspan="4" style="padding: 15px; text-align: center;"><i class="fa-solid fa-spinner fa-spin"></i> Buscando documentos...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" style="padding: 15px; text-align: center;"><i class="fa-solid fa-spinner fa-spin"></i> Buscando documentos...</td></tr>';
 
     try {
         const resposta = await fetch(APPS_SCRIPT_URL, {
@@ -171,36 +187,39 @@ async function carregarDocumentos() {
         tbody.innerHTML = ''; 
 
         if (linhasPlanilha.length <= 1) {
-            tbody.innerHTML = '<tr><td colspan="4" style="padding: 15px; text-align: center; color: #64748b;">Nenhum documento registrado ainda.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="5" style="padding: 15px; text-align: center; color: #64748b;">Nenhum documento registrado ainda.</td></tr>';
             return;
         }
         
         for (let i = linhasPlanilha.length - 1; i > 0; i--) {
             let linha = linhasPlanilha[i];
             
-            let corStatus = linha[2] === "Pendente" 
+            // Tratamento de cor do Status (que agora é a posição [3] na planilha)
+            let corStatus = linha[3] === "Pendente" 
                 ? "color: #b91c1c; font-weight: bold; background: #fee2e2; padding: 2px 6px; border-radius: 4px;" 
                 : "color: #15803d; font-weight: bold; background: #dcfce3; padding: 2px 6px; border-radius: 4px;";
             
-            let dataAjustada = linha[3];
+            let dataAjustada = linha[4];
             try {
-                let d = new Date(linha[3]);
+                let d = new Date(linha[4]);
                 if (!isNaN(d.getTime())) {
                     dataAjustada = d.toLocaleDateString('pt-BR');
                 }
             } catch(e) {}
 
+            // Nova ordem com a Turma
             let htmlLinha = `
                 <tr style="border-bottom: 1px solid #e2e8f0; transition: background 0.2s;">
+                    <td style="padding: 12px 10px; font-weight: bold; color: #005088;">${linha[1] || '-'}</td>
                     <td style="padding: 12px 10px;">${linha[0]}</td>
-                    <td style="padding: 12px 10px;">${linha[1]}</td>
-                    <td style="padding: 12px 10px;"><span style="${corStatus}">${linha[2]}</span></td>
+                    <td style="padding: 12px 10px;">${linha[2]}</td>
+                    <td style="padding: 12px 10px;"><span style="${corStatus}">${linha[3]}</span></td>
                     <td style="padding: 12px 10px; color: #64748b;">${dataAjustada}</td>
                 </tr>`;
             tbody.innerHTML += htmlLinha;
         }
     } catch (e) {
-        tbody.innerHTML = '<tr><td colspan="4" style="padding: 15px; text-align: center; color: #b91c1c;">Erro ao conectar com a base de dados.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="padding: 15px; text-align: center; color: #b91c1c;">Erro ao conectar com a base de dados.</td></tr>';
     }
 }
 
@@ -231,6 +250,28 @@ function inicializarPainel() {
     carregarAlunosETurmas(); 
     carregarRegistrosDoServidor();
 }
+
+// ALERTA EM TEMPO REAL (POLLING)
+let totalRegistrosAnterior = 0;
+setInterval(async () => {
+    if (usuarioLogado) { 
+        try {
+            const r = await fetch(APPS_SCRIPT_URL, { method: 'GET', cache: 'no-cache' });
+            const novosRegistros = await r.json();
+            
+            if (novosRegistros.length !== totalRegistrosAnterior && totalRegistrosAnterior !== 0) {
+                todosOsRegistros = novosRegistros;
+                atualizarGraficosMural();
+                if (document.getElementById('select-alunos').value) filtrarRegistrosPorAluno();
+                mostrarToast('Novos apontamentos recebidos!', 'sucesso');
+            }
+            totalRegistrosAnterior = novosRegistros.length;
+            
+        } catch (e) {
+            console.log("Tentativa de atualização em background falhou.");
+        }
+    }
+}, 180000); // Checa a cada 3 minutos
 
 function abrirModuloPatrimonio() {
     document.getElementById('app-interface').style.display = 'none';
@@ -394,7 +435,6 @@ function filtrarRegistrosPorAluno() {
     setDisplay(pdf, 'inline-flex');
     setDisplay(tabs, 'flex'); 
 
-    // ATIVAÇÃO DINÂMICA DA ABA
     let abaPadrao = usuarioLogado.setor === 'professores' ? 'direcao' : usuarioLogado.setor;
     if (!['meivs', 'pedagogico', 'adm', 'direcao'].includes(abaPadrao)) abaPadrao = 'meivs';
 
@@ -599,37 +639,6 @@ function gerarFichaIndividualConselho() {
     };
 
     html2pdf().set(opcoesPdf).from(elementoParaImprimir).toPdf().get('pdf').then(function (pdf) {
-        window.open(pdf.output('bloburl'), '_blank');
-    });
-}
-
-function gerarPDF() {
-    const idDoConteudo = 'conteudo-apontamento'; 
-    const elementoConteudo = document.getElementById(idDoConteudo);
-    const cabecalhoPDF = document.getElementById('pdf-header');
-
-    if (!elementoConteudo) {
-        alert("Erro: Não foi possível encontrar o conteúdo para gerar o PDF.");
-        return;
-    }
-
-    const divImpressao = document.createElement('div');
-    divImpressao.style.padding = '20px';
-    
-    const cabecalhoClone = cabecalhoPDF.cloneNode(true);
-    cabecalhoClone.style.display = 'block'; 
-    divImpressao.appendChild(cabecalhoClone);
-    divImpressao.appendChild(elementoConteudo.cloneNode(true));
-
-    const opcoes = {
-        margin:       10,
-        filename:     'Apontamentos_SIGA.pdf',
-        image:        { type: 'jpeg', quality: 1.0 },
-        html2canvas:  { scale: 2, useCORS: true }, 
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
-
-    html2pdf().set(opcoes).from(divImpressao).toPdf().get('pdf').then(function (pdf) {
         window.open(pdf.output('bloburl'), '_blank');
     });
 }
@@ -1078,6 +1087,91 @@ function abrirCaixaTexto(setor) {
 function fecharCaixaTexto(setor) {
     document.getElementById('overlay-text-' + setor).style.display = 'none';
     document.getElementById('text-' + setor).value = ''; 
+}
+
+// ==== MÓDULO SAÍDA ANTECIPADA ====
+function abrirModalSaida() {
+    const modal = document.getElementById('modal-saida-antecipada');
+    const selectTurma = document.getElementById('saida-turma');
+    
+    // Limpa campos
+    document.getElementById('saida-motivo').value = '';
+    document.getElementById('saida-aluno').innerHTML = '<option value="">-- Aguardando turma --</option>';
+    document.getElementById('saida-aluno').disabled = true;
+
+    // Popula turmas
+    selectTurma.innerHTML = '<option value="">-- Escolha --</option>';
+    Object.keys(cacheAlunosPorTurma).sort().forEach(t => {
+        selectTurma.innerHTML += `<option value="${t}">${t}</option>`;
+    });
+
+    modal.style.display = 'flex';
+}
+
+function carregarAlunosSaida() {
+    const turma = document.getElementById('saida-turma').value;
+    const selectAluno = document.getElementById('saida-aluno');
+    
+    if (!turma) {
+        selectAluno.innerHTML = '<option value="">-- Aguardando turma --</option>';
+        selectAluno.disabled = true;
+        return;
+    }
+
+    selectAluno.disabled = false;
+    selectAluno.innerHTML = '<option value="">-- Selecione o Aluno --</option>';
+    
+    const alunos = cacheAlunosPorTurma[turma] || [];
+    alunos.sort().forEach(a => { 
+        selectAluno.innerHTML += `<option value="${a}">${a}</option>`; 
+    });
+}
+
+async function registrarSaida() {
+    const aluno = document.getElementById('saida-aluno').value;
+    const autorizacao = document.getElementById('saida-autorizacao').value;
+    const motivo = document.getElementById('saida-motivo').value.trim();
+
+    if (!aluno) {
+        mostrarToast('Por favor, selecione um aluno.', 'aviso');
+        return;
+    }
+
+    const btn = document.getElementById('btn-save-saida');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Registrando...';
+
+    // Cria o texto que vai aparecer no Feed ADM
+    const textoSaida = `🚶 SAÍDA ANTECIPADA: Liberado por: ${autorizacao}. Motivo: ${motivo || 'Não informado.'}`;
+
+    const payload = {
+        operacao: "SALVAR",
+        aluno: aluno,
+        setor: 'adm', // Registra na aba ADM
+        texto: textoSaida,
+        funcionario: usuarioLogado.nome,
+        dataAtual: new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+    };
+
+    try {
+        await fetch(APPS_SCRIPT_URL, { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'text/plain' }, 
+            body: JSON.stringify(payload) 
+        });
+        
+        mostrarToast('Saída registrada com sucesso!', 'sucesso');
+        document.getElementById('modal-saida-antecipada').style.display = 'none';
+        
+        // Atualiza o feed para mostrar o novo registro
+        await carregarRegistrosDoServidor();
+        
+    } catch (e) {
+        mostrarToast('Erro ao registrar a saída.', 'erro');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'Registrar Saída no Feed ADM';
+    }
 }
 
 // ========== MÓDULO PATRIMÔNIO ==========
