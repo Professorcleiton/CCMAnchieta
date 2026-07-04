@@ -125,13 +125,12 @@
     </div>
 
     <div class="container">
-        <!-- Abas -->
         <div class="tabs">
             <div class="tab active" onclick="mostrarAba('login')">🔐 Entrar</div>
             <div class="tab" onclick="mostrarAba('cadastro')">📝 Cadastrar</div>
         </div>
 
-        <!-- Formulário de Login -->
+        <!-- Login -->
         <div id="form-login" class="form active">
             <label>E-mail</label>
             <input type="email" id="login-email" placeholder="email@exemplo.com">
@@ -141,7 +140,7 @@
             <div class="msg" id="msg-login"></div>
         </div>
 
-        <!-- Formulário de Cadastro -->
+        <!-- Cadastro -->
         <div id="form-cadastro" class="form">
             <label>Nome completo</label>
             <input type="text" id="cad-nome" placeholder="Seu nome">
@@ -152,8 +151,8 @@
             <label>Senha (apenas números, ex: RG)</label>
             <input type="password" id="cad-senha" placeholder="Apenas números">
 
-            <label>Telefone (opcional)</label>
-            <input type="text" id="cad-telefone" placeholder="(44) 99999-9999">
+            <label>Telefone com WhatsApp (obrigatório)</label>
+            <input type="text" id="cad-telefone" placeholder="(44) 99999-9999" required>
 
             <label>Nome(s) do(s) filho(s)</label>
             <textarea id="cad-filhos" placeholder="Digite um nome completo por linha, sem abreviar.
@@ -168,7 +167,6 @@ O sistema reconhece mesmo sem acentos ou letras maiúsculas."></textarea>
     <a href="index.html" class="voltar">← Voltar ao site</a>
 
     <script>
-        // URL do Apps Script
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
 
         function mostrarAba(tipo) {
@@ -183,7 +181,6 @@ O sistema reconhece mesmo sem acentos ou letras maiúsculas."></textarea>
             }
         }
 
-        // Login do responsável
         async function fazerLogin() {
             const email = document.getElementById('login-email').value.trim().toLowerCase();
             const senha = document.getElementById('login-senha').value.trim().replace(/\D/g, '');
@@ -220,7 +217,6 @@ O sistema reconhece mesmo sem acentos ou letras maiúsculas."></textarea>
             }
         }
 
-        // Cadastro de novo responsável
         async function cadastrar() {
             const nome = document.getElementById('cad-nome').value.trim();
             const email = document.getElementById('cad-email').value.trim().toLowerCase();
@@ -229,16 +225,17 @@ O sistema reconhece mesmo sem acentos ou letras maiúsculas."></textarea>
             const filhosTexto = document.getElementById('cad-filhos').value.trim();
             const msg = document.getElementById('msg-cadastro');
 
-            if (!nome || !email || !senha || !filhosTexto) {
+            if (!nome || !email || !senha || !telefone || !filhosTexto) {
                 msg.innerText = 'Preencha todos os campos obrigatórios.';
                 return;
             }
 
-            // Divide por linha, remove linhas vazias e espaços extras
-            const filhos = filhosTexto.split('\n')
-                                     .map(f => f.trim())
-                                     .filter(f => f !== '');
+            if (telefone.replace(/\D/g, '').length < 10) {
+                msg.innerText = 'Informe um número de telefone válido (com DDD).';
+                return;
+            }
 
+            const filhos = filhosTexto.split('\n').map(f => f.trim()).filter(f => f !== '');
             if (filhos.length === 0) {
                 msg.innerText = 'Informe pelo menos um nome de filho.';
                 return;
