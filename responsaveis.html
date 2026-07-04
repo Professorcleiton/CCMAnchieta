@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal dos Pais - SIGA Anchieta</title>
     <style>
+        /* (mantenha o mesmo CSS anterior, sem alterações) */
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f6f8;
@@ -65,7 +66,7 @@
             font-size: 14px;
             margin-bottom: 3px;
         }
-        input, textarea, select {
+        input, textarea {
             padding: 12px;
             border: 1px solid #ccc;
             border-radius: 5px;
@@ -105,9 +106,6 @@
             color: #005088;
             text-decoration: none;
             font-weight: bold;
-        }
-        .voltar:hover {
-            text-decoration: underline;
         }
         .instrucao {
             font-size: 12px;
@@ -159,7 +157,7 @@
 O sistema reconhece mesmo sem acentos ou letras maiúsculas."></textarea>
             <div class="instrucao">Escreva o nome completo de cada filho, um por linha. Não abrevie. Acentos e letras maiúsculas/minúsculas não fazem diferença.</div>
 
-            <button onclick="cadastrar()">Cadastrar</button>
+            <button id="btn-cadastrar" onclick="cadastrar()">Cadastrar</button>
             <div class="msg" id="msg-cadastro"></div>
         </div>
     </div>
@@ -224,6 +222,7 @@ O sistema reconhece mesmo sem acentos ou letras maiúsculas."></textarea>
             const telefone = document.getElementById('cad-telefone').value.trim();
             const filhosTexto = document.getElementById('cad-filhos').value.trim();
             const msg = document.getElementById('msg-cadastro');
+            const btn = document.getElementById('btn-cadastrar');
 
             if (!nome || !email || !senha || !telefone || !filhosTexto) {
                 msg.innerText = 'Preencha todos os campos obrigatórios.';
@@ -241,7 +240,10 @@ O sistema reconhece mesmo sem acentos ou letras maiúsculas."></textarea>
                 return;
             }
 
-            msg.innerText = 'Cadastrando...';
+            btn.disabled = true;
+            btn.innerText = 'Cadastrando...';
+            msg.innerText = '';
+
             try {
                 const res = await fetch(APPS_SCRIPT_URL, {
                     method: 'POST',
@@ -255,23 +257,32 @@ O sistema reconhece mesmo sem acentos ou letras maiúsculas."></textarea>
                         filhos: filhos
                     })
                 });
-const resposta = await res.text();
-if (resposta === 'success') {
-    msg.innerText = '✅ Cadastro realizado! Agora você pode entrar.';
-    document.getElementById('cad-nome').value = '';
-    document.getElementById('cad-email').value = '';
-    document.getElementById('cad-senha').value = '';
-    document.getElementById('cad-telefone').value = '';
-    document.getElementById('cad-filhos').value = '';
-    mostrarAba('login');
-} else if (resposta.startsWith('Cadastro parcial')) {
-    // Sucesso parcial: exibe a mensagem e mantém o formulário para correção
-    msg.innerText = '⚠️ ' + resposta;
-    // Opcional: você pode limpar apenas o campo de filhos para que o responsável digite novamente os nomes faltantes
-    document.getElementById('cad-filhos').value = '';
-} else {
-    msg.innerText = '❌ ' + resposta;
-}
+
+                const resposta = await res.text();
+                console.log('Resposta do servidor:', resposta);
+
+                if (resposta === 'success') {
+                    msg.innerText = '✅ Cadastro realizado! Agora você pode entrar.';
+                    document.getElementById('cad-nome').value = '';
+                    document.getElementById('cad-email').value = '';
+                    document.getElementById('cad-senha').value = '';
+                    document.getElementById('cad-telefone').value = '';
+                    document.getElementById('cad-filhos').value = '';
+                    mostrarAba('login');
+                } else if (resposta.startsWith('Cadastro parcial')) {
+                    msg.innerText = '⚠️ ' + resposta;
+                    document.getElementById('cad-filhos').value = ''; // limpa apenas os filhos para corrigir
+                } else {
+                    msg.innerText = '❌ ' + resposta;
+                }
+            } catch (e) {
+                console.error('Erro na requisição:', e);
+                msg.innerText = 'Erro de conexão. Verifique sua internet e tente novamente.';
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Cadastrar';
+            }
+        }
     </script>
 </body>
 </html>
