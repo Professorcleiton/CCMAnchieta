@@ -76,9 +76,6 @@
                         <button class="btn-patrimonio" id="btn-abrir-admin" onclick="abrirPainelAdmin()" style="display: none; background-color: #475569;">
                             <i class="fa-solid fa-gear"></i> Gestão
                         </button>
-                        <button class="btn-patrimonio" id="btn-abrir-patrimonio" onclick="abrirModuloPatrimonio()">
-                            <i class="fa-solid fa-boxes-stacked"></i> Patrimônio
-                        </button>
 
                         <div id="user-display" style="background: #e2e8f0; padding: 6px 12px; border-radius: 20px; font-weight: bold; color: #334155;">
                             <i class="fa-solid fa-user-check"></i> Carregando...
@@ -203,14 +200,20 @@
                                 <div class="dash-bar-track"><div class="dash-bar-fill" id="dash-bar-professores" style="background-color: #b91c1c; width: 0%;"></div></div>
                             </div>
                         </div>
-<div class="dash-panel">
+            <div class="dash-panel">
     <div class="dash-panel-title"><i class="fa-solid fa-bolt"></i> Ações Rápidas</div>
     <p style="font-size: 13px; color: #64748b; margin-bottom: 15px;">Acesse as ferramentas gerenciais e relatórios pedagógicos.</p>
+    
     <button class="btn-salvar" style="background-color: #0d9488; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(13, 148, 136, 0.2); margin-bottom: 10px;" onclick="abrirPreConselho()">
         <i class="fa-solid fa-clipboard-check" style="font-size: 18px;"></i> Preencher Pré-Conselho
     </button>
-    <button class="btn-salvar" style="background-color: #f59e0b; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(245, 158, 11, 0.2);" onclick="abrirModalSaida()">
+    
+    <button class="btn-salvar" style="background-color: #f59e0b; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(245, 158, 11, 0.2); margin-bottom: 10px;" onclick="abrirModalSaida()">
         <i class="fa-solid fa-sign-out" style="font-size: 18px;"></i> Registrar Saída Antecipada
+    </button>
+    
+    <button class="btn-salvar" style="background-color: #005088; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(0, 80, 136, 0.2);" onclick="abrirModuloPatrimonio()">
+        <i class="fa-solid fa-boxes-stacked" style="font-size: 18px;"></i> Módulo Patrimônio
     </button>
 </div>
                     </div>
