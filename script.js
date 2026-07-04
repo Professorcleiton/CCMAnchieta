@@ -330,31 +330,54 @@ function selecionarTurma(turma) {
 // ==== BUSCA E CARREGAMENTO DE DADOS ====
 async function carregarRegistrosDoServidor() {
     try {
-        const r = await fetch(APPS_SCRIPT_URL, { method: 'GET', cache: 'no-cache' });
-        const data = await r.json();
+        // Buscamos tudo de uma vez (assumindo que o doGet retorna um objeto com as 3 chaves)
+        const resposta = await fetch(APPS_SCRIPT_URL + "?aba=todos_os_dados"); 
+        const data = await resposta.json(); 
         
-        // Unifica apontamentos comuns com documentos da secretaria
-        let lista = data.apontamentos.map(row => ({
-            idLinha: row.idLinha, aluno: row.aluno, setor: row.setor, texto: row.texto, funcionario: row.funcionario, dataAtual: row.dataAtual
-        }));
-        
-        data.documentos.forEach((doc, idx) => {
-            if (idx > 0 && doc[0]) { // doc[0] é Aluno, doc[2] é Documento
-                lista.push({
-                    idLinha: 'doc_' + idx,
-                    aluno: doc[0],
-                    setor: 'adm', 
-                    texto: `📄 Solicitação de Documento: ${doc[2]} | Status: ${doc[3]}`,
-                    funcionario: 'Secretaria',
-                    dataAtual: doc[4]
-                });
-            }
+        todosOsRegistros = [];
+
+        // 1. Apontamentos Pedagógicos
+        data.apontamentos.forEach(row => {
+            todosOsRegistros.push({
+                idLinha: row.idLinha,
+                aluno: row.aluno,
+                setor: row.setor,
+                texto: row.texto,
+                funcionario: row.funcionario,
+                dataAtual: row.dataAtual,
+                tipo: 'apontamento'
+            });
         });
-        
-        todosOsRegistros = lista;
+
+        // 2. Documentos da Secretaria
+        data.documentos.forEach(doc => {
+            todosOsRegistros.push({
+                aluno: doc.aluno,
+                setor: 'adm',
+                texto: `📄 Documento: ${doc.documento} - Status: ${doc.status}`,
+                funcionario: 'Secretaria',
+                dataAtual: doc.data,
+                tipo: 'documento'
+            });
+        });
+
+        // 3. Saídas Antecipadas
+        data.saidas.forEach(s => {
+            todosOsRegistros.push({
+                aluno: s.aluno,
+                setor: 'adm',
+                texto: `🚪 Saída Antecipada: ${s.motivo} | Autorizado por: ${s.autorizador}`,
+                funcionario: 'Secretaria',
+                dataAtual: s.data,
+                tipo: 'saida'
+            });
+        });
+
+        // Atualiza a interface
         atualizarGraficosMural();
         if (document.getElementById('select-alunos').value) filtrarRegistrosPorAluno();
-    } catch (e) { console.error("Erro ao carregar:", e); }
+
+    } catch (e) { console.error("Erro ao carregar dados unificados:", e); }
 }
 
 function atualizarGraficosMural() {
