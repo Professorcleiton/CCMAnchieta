@@ -159,15 +159,25 @@ async function carregarDocumentos() {
             return;
         }
 
-        // Criamos um array para acumular o HTML antes de inserir no DOM (mais rápido)
         let htmlRows = '';
         for (let i = linhasPlanilha.length - 1; i > 0; i--) {
             let linha = linhasPlanilha[i];
             
-            // Usando sua função de formatação existente no script
-            let dataFormatada = formatarDataEHora(linha[4]);
+            // Lógica robusta para formatar a data/hora
+            let dataFormatada = 'Data inválida';
+            if (linha[4]) {
+                const d = new Date(linha[4]);
+                // Verifica se a data é válida
+                if (!isNaN(d.getTime())) {
+                    // Formata para dd/mm/aaaa
+                    dataFormatada = d.toLocaleDateString('pt-BR');
+                } else {
+                    // Se não for um objeto data, tenta usar o valor original (caso venha como string)
+                    dataFormatada = linha[4];
+                }
+            }
             
-            // Definição das colunas baseada na sua planilha:
+            // Definição das colunas:
             // 0: Aluno | 1: Turma | 2: Documento | 3: Status | 4: Data
             htmlRows += `<tr>
                 <td>${linha[1] || '-'}</td>
@@ -180,6 +190,7 @@ async function carregarDocumentos() {
         tbody.innerHTML = htmlRows;
         
     } catch (e) { 
+        console.error("Erro ao carregar documentos:", e);
         tbody.innerHTML = '<tr><td colspan="5" style="color: red; text-align: center;">Erro ao carregar documentos.</td></tr>'; 
     }
 }
