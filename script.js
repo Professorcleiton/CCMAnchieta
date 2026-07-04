@@ -308,7 +308,7 @@ async function carregarAlunosETurmas() {
         linhas.forEach(r => {
             if (r.c && r.c[1] && r.c[1].v) {
                 const nome = r.c[1].v.toString().trim();
-                const turma = r.c[2] && r.c[2].v ? r.c[2].v.toString().trim() : 'Sem Turma';
+                const turma = r.c[1] && r.c[1].v ? r.c[1].v.toString().trim() : 'Sem Turma';
                 if (!cacheAlunosPorTurma[turma]) cacheAlunosPorTurma[turma] = [];
                 cacheAlunosPorTurma[turma].push(nome);
             }
