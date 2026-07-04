@@ -20,9 +20,7 @@
             margin-bottom: 20px;
             text-align: center;
         }
-        .header h2 {
-            margin: 0;
-        }
+        .header h2 { margin: 0; }
         .logout {
             display: inline-block;
             margin-top: 10px;
@@ -45,11 +43,7 @@
             width: 100%;
             max-width: 300px;
         }
-        .registros {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
+        .registros { display: flex; flex-direction: column; gap: 10px; }
         .registro {
             background: white;
             padding: 15px;
@@ -57,23 +51,11 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
             border-left: 5px solid #005088;
         }
-        .registro .setor {
-            font-weight: bold;
-        }
-        .registro .data {
-            font-size: 12px;
-            color: #666;
-            margin-top: 5px;
-        }
-        .registro .texto {
-            margin-top: 8px;
-            font-size: 15px;
-        }
-        .sem-registros {
-            text-align: center;
-            padding: 30px;
-            color: #999;
-        }
+        .registro .setor { font-weight: bold; }
+        .registro .data { font-size: 12px; color: #666; margin-top: 5px; }
+        .registro .texto { margin-top: 8px; font-size: 15px; }
+        .sem-registros { text-align: center; padding: 30px; color: #999; }
+        .erro { color: red; text-align: center; padding: 30px; }
     </style>
 </head>
 <body>
@@ -91,7 +73,7 @@
     </div>
 
     <div class="registros" id="lista-registros">
-        <div class="sem-registros">Nenhum registro encontrado.</div>
+        <div class="sem-registros">Carregando registros...</div>
     </div>
 
     <script>
@@ -126,34 +108,63 @@
         }
 
         async function carregarRegistros() {
+            const container = document.getElementById('lista-registros');
+            container.innerHTML = '<div class="sem-registros">Carregando dados do servidor...</div>';
+
             try {
                 const res = await fetch(APPS_SCRIPT_URL + '?aba=todos_os_dados');
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const data = await res.json();
+                console.log('Dados recebidos:', data);
+
+                if (!data.apontamentos && !data.documentos && !data.ocorrencias) {
+                    throw new Error('Resposta do servidor não contém os dados esperados.');
+                }
 
                 const alunosVinculados = dadosResponsavel.alunos;
-                todosRegistros = [
-                    ...data.apontamentos.filter(r => alunosVinculados.includes(r.aluno)).map(r => ({...r, tipo: 'apontamento'})),
-                    ...data.documentos.filter(d => alunosVinculados.includes(d.aluno)).map(d => ({
-                        aluno: d.aluno,
-                        setor: 'adm',
-                        texto: `📄 Documento: ${d.documento} - Status: ${d.status}`,
-                        funcionario: 'Secretaria',
-                        dataAtual: d.data,
-                        tipo: 'documento'
-                    })),
-                    ...data.saidas.filter(s => alunosVinculados.includes(s.aluno)).map(s => ({
-                        aluno: s.aluno,
-                        setor: 'adm',
-                        texto: `🚪 Saída Antecipada: ${s.motivo} | Autorizado por: ${s.autorizador}`,
-                        funcionario: 'Secretaria',
-                        dataAtual: s.data,
-                        tipo: 'saida'
-                    }))
-                ];
+                todosRegistros = [];
+
+                // Apontamentos
+                (data.apontamentos || []).forEach(r => {
+                    if (alunosVinculados.includes(r.aluno)) {
+                        todosRegistros.push({...r, tipo: 'apontamento'});
+                    }
+                });
+
+                // Documentos
+                (data.documentos || []).forEach(d => {
+                    if (alunosVinculados.includes(d.aluno)) {
+                        todosRegistros.push({
+                            aluno: d.aluno,
+                            setor: 'adm',
+                            texto: `📄 Documento: ${d.documento} - Status: ${d.status}`,
+                            funcionario: 'Secretaria',
+                            dataAtual: d.data,
+                            tipo: 'documento'
+                        });
+                    }
+                });
+
+                // Ocorrências
+                (data.ocorrencias || []).forEach(oc => {
+                    if (alunosVinculados.includes(oc.aluno)) {
+                        const icone = oc.tipo === "Saída Antecipada" ? "🚪" : "⏰";
+                        const horario = oc.data ? oc.data.split(' ')[1] : '';
+                        todosRegistros.push({
+                            aluno: oc.aluno,
+                            setor: 'adm',
+                            texto: `${icone} ${oc.tipo}: ${oc.motivo} | Autorizado por: ${oc.autorizador} | Horário: ${horario}`,
+                            funcionario: oc.autorizador || 'Secretaria',
+                            dataAtual: oc.data,
+                            tipo: 'ocorrencia'
+                        });
+                    }
+                });
 
                 filtrarRegistros();
             } catch (e) {
-                document.getElementById('lista-registros').innerHTML = '<div class="sem-registros">Erro ao carregar dados.</div>';
+                console.error('Erro ao carregar:', e);
+                container.innerHTML = `<div class="erro">Erro ao carregar dados: ${e.message}.<br>Verifique sua conexão e tente novamente.</div>`;
             }
         }
 
@@ -169,7 +180,7 @@
             registros.sort((a, b) => (b.dataAtual || '').localeCompare(a.dataAtual || ''));
 
             if (registros.length === 0) {
-                container.innerHTML = '<div class="sem-registros">Nenhum registro encontrado.</div>';
+                container.innerHTML = '<div class="sem-registros">Nenhum registro encontrado para o(s) aluno(s) selecionado(s).</div>';
                 return;
             }
 
