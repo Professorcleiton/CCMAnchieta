@@ -1,155 +1,993 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('contactForm');
-    const formMessage = document.getElementById('formMessage');
+// ========== GLOBAIS ==========
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
+const SHEET_ID = '1UUiVcCaSb_9Lx7gdEpmBzeRQPlBwDZRouQC2pf1q8Vg';
+const COLS_ALUNOS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=Alunos`;
+let usuarioLogado = null, todosOsRegistros = [], cacheAlunosPorTurma = {}, turmaSelecionadaAtiva = '';
+let modalSetorAtivo = '', modalRegistrosFiltrados = [], modalItensExibidos = 50;
+let patTodos = [], patAmbientes = [], patSalaFiltro = 'TODOS', patCameraAtiva = null;
 
-    form.addEventListener('submit', (event) => {
-        event.preventDefault(); // Previne o envio do formulário
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js');
+}
 
-        const name = document.getElementById('name').value;
-        const email = document.getElementById('email').value;
-        const message = document.getElementById('message').value;
+// ==== UTILITÁRIOS E TOASTS ====
+function mostrarToast(mensagem, tipo = 'sucesso') {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `toast ${tipo}`;
+    let icone = 'fa-circle-check';
+    if (tipo === 'erro') icone = 'fa-circle-xmark';
+    if (tipo === 'aviso') icone = 'fa-triangle-exclamation';
 
-        // Exemplo simples de validação
-        if (name && email && message) {
-            formMessage.textContent = 'Obrigado pelo seu contato, ' + name + '!';
-            formMessage.style.color = 'green';
-            form.reset(); // Limpa o formulário
-        } else {
-            formMessage.textContent = 'Por favor, preencha todos os campos.';
-            formMessage.style.color = 'red';
+    toast.innerHTML = `<i class="fa-solid ${icone}"></i> <span>${mensagem}</span>`;
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.add('fade-out');
+        setTimeout(() => toast.remove(), 400); 
+    }, 3500);
+}
+
+// ========== SESSÃO ==========
+window.addEventListener('DOMContentLoaded', () => {
+    const sessao = localStorage.getItem('sgi_ccma_session');
+    if (sessao) { 
+        usuarioLogado = JSON.parse(sessao); 
+        
+        if (usuarioLogado.setor === 'secretaria' || usuarioLogado.setor === 'direcao' || usuarioLogado.nivel === 3) {
+            const btnSec = document.getElementById('btn-aba-secretaria');
+            if (btnSec) btnSec.style.display = 'inline-block';
         }
-    });
+        
+        inicializarPainel(); 
+    }
 });
-document.addEventListener('DOMContentLoaded', () => {
-    const chatbox = document.getElementById('chatbox');
-    const openChatButton = document.getElementById('open-chat');
-    const closeChatButton = document.getElementById('close-chat');
-    const chatInput = document.getElementById('chat-input');
-    const sendMessageButton = document.getElementById('send-message');
-    const chatLog = document.getElementById('chat-log');
 
-    openChatButton.addEventListener('click', () => {
-        chatbox.style.display = 'block';
-        openChatButton.style.display = 'none';
-    });
+async function autenticarUsuario() {
+    const email = document.getElementById('user-email').value.trim().toLowerCase();
+    const senha = document.getElementById('user-password').value.trim().replace(/\D/g, '');
+    const err = document.getElementById('error-message'), btn = document.getElementById('btn-entrar-login');
+    if (!email || !senha) return;
+    
+    btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+    
+    try {
+        const r = await fetch(APPS_SCRIPT_URL, { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'text/plain' }, 
+            body: JSON.stringify({ operacao: "LOGIN", email, senha }) 
+        });
+        
+        const data = await r.json();
+        
+        if (data.status === "success") {
+            let setor = data.setor.toString().trim().toLowerCase();
+            
+            if (setor === 'secretaria' || setor === 'direcao' || data.nivel === 3) {
+                const btnSec = document.getElementById('btn-aba-secretaria');
+                if (btnSec) btnSec.style.display = 'inline-block';
+            }
 
-    closeChatButton.addEventListener('click', () => {
-        chatbox.style.display = 'none';
-        openChatButton.style.display = 'block';
-    });
-
-    sendMessageButton.addEventListener('click', () => {
-        sendMessage();
-    });
-
-    chatInput.addEventListener('keypress', (event) => {
-        if (event.key === 'Enter') {
-            sendMessage();
+            if (setor === 'direcao' || setor === 'professor' || setor === 'professores') setor = 'professores';
+            
+            usuarioLogado = { email, nome: data.nome, setorExibicao: 'PROFESSORES', setor, nivel: data.nivel };
+            localStorage.setItem('sgi_ccma_session', JSON.stringify(usuarioLogado));
+            
+            inicializarPainel();
+        } else { 
+            err.style.display = 'block'; btn.disabled = false; btn.innerHTML = 'Entrar no Sistema'; 
         }
+    } catch (e) { 
+        err.style.display = 'block'; btn.disabled = false; btn.innerHTML = 'Entrar no Sistema'; 
+    }
+}
+
+function fazerLogout() {
+    localStorage.removeItem('sgi_ccma_session'); location.reload();
+}
+
+// ========== NAVEGAÇÃO ENTRE ABAS ==========
+function mostrarTab(tabSelecionada) {
+    if (tabSelecionada === 'apontamentos') {
+        document.getElementById('aba-apontamentos').style.display = 'block';
+        document.getElementById('aba-documentos').style.display = 'none';
+    } else if (tabSelecionada === 'documentos') {
+        document.getElementById('aba-apontamentos').style.display = 'none';
+        document.getElementById('aba-documentos').style.display = 'block';
+        carregarDocumentos(); // Atualiza a lista automaticamente ao abrir a aba
+    }
+}
+
+// ========== ABA SECRETARIA ==========
+function salvarDocumento() {
+    const aluno = document.getElementById('doc-aluno').value.trim();
+    const documento = document.getElementById('doc-tipo').value;
+    const status = document.getElementById('doc-status').value;
+    
+    const btnSalvar = document.getElementById('btn-salvar-doc');
+    const msgDoc = document.getElementById('msg-doc');
+
+    if (!aluno) {
+        msgDoc.innerText = "⚠️ Por favor, digite o nome do aluno.";
+        msgDoc.style.color = "#b91c1c";
+        msgDoc.style.display = "block";
+        return;
+    }
+
+    btnSalvar.innerText = "Salvando...";
+    btnSalvar.disabled = true;
+    btnSalvar.style.opacity = "0.7";
+    msgDoc.style.display = "none";
+
+    const dadosParaEnviar = {
+        operacao: "salvar_documento",
+        aluno: aluno,
+        documento: documento,
+        status: status,
+        data: new Date().toLocaleDateString('pt-BR')
+    };
+
+    fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'text/plain',
+        },
+        body: JSON.stringify(dadosParaEnviar)
+    })
+    .then(response => {
+        msgDoc.innerText = "✅ Documento salvo com sucesso!";
+        msgDoc.style.color = "#15803d";
+        msgDoc.style.display = "block";
+        document.getElementById('doc-aluno').value = ""; 
+        carregarDocumentos(); // Recarrega a tabela para mostrar o novo documento
+    })
+    .catch(error => {
+        msgDoc.innerText = "❌ Erro de conexão. Tente novamente.";
+        msgDoc.style.color = "#b91c1c";
+        msgDoc.style.display = "block";
+    })
+    .finally(() => {
+        setTimeout(() => {
+            btnSalvar.innerText = "Salvar no Sistema";
+            btnSalvar.disabled = false;
+            btnSalvar.style.opacity = "1";
+            setTimeout(() => { msgDoc.style.display = "none"; }, 3000);
+        }, 1000);
+    });
+}
+
+async function carregarDocumentos() {
+    const tbody = document.getElementById('tabela-documentos-body');
+    tbody.innerHTML = '<tr><td colspan="4" style="padding: 15px; text-align: center;"><i class="fa-solid fa-spinner fa-spin"></i> Buscando documentos...</td></tr>';
+
+    try {
+        const resposta = await fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify({ operacao: "listar_documentos" })
+        });
+        
+        const linhasPlanilha = await resposta.json();
+        tbody.innerHTML = ''; 
+
+        if (linhasPlanilha.length <= 1) {
+            tbody.innerHTML = '<tr><td colspan="4" style="padding: 15px; text-align: center; color: #64748b;">Nenhum documento registrado ainda.</td></tr>';
+            return;
+        }
+        
+        for (let i = linhasPlanilha.length - 1; i > 0; i--) {
+            let linha = linhasPlanilha[i];
+            
+            let corStatus = linha[2] === "Pendente" 
+                ? "color: #b91c1c; font-weight: bold; background: #fee2e2; padding: 2px 6px; border-radius: 4px;" 
+                : "color: #15803d; font-weight: bold; background: #dcfce3; padding: 2px 6px; border-radius: 4px;";
+            
+            let dataAjustada = linha[3];
+            try {
+                let d = new Date(linha[3]);
+                if (!isNaN(d.getTime())) {
+                    dataAjustada = d.toLocaleDateString('pt-BR');
+                }
+            } catch(e) {}
+
+            let htmlLinha = `
+                <tr style="border-bottom: 1px solid #e2e8f0; transition: background 0.2s;">
+                    <td style="padding: 12px 10px;">${linha[0]}</td>
+                    <td style="padding: 12px 10px;">${linha[1]}</td>
+                    <td style="padding: 12px 10px;"><span style="${corStatus}">${linha[2]}</span></td>
+                    <td style="padding: 12px 10px; color: #64748b;">${dataAjustada}</td>
+                </tr>`;
+            tbody.innerHTML += htmlLinha;
+        }
+    } catch (e) {
+        tbody.innerHTML = '<tr><td colspan="4" style="padding: 15px; text-align: center; color: #b91c1c;">Erro ao conectar com a base de dados.</td></tr>';
+    }
+}
+
+// ========== PAINEL PRINCIPAL ==========
+function inicializarPainel() {
+    const telaLogin = document.getElementById('login-screen');
+    if (telaLogin) { telaLogin.style.display = 'none'; }
+    
+    const interfaceApp = document.getElementById('app-interface');
+    if (interfaceApp) { interfaceApp.style.display = 'flex'; }
+    
+    const displayUser = document.getElementById('user-display');
+    if (displayUser) {
+        displayUser.innerHTML = `<i class="fa-solid fa-user-check"></i> ${usuarioLogado.nome} (${usuarioLogado.setor === 'professores' ? 'PROFESSORES' : usuarioLogado.setor.toUpperCase()})`;
+    }
+    
+    const btnPat = document.getElementById('btn-abrir-patrimonio');
+    if (btnPat) { btnPat.style.display = (usuarioLogado.nivel >= 3) ? 'inline-flex' : 'none'; }
+    
+    const btnAdmin = document.getElementById('btn-abrir-admin');
+    if (btnAdmin) { btnAdmin.style.display = (usuarioLogado.nivel >= 3) ? 'inline-flex' : 'none'; }
+
+    const btnPdfPre = document.getElementById('btn-gerar-pdf-pre-conselho');
+    if (btnPdfPre) { btnPdfPre.style.display = (usuarioLogado.nivel >= 3) ? 'inline-flex' : 'none'; }
+    
+    aplicarBloqueioSetores(usuarioLogado.setor, usuarioLogado.nivel);
+    
+    carregarAlunosETurmas(); 
+    carregarRegistrosDoServidor();
+}
+
+function abrirModuloPatrimonio() {
+    document.getElementById('app-interface').style.display = 'none';
+    document.getElementById('patrimonio-interface').style.display = 'flex';
+    patInicializar();
+}
+
+function fecharModuloPatrimonio() {
+    document.getElementById('patrimonio-interface').style.display = 'none';
+    document.getElementById('app-interface').style.display = 'flex';
+}
+
+function alternarMenuLateral() { document.getElementById('app-sidebar').classList.toggle('open'); }
+
+function alternarAbaMobile(setor, btn) {
+    document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.sector-column').forEach(c => { c.classList.remove('active'); });
+    const col = document.getElementById(`col-${setor}`);
+    if (col) col.classList.add('active'); 
+}
+
+async function carregarAlunosETurmas() {
+    cacheAlunosPorTurma = {};
+    const ul = document.getElementById('lista-turmas-sidebar');
+    
+    try {
+        const response = await fetch(COLS_ALUNOS_URL);
+        const text = await response.text();
+        const jsonText = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
+        const data = JSON.parse(jsonText);
+        
+        const linhas = data.table.rows;
+        linhas.forEach(r => {
+            if (r.c && r.c[1] && r.c[1].v) {
+                const nome = r.c[1].v.toString().trim();
+                const turma = r.c[2] && r.c[2].v ? r.c[2].v.toString().trim() : 'Sem Turma';
+                if (!cacheAlunosPorTurma[turma]) cacheAlunosPorTurma[turma] = [];
+                cacheAlunosPorTurma[turma].push(nome);
+            }
+        });
+        
+        renderizarSidebarTurmas();
+        preencherBuscaGlobal();
+    } catch (e) { 
+        console.error("Falha ao processar os alunos:", e); 
+        ul.innerHTML = '<li class="turma-item" style="color:#f87171;"><i class="fa-solid fa-triangle-exclamation"></i> Erro na Tabela</li>';
+    }
+}
+
+function renderizarSidebarTurmas() {
+    const ul = document.getElementById('lista-turmas-sidebar');
+    ul.innerHTML = '';
+    const turmas = Object.keys(cacheAlunosPorTurma).sort();
+    if (!turmas.length) { ul.innerHTML = '<li class="turma-item">Nenhuma turma</li>'; return; }
+    turmas.forEach((turma, idx) => {
+        const li = document.createElement('li');
+        li.className = 'turma-item';
+        li.innerHTML = `<i class="fa-solid fa-users-viewfinder"></i> ${turma}`;
+        li.onclick = () => {
+            document.querySelectorAll('.turma-item').forEach(el => el.classList.remove('active'));
+            li.classList.add('active');
+            selecionarTurma(turma);
+        };
+        ul.appendChild(li);
+        if (idx === 0 && !turmaSelecionadaAtiva) { li.classList.add('active'); selecionarTurma(turma); }
+    });
+}
+
+function selecionarTurma(turma) {
+    turmaSelecionadaAtiva = turma;
+    const select = document.getElementById('select-alunos');
+    select.innerHTML = '<option value="">-- Escolha o Aluno --</option>';
+    
+    const alunos = cacheAlunosPorTurma[turma] || [];
+    alunos.sort().forEach(a => { 
+        const opt = document.createElement('option'); 
+        opt.value = a; 
+        opt.textContent = a; 
+        select.appendChild(opt); 
+    });
+    
+    select.value = '';
+    filtrarRegistrosPorAluno();
+    document.getElementById('app-sidebar').classList.remove('open');
+}
+
+async function carregarRegistrosDoServidor() {
+    try {
+        const r = await fetch(APPS_SCRIPT_URL, { method: 'GET', cache: 'no-cache' });
+        todosOsRegistros = await r.json();
+        atualizarGraficosMural();
+        if (document.getElementById('select-alunos').value) filtrarRegistrosPorAluno();
+    } catch (e) { console.error(e); }
+}
+
+function atualizarGraficosMural() {
+    const total = todosOsRegistros.length;
+    const meivs = todosOsRegistros.filter(r => r.setor.toLowerCase() === 'meivs').length;
+    const pedagogico = todosOsRegistros.filter(r => r.setor.toLowerCase() === 'pedagogico').length;
+    const adm = todosOsRegistros.filter(r => r.setor.toLowerCase() === 'adm').length;
+    const professores = todosOsRegistros.filter(r => r.setor.toLowerCase() === 'professores' || r.setor.toLowerCase() === 'direcao').length;
+
+    const elTotal = document.getElementById('dash-val-total'); if(elTotal) elTotal.innerText = total;
+    const elMeivs = document.getElementById('dash-val-meivs'); if(elMeivs) elMeivs.innerText = meivs;
+    const elPed = document.getElementById('dash-val-pedagogico'); if(elPed) elPed.innerText = pedagogico;
+    const elProfs = document.getElementById('dash-val-professores'); if(elProfs) elProfs.innerText = professores;
+
+    const pctMeivs = total === 0 ? 0 : Math.round((meivs / total) * 100);
+    const pctPed = total === 0 ? 0 : Math.round((pedagogico / total) * 100);
+    const pctAdm = total === 0 ? 0 : Math.round((adm / total) * 100);
+    const pctProf = total === 0 ? 0 : Math.round((professores / total) * 100);
+
+    const bMeivs = document.getElementById('dash-bar-meivs'); if(bMeivs) { bMeivs.style.width = pctMeivs + '%'; document.getElementById('dash-pct-meivs').innerText = pctMeivs + '%'; }
+    const bPed = document.getElementById('dash-bar-pedagogico'); if(bPed) { bPed.style.width = pctPed + '%'; document.getElementById('dash-pct-pedagogico').innerText = pctPed + '%'; }
+    const bAdm = document.getElementById('dash-bar-adm'); if(bAdm) { bAdm.style.width = pctAdm + '%'; document.getElementById('dash-pct-adm').innerText = pctAdm + '%'; }
+    const bProf = document.getElementById('dash-bar-professores'); if(bProf) { bProf.style.width = pctProf + '%'; document.getElementById('dash-pct-professores').innerText = pctProf + '%'; }
+}
+
+function formatarDataEHora(s) {
+    if (!s) return ''; s = s.toString().trim();
+    if (s.match(/^[A-Za-z]{3}\s[A-Za-z]{3}/) || s.includes('GMT')) {
+        const d = new Date(s); if (!isNaN(d)) return `${d.toLocaleDateString('pt-BR')} às ${d.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'})}`;
+    }
+    if (s.includes('-')) {
+        const partes = s.split(' '), data = partes[0].split('-');
+        const hora = partes[1] ? ' às ' + partes[1].substring(0,5) : '';
+        if (data[0].length === 4) return `${data[2]}/${data[1]}/${data[0]}${hora}`;
+    }
+    if (s.includes('/')) return s.replace(' ', ' às ');
+    return s;
+}
+
+function encontrarTurmaDoAluno(nome) {
+    for (let t in cacheAlunosPorTurma) if (cacheAlunosPorTurma[t].includes(nome)) return t;
+    return 'Sem Turma';
+}
+
+function filtrarRegistrosPorAluno() {
+    const select = document.getElementById('select-alunos');
+    const mural = document.getElementById('welcome-dashboard-mural');
+    const mini = document.getElementById('student-mini-dash');
+    const grid = document.getElementById('siga-columns-grid'); 
+    const pdf = document.getElementById('btn-gerar-pdf-oficial');
+    const tabs = document.getElementById('mobile-tabs-container');
+
+    const setDisplay = (el, val) => { if (el) el.style.display = val; };
+
+    if (!select || !select.value || select.value === "Selecione uma turma...") {
+        setDisplay(mural, 'flex');
+        setDisplay(mini, 'none');
+        setDisplay(grid, 'none'); 
+        setDisplay(pdf, 'none');
+        setDisplay(tabs, 'none');
+        return;
+    }
+
+    setDisplay(mural, 'none');
+    setDisplay(mini, 'flex');
+    setDisplay(grid, 'block');
+    setDisplay(pdf, 'inline-flex');
+    setDisplay(tabs, 'flex'); 
+
+    // ATIVAÇÃO DINÂMICA DA ABA
+    let abaPadrao = usuarioLogado.setor === 'professores' ? 'direcao' : usuarioLogado.setor;
+    if (!['meivs', 'pedagogico', 'adm', 'direcao'].includes(abaPadrao)) abaPadrao = 'meivs';
+
+    const colAtiva = document.getElementById(`col-${abaPadrao}`);
+    if (colAtiva) {
+        document.querySelectorAll('.sector-column').forEach(c => c.classList.remove('active'));
+        colAtiva.classList.add('active');
+    }
+    
+    const btnAtivo = document.querySelector(`.tab-button[onclick*="'${abaPadrao}'"]`);
+    if (btnAtivo) {
+        document.querySelectorAll('#mobile-tabs-container .tab-button').forEach(b => b.classList.remove('active'));
+        btnAtivo.classList.add('active');
+    }
+
+    const aluno = select.value;
+    
+    ['meivs','pedagogico','adm','direcao'].forEach(s => {
+        const feed = document.getElementById(`feed-${s}`);
+        if (feed) feed.innerHTML = '';
     });
 
-    async function sendMessage() {
-        const message = chatInput.value.trim();
-        if (message) {
-            chatLog.innerHTML += `<div><strong>Você:</strong> ${message}</div>`;
-            chatInput.value = '';
+    let cm=0, cp=0, ca=0, cf=0;
 
-            // Send the message to the backend
-            try {
-                const response = await fetch('/api/chat', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ message })
-                });
-
-                const data = await response.json();
-                const botMessage = data.message;
-                chatLog.innerHTML += `<div><strong>Assistente:</strong> ${botMessage}</div>`;
-                chatLog.scrollTop = chatLog.scrollHeight;
-            } catch (error) {
-                console.error('Error:', error);
-                chatLog.innerHTML += `<div><strong>Assistente:</strong> Ocorreu um erro. Tente novamente mais tarde.</div>`;
+    todosOsRegistros.forEach(r => {
+        if (r.aluno && r.aluno.trim() === aluno) {
+            let setor = r.setor;
+            if (setor === 'meivs') cm++;
+            else if (setor === 'pedagogico') cp++;
+            else if (setor === 'adm') ca++;
+            else if (setor === 'professores' || setor === 'direcao') cf++;
+            
+            if (setor === 'professores') setor = 'direcao';
+            
+            const feed = document.getElementById(`feed-${setor}`);
+            if (feed) {
+                const card = document.createElement('div'); 
+                card.className = 'post-card';
+                const botoes = (usuarioLogado && usuarioLogado.nivel >= 3) ? 
+                    `<div class="card-actions"><button class="btn-action-card btn-edit-card" onclick="editarRegistroServidor(${r.idLinha}, '${r.setor}')"><i class="fa-solid fa-pen-to-square"></i> Editar</button><button class="btn-action-card btn-delete-card" onclick="excluirRegistroServidor(${r.idLinha})"><i class="fa-solid fa-trash-can"></i> Apagar</button></div>` : '';
+                
+                card.innerHTML = `<p class="post-text" id="text-card-${r.idLinha}">${r.texto}</p><div class="post-footer"><span><i class="fa-solid fa-user"></i>${r.funcionario || 'SIGA'}</span><span><i class="fa-solid fa-clock"></i>${formatarDataEHora(r.dataAtual)}</span></div>${botoes}`;
+                feed.appendChild(card);
             }
         }
-    }
-});
-document.body.style.overflow = 'auto'; // Certifique-se de que a rolagem está habilitada
-function closeOverlay() {
-    document.getElementById('overlay').style.display = 'none';
-}
-function abrirTelaCheia() {
-    var video = document.getElementById("meuVideo");
-    if (video.requestFullscreen) {
-        video.requestFullscreen();
-    } else if (video.mozRequestFullScreen) { // Firefox
-        video.mozRequestFullScreen();
-    } else if (video.webkitRequestFullscreen) { // Chrome, Safari and Opera
-        video.webkitRequestFullscreen();
-    } else if (video.msRequestFullscreen) { // IE/Edge
-        video.msRequestFullscreen();
-    }
-}
-document.addEventListener("scroll", function() {
-    const backToTopButton = document.getElementById("back-to-top");
-    if (window.scrollY > 100) {
-        backToTopButton.classList.add("show");
-    } else {
-        backToTopButton.classList.remove("show");
-    }
-});
-
-document.getElementById("back-to-top").addEventListener("click", function() {
-    window.scrollTo({
-        top: 0,
-        behavior: "smooth"
     });
-});
-document.getElementById('loginForm').addEventListener('submit', function(event) {
-    event.preventDefault();
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
 
-    // Verifique as credenciais (aqui está um exemplo simples)
-    if (username === 'admin' && password === '1234') {
-        window.location.href = 'area-restrita.html';
-    } else {
-        alert('Usuário ou senha incorretos');
+    const total = cm+cp+ca+cf;
+    document.getElementById('dash-total-count').innerText = total;
+    ['bar-meivs','bar-pedag','bar-adm','bar-profs'].forEach((id,i) => {
+        const val = [cm,cp,ca,cf][i];
+        const bar = document.getElementById(id);
+        if (bar) bar.style.width = total ? Math.max((val/total)*100, 5) + '%' : '0%';
+    });
+}
+
+function verificarTeclaEnter(e, setor) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); salvarPost(setor); } }
+
+async function salvarPost(setor) {
+    const textarea = document.getElementById(`text-${setor}`), texto = textarea.value.trim(), aluno = document.getElementById('select-alunos').value, btn = document.getElementById(`btn-${setor}`);
+    if (!texto || !aluno) {
+        mostrarToast('Selecione um aluno e digite algo antes de salvar.', 'aviso');
+        return;
     }
-});
-function checkPassword() {
-    const password = document.getElementById('password').value;
-    const errorMessage = document.getElementById('error-message');
+    btn.disabled = true;
+    const agora = new Date();
+    const data = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    const payload = { operacao: "SALVAR", aluno, setor: setor === 'direcao' ? 'professores' : setor, texto, funcionario: usuarioLogado.nome, dataAtual: data };
+    try {
+        await fetch(APPS_SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
+        textarea.value = ''; await carregarRegistrosDoServidor();
+        mostrarToast('Apontamento salvo com sucesso!', 'sucesso');
+    } catch (e) { 
+        mostrarToast('Falha ao salvar. Verifique sua conexão.', 'erro'); 
+    } finally { btn.disabled = false; }
+}
 
-    // Defina a senha correta aqui
-    const correctPassword = '12345';
-
-    if (password === correctPassword) {
-        // Redireciona para a página restrita
-        window.location.href = 'area-restrita.html';
-    } else {
-        errorMessage.textContent = 'Senha incorreta. Tente novamente.';
+async function excluirRegistroServidor(id) {
+    if (!id || !confirm('Apagar?')) return;
+    try {
+        await fetch(APPS_SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ operacao: "EXCLUIR", idLinha: id }) });
+        todosOsRegistros = todosOsRegistros.filter(r => r.idLinha !== id); filtrarRegistrosPorAluno();
+        mostrarToast('Registro apagado com sucesso.', 'sucesso');
+    } catch (e) { 
+        mostrarToast('Erro ao tentar apagar o registro.', 'erro'); 
     }
 }
 
-window.sr = ScrollReveal({ reset: true });
+async function editarRegistroServidor(id, setor) {
+    if (!id) return;
+    const el = document.getElementById(`text-card-${id}`);
+    const novo = prompt('Editar:', el.innerText);
+    if (!novo || !novo.trim()) return;
+    try {
+        await fetch(APPS_SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ operacao: "EDITAR", idLinha: id, texto: novo.trim() }) });
+        const reg = todosOsRegistros.find(r => r.idLinha === id); if (reg) reg.texto = novo.trim();
+        filtrarRegistrosPorAluno();
+        mostrarToast('Registro editado com sucesso!', 'sucesso');
+    } catch (e) { 
+        mostrarToast('Erro ao tentar editar.', 'erro'); 
+    }
+}
 
-sr.reveal('.sobre', { 
-    rotate: { x:0, y:80, z:0},
-    duration: 2000
+// ==== BUSCA GLOBAL DE ALUNOS ====
+function preencherBuscaGlobal() {
+    const datalist = document.getElementById('lista-todos-alunos');
+    datalist.innerHTML = '';
+    let todosAlunos = [];
+    
+    for (let turma in cacheAlunosPorTurma) {
+        todosAlunos = todosAlunos.concat(cacheAlunosPorTurma[turma]);
+    }
+    
+    todosAlunos = [...new Set(todosAlunos)].sort();
+    
+    todosAlunos.forEach(a => {
+        const opt = document.createElement('option');
+        opt.value = a;
+        datalist.appendChild(opt);
+    });
+}
+
+function buscarAlunoGlobal() {
+    const nomeBuscado = document.getElementById('input-busca-aluno').value.trim();
+    if (!nomeBuscado) return;
+    
+    const turma = encontrarTurmaDoAluno(nomeBuscado);
+    if (turma && turma !== 'Sem Turma') {
+        document.querySelectorAll('.turma-item').forEach(el => el.classList.remove('active'));
+        const itensTurma = Array.from(document.querySelectorAll('.turma-item'));
+        const itemEncontrado = itensTurma.find(el => el.innerText.includes(turma));
+        if (itemEncontrado) itemEncontrado.classList.add('active');
+        
+        selecionarTurma(turma);
+        document.getElementById('select-alunos').value = nomeBuscado;
+        filtrarRegistrosPorAluno();
+        document.getElementById('input-busca-aluno').value = '';
+    } else {
+        mostrarToast('Aluno não encontrado na base de dados.', 'aviso');
+    }
+}
+
+// ==== MODO ESCURO ====
+function alternarTema() {
+    const body = document.body;
+    const btnIcone = document.getElementById('btn-icone-tema');
+    
+    body.classList.toggle('dark-mode');
+    
+    if (body.classList.contains('dark-mode')) {
+        btnIcone.innerHTML = '<i class="fa-solid fa-sun" style="color: #eab308;"></i>';
+        localStorage.setItem('sgi_ccma_tema', 'escuro');
+    } else {
+        btnIcone.innerHTML = '<i class="fa-solid fa-moon"></i>';
+        localStorage.setItem('sgi_ccma_tema', 'claro');
+    }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    if (localStorage.getItem('sgi_ccma_tema') === 'escuro') {
+        document.body.classList.add('dark-mode');
+        const btnIcone = document.getElementById('btn-icone-tema');
+        if (btnIcone) btnIcone.innerHTML = '<i class="fa-solid fa-sun" style="color: #eab308;"></i>';
+    }
 });
 
-sr.reveal('.equipe administrativa', { duration: 1000});
+// ==== PDFS ====
+function gerarFichaIndividualConselho() {
+    const aluno = document.getElementById('select-alunos').value;
+    if (!aluno) return;
+    
+    let html = `<div style="padding:25px;font-family:'Segoe UI',Arial;color:#000;background:#fff;">
+        <div style="display:flex;justify-content:space-between;border-bottom:3px double #005088;padding-bottom:12px;margin-bottom:20px;">
+            <div><h4 style="margin:0;font-size:13px;color:#475569;">SECRETARIA DE ESTADO DA EDUCAÇÃO - SEED</h4><h4 style="margin:2px 0 0;font-size:12px;color:#64748b;">NÚCLEO REGIONAL DE EDUCAÇÃO DE UMUARAMA</h4><h2 style="margin:5px 0 0;color:#005088;font-size:18px;">COLÉGIO CÍVICO-MILITAR ANCHIETA</h2></div>
+            <div><span style="font-size:10px;border:1px solid #005088;padding:4px 8px;border-radius:4px;">DOCUMENTO INTERNO</span></div>
+        </div>
+        <h3 style="text-align:center;margin-bottom:25px;">Ficha de Acompanhamento Individual do Estudante</h3>
+        <table style="width:100%;border-collapse:collapse;font-size:13px;">
+            <tr><td style="padding:6px;border:1px solid #94a3b8;background:#f8fafc;font-weight:bold;">Estudante:</td><td style="padding:6px;border:1px solid #94a3b8;">${aluno}</td><td style="padding:6px;border:1px solid #94a3b8;background:#f8fafc;font-weight:bold;">Turma:</td><td style="padding:6px;border:1px solid #94a3b8;">${turmaSelecionadaAtiva}</td></tr>
+        </table>
+        <h4 style="font-size:13px;color:#005088;margin-top:15px;">Histórico de Apontamentos</h4>`;
+        
+    ['meivs','pedagogico','adm','direcao'].forEach(setor => {
+        const registros = todosOsRegistros.filter(r => r.aluno === aluno && (r.setor === setor || (setor === 'direcao' && (r.setor === 'professores' || r.setor === 'direcao'))));
+        if (registros.length) {
+            html += `<div style="margin-top:10px;background:#f1f5f9;padding:5px 10px;border-radius:4px;font-weight:bold;border-left:5px solid #005088;">${setor.toUpperCase()}</div>`;
+            registros.forEach(p => html += `<div style="margin:8px 0;padding:8px 12px;background:#fff;border-bottom:1px solid #e2e8f0;"><div>${p.texto}</div><div style="font-size:10px;color:#64748b;text-align:right;">${p.funcionario} | ${formatarDataEHora(p.dataAtual)}</div></div>`);
+        }
+    });
+    
+    html += `</div>`;
+    
+    const elementoParaImprimir = document.createElement('div');
+    elementoParaImprimir.innerHTML = html;
 
-sr.reveal('.fique por dentro', { duration: 1000});
+    const opcoesPdf = { 
+        margin: 12, 
+        filename: `Ficha_Conselho_${aluno.replace(/ /g,'_')}.pdf`, 
+        image: { type: 'jpeg', quality: 0.98 }, 
+        html2canvas: { scale: 2 }, 
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
+    };
 
-sr.reveal('.gallery', { duration: 1000});
+    html2pdf().set(opcoesPdf).from(elementoParaImprimir).toPdf().get('pdf').then(function (pdf) {
+        window.open(pdf.output('bloburl'), '_blank');
+    });
+}
 
-sr.reveal('.contato', { duration: 1000});
-function abrirModalRelatorio() {
+function gerarPDF() {
+    const idDoConteudo = 'conteudo-apontamento'; 
+    const elementoConteudo = document.getElementById(idDoConteudo);
+    const cabecalhoPDF = document.getElementById('pdf-header');
+
+    if (!elementoConteudo) {
+        alert("Erro: Não foi possível encontrar o conteúdo para gerar o PDF.");
+        return;
+    }
+
+    const divImpressao = document.createElement('div');
+    divImpressao.style.padding = '20px';
+    
+    const cabecalhoClone = cabecalhoPDF.cloneNode(true);
+    cabecalhoClone.style.display = 'block'; 
+    divImpressao.appendChild(cabecalhoClone);
+    divImpressao.appendChild(elementoConteudo.cloneNode(true));
+
+    const opcoes = {
+        margin:       10,
+        filename:     'Apontamentos_SIGA.pdf',
+        image:        { type: 'jpeg', quality: 1.0 },
+        html2canvas:  { scale: 2, useCORS: true }, 
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    html2pdf().set(opcoes).from(divImpressao).toPdf().get('pdf').then(function (pdf) {
+        window.open(pdf.output('bloburl'), '_blank');
+    });
+}
+
+// ==== CONTROLE DE BLOQUEIOS ====
+function aplicarBloqueioSetores(setor, nivel) {
+    const setoresDefinidos = ['meivs', 'pedagogico', 'adm', 'direcao'];
+    
+    setoresDefinidos.forEach(s => {
+        const ta = document.getElementById(`text-${s}`);
+        const btn = document.getElementById(`btn-${s}`);
+        const tabBtn = document.querySelector(`.tab-button[onclick*="'${s}'"]`);
+        
+        let liberado = false;
+        
+        if (nivel >= 2) { 
+            liberado = true; 
+        } 
+        else {
+            if (setor === s || (setor === 'professores' && s === 'direcao')) { 
+                liberado = true; 
+            }
+        }
+        
+        if (liberado) {
+            if (ta) ta.disabled = false; 
+            if (btn) btn.disabled = false;
+            if (tabBtn) tabBtn.style.display = 'inline-block';
+        } else {
+            if (ta) ta.disabled = true; 
+            if (btn) btn.disabled = true;
+            if (tabBtn) tabBtn.style.display = 'none';
+        }
+    });
+}
+
+// ==== MODAL RELATÓRIO ====
+function abrirModalRelatorio(setorFiltrado) {
+    modalSetorAtivo = setorFiltrado; modalItensExibidos = 50;
+    document.getElementById('modal-relatorio-setor').style.display = 'flex';
+    document.getElementById('modal-relatorio-titulo').innerHTML = setorFiltrado === 'geral' ? 'Relatório Geral' : setorFiltrado.toUpperCase();
+    let registros = setorFiltrado === 'geral' ? todosOsRegistros : todosOsRegistros.filter(r => r.setor === setorFiltrado || (setorFiltrado === 'direcao' && (r.setor === 'professores' || r.setor === 'direcao')));
+    modalRegistrosFiltrados = [...registros].reverse();
+    const container = document.getElementById('modal-relatorio-lista');
+    container.innerHTML = `<div style="padding:10px;"><input type="text" id="busca-modal" placeholder="Filtrar..." oninput="filtrarBuscaModal(false)" style="width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:6px;"></div><div id="modal-lista-itens-scroll" style="max-height:420px;overflow-y:auto;"></div><div id="modal-container-botao-mais" style="text-align:center;padding:15px;"></div>`;
+    renderizarItensModal(modalRegistrosFiltrados);
+}
+
+function renderizarItensModal(lista) {
+    const container = document.getElementById('modal-lista-itens-scroll');
+    const btnContainer = document.getElementById('modal-container-botao-mais');
+    container.innerHTML = ''; btnContainer.innerHTML = '';
+    if (!lista.length) { container.innerHTML = '<p style="text-align:center;color:#64748b;">Nenhum registro.</p>'; return; }
+    const limitados = lista.slice(0, modalItensExibidos);
+    limitados.forEach(r => {
+        const div = document.createElement('div'); div.className = 'modal-list-item';
+        div.innerHTML = `<div style="display:flex;justify-content:space-between;font-size:11px;color:#64748b;"><span>${formatarDataEHora(r.dataAtual)}</span><span>${r.funcionario}</span></div><div style="font-size:14px;margin:4px 0;"><strong>${r.aluno}</strong> <span style="background:#e0f2fe;padding:2px 6px;border-radius:4px;font-size:11px;">${encontrarTurmaDoAluno(r.aluno)}</span></div><div style="font-style:italic;">${r.texto}</div>`;
+        container.appendChild(div);
+    });
+    if (lista.length > modalItensExibidos) {
+        const btn = document.createElement('button');
+        btn.innerText = `Exibir mais (${lista.length - modalItensExibidos} pendentes)`;
+        btn.style = "background:#0f172a;color:white;border:none;padding:10px 22px;border-radius:6px;cursor:pointer;";
+        btn.onclick = () => { modalItensExibidos += 50; filtrarBuscaModal(true); };
+        btnContainer.appendChild(btn);
+    }
+}
+
+function filtrarBuscaModal(manter) {
+    const termo = document.getElementById('busca-modal').value.toLowerCase();
+    let lista = termo ? modalRegistrosFiltrados.filter(r => r.aluno.toLowerCase().includes(termo) || encontrarTurmaDoAluno(r.aluno).toLowerCase().includes(termo) || r.texto.toLowerCase().includes(termo)) : modalRegistrosFiltrados;
+    if (!manter) modalItensExibidos = 50;
+    renderizarItensModal(lista);
+}
+
+function fecharModalRelatorio() { document.getElementById('modal-relatorio-setor').style.display = 'none'; }
+function fecharModalRelatorioEvent(e) { if (e.target.id === 'modal-relatorio-setor') fecharModalRelatorio(); }
+function fecharModalSelecaoEvent(e) { if (e.target.id === 'modal-selecionar-turma') document.getElementById('modal-selecionar-turma').style.display = 'none'; }
+
+// ==== PAINEL DE ADMINISTRAÇÃO ====
+function abrirPainelAdmin() {
+    document.getElementById('modal-admin').style.display = 'flex';
+    const select = document.getElementById('admin-nova-turma');
+    select.innerHTML = '<option value="">-- Escolha a nova turma --</option><option value="EXCLUIR" style="color: red; font-weight: bold;">❌ EXCLUIR ALUNO DO SISTEMA</option>';
+    
+    Object.keys(cacheAlunosPorTurma).sort().forEach(t => {
+        select.innerHTML += `<option value="${t}">${t}</option>`;
+    });
+}
+
+function fecharModalAdmin() { document.getElementById('modal-admin').style.display = 'none'; }
+function fecharModalAdminEvent(e) { if (e.target.id === 'modal-admin') fecharModalAdmin(); }
+
+async function executarAcaoAluno() {
+    const nomeAluno = document.getElementById('admin-nome-aluno').value.trim();
+    const novaTurma = document.getElementById('admin-nova-turma').value;
+    const btn = document.getElementById('btn-exec-admin');
+
+    if (!nomeAluno || !novaTurma) return mostrarToast('Preencha o nome do aluno e escolha uma ação.', 'aviso');
+    
+    const operacao = novaTurma === 'EXCLUIR' ? 'ALUNO_EXCLUIR' : 'ALUNO_TRANSFERIR';
+    if (operacao === 'ALUNO_EXCLUIR' && !confirm(`Tem certeza que deseja EXCLUIR ${nomeAluno} do sistema?`)) return;
+    
+    btn.disabled = true;
+    btn.innerHTML = 'Processando...';
+
+    const payload = {
+        operacao: operacao,
+        nome_aluno: nomeAluno,
+        nova_turma: novaTurma,
+        emailOperador: usuarioLogado.email 
+    };
+
+    try {
+        const response = await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+            mostrarToast('Ação concluída com sucesso! Atualizando base...', 'sucesso');
+            document.getElementById('admin-nome-aluno').value = '';
+            fecharModalAdmin();
+            await carregarAlunosETurmas();
+        } else if (result.status === 'not_found') {
+            mostrarToast('Aluno não encontrado na base de dados.', 'erro');
+        } else {
+            mostrarToast('Sem permissão para esta ação.', 'erro');
+        }
+    } catch (e) {
+        mostrarToast('Erro de comunicação com o servidor.', 'erro');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'Confirmar Ação';
+    }
+}
+
+// ==== GESTÃO DE USUÁRIOS DA EQUIPE ====
+async function salvarUsuarioAdmin() {
+    const email = document.getElementById('admin-user-email').value.trim();
+    const nome = document.getElementById('admin-user-nome').value.trim();
+    const setor = document.getElementById('admin-user-setor').value;
+    const nivel = document.getElementById('admin-user-nivel').value;
+    const senha = document.getElementById('admin-user-senha').value.trim();
+
+    if (!email || !nome) return mostrarToast('Preencha pelo menos o E-mail e o Nome.', 'aviso');
+
+    const btn = document.getElementById('btn-save-user');
+    btn.disabled = true; btn.innerHTML = 'Processando...';
+
+    const payload = {
+        operacao: 'USER_SALVAR',
+        emailOperador: usuarioLogado.email, 
+        email: email,
+        nome: nome,
+        setor: setor,
+        nivel: nivel,
+        senha: senha
+    };
+
+    try {
+        const resp = await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+        const result = await resp.json();
+        
+        if (result.status === 'success' || result.status === 'updated') {
+            mostrarToast(result.status === 'success' ? 'Novo usuário cadastrado!' : 'Usuário atualizado!', 'sucesso');
+            document.getElementById('admin-user-email').value = '';
+            document.getElementById('admin-user-nome').value = '';
+            document.getElementById('admin-user-senha').value = '';
+        } else {
+            mostrarToast('Você não tem permissão para esta ação.', 'erro');
+        }
+    } catch(e) {
+        mostrarToast('Erro ao salvar usuário. Verifique a conexão.', 'erro');
+    } finally {
+        btn.disabled = false; btn.innerHTML = 'Salvar Usuário';
+    }
+}
+
+async function deletarUsuarioAdmin() {
+    const email = document.getElementById('admin-user-email').value.trim();
+    if (!email) return mostrarToast('Digite o E-mail do usuário que deseja excluir.', 'aviso');
+    
+    if (!confirm(`ALERTA: Tem certeza que deseja REVOGAR O ACESSO de ${email}?`)) return;
+
+    const btn = document.getElementById('btn-del-user');
+    btn.disabled = true; btn.innerHTML = 'Excluindo...';
+
+    try {
+        const resp = await fetch(APPS_SCRIPT_URL, { 
+            method: 'POST', 
+            body: JSON.stringify({ operacao: 'USER_DELETAR', emailOperador: usuarioLogado.email, email: email }) 
+        });
+        const result = await resp.json();
+        
+        if (result.status === 'success') {
+            mostrarToast('Acesso revogado com sucesso.', 'sucesso');
+            document.getElementById('admin-user-email').value = '';
+            document.getElementById('admin-user-nome').value = '';
+        } else if (result.status === 'not_found') {
+            mostrarToast('Usuário não encontrado na base de dados.', 'aviso');
+        } else {
+            mostrarToast('Não autorizado.', 'erro');
+        }
+    } catch(e) {
+        mostrarToast('Erro de comunicação.', 'erro');
+    } finally {
+        btn.disabled = false; btn.innerHTML = 'Excluir';
+    }
+}
+
+// ==== MÓDULO PRÉ-CONSELHO ====
+function abrirPreConselho() {
+    document.getElementById('modal-pre-conselho').style.display = 'flex';
+    document.getElementById('pc-professor').value = usuarioLogado.nome;
+    
+    const selectTurma = document.getElementById('pc-turma');
+    selectTurma.innerHTML = '<option value="">Selecione a Turma...</option>';
+    Object.keys(cacheAlunosPorTurma).sort().forEach(t => {
+        selectTurma.innerHTML += `<option value="${t}">${t}</option>`;
+    });
+}
+
+async function enviarPreConselho() {
+    const turma = document.getElementById('pc-turma').value;
+    const disciplina = document.getElementById('pc-disciplina').value.trim();
+    
+    if (!turma || !disciplina) {
+        return mostrarToast('Preencha a Disciplina e selecione a Turma.', 'aviso');
+    }
+
+    const btn = document.getElementById('btn-save-conselho');
+    btn.disabled = true; 
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Enviando...';
+
+    const checkboxes = document.querySelectorAll('#pc-q12-checkboxes input:checked');
+    let instrumentos = Array.from(checkboxes).map(cb => cb.value);
+    const outros = document.getElementById('pc-q12-outros').value.trim();
+    if (outros) instrumentos.push(`Outros: ${outros}`);
+
+    const payload = {
+        operacao: 'PRE_CONSELHO_SALVAR',
+        professor: usuarioLogado.nome,
+        disciplina: disciplina,
+        turma: turma,
+        trimestre: document.getElementById('pc-trimestre').value,
+        q1: document.getElementById('pc-q1').value,
+        q2: document.getElementById('pc-q2').value,
+        q3: document.getElementById('pc-q3').value,
+        q4: document.getElementById('pc-q4').value,
+        q5: document.getElementById('pc-q5').value,
+        q6: document.getElementById('pc-q6').value.trim(),
+        q7: document.getElementById('pc-q7').value.trim(),
+        q8: document.getElementById('pc-q8').value.trim(),
+        q9: document.getElementById('pc-q9').value.trim(),
+        q10: document.getElementById('pc-q10').value.trim(),
+        q11: document.getElementById('pc-q11').value.trim(),
+        q12: instrumentos.join(', '),
+        q14: document.getElementById('pc-q14').value,
+        q16: document.getElementById('pc-q16').value.trim(),
+        q17: document.getElementById('pc-q17').value,
+        q18: document.getElementById('pc-q18').value.trim()
+    };
+
+    try {
+        const resp = await fetch(APPS_SCRIPT_URL, { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'text/plain' }, 
+            body: JSON.stringify(payload) 
+        });
+        
+        const result = await resp.json();
+        
+        if (result.status === 'success') {
+            mostrarToast('Avaliação enviada com sucesso!', 'sucesso');
+            
+            document.querySelectorAll('#modal-pre-conselho input, #modal-pre-conselho textarea').forEach(el => {
+                if(el.type === 'checkbox') el.checked = false;
+                else el.value = '';
+            });
+
+            setTimeout(() => {
+                document.getElementById('modal-pre-conselho').style.display = 'none';
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Enviar Avaliação da Turma';
+            }, 1000);
+            
+        } else {
+            throw new Error(result.message || 'Erro no servidor');
+        }
+    } catch(e) {
+        mostrarToast('Falha ao enviar: ' + e.message, 'erro');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Tentar Novamente';
+    }
+}
+
+async function gerarRelatorioPreConselho(turmaSelecionada) {
+    const todosRegistrosPC = await carregarRegistrosPreConselho(); 
+    const turmaLimpa = turmaSelecionada.toString().trim().toLowerCase();
+
+    const dadosTurma = todosRegistrosPC.filter(r => 
+        r.turma && r.turma.toString().trim().toLowerCase() === turmaLimpa
+    );
+
+    if (dadosTurma.length === 0) {
+        mostrarToast('Nenhum registro encontrado na aba Pré-Conselho para a turma ' + turmaSelecionada, 'aviso');
+        return;
+    }
+
+    let html = `
+        <div style="font-family: Arial, sans-serif; padding: 40px; color: #000;">
+            <h2 style="text-align:center; border-bottom: 2px solid #000; padding-bottom: 10px;">Relatório de Pré-Conselho - ${turmaSelecionada}</h2>
+            
+            ${dadosTurma.map(r => `
+                <div style="margin-bottom: 40px; border: 1px solid #ccc; padding: 20px; border-radius: 8px; page-break-inside: avoid;">
+                    <h3 style="background: #e9ecef; padding: 10px; margin-top: 0; border-radius: 5px;">
+                        Disciplina: ${r.disciplina || 'N/A'} | Professor: ${r.professor || 'N/A'}
+                    </h3>
+                    <p style="font-size: 14px; color: #555;"><strong>Trimestre:</strong> ${r.trimestre || 'N/A'} | <strong>Data de Envio:</strong> ${r.data || 'N/A'}</p>
+                    
+                    <hr style="border-top: 1px dashed #ccc; margin: 15px 0;">
+                    
+                    <h4 style="color: #2c3e50; margin-bottom: 8px;">1. Rendimento da Turma (Quantitativo)</h4>
+                    <p style="margin: 5px 0;"><strong>Abaixo da Média:</strong> ${r.q1 || '0'} | <strong>Básico:</strong> ${r.q2 || '0'} | <strong>Adequado:</strong> ${r.q3 || '0'} | <strong>Avançado:</strong> ${r.q4 || '0'}</p>
+                    
+                    <h4 style="color: #2c3e50; margin-bottom: 8px; margin-top: 15px;">2. Análise da Turma</h4>
+                    <p style="margin: 5px 0;"><strong>Comprometimento:</strong> ${r.q5 || 'N/A'}</p>
+                    <p style="margin: 5px 0;"><strong>Pontos Positivos:</strong> ${r.q6 || 'N/A'}</p>
+                    <p style="margin: 5px 0;"><strong>Pontos Negativos/Dificuldades:</strong> ${r.q7 || 'N/A'}</p>
+                    <p style="margin: 5px 0;"><strong>Sugestões de Melhoria:</strong> ${r.q8 || 'N/A'}</p>
+                    
+                    <h4 style="color: #2c3e50; margin-bottom: 8px; margin-top: 15px;">3. Alunos em Destaque Negativo</h4>
+                    <p style="margin: 5px 0;"><strong>Alunos Abaixo da Média e Motivos:</strong> ${r.q9 || 'N/A'}</p>
+                    
+                    <h4 style="color: #2c3e50; margin-bottom: 8px; margin-top: 15px;">4. Metodologia e Avaliação</h4>
+                    <p style="margin: 5px 0;"><strong>Metodologia Aplicada:</strong> ${r.q10 || 'N/A'}</p>
+                    <p style="margin: 5px 0;"><strong>Recursos Utilizados:</strong> ${r.q11 || 'N/A'}</p>
+                    <p style="margin: 5px 0;"><strong>Instrumentos de Avaliação:</strong> ${r.q12 || 'N/A'}</p>
+                    <p style="margin: 5px 0;"><strong>Houve Avaliação Específica?</strong> ${r.q14 || 'N/A'}</p>
+                    
+                    <h4 style="color: #2c3e50; margin-bottom: 8px; margin-top: 15px;">5. Recuperação de Estudos</h4>
+                    <p style="margin: 5px 0;"><strong>Como foi a Recuperação:</strong> ${r.q16 || 'N/A'}</p>
+                    <p style="margin: 5px 0;"><strong>Usou Instrumentos Diferenciados?</strong> ${r.q17 || 'N/A'}</p>
+                    <p style="margin: 5px 0;"><strong>Plano de Recuperação Paralela:</strong> ${r.q18 || 'N/A'}</p>
+                </div>
+            `).join('')}
+        </div>
+    `;
+
+    const win = window.open('', '_blank');
+    win.document.write(html);
+    win.document.close();
+    setTimeout(() => {
+        win.print();
+    }, 500);
+}
+
+function abrirModalTurmasPreConselho() {
     const select = document.getElementById('select-turma-relatorio');
-    // Limpa e preenche o select com as turmas que já estão no seu cache
     select.innerHTML = '<option value="">-- Escolha uma Turma --</option>';
     
     Object.keys(cacheAlunosPorTurma).sort().forEach(turma => {
@@ -168,7 +1006,280 @@ function confirmarGeracaoRelatorio() {
         mostrarToast('Por favor, selecione uma turma!', 'aviso');
         return;
     }
-    // Fecha o modal e chama a função de gerar o relatório (aquela que criamos antes)
     document.getElementById('modal-selecionar-turma').style.display = 'none';
     gerarRelatorioPreConselho(turma); 
+}
+
+async function carregarRegistrosPreConselho() {
+    const SHEET_PRE_CONSELHO_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=Pre_Conselho`; 
+
+    try {
+        const response = await fetch(SHEET_PRE_CONSELHO_URL);
+        const text = await response.text();
+        const jsonText = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
+        const data = JSON.parse(jsonText);
+        
+        return data.table.rows.map(r => ({
+            data: r.c[0]?.v || '',
+            professor: r.c[1]?.v || '',
+            disciplina: r.c[2]?.v || '',
+            turma: r.c[3]?.v?.toString().trim() || '',
+            trimestre: r.c[4]?.v || '',
+            q1: r.c[5]?.v || '',
+            q2: r.c[6]?.v || '',
+            q3: r.c[7]?.v || '',
+            q4: r.c[8]?.v || '',
+            q5: r.c[9]?.v || '',
+            q6: r.c[10]?.v || '',
+            q7: r.c[11]?.v || '',
+            q8: r.c[12]?.v || '',
+            q9: r.c[13]?.v || '',
+            q10: r.c[14]?.v || '',
+            q11: r.c[15]?.v || '',
+            q12: r.c[16]?.v || '',
+            q14: r.c[17]?.v || '',
+            q16: r.c[18]?.v || '',
+            q17: r.c[19]?.v || '',
+            q18: r.c[20]?.v || '' 
+        }));
+    } catch (e) {
+        console.error("Erro ao carregar Pré-Conselho:", e);
+        return [];
+    }
+}
+
+function abrirCaixaTexto(setor) {
+    const selectAlunos = document.getElementById('select-alunos');
+    const alunoSelecionado = selectAlunos.options[selectAlunos.selectedIndex].text;
+    const alunoValor = selectAlunos.value;
+
+    if (!alunoValor || alunoValor === "Selecione uma turma..." || alunoValor === "") {
+        alert("⚠️ Por favor, selecione um ALUNO na barra superior antes de criar um apontamento!");
+        selectAlunos.focus(); 
+        return; 
+    }
+
+    const titulos = {
+        'meivs': '<i class="fa-solid fa-shield-halved"></i> MEIV\'S',
+        'pedagogico': '<i class="fa-solid fa-book-open"></i> Pedagógico',
+        'adm': '<i class="fa-solid fa-folder-open"></i> ADM',
+        'direcao': '<i class="fa-solid fa-chalkboard-user"></i> Professores'
+    };
+
+    const h3 = document.querySelector('#overlay-text-' + setor + ' h3');
+    if (h3) {
+        h3.innerHTML = titulos[setor] + '<br><span style="font-size: 16px; color: #475569; display: block; margin-top: 8px; font-weight: normal;">Para o aluno(a): <strong>' + alunoSelecionado + '</strong></span>';
+    }
+
+    document.getElementById('overlay-text-' + setor).style.display = 'flex';
+    document.getElementById('text-' + setor).focus();
+}
+
+function fecharCaixaTexto(setor) {
+    document.getElementById('overlay-text-' + setor).style.display = 'none';
+    document.getElementById('text-' + setor).value = ''; 
+}
+
+// ========== MÓDULO PATRIMÔNIO ==========
+function patInicializar() {
+    document.getElementById('pat-reg-resp').value = usuarioLogado.nome || '';
+    patCarregarAmbientes(); patCarregarItens();
+}
+
+function patAlternarAba(aba) {
+    document.querySelectorAll('.pat-tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector(`.pat-tab-btn:nth-child(${aba === 'MOVER' ? 1 : aba === 'CADASTRAR' ? 2 : 3})`).classList.add('active');
+    document.getElementById('pat-panel-mover').style.display = aba === 'MOVER' ? 'flex' : 'none';
+    document.getElementById('pat-panel-cadastrar').style.display = aba === 'CADASTRAR' ? 'flex' : 'none';
+    document.getElementById('pat-panel-ambientes').style.display = aba === 'AMBIENTES' ? 'flex' : 'none';
+    if (aba === 'CADASTRAR') patResetarCadastro();
+}
+
+async function patCarregarAmbientes() {
+    try {
+        const r = await fetch(`${APPS_SCRIPT_URL}?aba=ambientes`);
+        patAmbientes = await r.json();
+        const sidebar = document.getElementById('pat-room-list');
+        sidebar.innerHTML = `<li class="pat-room-item ${patSalaFiltro === 'TODOS' ? 'active' : ''}" onclick="patFiltrarSala('TODOS', this)"><i class="fa-solid fa-boxes-stacked"></i> Ver Tudo</li>`;
+        patAmbientes.forEach(s => {
+            sidebar.innerHTML += `<li class="pat-room-item" onclick="patFiltrarSala('${s}', this)"><i class="fa-solid fa-location-dot"></i> ${s}</li>`;
+        });
+        ['pat-trans-room','pat-reg-room'].forEach(id => {
+            const sel = document.getElementById(id);
+            sel.innerHTML = '<option value="">-- Selecione --</option>';
+            patAmbientes.forEach(s => sel.innerHTML += `<option>${s}</option>`);
+        });
+        document.getElementById('pat-mini-amb-list').innerHTML = patAmbientes.map(s => `<li style="display:flex;justify-content:space-between;padding:8px 12px;">${s} <button onclick="patDeletarAmbiente('${s}')" style="background:none;border:none;color:red;">🗑</button></li>`).join('');
+    } catch (e) { console.error(e); }
+}
+
+async function patCarregarItens() {
+    try {
+        const r = await fetch(`${APPS_SCRIPT_URL}?aba=patrimonio`);
+        patTodos = await r.json();
+        patRenderizarTabela();
+    } catch (e) {}
+}
+
+function patRenderizarTabela() {
+    const tbody = document.getElementById('pat-table-body');
+    const itens = patSalaFiltro === 'TODOS' ? patTodos : patTodos.filter(i => i.localizacao === patSalaFiltro);
+    if (!itens.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Nenhum item.</td></tr>'; return; }
+    tbody.innerHTML = itens.map(i => {
+        const st = i.status.toLowerCase(), cls = st.includes('manuten') ? 'status-manutencao' : st.includes('danific') ? 'status-danificado' : st.includes('inserv') ? 'status-inservivel' : st.includes('localiz') ? 'status-naolocalizado' : 'status-bom';
+        const vinculo = i.itemPai ? `<br><span class="pat-item-vinculo">Pai: ${i.itemPai}</span>` : '';
+        return `<tr style="cursor:pointer" onclick="patCarregarMovimentacao('${i.codigo}')"><td>${i.codigo}</td><td>${i.item}${vinculo}</td><td>${i.categoria}</td><td>${i.localizacao}</td><td>${i.responsavel || '-'}</td><td>${i.dataAtualizacao || '-'}</td><td><span class="pat-status-badge ${cls}">${i.status}</span></td></tr>`;
+    }).join('');
+}
+
+function patFiltrarSala(sala, el) {
+    patSalaFiltro = sala;
+    document.querySelectorAll('.pat-room-item').forEach(e => e.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('pat-panel-title').innerText = sala === 'TODOS' ? 'Almoxarifado Geral' : `Ambiente: ${sala}`;
+    patRenderizarTabela();
+}
+
+function patFiltrarTabela() {
+    const termo = document.getElementById('pat-search-input').value.toLowerCase();
+    if (!termo) { patRenderizarTabela(); return; }
+    const tbody = document.getElementById('pat-table-body');
+    const filtrados = patTodos.filter(i => i.codigo.toLowerCase().includes(termo) || i.item.toLowerCase().includes(termo));
+    tbody.innerHTML = filtrados.map(i => `<tr onclick="patCarregarMovimentacao('${i.codigo}')"><td>${i.codigo}</td><td>${i.item}</td><td>${i.categoria}</td><td>${i.localizacao}</td><td>${i.responsavel}</td><td>${i.dataAtualizacao}</td><td>${i.status}</td></tr>`).join('');
+}
+
+function patBuscarItem() {
+    const cod = document.getElementById('pat-trans-code').value.trim();
+    const item = patTodos.find(i => i.codigo === cod);
+    const preview = document.getElementById('pat-item-preview'), btn = document.getElementById('pat-btn-mover');
+    if (item) {
+        document.getElementById('pat-prev-nome').innerText = item.item;
+        document.getElementById('pat-prev-local').innerText = item.localizacao;
+        document.getElementById('pat-prev-resp').innerText = item.responsavel || '-';
+        preview.style.display = 'block'; btn.disabled = false;
+    } else { preview.style.display = 'none'; btn.disabled = true; }
+}
+
+function patCarregarMovimentacao(codigo) {
+    patAlternarAba('MOVER');
+    document.getElementById('pat-trans-code').value = codigo;
+    patBuscarItem();
+}
+
+function patLigarCamera(inputId, containerId) {
+    const container = document.getElementById(containerId);
+    if (patCameraAtiva) { patDesligarCamera(); return; }
+    container.style.display = 'block';
+    patCameraAtiva = new Html5Qrcode(containerId);
+    patCameraAtiva.start({ facingMode: "environment" }, { fps: 25, qrbox: { width: 280, height: 140 } },
+        (decoded) => { document.getElementById(inputId).value = decoded.trim(); patDesligarCamera(); if (inputId === 'pat-trans-code') patBuscarItem(); else patChecarEdicao(); },
+        () => {}
+    ).catch(() => { alert('Permita a câmera.'); patDesligarCamera(); });
+}
+
+function patDesligarCamera() {
+    document.querySelectorAll('.pat-camera-container').forEach(c => c.style.display = 'none');
+    if (patCameraAtiva) { patCameraAtiva.stop().then(() => patCameraAtiva = null).catch(() => patCameraAtiva = null); }
+}
+
+function patChecarEdicao() {
+    const cod = document.getElementById('pat-reg-code').value.trim();
+    const item = patTodos.find(i => i.codigo === cod);
+    document.getElementById('pat-cad-title').innerHTML = item ? '<i class="fa-solid fa-pen-to-square"></i> Modo Edição' : 'Cadastrar Novo';
+    document.getElementById('pat-btn-cadastrar').innerText = item ? 'Atualizar' : 'Salvar';
+    document.getElementById('pat-btn-excluir').style.display = item ? 'block' : 'none';
+    if (item) {
+        document.getElementById('pat-reg-item').value = item.item;
+        document.getElementById('pat-reg-cat').value = item.categoria;
+        document.getElementById('pat-reg-room').value = item.localizacao;
+        document.getElementById('pat-reg-parent').value = item.itemPai || '';
+        document.getElementById('pat-reg-status').value = item.status;
+    }
+}
+
+function patResetarCadastro() {
+    ['pat-reg-code','pat-reg-item','pat-reg-parent'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('pat-cad-title').innerText = 'Cadastrar Novo';
+    document.getElementById('pat-btn-cadastrar').innerText = 'Salvar';
+    document.getElementById('pat-btn-excluir').style.display = 'none';
+}
+
+async function patExecutarTransferencia() {
+    const cod = document.getElementById('pat-trans-code').value.trim();
+    const sala = document.getElementById('pat-trans-room').value;
+    const resp = document.getElementById('pat-trans-resp').value.trim();
+    const status = document.getElementById('pat-trans-status').value;
+    if (!cod || !sala || !resp) {
+        mostrarToast('Preencha todos os campos da transferência.', 'aviso');
+        return;
+    }
+    try {
+        await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ operacao: "PAT_TRANSFERIR", codigo: cod, novaLocalizacao: sala, responsavel: resp, status: status || null }) });
+        mostrarToast('Transferência concluída com sucesso!', 'sucesso');
+        document.getElementById('pat-trans-code').value = ''; document.getElementById('pat-item-preview').style.display = 'none';
+        await patCarregarItens();
+    } catch (e) { 
+        mostrarToast('Erro ao processar transferência.', 'erro'); 
+    }
+}
+
+async function patExecutarCadastro() {
+    const payload = {
+        operacao: "PAT_CADASTRAR",
+        codigo: document.getElementById('pat-reg-code').value.trim(),
+        item: document.getElementById('pat-reg-item').value.trim(),
+        categoria: document.getElementById('pat-reg-cat').value,
+        localizacao: document.getElementById('pat-reg-room').value,
+        responsavel: document.getElementById('pat-reg-resp').value.trim(),
+        status: document.getElementById('pat-reg-status').value,
+        itemPai: document.getElementById('pat-reg-parent').value.trim()
+    };
+    if (!payload.codigo || !payload.item || !payload.responsavel || !payload.localizacao) {
+        mostrarToast('Preencha os campos obrigatórios.', 'aviso');
+        return;
+    }
+    try {
+        await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+        mostrarToast('Item salvo com sucesso no patrimônio!', 'sucesso'); 
+        patResetarCadastro(); await patCarregarItens();
+    } catch (e) { 
+        mostrarToast('Erro ao cadastrar item.', 'erro'); 
+    }
+}
+
+async function patExcluirItem() {
+    const cod = document.getElementById('pat-reg-code').value.trim();
+    if (!cod || !confirm('Excluir permanentemente?')) return;
+    try {
+        await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ operacao: "PAT_EXCLUIR", codigo: cod }) });
+        mostrarToast('Item excluído permanentemente.', 'sucesso'); 
+        patResetarCadastro(); await patCarregarItens();
+    } catch (e) { 
+        mostrarToast('Erro ao excluir item.', 'erro'); 
+    }
+}
+
+async function patAdicionarAmbiente() {
+    const nome = document.getElementById('pat-new-amb').value.trim();
+    if (!nome) return;
+    try {
+        await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ operacao: "AMB_ADICIONAR", ambiente: nome }) });
+        document.getElementById('pat-new-amb').value = ''; await patCarregarAmbientes();
+    } catch (e) { alert('Erro.'); }
+}
+
+async function patDeletarAmbiente(nome) {
+    if (!confirm(`Remover "${nome}"?`)) return;
+    try {
+        await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ operacao: "AMB_DELETAR", ambiente: nome }) });
+        await patCarregarAmbientes();
+    } catch (e) { alert('Erro.'); }
+}
+
+function patValidarPai() {
+    const cod = document.getElementById('pat-reg-parent').value.trim();
+    const preview = document.getElementById('pat-reg-parent-preview');
+    if (!cod) { preview.innerText = ''; return; }
+    const pai = patTodos.find(i => i.codigo === cod);
+    preview.innerHTML = pai ? '✅ Pai: ' + pai.item : '⚠️ Não localizado.';
 }
