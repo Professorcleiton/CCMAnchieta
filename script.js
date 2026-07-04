@@ -163,22 +163,16 @@ async function carregarDocumentos() {
         for (let i = linhasPlanilha.length - 1; i > 0; i--) {
             let linha = linhasPlanilha[i];
             
-            // Lógica robusta para formatar a data/hora
             let dataFormatada = 'Data inválida';
             if (linha[4]) {
                 const d = new Date(linha[4]);
-                // Verifica se a data é válida
                 if (!isNaN(d.getTime())) {
-                    // Formata para dd/mm/aaaa
                     dataFormatada = d.toLocaleDateString('pt-BR');
                 } else {
-                    // Se não for um objeto data, tenta usar o valor original (caso venha como string)
                     dataFormatada = linha[4];
                 }
             }
             
-            // Definição das colunas:
-            // 0: Aluno | 1: Turma | 2: Documento | 3: Status | 4: Data
             htmlRows += `<tr>
                 <td>${linha[1] || '-'}</td>
                 <td>${linha[0] || '-'}</td>
@@ -222,6 +216,7 @@ setInterval(async () => {
         } catch (e) { console.log("Atualização em background falhou."); }
     }
 }, 60000);
+
 // ==== CARREGAMENTO DE ALUNOS ====
 async function carregarAlunosETurmas() {
     cacheAlunosPorTurma = {};
@@ -239,6 +234,7 @@ async function carregarAlunosETurmas() {
             }
         });
         renderizarSidebarTurmas();
+        preencherBuscaGlobal();
     } catch (e) { console.error(e); }
 }
 
@@ -249,6 +245,7 @@ function encontrarTurmaDoAluno(nome) {
     }
     return 'Sem Turma';
 }
+
 function abrirModuloPatrimonio() {
     document.getElementById('app-interface').style.display = 'none';
     document.getElementById('patrimonio-interface').style.display = 'flex';
@@ -268,26 +265,6 @@ function alternarAbaMobile(setor, btn) {
     document.querySelectorAll('.sector-column').forEach(c => { c.classList.remove('active'); });
     const col = document.getElementById(`col-${setor}`);
     if (col) col.classList.add('active'); 
-}
-
-async function carregarAlunosETurmas() {
-    cacheAlunosPorTurma = {};
-    try {
-        const response = await fetch(COLS_ALUNOS_URL);
-        const text = await response.text();
-        const jsonText = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
-        const data = JSON.parse(jsonText);
-        
-        data.table.rows.forEach(r => {
-            if (r.c && r.c[1] && r.c[1].v) {
-                const nome = r.c[1].v.toString().trim();
-                const turma = (r.c[2] && r.c[2].v) ? r.c[2].v.toString().trim() : 'Sem Turma';
-                if (!cacheAlunosPorTurma[turma]) cacheAlunosPorTurma[turma] = [];
-                if (!cacheAlunosPorTurma[turma].includes(nome)) cacheAlunosPorTurma[turma].push(nome);
-            }
-        });
-        renderizarSidebarTurmas();
-    } catch (e) { console.error(e); }
 }
 
 function renderizarSidebarTurmas() {
@@ -330,13 +307,11 @@ function selecionarTurma(turma) {
 // ==== BUSCA E CARREGAMENTO DE DADOS ====
 async function carregarRegistrosDoServidor() {
     try {
-        // Buscamos tudo de uma vez (assumindo que o doGet retorna um objeto com as 3 chaves)
         const resposta = await fetch(APPS_SCRIPT_URL + "?aba=todos_os_dados"); 
         const data = await resposta.json(); 
         
         todosOsRegistros = [];
 
-        // 1. Apontamentos Pedagógicos
         data.apontamentos.forEach(row => {
             todosOsRegistros.push({
                 idLinha: row.idLinha,
@@ -349,7 +324,6 @@ async function carregarRegistrosDoServidor() {
             });
         });
 
-        // 2. Documentos da Secretaria
         data.documentos.forEach(doc => {
             todosOsRegistros.push({
                 aluno: doc.aluno,
@@ -361,7 +335,6 @@ async function carregarRegistrosDoServidor() {
             });
         });
 
-        // 3. Saídas Antecipadas
         data.saidas.forEach(s => {
             todosOsRegistros.push({
                 aluno: s.aluno,
@@ -373,7 +346,6 @@ async function carregarRegistrosDoServidor() {
             });
         });
 
-        // Atualiza a interface
         atualizarGraficosMural();
         if (document.getElementById('select-alunos').value) filtrarRegistrosPorAluno();
 
@@ -387,20 +359,25 @@ function atualizarGraficosMural() {
     const adm = todosOsRegistros.filter(r => r.setor.toLowerCase() === 'adm').length;
     const professores = todosOsRegistros.filter(r => r.setor.toLowerCase() === 'professores' || r.setor.toLowerCase() === 'direcao').length;
 
-    const elTotal = document.getElementById('dash-val-total'); if(elTotal) elTotal.innerText = total;
-    const elMeivs = document.getElementById('dash-val-meivs'); if(elMeivs) elMeivs.innerText = meivs;
-    const elPed = document.getElementById('dash-val-pedagogico'); if(elPed) elPed.innerText = pedagogico;
-    const elProfs = document.getElementById('dash-val-professores'); if(elProfs) elProfs.innerText = professores;
+    document.getElementById('dash-val-total').innerText = total;
+    document.getElementById('dash-val-meivs').innerText = meivs;
+    document.getElementById('dash-val-pedagogico').innerText = pedagogico;
+    document.getElementById('dash-val-adm').innerText = adm;
+    document.getElementById('dash-val-professores').innerText = professores;
 
     const pctMeivs = total === 0 ? 0 : Math.round((meivs / total) * 100);
     const pctPed = total === 0 ? 0 : Math.round((pedagogico / total) * 100);
     const pctAdm = total === 0 ? 0 : Math.round((adm / total) * 100);
     const pctProf = total === 0 ? 0 : Math.round((professores / total) * 100);
 
-    const bMeivs = document.getElementById('dash-bar-meivs'); if(bMeivs) { bMeivs.style.width = pctMeivs + '%'; document.getElementById('dash-pct-meivs').innerText = pctMeivs + '%'; }
-    const bPed = document.getElementById('dash-bar-pedagogico'); if(bPed) { bPed.style.width = pctPed + '%'; document.getElementById('dash-pct-pedagogico').innerText = pctPed + '%'; }
-    const bAdm = document.getElementById('dash-bar-adm'); if(bAdm) { bAdm.style.width = pctAdm + '%'; document.getElementById('dash-pct-adm').innerText = pctAdm + '%'; }
-    const bProf = document.getElementById('dash-bar-professores'); if(bProf) { bProf.style.width = pctProf + '%'; document.getElementById('dash-pct-professores').innerText = pctProf + '%'; }
+    document.getElementById('dash-bar-meivs').style.width = pctMeivs + '%';
+    document.getElementById('dash-pct-meivs').innerText = pctMeivs + '%';
+    document.getElementById('dash-bar-pedagogico').style.width = pctPed + '%';
+    document.getElementById('dash-pct-pedagogico').innerText = pctPed + '%';
+    document.getElementById('dash-bar-adm').style.width = pctAdm + '%';
+    document.getElementById('dash-pct-adm').innerText = pctAdm + '%';
+    document.getElementById('dash-bar-professores').style.width = pctProf + '%';
+    document.getElementById('dash-pct-professores').innerText = pctProf + '%';
 }
 
 function formatarDataEHora(s) {
@@ -417,15 +394,6 @@ function formatarDataEHora(s) {
     return s;
 }
 
-function encontrarTurmaDoAluno(nome) {
-    const nomeLimpo = nome.trim().toLowerCase();
-    for (let t in cacheAlunosPorTurma) {
-        const alunosDaTurma = cacheAlunosPorTurma[t].map(n => n.trim().toLowerCase());
-        if (alunosDaTurma.includes(nomeLimpo)) return t;
-    }
-    return 'Sem Turma';
-}
-
 function filtrarRegistrosPorAluno() {
     const select = document.getElementById('select-alunos');
     const mural = document.getElementById('welcome-dashboard-mural');
@@ -434,22 +402,20 @@ function filtrarRegistrosPorAluno() {
     const pdf = document.getElementById('btn-gerar-pdf-oficial');
     const tabs = document.getElementById('mobile-tabs-container');
 
-    const setDisplay = (el, val) => { if (el) el.style.display = val; };
-
     if (!select || !select.value || select.value === "Selecione uma turma...") {
-        setDisplay(mural, 'flex');
-        setDisplay(mini, 'none');
-        setDisplay(grid, 'none'); 
-        setDisplay(pdf, 'none');
-        setDisplay(tabs, 'none');
+        mural.style.display = 'flex';
+        mini.style.display = 'none';
+        grid.style.display = 'none'; 
+        pdf.style.display = 'none';
+        tabs.style.display = 'none';
         return;
     }
 
-    setDisplay(mural, 'none');
-    setDisplay(mini, 'flex');
-    setDisplay(grid, 'block');
-    setDisplay(pdf, 'inline-flex');
-    setDisplay(tabs, 'flex'); 
+    mural.style.display = 'none';
+    mini.style.display = 'flex';
+    grid.style.display = 'block';
+    pdf.style.display = 'inline-flex';
+    tabs.style.display = 'flex'; 
 
     let abaPadrao = usuarioLogado.setor === 'professores' ? 'direcao' : usuarioLogado.setor;
     if (!['meivs', 'pedagogico', 'adm', 'direcao'].includes(abaPadrao)) abaPadrao = 'meivs';
@@ -1105,117 +1071,80 @@ function fecharCaixaTexto(setor) {
     document.getElementById('text-' + setor).value = ''; 
 }
 
-// ==== MÓDULO SAÍDA ANTECIPADA ====
+// ==== MÓDULO SAÍDA ANTECIPADA (UNIFICADO E CORRIGIDO) ====
 function abrirModalSaida() {
-    const modal = document.getElementById('modal-saida-antecipada');
-    const selectTurma = document.getElementById('saida-turma');
+    const modal = document.getElementById('modal-saida');
+    const selectAluno = document.getElementById('saida-aluno');
     
     // Limpa campos
     document.getElementById('saida-motivo').value = '';
-    document.getElementById('saida-aluno').innerHTML = '<option value="">-- Aguardando turma --</option>';
-    document.getElementById('saida-aluno').disabled = true;
-
-    // Popula turmas
-    selectTurma.innerHTML = '<option value="">-- Escolha --</option>';
-    Object.keys(cacheAlunosPorTurma).sort().forEach(t => {
-        selectTurma.innerHTML += `<option value="${t}">${t}</option>`;
+    
+    // Popula o select de alunos com todos os alunos do cache
+    selectAluno.innerHTML = '<option value="">-- Selecione o Aluno --</option>';
+    
+    // Junta todos os alunos de todas as turmas, ordena e remove duplicatas
+    let todosAlunos = [];
+    for (let turma in cacheAlunosPorTurma) {
+        todosAlunos = todosAlunos.concat(cacheAlunosPorTurma[turma]);
+    }
+    todosAlunos = [...new Set(todosAlunos)].sort();
+    
+    todosAlunos.forEach(nome => {
+        const opt = document.createElement('option');
+        opt.value = nome;
+        opt.textContent = nome;
+        selectAluno.appendChild(opt);
     });
 
     modal.style.display = 'flex';
-}
-
-function carregarAlunosSaida() {
-    const turma = document.getElementById('saida-turma').value;
-    const selectAluno = document.getElementById('saida-aluno');
-    
-    if (!turma) {
-        selectAluno.innerHTML = '<option value="">-- Aguardando turma --</option>';
-        selectAluno.disabled = true;
-        return;
-    }
-
-    selectAluno.disabled = false;
-    selectAluno.innerHTML = '<option value="">-- Selecione o Aluno --</option>';
-    
-    const alunos = cacheAlunosPorTurma[turma] || [];
-    alunos.sort().forEach(a => { 
-        selectAluno.innerHTML += `<option value="${a}">${a}</option>`; 
-    });
-}
-
-async function registrarSaida() {
-    const aluno = document.getElementById('saida-aluno').value;
-    const autorizacao = document.getElementById('saida-autorizacao').value;
-    const motivo = document.getElementById('saida-motivo').value.trim();
-
-    if (!aluno) {
-        mostrarToast('Por favor, selecione um aluno.', 'aviso');
-        return;
-    }
-
-    const btn = document.getElementById('btn-save-saida');
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Registrando...';
-
-    // Cria o texto que vai aparecer no Feed ADM
-    const textoSaida = `🚶 SAÍDA ANTECIPADA: Liberado por: ${autorizacao}. Motivo: ${motivo || 'Não informado.'}`;
-
-    const payload = {
-        operacao: "SALVAR",
-        aluno: aluno,
-        setor: 'adm', // Registra na aba ADM
-        texto: textoSaida,
-        funcionario: usuarioLogado.nome,
-        dataAtual: new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-    };
-
-    try {
-        await fetch(APPS_SCRIPT_URL, { 
-            method: 'POST', 
-            headers: { 'Content-Type': 'text/plain' }, 
-            body: JSON.stringify(payload) 
-        });
-        
-        mostrarToast('Saída registrada com sucesso!', 'sucesso');
-        document.getElementById('modal-saida-antecipada').style.display = 'none';
-        
-        // Atualiza o feed para mostrar o novo registro
-        await carregarRegistrosDoServidor();
-        
-    } catch (e) {
-        mostrarToast('Erro ao registrar a saída.', 'erro');
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = 'Registrar Saída no Feed ADM';
-    }
-}
-function abrirModalSaida() {
-    document.getElementById('modal-saida').style.display = 'block';
-    // Aqui você pode preencher o select "saida-aluno" com os nomes do cache
 }
 
 function fecharModalSaida() {
     document.getElementById('modal-saida').style.display = 'none';
 }
 
+function fecharModalSaidaEvent(event) {
+    if (event.target === document.getElementById('modal-saida')) {
+        fecharModalSaida();
+    }
+}
+
 async function registrarSaidaAntecipada() {
+    const aluno = document.getElementById('saida-aluno').value;
+    const motivo = document.getElementById('saida-motivo').value.trim();
+    const autorizador = document.getElementById('saida-autorizador').value;
+
+    if (!aluno) {
+        mostrarToast('Selecione um aluno!', 'aviso');
+        return;
+    }
+
+    // Envia para o servidor (rota registrar_saida no Apps Script)
     const payload = {
         operacao: "registrar_saida",
-        aluno: document.getElementById('saida-aluno').value,
-        motivo: document.getElementById('saida-motivo').value,
-        autorizador: document.getElementById('saida-autorizador').value,
+        aluno: aluno,
+        motivo: motivo,
+        autorizador: autorizador,
         data: new Date().toLocaleString('pt-BR')
     };
 
-    await fetch(APPS_SCRIPT_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify(payload)
-    });
-    
-    alert("Saída registrada!");
-    fecharModalSaida();
+    try {
+        await fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify(payload)
+        });
+        
+        mostrarToast('Saída registrada com sucesso!', 'sucesso');
+        fecharModalSaida();
+        
+        // Recarrega os dados para atualizar o mural
+        await carregarRegistrosDoServidor();
+    } catch (e) {
+        mostrarToast('Erro ao registrar a saída.', 'erro');
+    }
 }
+
 // ========== MÓDULO PATRIMÔNIO ==========
 function patInicializar() {
     document.getElementById('pat-reg-resp').value = usuarioLogado.nome || '';
