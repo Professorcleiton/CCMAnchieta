@@ -305,14 +305,21 @@ async function carregarAlunosETurmas() {
         const data = JSON.parse(jsonText);
         
         const linhas = data.table.rows;
-        linhas.forEach(r => {
-            if (r.c && r.c[1] && r.c[1].v) {
-                const nome = r.c[1].v.toString().trim();
-                const turma = r.c[1] && r.c[1].v ? r.c[1].v.toString().trim() : 'Sem Turma';
-                if (!cacheAlunosPorTurma[turma]) cacheAlunosPorTurma[turma] = [];
-                cacheAlunosPorTurma[turma].push(nome);
-            }
-        });
+linhas.forEach(r => {
+    // r.c[1] é a Coluna B (Nome), r.c[2] é a Coluna C (Turma)
+    if (r.c && r.c[1] && r.c[1].v) {
+        const nome = r.c[1].v.toString().trim();
+        const turma = r.c[2] && r.c[2].v ? r.c[2].v.toString().trim() : 'Sem Turma';
+        
+        // Inicializa o array se a turma ainda não existir no cache
+        if (!cacheAlunosPorTurma[turma]) {
+            cacheAlunosPorTurma[turma] = [];
+        }
+        
+        // Adiciona o nome ao array da turma
+        cacheAlunosPorTurma[turma].push(nome);
+    }
+});
         
         renderizarSidebarTurmas();
         preencherBuscaGlobal();
