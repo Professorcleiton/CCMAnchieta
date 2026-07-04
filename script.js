@@ -1166,7 +1166,33 @@ async function registrarSaida() {
         btn.innerHTML = 'Registrar Saída no Feed ADM';
     }
 }
+function abrirModalSaida() {
+    document.getElementById('modal-saida').style.display = 'block';
+    // Aqui você pode preencher o select "saida-aluno" com os nomes do cache
+}
 
+function fecharModalSaida() {
+    document.getElementById('modal-saida').style.display = 'none';
+}
+
+async function registrarSaidaAntecipada() {
+    const payload = {
+        operacao: "registrar_saida",
+        aluno: document.getElementById('saida-aluno').value,
+        motivo: document.getElementById('saida-motivo').value,
+        autorizador: document.getElementById('saida-autorizador').value,
+        data: new Date().toLocaleString('pt-BR')
+    };
+
+    await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify(payload)
+    });
+    
+    alert("Saída registrada!");
+    fecharModalSaida();
+}
 // ========== MÓDULO PATRIMÔNIO ==========
 function patInicializar() {
     document.getElementById('pat-reg-resp').value = usuarioLogado.nome || '';
