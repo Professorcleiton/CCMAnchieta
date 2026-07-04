@@ -1060,17 +1060,21 @@ function abrirModalSaida() {
     
     // Limpa campos
     document.getElementById('saida-motivo').value = '';
+    document.getElementById('ocorrencia-tipo').value = 'Saída Antecipada';
     
-    // Popula o select de alunos com todos os alunos do cache
+    // Define hora atual no formato HH:MM
+    const agora = new Date();
+    const hora = String(agora.getHours()).padStart(2, '0');
+    const minutos = String(agora.getMinutes()).padStart(2, '0');
+    document.getElementById('ocorrencia-horario').value = hora + ':' + minutos;
+    
+    // Popula alunos (todos do cache)
     selectAluno.innerHTML = '<option value="">-- Selecione o Aluno --</option>';
-    
-    // Junta todos os alunos de todas as turmas, ordena e remove duplicatas
     let todosAlunos = [];
     for (let turma in cacheAlunosPorTurma) {
         todosAlunos = todosAlunos.concat(cacheAlunosPorTurma[turma]);
     }
     todosAlunos = [...new Set(todosAlunos)].sort();
-    
     todosAlunos.forEach(nome => {
         const opt = document.createElement('option');
         opt.value = nome;
@@ -1093,6 +1097,8 @@ function fecharModalSaidaEvent(event) {
 
 async function registrarSaidaAntecipada() {
     const aluno = document.getElementById('saida-aluno').value;
+    const tipo = document.getElementById('ocorrencia-tipo').value;
+    const horario = document.getElementById('ocorrencia-horario').value;
     const motivo = document.getElementById('saida-motivo').value.trim();
     const autorizador = document.getElementById('saida-autorizador').value;
 
@@ -1100,14 +1106,24 @@ async function registrarSaidaAntecipada() {
         mostrarToast('Selecione um aluno!', 'aviso');
         return;
     }
+    if (!horario) {
+        mostrarToast('Informe o horário da ocorrência.', 'aviso');
+        return;
+    }
 
-    // Envia para o servidor (rota registrar_saida no Apps Script)
+    // Formata a data/hora completa
+    const agora = new Date();
+    const data = agora.toLocaleDateString('pt-BR');
+    const dataHora = data + ' ' + horario;
+
     const payload = {
-        operacao: "registrar_saida",
+        operacao: "registrar_ocorrencia",
         aluno: aluno,
+        tipo: tipo,
+        horario: horario,
         motivo: motivo,
         autorizador: autorizador,
-        data: new Date().toLocaleString('pt-BR')
+        data: dataHora
     };
 
     try {
@@ -1116,17 +1132,13 @@ async function registrarSaidaAntecipada() {
             headers: { 'Content-Type': 'text/plain' },
             body: JSON.stringify(payload)
         });
-        
-        mostrarToast('Saída registrada com sucesso!', 'sucesso');
+        mostrarToast(tipo + ' registrada com sucesso!', 'sucesso');
         fecharModalSaida();
-        
-        // Recarrega os dados para atualizar o mural
         await carregarRegistrosDoServidor();
     } catch (e) {
-        mostrarToast('Erro ao registrar a saída.', 'erro');
+        mostrarToast('Erro ao registrar a ocorrência.', 'erro');
     }
 }
-
 // ========== MÓDULO PATRIMÔNIO ==========
 function patInicializar() {
     document.getElementById('pat-reg-resp').value = usuarioLogado.nome || '';
