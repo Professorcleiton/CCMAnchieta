@@ -471,54 +471,70 @@
         </main>
     </div>
 
-    <!-- MODAL SAÍDA ANTECIPADA -->
-    <div id="modal-saida" class="modal-overlay" style="display:none; z-index:10000;" onclick="fecharModalSaidaEvent(event)">
-        <div class="modal-content" style="max-width: 500px;">
-            <div class="modal-header" style="background-color: #f59e0b;">
-                <h3><i class="fa-solid fa-sign-out"></i> Registrar Saída Antecipada</h3>
-                <button onclick="fecharModalSaida()" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;">&times;</button>
+<!-- MODAL DE OCORRÊNCIAS (SAÍDA ANTECIPADA / ENTRADA ATRASADA) -->
+<div id="modal-saida" class="modal-overlay" style="display:none; z-index:10000;" onclick="fecharModalSaidaEvent(event)">
+    <div class="modal-content" style="max-width: 500px;">
+        <div class="modal-header" style="background-color: #f59e0b;">
+            <h3><i class="fa-solid fa-clock"></i> Registrar Ocorrência</h3>
+            <button onclick="fecharModalSaida()" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;">&times;</button>
+        </div>
+        <div class="modal-body" style="padding: 25px;">
+            <div style="margin-bottom: 15px;">
+                <label style="font-weight: bold; display: block; margin-bottom: 5px;">
+                    <i class="fa-solid fa-tag"></i> Tipo de Ocorrência:
+                </label>
+                <select id="ocorrencia-tipo" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+                    <option value="Saída Antecipada">🚪 Saída Antecipada</option>
+                    <option value="Entrada Atrasada">⏰ Entrada Atrasada</option>
+                </select>
             </div>
-            <div class="modal-body" style="padding: 25px;">
-                <div style="margin-bottom: 15px;">
-                    <label style="font-weight: bold; display: block; margin-bottom: 5px;">
-                        <i class="fa-solid fa-user-graduate"></i> Aluno:
-                    </label>
-                    <select id="saida-aluno" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
-                        <option value="">Selecione o aluno...</option>
-                    </select>
-                </div>
-                
-                <div style="margin-bottom: 15px;">
-                    <label style="font-weight: bold; display: block; margin-bottom: 5px;">
-                        <i class="fa-solid fa-file-lines"></i> Motivo da Saída:
-                    </label>
-                    <input type="text" id="saida-motivo" placeholder="Descreva o motivo da saída antecipada..." 
-                           style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
-                </div>
-                
-                <div style="margin-bottom: 20px;">
-                    <label style="font-weight: bold; display: block; margin-bottom: 5px;">
-                        <i class="fa-solid fa-user-check"></i> Autorizador:
-                    </label>
-                    <select id="saida-autorizador" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
-                        <option value="Responsavel">Responsável Legal</option>
-                        <option value="Pedagogico">Autorização Pedagógica</option>
-                    </select>
-                </div>
-                
-                <div style="display: flex; gap: 10px;">
-                    <button onclick="fecharModalSaida()" 
-                            style="flex: 1; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; background: #e2e8f0; color: #334155;">
-                        <i class="fa-solid fa-xmark"></i> Cancelar
-                    </button>
-                    <button onclick="registrarSaidaAntecipada()" 
-                            style="flex: 1; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; background: #f59e0b; color: white;">
-                        <i class="fa-solid fa-check"></i> Confirmar Saída
-                    </button>
-                </div>
+            <div style="margin-bottom: 15px;">
+                <label style="font-weight: bold; display: block; margin-bottom: 5px;">
+                    <i class="fa-solid fa-user-graduate"></i> Aluno:
+                </label>
+                <select id="saida-aluno" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+                    <option value="">Selecione o aluno...</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="font-weight: bold; display: block; margin-bottom: 5px;">
+                    <i class="fa-solid fa-clock"></i> Horário:
+                </label>
+                <input type="time" id="ocorrencia-horario" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;" 
+                       value="<?php echo date('H:i'); ?>" />  <!-- Ou preencha via JS -->
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="font-weight: bold; display: block; margin-bottom: 5px;">
+                    <i class="fa-solid fa-file-lines"></i> Motivo:
+                </label>
+                <input type="text" id="saida-motivo" placeholder="Descreva o motivo..." 
+                       style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+            </div>
+            <div style="margin-bottom: 20px;">
+                <label style="font-weight: bold; display: block; margin-bottom: 5px;">
+                    <i class="fa-solid fa-user-check"></i> Autorizador:
+                </label>
+                <select id="saida-autorizador" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+                    <option value="Responsável Legal">Responsável Legal</option>
+                    <option value="Autorização Pedagógica">Autorização Pedagógica</option>
+                    <option value="Direção">Direção</option>
+                    <option value="Secretaria">Secretaria</option>
+                </select>
+            </div>
+            
+            <div style="display: flex; gap: 10px;">
+                <button onclick="fecharModalSaida()" 
+                        style="flex: 1; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; background: #e2e8f0; color: #334155;">
+                    <i class="fa-solid fa-xmark"></i> Cancelar
+                </button>
+                <button onclick="registrarSaidaAntecipada()" 
+                        style="flex: 1; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; background: #f59e0b; color: white;">
+                    <i class="fa-solid fa-check"></i> Confirmar
+                </button>
             </div>
         </div>
     </div>
+</div>
 
     <!-- MODAL PRÉ-CONSELHO -->
     <div class="modal-overlay" id="modal-pre-conselho" style="z-index: 10000; display: none;">
