@@ -831,7 +831,76 @@
         </div>
     </div>
     </div> <!-- ISSO AQUI FECHA A CAIXA DE APONTAMENTOS -->
-        <!-- ========================================== -->
+        <!-- CAIXA DA SECRETARIA (Aba de Documentos) -->
+<!-- ========================================== -->
+<div id="aba-documentos" style="display: none !important; padding-top: 20px; width: 100%; position: relative; z-index: 10;">
+    
+    <!-- Container Flex: Lado a Lado -->
+    <div style="display: flex; gap: 30px; align-items: flex-start; flex-wrap: wrap;">
+        
+        <!-- CENTRO/ESQUERDA: NOVO PEDIDO (Fica embaixo dos botões) -->
+        <div style="flex: 1; min-width: 300px; max-width: 350px; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+            <h3 style="color: #005088; margin-top: 0; margin-bottom: 20px; font-size: 18px;">
+                <i class="fa-solid fa-file-circle-plus"></i> Novo Pedido
+            </h3>
+            
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                <div>
+                    <label style="font-weight: 600; font-size: 13px; color: #475569;">Nome do Estudante:</label>
+                    <input type="text" id="doc-aluno" placeholder="Ex: João da Silva" style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none;">
+                </div>
+                <div>
+                    <label style="font-weight: 600; font-size: 13px; color: #475569;">Documento Solicitado:</label>
+                    <select id="doc-tipo" style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none;">
+                        <option value="Histórico Escolar">Histórico Escolar</option>
+                        <option value="Certidão de Nascimento">Certidão de Nascimento</option>
+                        <option value="Comprovante de Residência">Comprovante de Residência</option>
+                        <option value="RG / CPF">RG / CPF</option>
+                        <option value="Carteira de Vacinação">Carteira de Vacinação</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-weight: 600; font-size: 13px; color: #475569;">Status:</label>
+                    <select id="doc-status" style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none;">
+                        <option value="Pendente">Pendente</option>
+                        <option value="Entregue">Entregue</option>
+                    </select>
+                </div>
+                <button id="btn-salvar-doc" onclick="salvarDocumento()" style="width: 100%; padding: 12px; background: #0d9488; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 10px; transition: background 0.2s;">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> Salvar no Sistema
+                </button>
+                <div id="msg-doc" style="font-size: 13px; display: none; text-align: center; font-weight: bold; margin-top: 5px;"></div>
+            </div>
+        </div>
+
+        <!-- DIREITA: HISTÓRICO DE DOCUMENTOS -->
+        <div style="flex: 2; min-width: 400px; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px; margin-bottom: 15px;">
+                <h3 style="color: #005088; margin: 0; font-size: 18px;">
+                    <i class="fa-solid fa-list-check"></i> Histórico de Documentos
+                </h3>
+                <button onclick="carregarDocumentos()" style="padding: 8px 15px; background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold;">
+                    <i class="fa-solid fa-rotate"></i> Atualizar
+                </button>
+            </div>
+            
+            <div style="overflow-x: auto; max-height: 450px; overflow-y: auto;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                    <thead style="position: sticky; top: 0; background: white; z-index: 1;">
+                        <tr style="text-align: left; color: #475569;">
+                            <th style="padding: 12px 10px; border-bottom: 2px solid #e2e8f0;">Aluno</th>
+                            <th style="padding: 12px 10px; border-bottom: 2px solid #e2e8f0;">Documento</th>
+                            <th style="padding: 12px 10px; border-bottom: 2px solid #e2e8f0;">Status</th>
+                            <th style="padding: 12px 10px; border-bottom: 2px solid #e2e8f0;">Data</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-documentos-body">
+                        <tr><td colspan="4" style="padding: 20px; text-align: center; color: #94a3b8;">Nenhum documento carregado.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
     <script>
     // Função para alternar entre as abas Apontamentos / Documentos
 function mostrarTab(tabSelecionada) {
@@ -2073,76 +2142,7 @@ function gerarPDF() {
             document.getElementById('text-' + setor).value = ''; 
         }
     </script>
-<!-- CAIXA DA SECRETARIA (Aba de Documentos) -->
-<!-- ========================================== -->
-<div id="aba-documentos" style="display: none !important; padding-top: 20px; width: 100%; position: relative; z-index: 10;">
-    
-    <!-- Container Flex: Lado a Lado -->
-    <div style="display: flex; gap: 30px; align-items: flex-start; flex-wrap: wrap;">
-        
-        <!-- CENTRO/ESQUERDA: NOVO PEDIDO (Fica embaixo dos botões) -->
-        <div style="flex: 1; min-width: 300px; max-width: 350px; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
-            <h3 style="color: #005088; margin-top: 0; margin-bottom: 20px; font-size: 18px;">
-                <i class="fa-solid fa-file-circle-plus"></i> Novo Pedido
-            </h3>
-            
-            <div style="display: flex; flex-direction: column; gap: 15px;">
-                <div>
-                    <label style="font-weight: 600; font-size: 13px; color: #475569;">Nome do Estudante:</label>
-                    <input type="text" id="doc-aluno" placeholder="Ex: João da Silva" style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none;">
-                </div>
-                <div>
-                    <label style="font-weight: 600; font-size: 13px; color: #475569;">Documento Solicitado:</label>
-                    <select id="doc-tipo" style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none;">
-                        <option value="Histórico Escolar">Histórico Escolar</option>
-                        <option value="Certidão de Nascimento">Certidão de Nascimento</option>
-                        <option value="Comprovante de Residência">Comprovante de Residência</option>
-                        <option value="RG / CPF">RG / CPF</option>
-                        <option value="Carteira de Vacinação">Carteira de Vacinação</option>
-                    </select>
-                </div>
-                <div>
-                    <label style="font-weight: 600; font-size: 13px; color: #475569;">Status:</label>
-                    <select id="doc-status" style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none;">
-                        <option value="Pendente">Pendente</option>
-                        <option value="Entregue">Entregue</option>
-                    </select>
-                </div>
-                <button id="btn-salvar-doc" onclick="salvarDocumento()" style="width: 100%; padding: 12px; background: #0d9488; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 10px; transition: background 0.2s;">
-                    <i class="fa-solid fa-cloud-arrow-up"></i> Salvar no Sistema
-                </button>
-                <div id="msg-doc" style="font-size: 13px; display: none; text-align: center; font-weight: bold; margin-top: 5px;"></div>
-            </div>
-        </div>
 
-        <!-- DIREITA: HISTÓRICO DE DOCUMENTOS -->
-        <div style="flex: 2; min-width: 400px; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px; margin-bottom: 15px;">
-                <h3 style="color: #005088; margin: 0; font-size: 18px;">
-                    <i class="fa-solid fa-list-check"></i> Histórico de Documentos
-                </h3>
-                <button onclick="carregarDocumentos()" style="padding: 8px 15px; background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold;">
-                    <i class="fa-solid fa-rotate"></i> Atualizar
-                </button>
-            </div>
-            
-            <div style="overflow-x: auto; max-height: 450px; overflow-y: auto;">
-                <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
-                    <thead style="position: sticky; top: 0; background: white; z-index: 1;">
-                        <tr style="text-align: left; color: #475569;">
-                            <th style="padding: 12px 10px; border-bottom: 2px solid #e2e8f0;">Aluno</th>
-                            <th style="padding: 12px 10px; border-bottom: 2px solid #e2e8f0;">Documento</th>
-                            <th style="padding: 12px 10px; border-bottom: 2px solid #e2e8f0;">Status</th>
-                            <th style="padding: 12px 10px; border-bottom: 2px solid #e2e8f0;">Data</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabela-documentos-body">
-                        <tr><td colspan="4" style="padding: 20px; text-align: center; color: #94a3b8;">Nenhum documento carregado.</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
     <script>
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('sw.js');
