@@ -255,22 +255,23 @@ O sistema reconhece mesmo sem acentos ou letras maiúsculas."></textarea>
                         filhos: filhos
                     })
                 });
-                const resposta = await res.text();
-                if (resposta === 'success') {
-                    msg.innerText = '✅ Cadastro realizado! Agora você pode entrar.';
-                    document.getElementById('cad-nome').value = '';
-                    document.getElementById('cad-email').value = '';
-                    document.getElementById('cad-senha').value = '';
-                    document.getElementById('cad-telefone').value = '';
-                    document.getElementById('cad-filhos').value = '';
-                    mostrarAba('login');
-                } else {
-                    msg.innerText = '❌ ' + resposta;
-                }
-            } catch (e) {
-                msg.innerText = 'Erro de conexão.';
-            }
-        }
+const resposta = await res.text();
+if (resposta === 'success') {
+    msg.innerText = '✅ Cadastro realizado! Agora você pode entrar.';
+    document.getElementById('cad-nome').value = '';
+    document.getElementById('cad-email').value = '';
+    document.getElementById('cad-senha').value = '';
+    document.getElementById('cad-telefone').value = '';
+    document.getElementById('cad-filhos').value = '';
+    mostrarAba('login');
+} else if (resposta.startsWith('Cadastro parcial')) {
+    // Sucesso parcial: exibe a mensagem e mantém o formulário para correção
+    msg.innerText = '⚠️ ' + resposta;
+    // Opcional: você pode limpar apenas o campo de filhos para que o responsável digite novamente os nomes faltantes
+    document.getElementById('cad-filhos').value = '';
+} else {
+    msg.innerText = '❌ ' + resposta;
+}
     </script>
 </body>
 </html>
