@@ -115,7 +115,7 @@ function salvarDocumento() {
     }
 
     // Identifica a turma automaticamente
-    const turmaDoAluno = encontrarTurmaDoAluno(aluno);
+   const turmaDoAluno = encontrarTurmaDoAluno(aluno.trim());
 
     btnSalvar.innerText = "Salvando...";
     btnSalvar.disabled = true;
@@ -306,23 +306,21 @@ async function carregarAlunosETurmas() {
         
         const linhas = data.table.rows;
 linhas.forEach(r => {
-    // Vamos verificar o que tem em cada coluna (índices 0, 1, 2, 3...)
-    console.log("Linha lida:", r.c); 
-
-    if (r.c && r.c[1]) {
-        const nome = r.c[1] && r.c[1].v ? r.c[1].v.toString().trim() : "Sem Nome";
+    // Certifique-se de que r.c[1] (Nome) e r.c[2] (Turma) existem
+    if (r.c && r.c[1] && r.c[1].v) {
+        const nome = r.c[1].v.toString().trim();
+        const turma = (r.c[2] && r.c[2].v) ? r.c[2].v.toString().trim() : 'Sem Turma';
         
-        // Vamos testar os índices 0, 1, 2, 3 até achar onde está a turma
-        const turma = (r.c[2] && r.c[2].v) ? r.c[2].v.toString().trim() : "TURMA NÃO ACHADA";
-        
-        console.log("Nome encontrado:", nome, "| Turma tentativa (índice 2):", turma);
-
         if (!cacheAlunosPorTurma[turma]) {
             cacheAlunosPorTurma[turma] = [];
         }
-        cacheAlunosPorTurma[turma].push(nome);
+        
+        // Evita duplicar nomes na lista
+        if (!cacheAlunosPorTurma[turma].includes(nome)) {
+            cacheAlunosPorTurma[turma].push(nome);
+        }
     }
-});    
+}); 
         renderizarSidebarTurmas();
         preencherBuscaGlobal();
     } catch (e) { 
@@ -415,7 +413,11 @@ function formatarDataEHora(s) {
 }
 
 function encontrarTurmaDoAluno(nome) {
-    for (let t in cacheAlunosPorTurma) if (cacheAlunosPorTurma[t].includes(nome)) return t;
+    const nomeLimpo = nome.trim().toLowerCase();
+    for (let t in cacheAlunosPorTurma) {
+        const alunosDaTurma = cacheAlunosPorTurma[t].map(n => n.trim().toLowerCase());
+        if (alunosDaTurma.includes(nomeLimpo)) return t;
+    }
     return 'Sem Turma';
 }
 
