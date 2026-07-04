@@ -234,7 +234,6 @@ async function carregarAlunosETurmas() {
             }
         });
         renderizarSidebarTurmas();
-        preencherBuscaGlobal();
     } catch (e) { console.error(e); }
 }
 
@@ -517,45 +516,6 @@ async function editarRegistroServidor(id, setor) {
         mostrarToast('Registro editado com sucesso!', 'sucesso');
     } catch (e) { 
         mostrarToast('Erro ao tentar editar.', 'erro'); 
-    }
-}
-
-// ==== BUSCA GLOBAL DE ALUNOS ====
-function preencherBuscaGlobal() {
-    const datalist = document.getElementById('lista-todos-alunos');
-    datalist.innerHTML = '';
-    let todosAlunos = [];
-    
-    for (let turma in cacheAlunosPorTurma) {
-        todosAlunos = todosAlunos.concat(cacheAlunosPorTurma[turma]);
-    }
-    
-    todosAlunos = [...new Set(todosAlunos)].sort();
-    
-    todosAlunos.forEach(a => {
-        const opt = document.createElement('option');
-        opt.value = a;
-        datalist.appendChild(opt);
-    });
-}
-
-function buscarAlunoGlobal() {
-    const nomeBuscado = document.getElementById('input-busca-aluno').value.trim();
-    if (!nomeBuscado) return;
-    
-    const turma = encontrarTurmaDoAluno(nomeBuscado);
-    if (turma && turma !== 'Sem Turma') {
-        document.querySelectorAll('.turma-item').forEach(el => el.classList.remove('active'));
-        const itensTurma = Array.from(document.querySelectorAll('.turma-item'));
-        const itemEncontrado = itensTurma.find(el => el.innerText.includes(turma));
-        if (itemEncontrado) itemEncontrado.classList.add('active');
-        
-        selecionarTurma(turma);
-        document.getElementById('select-alunos').value = nomeBuscado;
-        filtrarRegistrosPorAluno();
-        document.getElementById('input-busca-aluno').value = '';
-    } else {
-        mostrarToast('Aluno não encontrado na base de dados.', 'aviso');
     }
 }
 
