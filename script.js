@@ -5,40 +5,30 @@ const COLS_ALUNOS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz
 let usuarioLogado = null, todosOsRegistros = [], cacheAlunosPorTurma = {}, turmaSelecionadaAtiva = '';
 let modalSetorAtivo = '', modalRegistrosFiltrados = [], modalItensExibidos = 50;
 let patTodos = [], patAmbientes = [], patSalaFiltro = 'TODOS', patCameraAtiva = null;
+let totalRegistrosAnterior = 0; // Para o alerta de tempo real
 
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js');
-}
+if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
 
-// ==== UTILITÁRIOS E TOASTS ====
+// ==== FUNÇÕES DE INICIALIZAÇÃO E SUPORTE ====
 function mostrarToast(mensagem, tipo = 'sucesso') {
     const container = document.getElementById('toast-container');
     const toast = document.createElement('div');
     toast.className = `toast ${tipo}`;
-    let icone = 'fa-circle-check';
-    if (tipo === 'erro') icone = 'fa-circle-xmark';
-    if (tipo === 'aviso') icone = 'fa-triangle-exclamation';
-
+    let icone = tipo === 'erro' ? 'fa-circle-xmark' : tipo === 'aviso' ? 'fa-triangle-exclamation' : 'fa-circle-check';
     toast.innerHTML = `<i class="fa-solid ${icone}"></i> <span>${mensagem}</span>`;
     container.appendChild(toast);
-
-    setTimeout(() => {
-        toast.classList.add('fade-out');
-        setTimeout(() => toast.remove(), 400); 
-    }, 3500);
+    setTimeout(() => { toast.classList.add('fade-out'); setTimeout(() => toast.remove(), 400); }, 3500);
 }
 
-// ========== SESSÃO ==========
+// ========== SESSÃO E INICIALIZAÇÃO ==========
 window.addEventListener('DOMContentLoaded', () => {
     const sessao = localStorage.getItem('sgi_ccma_session');
     if (sessao) { 
         usuarioLogado = JSON.parse(sessao); 
-        
         if (usuarioLogado.setor === 'secretaria' || usuarioLogado.setor === 'direcao' || usuarioLogado.nivel === 3) {
             const btnSec = document.getElementById('btn-aba-secretaria');
             if (btnSec) btnSec.style.display = 'inline-block';
         }
-        
         inicializarPainel(); 
     }
 });
@@ -98,21 +88,23 @@ function mostrarTab(tabSelecionada) {
     }
 }
 
-// ========== ABA SECRETARIA (ATUALIZADO) ==========
+// ==== FUNÇÕES DE APONTAMENTO E DOCUMENTO ====
 function salvarDocumento() {
     const aluno = document.getElementById('doc-aluno').value.trim();
     const documento = document.getElementById('doc-tipo').value;
     const status = document.getElementById('doc-status').value;
-    
-    const btnSalvar = document.getElementById('btn-salvar-doc');
-    const msgDoc = document.getElementById('msg-doc');
+    const turma = encontrarTurmaDoAluno(aluno);
 
-    if (!aluno) {
-        msgDoc.innerText = "⚠️ Por favor, digite o nome do aluno.";
-        msgDoc.style.color = "#b91c1c";
-        msgDoc.style.display = "block";
-        return;
-    }
+    fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ operacao: "salvar_documento", aluno, turma, documento, status, data: new Date().toLocaleDateString('pt-BR') })
+    }).then(() => {
+        mostrarToast("Documento salvo com sucesso!");
+        carregarDocumentos();
+        carregarRegistrosDoServidor(); // Atualiza o feed da ADM
+    });
+}
 
     // Identifica a turma automaticamente
    const turmaDoAluno = encontrarTurmaDoAluno(aluno.trim());
@@ -223,55 +215,36 @@ async function carregarDocumentos() {
     }
 }
 
-// ========== PAINEL PRINCIPAL ==========
 function inicializarPainel() {
     const telaLogin = document.getElementById('login-screen');
-    if (telaLogin) { telaLogin.style.display = 'none'; }
-    
+    if (telaLogin) telaLogin.style.display = 'none';
     const interfaceApp = document.getElementById('app-interface');
-    if (interfaceApp) { interfaceApp.style.display = 'flex'; }
+    if (interfaceApp) interfaceApp.style.display = 'flex';
     
     const displayUser = document.getElementById('user-display');
-    if (displayUser) {
-        displayUser.innerHTML = `<i class="fa-solid fa-user-check"></i> ${usuarioLogado.nome} (${usuarioLogado.setor === 'professores' ? 'PROFESSORES' : usuarioLogado.setor.toUpperCase()})`;
-    }
-    
-    const btnPat = document.getElementById('btn-abrir-patrimonio');
-    if (btnPat) { btnPat.style.display = (usuarioLogado.nivel >= 3) ? 'inline-flex' : 'none'; }
-    
-    const btnAdmin = document.getElementById('btn-abrir-admin');
-    if (btnAdmin) { btnAdmin.style.display = (usuarioLogado.nivel >= 3) ? 'inline-flex' : 'none'; }
-
-    const btnPdfPre = document.getElementById('btn-gerar-pdf-pre-conselho');
-    if (btnPdfPre) { btnPdfPre.style.display = (usuarioLogado.nivel >= 3) ? 'inline-flex' : 'none'; }
+    if (displayUser) displayUser.innerHTML = `<i class="fa-solid fa-user-check"></i> ${usuarioLogado.nome} (${usuarioLogado.setor.toUpperCase()})`;
     
     aplicarBloqueioSetores(usuarioLogado.setor, usuarioLogado.nivel);
-    
     carregarAlunosETurmas(); 
     carregarRegistrosDoServidor();
 }
 
-// ALERTA EM TEMPO REAL (POLLING)
-let totalRegistrosAnterior = 0;
+// ==== ALERTA EM TEMPO REAL ====
 setInterval(async () => {
     if (usuarioLogado) { 
         try {
             const r = await fetch(APPS_SCRIPT_URL, { method: 'GET', cache: 'no-cache' });
-            const novosRegistros = await r.json();
+            const data = await r.json();
+            const contagemAtual = data.apontamentos ? data.apontamentos.length : 0;
             
-            if (novosRegistros.length !== totalRegistrosAnterior && totalRegistrosAnterior !== 0) {
-                todosOsRegistros = novosRegistros;
-                atualizarGraficosMural();
-                if (document.getElementById('select-alunos').value) filtrarRegistrosPorAluno();
+            if (totalRegistrosAnterior !== 0 && contagemAtual !== totalRegistrosAnterior) {
                 mostrarToast('Novos apontamentos recebidos!', 'sucesso');
+                carregarRegistrosDoServidor();
             }
-            totalRegistrosAnterior = novosRegistros.length;
-            
-        } catch (e) {
-            console.log("Tentativa de atualização em background falhou.");
-        }
+            totalRegistrosAnterior = contagemAtual;
+        } catch (e) { console.log("Atualização em background falhou."); }
     }
-}, 180000); // Checa a cada 3 minutos
+}, 60000); // Checa a cada 1 minuto
 
 function abrirModuloPatrimonio() {
     document.getElementById('app-interface').style.display = 'none';
@@ -296,37 +269,22 @@ function alternarAbaMobile(setor, btn) {
 
 async function carregarAlunosETurmas() {
     cacheAlunosPorTurma = {};
-    const ul = document.getElementById('lista-turmas-sidebar');
-    
     try {
         const response = await fetch(COLS_ALUNOS_URL);
         const text = await response.text();
         const jsonText = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
         const data = JSON.parse(jsonText);
         
-        const linhas = data.table.rows;
-linhas.forEach(r => {
-    // Certifique-se de que r.c[1] (Nome) e r.c[2] (Turma) existem
-    if (r.c && r.c[1] && r.c[1].v) {
-        const nome = r.c[1].v.toString().trim();
-        const turma = (r.c[2] && r.c[2].v) ? r.c[2].v.toString().trim() : 'Sem Turma';
-        
-        if (!cacheAlunosPorTurma[turma]) {
-            cacheAlunosPorTurma[turma] = [];
-        }
-        
-        // Evita duplicar nomes na lista
-        if (!cacheAlunosPorTurma[turma].includes(nome)) {
-            cacheAlunosPorTurma[turma].push(nome);
-        }
-    }
-}); 
+        data.table.rows.forEach(r => {
+            if (r.c && r.c[1] && r.c[1].v) {
+                const nome = r.c[1].v.toString().trim();
+                const turma = (r.c[2] && r.c[2].v) ? r.c[2].v.toString().trim() : 'Sem Turma';
+                if (!cacheAlunosPorTurma[turma]) cacheAlunosPorTurma[turma] = [];
+                if (!cacheAlunosPorTurma[turma].includes(nome)) cacheAlunosPorTurma[turma].push(nome);
+            }
+        });
         renderizarSidebarTurmas();
-        preencherBuscaGlobal();
-    } catch (e) { 
-        console.error("Falha ao processar os alunos:", e); 
-        ul.innerHTML = '<li class="turma-item" style="color:#f87171;"><i class="fa-solid fa-triangle-exclamation"></i> Erro na Tabela</li>';
-    }
+    } catch (e) { console.error(e); }
 }
 
 function renderizarSidebarTurmas() {
@@ -366,13 +324,34 @@ function selecionarTurma(turma) {
     document.getElementById('app-sidebar').classList.remove('open');
 }
 
+// ==== BUSCA E CARREGAMENTO DE DADOS ====
 async function carregarRegistrosDoServidor() {
     try {
         const r = await fetch(APPS_SCRIPT_URL, { method: 'GET', cache: 'no-cache' });
-        todosOsRegistros = await r.json();
+        const data = await r.json();
+        
+        // Unifica apontamentos comuns com documentos da secretaria
+        let lista = data.apontamentos.map(row => ({
+            idLinha: row.idLinha, aluno: row.aluno, setor: row.setor, texto: row.texto, funcionario: row.funcionario, dataAtual: row.dataAtual
+        }));
+        
+        data.documentos.forEach((doc, idx) => {
+            if (idx > 0 && doc[0]) { // doc[0] é Aluno, doc[2] é Documento
+                lista.push({
+                    idLinha: 'doc_' + idx,
+                    aluno: doc[0],
+                    setor: 'adm', 
+                    texto: `📄 Solicitação de Documento: ${doc[2]} | Status: ${doc[3]}`,
+                    funcionario: 'Secretaria',
+                    dataAtual: doc[4]
+                });
+            }
+        });
+        
+        todosOsRegistros = lista;
         atualizarGraficosMural();
         if (document.getElementById('select-alunos').value) filtrarRegistrosPorAluno();
-    } catch (e) { console.error(e); }
+    } catch (e) { console.error("Erro ao carregar:", e); }
 }
 
 function atualizarGraficosMural() {
