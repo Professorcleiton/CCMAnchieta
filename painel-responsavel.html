@@ -5,99 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel do Responsável - SIGA Anchieta</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f6f8;
-            margin: 0;
-            padding: 20px;
-            color: #333;
-        }
-        .header {
-            background-color: #2e7d32;
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
+        body { font-family: Arial, sans-serif; background-color: #f4f6f8; margin: 0; padding: 20px; color: #333; }
+        .header { background-color: #2e7d32; color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; text-align: center; }
         .header h2 { margin: 0; }
-        .logout {
-            display: inline-block;
-            margin-top: 10px;
-            color: #fff;
-            text-decoration: underline;
-            cursor: pointer;
-        }
-        .filtro {
-            background: white;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .filtro select {
-            padding: 10px;
-            font-size: 16px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            width: 100%;
-            max-width: 300px;
-        }
+        .logout { display: inline-block; margin-top: 10px; color: #fff; text-decoration: underline; cursor: pointer; }
+        .filtro { background: white; padding: 15px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .filtro select { padding: 10px; font-size: 16px; border-radius: 5px; border: 1px solid #ccc; width: 100%; max-width: 300px; }
         .registros { display: flex; flex-direction: column; gap: 10px; }
-        .registro {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            border-left: 5px solid #005088;
-        }
+        .registro { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-left: 5px solid #005088; }
         .registro .setor { font-weight: bold; }
         .registro .data { font-size: 12px; color: #666; margin-top: 5px; }
         .registro .texto { margin-top: 8px; font-size: 15px; }
         .sem-registros { text-align: center; padding: 30px; color: #999; }
         .erro { color: red; text-align: center; padding: 30px; }
-
-                .tabela-documentos {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
-        }
-        .tabela-documentos th {
-            background: #f1f5f9;
-            padding: 10px;
-            text-align: left;
-            font-weight: bold;
-            color: #475569;
-        }
-        .tabela-documentos td {
-            padding: 10px;
-            border-bottom: 1px solid #e2e8f0;
-        }
+        .tabela-documentos { width: 100%; border-collapse: collapse; font-size: 14px; }
+        .tabela-documentos th { background: #f1f5f9; padding: 10px; text-align: left; font-weight: bold; color: #475569; }
+        .tabela-documentos td { padding: 10px; border-bottom: 1px solid #e2e8f0; }
         .status-pendente { color: #d97706; font-weight: bold; }
         .status-enviado { color: #2563eb; font-weight: bold; }
         .status-verificado { color: #059669; font-weight: bold; }
         .status-rejeitado { color: #dc2626; font-weight: bold; }
-        .btn-upload {
-            background: #2563eb;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-        }
+        .btn-upload { background: #2563eb; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }
         .btn-upload:hover { background: #1d4ed8; }
-        .btn-visualizar {
-            background: #059669;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            text-decoration: none;
-            display: inline-block;
-        }
+        .btn-visualizar { background: #059669; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; text-decoration: none; display: inline-block; }
     </style>
 </head>
 <body>
@@ -113,290 +43,118 @@
             <option value="">Todos os filhos</option>
         </select>
     </div>
-        <!-- Seção de Documentos -->
+
     <div class="filtro" style="margin-top: 20px;">
         <h3 style="margin-top: 0; color: #2e7d32;">📁 Documentos Solicitados</h3>
         <div id="lista-documentos" style="margin-top: 15px;">
             <div class="sem-registros">Carregando documentos...</div>
         </div>
     </div>
+
     <div class="registros" id="lista-registros">
         <div class="sem-registros">Carregando registros...</div>
     </div>
 
     <script>
-             const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
+        var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
+        var dadosResponsavel = null;
+        var todosRegistros = [];
 
-        let dadosResponsavel = null;
-        let todosRegistros = [];
-
-        window.addEventListener('DOMContentLoaded', () => {
-            const sessao = sessionStorage.getItem('resp_logado');
-            if (!sessao) {
-                window.location.href = 'responsaveis.html';
-                return;
-            }
+        window.addEventListener('DOMContentLoaded', function() {
+            var sessao = sessionStorage.getItem('resp_logado');
+            if (!sessao) { window.location.href = 'responsaveis.html'; return; }
             dadosResponsavel = JSON.parse(sessao);
-            document.getElementById('nome-responsavel').innerText = `Bem-vindo(a), ${dadosResponsavel.nome}`;
-
-            const select = document.getElementById('filho-select');
-            dadosResponsavel.alunos.forEach(aluno => {
-                const opt = document.createElement('option');
-                opt.value = aluno;
-                opt.textContent = aluno;
-                select.appendChild(opt);
+            document.getElementById('nome-responsavel').innerText = 'Bem-vindo(a), ' + dadosResponsavel.nome;
+            var select = document.getElementById('filho-select');
+            dadosResponsavel.alunos.forEach(function(aluno) {
+                var opt = document.createElement('option'); opt.value = aluno; opt.textContent = aluno; select.appendChild(opt);
             });
-
             carregarRegistros();
             carregarDocumentosAluno();
         });
 
-        function logout() {
-            sessionStorage.removeItem('resp_logado');
-            window.location.href = 'responsaveis.html';
-        }
+        function logout() { sessionStorage.removeItem('resp_logado'); window.location.href = 'responsaveis.html'; }
 
         async function carregarRegistros() {
-            const container = document.getElementById('lista-registros');
+            var container = document.getElementById('lista-registros');
             container.innerHTML = '<div class="sem-registros">Carregando dados do servidor...</div>';
-
             try {
-                const res = await fetch(APPS_SCRIPT_URL + '?aba=todos_os_dados');
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                const data = await res.json();
-                console.log('Dados recebidos:', data);
-
-                if (!data.apontamentos && !data.documentos && !data.ocorrencias) {
-                    throw new Error('Resposta do servidor não contém os dados esperados.');
-                }
-
-                const alunosVinculados = dadosResponsavel.alunos;
+                var res = await fetch(APPS_SCRIPT_URL + '?aba=todos_os_dados');
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                var data = await res.json();
+                if (!data.apontamentos && !data.documentos && !data.ocorrencias) throw new Error('Dados não encontrados.');
+                var alunosVinculados = dadosResponsavel.alunos;
                 todosRegistros = [];
-
-                (data.apontamentos || []).forEach(r => {
-                    if (alunosVinculados.includes(r.aluno)) {
-                        todosRegistros.push({...r, tipo: 'apontamento'});
-                    }
-                });
-
-                (data.documentos || []).forEach(d => {
-                    if (alunosVinculados.includes(d.aluno)) {
-                        todosRegistros.push({
-                            aluno: d.aluno,
-                            setor: 'adm',
-                            texto: `📄 Documento: ${d.documento} - Status: ${d.status}`,
-                            funcionario: 'Secretaria',
-                            dataAtual: d.data,
-                            tipo: 'documento'
-                        });
-                    }
-                });
-
-                (data.ocorrencias || []).forEach(oc => {
-                    if (alunosVinculados.includes(oc.aluno)) {
-                        const icone = oc.tipo === "Saída Antecipada" ? "🚪" : "⏰";
-                        const horario = oc.data ? oc.data.split(' ')[1] : '';
-                        todosRegistros.push({
-                            aluno: oc.aluno,
-                            setor: 'adm',
-                            texto: `${icone} ${oc.tipo}: ${oc.motivo} | Autorizado por: ${oc.autorizador} | Horário: ${horario}`,
-                            funcionario: oc.autorizador || 'Secretaria',
-                            dataAtual: oc.data,
-                            tipo: 'ocorrencia'
-                        });
-                    }
-                });
-
+                (data.apontamentos || []).forEach(function(r) { if (alunosVinculados.includes(r.aluno)) todosRegistros.push(Object.assign({}, r, {tipo: 'apontamento'})); });
+                (data.documentos || []).forEach(function(d) { if (alunosVinculados.includes(d.aluno)) todosRegistros.push({aluno: d.aluno, setor: 'adm', texto: '📄 Documento: ' + d.documento + ' - Status: ' + d.status, funcionario: 'Secretaria', dataAtual: d.data, tipo: 'documento'}); });
+                (data.ocorrencias || []).forEach(function(oc) { if (alunosVinculados.includes(oc.aluno)) { var icone = oc.tipo === 'Saída Antecipada' ? '🚪' : '⏰'; var horario = oc.data ? oc.data.split(' ')[1] : ''; todosRegistros.push({aluno: oc.aluno, setor: 'adm', texto: icone + ' ' + oc.tipo + ': ' + oc.motivo + ' | Autorizado por: ' + oc.autorizador + ' | Horário: ' + horario, funcionario: oc.autorizador || 'Secretaria', dataAtual: oc.data, tipo: 'ocorrencia'}); } });
                 filtrarRegistros();
-            } catch (e) {
-                console.error('Erro ao carregar:', e);
-                container.innerHTML = `<div class="erro">Erro ao carregar dados: ${e.message}.<br>Verifique sua conexão e tente novamente.</div>`;
-            }
+            } catch (e) { container.innerHTML = '<div class="erro">Erro ao carregar: ' + e.message + '</div>'; }
         }
 
         function filtrarRegistros() {
-            const filhoSelecionado = document.getElementById('filho-select').value;
-            const container = document.getElementById('lista-registros');
-
-            let registros = todosRegistros;
-            if (filhoSelecionado) {
-                registros = registros.filter(r => r.aluno === filhoSelecionado);
-            }
-
-            registros.sort((a, b) => (b.dataAtual || '').localeCompare(a.dataAtual || ''));
-
-            if (registros.length === 0) {
-                container.innerHTML = '<div class="sem-registros">Nenhum registro encontrado para o(s) aluno(s) selecionado(s).</div>';
-                return;
-            }
-
-            container.innerHTML = registros.map(r => {
-                const setor = r.setor === 'meivs' ? 'MEIV\'S' :
-                               r.setor === 'pedagogico' ? 'Pedagógico' :
-                               r.setor === 'adm' ? 'ADM' : 'Professores';
-                const corSetor = r.setor === 'meivs' ? '#0284c7' :
-                                 r.setor === 'pedagogico' ? '#0d9488' :
-                                 r.setor === 'adm' ? '#4f46e5' : '#b91c1c';
-                return `
-                <div class="registro" style="border-left-color: ${corSetor}">
-                    <div class="setor" style="color: ${corSetor}">${setor}</div>
-                    <div class="texto">${r.texto}</div>
-                    <div class="data">${r.dataAtual} • ${r.funcionario || 'SIGA'}</div>
-                </div>`;
+            var filhoSelecionado = document.getElementById('filho-select').value;
+            var container = document.getElementById('lista-registros');
+            var registros = filhoSelecionado ? todosRegistros.filter(function(r) { return r.aluno === filhoSelecionado; }) : todosRegistros;
+            registros.sort(function(a, b) { return (b.dataAtual || '').localeCompare(a.dataAtual || ''); });
+            if (registros.length === 0) { container.innerHTML = '<div class="sem-registros">Nenhum registro encontrado.</div>'; return; }
+            container.innerHTML = registros.map(function(r) {
+                var setor = r.setor === 'meivs' ? "MEIV'S" : r.setor === 'pedagogico' ? 'Pedagógico' : r.setor === 'adm' ? 'ADM' : 'Professores';
+                var cor = r.setor === 'meivs' ? '#0284c7' : r.setor === 'pedagogico' ? '#0d9488' : r.setor === 'adm' ? '#4f46e5' : '#b91c1c';
+                return '<div class="registro" style="border-left-color:' + cor + '"><div class="setor" style="color:' + cor + '">' + setor + '</div><div class="texto">' + r.texto + '</div><div class="data">' + r.dataAtual + ' • ' + (r.funcionario || 'SIGA') + '</div></div>';
             }).join('');
         }
 
         async function carregarDocumentosAluno() {
-            const container = document.getElementById('lista-documentos');
+            var container = document.getElementById('lista-documentos');
             container.innerHTML = '<div class="sem-registros">Carregando documentos...</div>';
-            
-            let todosDocumentos = [];
-            for (const aluno of dadosResponsavel.alunos) {
+            var todosDocumentos = [];
+            for (var i = 0; i < dadosResponsavel.alunos.length; i++) {
+                var aluno = dadosResponsavel.alunos[i];
                 try {
-                    const res = await fetch(APPS_SCRIPT_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'text/plain' },
-                        body: JSON.stringify({
-                            operacao: "listar_documentos_aluno",
-                            aluno: aluno
-                        })
-                    });
-                    const docs = await res.json();
-                    docs.forEach(d => d.aluno = aluno);
+                    var res = await fetch(APPS_SCRIPT_URL, { method: 'POST', headers: {'Content-Type': 'text/plain'}, body: JSON.stringify({operacao: 'listar_documentos_aluno', aluno: aluno}) });
+                    var docs = await res.json();
+                    docs.forEach(function(d) { d.aluno = aluno; });
                     todosDocumentos = todosDocumentos.concat(docs);
-                } catch (e) {
-                    console.error('Erro ao carregar documentos de', aluno, e);
-                }
+                } catch (e) { console.error('Erro ao carregar docs de', aluno, e); }
             }
-            
-            if (todosDocumentos.length === 0) {
-                container.innerHTML = '<div class="sem-registros">Nenhum documento solicitado.</div>';
-                return;
-            }
-            
-            let html = '<table class="tabela-documentos"><thead><tr><th>Aluno</th><th>Documento</th><th>Status</th><th>Data</th><th>Ação</th></tr></thead><tbody>';
-            
-            todosDocumentos.forEach(doc => {
-                const statusClass = doc.status === 'Pendente' ? 'status-pendente' :
-                                    doc.status === 'Enviado' ? 'status-enviado' :
-                                    doc.status === 'Verificado' ? 'status-verificado' : 'status-rejeitado';
-                
-                let botaoAcao = '';
-                if (doc.status === 'Pendente') {
-                    botaoAcao = `<button class="btn-upload" onclick="abrirUpload('${doc.aluno}', '${doc.documento}')">📤 Enviar</button>`;
-                } else if (doc.status === 'Enviado' || doc.status === 'Verificado') {
-                    botaoAcao = `<a href="${doc.link}" target="_blank" class="btn-visualizar">👁️ Ver</a>`;
-                }
-                
-                html += `<tr>
-                    <td>${doc.aluno}</td>
-                    <td>${doc.documento}</td>
-                    <td class="${statusClass}">${doc.status}</td>
-                    <td>${formatarDataExibicao(doc.dataSolicitacao)}</td>
-                    <td>${botaoAcao}</td>
-                </tr>`;
+            if (todosDocumentos.length === 0) { container.innerHTML = '<div class="sem-registros">Nenhum documento solicitado.</div>'; return; }
+            var html = '<table class="tabela-documentos"><thead><tr><th>Aluno</th><th>Documento</th><th>Status</th><th>Data</th><th>Ação</th></tr></thead><tbody>';
+            todosDocumentos.forEach(function(doc) {
+                var statusClass = doc.status === 'Pendente' ? 'status-pendente' : doc.status === 'Enviado' ? 'status-enviado' : doc.status === 'Verificado' ? 'status-verificado' : 'status-rejeitado';
+                var botao = '';
+                if (doc.status === 'Pendente') botao = '<button class="btn-upload" onclick="abrirUpload(\'' + doc.aluno + '\',\'' + doc.documento + '\')">📤 Enviar</button>';
+                else if (doc.status === 'Enviado' || doc.status === 'Verificado') botao = '<a href="' + doc.link + '" target="_blank" class="btn-visualizar">👁️ Ver</a>';
+                var dataExibicao = doc.dataSolicitacao || '-';
+                if (dataExibicao.length > 10) dataExibicao = dataExibicao.substring(0, 10);
+                html += '<tr><td>' + doc.aluno + '</td><td>' + doc.documento + '</td><td class="' + statusClass + '">' + doc.status + '</td><td>' + dataExibicao + '</td><td>' + botao + '</td></tr>';
             });
-            
             html += '</tbody></table>';
             container.innerHTML = html;
         }
-        
+
         function abrirUpload(aluno, documento) {
-            const input = document.createElement('input');
+            var input = document.createElement('input');
             input.type = 'file';
             input.accept = '.pdf,.jpg,.jpeg,.png';
             input.onchange = async function() {
-                const file = input.files[0];
+                var file = input.files[0];
                 if (!file) return;
-                
-                // Verifica tamanho (5MB)
-                if (file.size > 5 * 1024 * 1024) {
-                    alert('O arquivo deve ter no máximo 5MB.');
-                    return;
-                }
-                
-                // Verifica tipo
-                const tiposPermitidos = ['application/pdf', 'image/jpeg', 'image/png'];
-                if (!tiposPermitidos.includes(file.type)) {
-                    alert('Tipo de arquivo não permitido. Use PDF, JPG ou PNG.');
-                    return;
-                }
-                
-                // Mostra feedback
-                const btn = document.querySelector(`button[onclick*="${documento}"]`);
-                if (btn) {
-                    btn.disabled = true;
-                    btn.innerText = 'Enviando...';
-                }
-                
-                const reader = new FileReader();
+                if (file.size > 5 * 1024 * 1024) { alert('Arquivo máximo 5MB.'); return; }
+                var reader = new FileReader();
                 reader.onload = async function(e) {
+                    var base64 = e.target.result.split(',')[1];
                     try {
-                        const base64 = e.target.result.split(',')[1];
-                        
-                        const res = await fetch(APPS_SCRIPT_URL, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'text/plain' },
-                            body: JSON.stringify({
-                                operacao: "upload_documento",
-                                aluno: aluno,
-                                documento: documento,
-                                nomeArquivo: file.name,
-                                arquivo: base64
-                            })
-                        });
-                        
-                        const result = await res.json();
-                        
-                        if (result.status === 'success') {
-                            alert('✅ Documento enviado com sucesso!');
-                            carregarDocumentosAluno();
-                        } else {
-                            alert('❌ Erro ao enviar: ' + (result.message || 'Tente novamente.'));
-                        }
-                    } catch (e) {
-                        alert('❌ Erro de conexão. Verifique sua internet.');
-                        console.error(e);
-                    } finally {
-                        if (btn) {
-                            btn.disabled = false;
-                            btn.innerText = '📤 Enviar';
-                        }
-                    }
+                        var res = await fetch(APPS_SCRIPT_URL, { method: 'POST', headers: {'Content-Type': 'text/plain'}, body: JSON.stringify({operacao: 'upload_documento', aluno: aluno, documento: documento, nomeArquivo: file.name, arquivo: base64}) });
+                        var result = await res.json();
+                        if (result.status === 'success') { alert('✅ Documento enviado!'); carregarDocumentosAluno(); }
+                        else { alert('❌ ' + (result.message || 'Erro ao enviar.')); }
+                    } catch (e) { alert('Erro de conexão.'); }
                 };
-                
-                reader.onerror = function() {
-                    alert('❌ Erro ao ler o arquivo. Tente novamente.');
-                    if (btn) {
-                        btn.disabled = false;
-                        btn.innerText = '📤 Enviar';
-                    }
-                };
-                
                 reader.readAsDataURL(file);
             };
             input.click();
         }
-        
-                function formatarDataExibicao(data) {
-            if (!data || data === '' || data === '000000') return '-';
-            
-            // Se for um objeto Date
-            if (data instanceof Date || (typeof data === 'string' && data.includes('GMT'))) {
-                const d = new Date(data);
-                if (!isNaN(d.getTime())) {
-                    return d.toLocaleDateString('pt-BR');
-                }
-            }
-            
-            // Se for string no formato dd/MM/yyyy
-            if (typeof data === 'string' && data.includes('/')) {
-                return data.split(' ')[0]; // Retorna só a data, sem horário
-            }
-            
-            return data;
-        }
-        
     </script>
 </body>
 </html>
