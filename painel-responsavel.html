@@ -125,7 +125,7 @@
     </div>
 
     <script>
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
+             const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
 
         let dadosResponsavel = null;
         let todosRegistros = [];
@@ -148,6 +148,7 @@
             });
 
             carregarRegistros();
+            carregarDocumentosAluno();
         });
 
         function logout() {
@@ -172,14 +173,12 @@
                 const alunosVinculados = dadosResponsavel.alunos;
                 todosRegistros = [];
 
-                // Apontamentos
                 (data.apontamentos || []).forEach(r => {
                     if (alunosVinculados.includes(r.aluno)) {
                         todosRegistros.push({...r, tipo: 'apontamento'});
                     }
                 });
 
-                // Documentos
                 (data.documentos || []).forEach(d => {
                     if (alunosVinculados.includes(d.aluno)) {
                         todosRegistros.push({
@@ -193,7 +192,6 @@
                     }
                 });
 
-                // Ocorrências
                 (data.ocorrencias || []).forEach(oc => {
                     if (alunosVinculados.includes(oc.aluno)) {
                         const icone = oc.tipo === "Saída Antecipada" ? "🚪" : "⏰";
@@ -247,6 +245,107 @@
                 </div>`;
             }).join('');
         }
+
+        async function carregarDocumentosAluno() {
+            const container = document.getElementById('lista-documentos');
+            container.innerHTML = '<div class="sem-registros">Carregando documentos...</div>';
+            
+            let todosDocumentos = [];
+            for (const aluno of dadosResponsavel.alunos) {
+                try {
+                    const res = await fetch(APPS_SCRIPT_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/plain' },
+                        body: JSON.stringify({
+                            operacao: "listar_documentos_aluno",
+                            aluno: aluno
+                        })
+                    });
+                    const docs = await res.json();
+                    docs.forEach(d => d.aluno = aluno);
+                    todosDocumentos = todosDocumentos.concat(docs);
+                } catch (e) {
+                    console.error('Erro ao carregar documentos de', aluno, e);
+                }
+            }
+            
+            if (todosDocumentos.length === 0) {
+                container.innerHTML = '<div class="sem-registros">Nenhum documento solicitado.</div>';
+                return;
+            }
+            
+            let html = '<table class="tabela-documentos"><thead><tr><th>Aluno</th><th>Documento</th><th>Status</th><th>Data</th><th>Ação</th></tr></thead><tbody>';
+            
+            todosDocumentos.forEach(doc => {
+                const statusClass = doc.status === 'Pendente' ? 'status-pendente' :
+                                    doc.status === 'Enviado' ? 'status-enviado' :
+                                    doc.status === 'Verificado' ? 'status-verificado' : 'status-rejeitado';
+                
+                let botaoAcao = '';
+                if (doc.status === 'Pendente') {
+                    botaoAcao = `<button class="btn-upload" onclick="abrirUpload('${doc.aluno}', '${doc.documento}')">📤 Enviar</button>`;
+                } else if (doc.status === 'Enviado' || doc.status === 'Verificado') {
+                    botaoAcao = `<a href="${doc.link}" target="_blank" class="btn-visualizar">👁️ Ver</a>`;
+                }
+                
+                html += `<tr>
+                    <td>${doc.aluno}</td>
+                    <td>${doc.documento}</td>
+                    <td class="${statusClass}">${doc.status}</td>
+                    <td>${doc.dataSolicitacao || '-'}</td>
+                    <td>${botaoAcao}</td>
+                </tr>`;
+            });
+            
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+        
+        function abrirUpload(aluno, documento) {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.pdf,.jpg,.jpeg,.png';
+            input.onchange = async function() {
+                const file = input.files[0];
+                if (!file) return;
+                
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('O arquivo deve ter no máximo 5MB.');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = async function(e) {
+                    const base64 = e.target.result.split(',')[1];
+                    
+                    try {
+                        const res = await fetch(APPS_SCRIPT_URL, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'text/plain' },
+                            body: JSON.stringify({
+                                operacao: "upload_documento",
+                                aluno: aluno,
+                                documento: documento,
+                                nomeArquivo: file.name,
+                                arquivo: base64
+                            })
+                        });
+                        const result = await res.json();
+                        if (result.status === 'success') {
+                            alert('Documento enviado com sucesso!');
+                            carregarDocumentosAluno();
+                        } else {
+                            alert('Erro ao enviar: ' + result.message);
+                        }
+                    } catch (e) {
+                        alert('Erro de conexão.');
+                    }
+                };
+                reader.readAsDataURL(file);
+            };
+            input.click();
+        }
+        
     </script>
 </body>
 </html>
