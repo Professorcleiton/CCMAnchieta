@@ -292,7 +292,7 @@
                     <td>${doc.aluno}</td>
                     <td>${doc.documento}</td>
                     <td class="${statusClass}">${doc.status}</td>
-                    <td>${doc.dataSolicitacao || '-'}</td>
+                    <td>${formatarDataExibicao(doc.dataSolicitacao)}</td>
                     <td>${botaoAcao}</td>
                 </tr>`;
             });
@@ -344,6 +344,25 @@
                 reader.readAsDataURL(file);
             };
             input.click();
+        }
+        
+                function formatarDataExibicao(data) {
+            if (!data || data === '' || data === '000000') return '-';
+            
+            // Se for um objeto Date
+            if (data instanceof Date || (typeof data === 'string' && data.includes('GMT'))) {
+                const d = new Date(data);
+                if (!isNaN(d.getTime())) {
+                    return d.toLocaleDateString('pt-BR');
+                }
+            }
+            
+            // Se for string no formato dd/MM/yyyy
+            if (typeof data === 'string' && data.includes('/')) {
+                return data.split(' ')[0]; // Retorna só a data, sem horário
+            }
+            
+            return data;
         }
         
     </script>
