@@ -335,13 +335,17 @@ async function carregarRegistrosDoServidor() {
             });
         });
 
+        // 2. Documentos da Secretaria
         data.documentos.forEach(doc => {
+            const linkDownload = doc.link ? ` <a href="${doc.link}" target="_blank" style="color:#4f46e5;text-decoration:underline;">📎 Baixar</a>` : '';
+            const statusInfo = doc.status ? ` | Status: ${doc.status}` : '';
+            const dataFormatada = doc.data ? formatarDataEHora(doc.data) : 'Data não informada';
             todosOsRegistros.push({
                 aluno: doc.aluno,
                 setor: 'adm',
-                texto: `📄 Documento: ${doc.documento} - Status: ${doc.status}`,
+                texto: `📄 Documento: ${doc.documento}${statusInfo}${linkDownload}`,
                 funcionario: 'Secretaria',
-                dataAtual: doc.data,
+                dataAtual: dataFormatada,
                 tipo: 'documento'
             });
         });
