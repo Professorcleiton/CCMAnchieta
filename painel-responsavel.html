@@ -309,16 +309,31 @@
                 const file = input.files[0];
                 if (!file) return;
                 
+                // Verifica tamanho (5MB)
                 if (file.size > 5 * 1024 * 1024) {
                     alert('O arquivo deve ter no máximo 5MB.');
                     return;
                 }
                 
+                // Verifica tipo
+                const tiposPermitidos = ['application/pdf', 'image/jpeg', 'image/png'];
+                if (!tiposPermitidos.includes(file.type)) {
+                    alert('Tipo de arquivo não permitido. Use PDF, JPG ou PNG.');
+                    return;
+                }
+                
+                // Mostra feedback
+                const btn = document.querySelector(`button[onclick*="${documento}"]`);
+                if (btn) {
+                    btn.disabled = true;
+                    btn.innerText = 'Enviando...';
+                }
+                
                 const reader = new FileReader();
                 reader.onload = async function(e) {
-                    const base64 = e.target.result.split(',')[1];
-                    
                     try {
+                        const base64 = e.target.result.split(',')[1];
+                        
                         const res = await fetch(APPS_SCRIPT_URL, {
                             method: 'POST',
                             headers: { 'Content-Type': 'text/plain' },
@@ -330,17 +345,34 @@
                                 arquivo: base64
                             })
                         });
+                        
                         const result = await res.json();
+                        
                         if (result.status === 'success') {
-                            alert('Documento enviado com sucesso!');
+                            alert('✅ Documento enviado com sucesso!');
                             carregarDocumentosAluno();
                         } else {
-                            alert('Erro ao enviar: ' + result.message);
+                            alert('❌ Erro ao enviar: ' + (result.message || 'Tente novamente.'));
                         }
                     } catch (e) {
-                        alert('Erro de conexão.');
+                        alert('❌ Erro de conexão. Verifique sua internet.');
+                        console.error(e);
+                    } finally {
+                        if (btn) {
+                            btn.disabled = false;
+                            btn.innerText = '📤 Enviar';
+                        }
                     }
                 };
+                
+                reader.onerror = function() {
+                    alert('❌ Erro ao ler o arquivo. Tente novamente.');
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerText = '📤 Enviar';
+                    }
+                };
+                
                 reader.readAsDataURL(file);
             };
             input.click();
