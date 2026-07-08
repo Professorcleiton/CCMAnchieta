@@ -506,11 +506,23 @@ function filtrarRegistrosPorAluno() {
 
     const total = cm+cp+ca+cf;
     document.getElementById('dash-total-count').innerText = total;
-    ['bar-meivs','bar-pedag','bar-adm','bar-profs'].forEach((id,i) => {
-        const val = [cm,cp,ca,cf][i];
-        const bar = document.getElementById(id);
-        if (bar) bar.style.width = total ? Math.max((val/total)*100, 5) + '%' : '0%';
-    });
+    
+    // Contadores numéricos no mini dashboard
+    document.getElementById('bar-meivs').style.width = '0%';  // esconde a barra
+    document.getElementById('bar-meivs').parentElement.querySelector('.mini-label-chart').innerHTML = 
+        'MEIVS <span style="background:#0284c7;color:white;padding:2px 8px;border-radius:10px;font-size:11px;">' + cm + '</span>';
+    
+    document.getElementById('bar-pedag').style.width = '0%';
+    document.getElementById('bar-pedag').parentElement.querySelector('.mini-label-chart').innerHTML = 
+        'PEDAG <span style="background:#0d9488;color:white;padding:2px 8px;border-radius:10px;font-size:11px;">' + cp + '</span>';
+    
+    document.getElementById('bar-adm').style.width = '0%';
+    document.getElementById('bar-adm').parentElement.querySelector('.mini-label-chart').innerHTML = 
+        'ADM <span style="background:#4f46e5;color:white;padding:2px 8px;border-radius:10px;font-size:11px;">' + ca + '</span>';
+    
+    document.getElementById('bar-profs').style.width = '0%';
+    document.getElementById('bar-profs').parentElement.querySelector('.mini-label-chart').innerHTML = 
+        'PROFS <span style="background:#b91c1c;color:white;padding:2px 8px;border-radius:10px;font-size:11px;">' + cf + '</span>';
 }
 
 function verificarTeclaEnter(e, setor) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); salvarPost(setor); } }
