@@ -5,7 +5,7 @@ const COLS_ALUNOS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz
 let usuarioLogado = null, todosOsRegistros = [], cacheAlunosPorTurma = {}, turmaSelecionadaAtiva = '';
 let modalSetorAtivo = '', modalRegistrosFiltrados = [], modalItensExibidos = 50;
 let patTodos = [], patAmbientes = [], patSalaFiltro = 'TODOS', patCameraAtiva = null;
-let totalRegistrosAnterior = 0; 
+let totalRegistrosAnterior = 0;
 
 if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
 
@@ -315,7 +315,7 @@ function selecionarTurma(turma) {
     document.getElementById('app-sidebar').classList.remove('open');
 }
 
-// ==== BUSCA E CARREGAMENTO DE DADOS ====
+// ==== BUSCA E CARREGAMENTO DE DADOS (COM ATAS) ====
 async function carregarRegistrosDoServidor() {
     try {
         const resposta = await fetch(APPS_SCRIPT_URL + "?aba=todos_os_dados"); 
@@ -390,43 +390,8 @@ async function carregarRegistrosDoServidor() {
     } catch (e) { console.error("Erro ao carregar dados unificados:", e); }
 }
 
-        // 2. Documentos da Secretaria
-        data.documentos.forEach(doc => {
-            const linkDownload = doc.link ? ` <a href="${doc.link}" target="_blank" style="color:#4f46e5;text-decoration:underline;">📎 Baixar</a>` : '';
-            const statusInfo = doc.status ? ` | Status: ${doc.status}` : '';
-            const dataFormatada = doc.data ? formatarDataEHora(doc.data) : 'Data não informada';
-            todosOsRegistros.push({
-                aluno: doc.aluno,
-                setor: 'adm',
-                texto: `📄 Documento: ${doc.documento}${statusInfo}${linkDownload}`,
-                funcionario: 'Secretaria',
-                dataAtual: dataFormatada,
-                tipo: 'documento'
-            });
-        });
-
-        // Ocorrências (nova aba)
-        if (data.ocorrencias) {
-            data.ocorrencias.forEach(oc => {
-                const icone = oc.tipo === "Saída Antecipada" ? "🚪" : "⏰";
-                const horario = oc.data ? oc.data.split(' ')[1] : '';
-                todosOsRegistros.push({
-                    aluno: oc.aluno,
-                    setor: 'adm',
-                    texto: `${icone} ${oc.tipo}: ${oc.motivo} | Autorizado por: ${oc.autorizador} | Horário: ${horario}`,
-                    funcionario: oc.autorizador || 'Secretaria',
-                    dataAtual: oc.data,
-                    tipo: 'ocorrencia'
-                });
-            });
-        }
-
-        atualizarGraficosMural();
-        if (document.getElementById('select-alunos').value) filtrarRegistrosPorAluno();
-
-    } catch (e) { console.error("Erro ao carregar dados unificados:", e); }
-}
-
+// ... (o restante das funções permanece igual ao seu último script.js completo)
+// Copie a partir daqui todas as outras funções que já existiam: atualizarGraficosMural, filtrarRegistrosPorAluno, etc.
 function atualizarGraficosMural() {
     const total = todosOsRegistros.length;
     const meivs = todosOsRegistros.filter(r => r.setor.toLowerCase() === 'meivs').length;
