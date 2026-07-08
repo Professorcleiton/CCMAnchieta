@@ -82,35 +82,104 @@
 
         function logout() { sessionStorage.removeItem('resp_logado'); window.location.href = 'responsaveis.html'; }
 
-        async function carregarRegistros() {
-            var container = document.getElementById('lista-registros');
-            container.innerHTML = '<div class="sem-registros">Carregando dados do servidor...</div>';
-            try {
-                var res = await fetch(APPS_SCRIPT_URL + '?aba=todos_os_dados');
-                if (!res.ok) throw new Error('HTTP ' + res.status);
-                var data = await res.json();
-                if (!data.apontamentos && !data.documentos && !data.ocorrencias) throw new Error('Dados não encontrados.');
-                var alunosVinculados = dadosResponsavel.alunos;
-                todosRegistros = [];
-                (data.apontamentos || []).forEach(function(r) { if (alunosVinculados.includes(r.aluno)) todosRegistros.push(Object.assign({}, r, {tipo: 'apontamento'})); });
-                (data.documentos || []).forEach(function(d) { if (alunosVinculados.includes(d.aluno)) todosRegistros.push({aluno: d.aluno, setor: 'adm', texto: '📄 Documento: ' + d.documento + ' - Status: ' + d.status, funcionario: 'Secretaria', dataAtual: d.data, tipo: 'documento'}); });
-                (data.ocorrencias || []).forEach(function(oc) { if (alunosVinculados.includes(oc.aluno)) { var icone = oc.tipo === 'Saída Antecipada' ? '🚪' : '⏰'; var horario = oc.data ? oc.data.split(' ')[1] : ''; todosRegistros.push({aluno: oc.aluno, setor: 'adm', texto: icone + ' ' + oc.tipo + ': ' + oc.motivo + ' | Autorizado por: ' + oc.autorizador + ' | Horário: ' + horario, funcionario: oc.autorizador || 'Secretaria', dataAtual: oc.data, tipo: 'ocorrencia'}); } });
-                filtrarRegistros();
-            } catch (e) { container.innerHTML = '<div class="erro">Erro ao carregar: ' + e.message + '</div>'; }
+ async function carregarRegistros() {
+    var container = document.getElementById('lista-registros');
+    container.innerHTML = '<div class="sem-registros">Carregando dados do servidor...</div>';
+    try {
+        var res = await fetch(APPS_SCRIPT_URL + '?aba=todos_os_dados');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        var data = await res.json();
+
+        // Verifica se há pelo menos algum tipo de dado (agora incluindo atas)
+        if (!data.apontamentos && !data.documentos && !data.ocorrencias && !data.atas) {
+            throw new Error('Dados não encontrados.');
         }
 
-        function filtrarRegistros() {
-            var filhoSelecionado = document.getElementById('filho-select').value;
-            var container = document.getElementById('lista-registros');
-            var registros = filhoSelecionado ? todosRegistros.filter(function(r) { return r.aluno === filhoSelecionado; }) : todosRegistros;
-            registros.sort(function(a, b) { return (b.dataAtual || '').localeCompare(a.dataAtual || ''); });
-            if (registros.length === 0) { container.innerHTML = '<div class="sem-registros">Nenhum registro encontrado.</div>'; return; }
-            container.innerHTML = registros.map(function(r) {
-                var setor = r.setor === 'meivs' ? "MEIV'S" : r.setor === 'pedagogico' ? 'Pedagógico' : r.setor === 'adm' ? 'ADM' : 'Professores';
-                var cor = r.setor === 'meivs' ? '#0284c7' : r.setor === 'pedagogico' ? '#0d9488' : r.setor === 'adm' ? '#4f46e5' : '#b91c1c';
-                return '<div class="registro" style="border-left-color:' + cor + '"><div class="setor" style="color:' + cor + '">' + setor + '</div><div class="texto">' + r.texto + '</div><div class="data">' + r.dataAtual + ' • ' + (r.funcionario || 'SIGA') + '</div></div>';
-            }).join('');
+        var alunosVinculados = dadosResponsavel.alunos;
+        todosRegistros = [];
+
+        // Apontamentos
+        (data.apontamentos || []).forEach(function(r) {
+            if (alunosVinculados.includes(r.aluno)) {
+                todosRegistros.push(Object.assign({}, r, { tipo: 'apontamento' }));
+            }
+        });
+
+        // Documentos
+        (data.documentos || []).forEach(function(d) {
+            if (alunosVinculados.includes(d.aluno)) {
+                todosRegistros.push({
+                    aluno: d.aluno,
+                    setor: 'adm',
+                    texto: '📄 Documento: ' + d.documento + ' - Status: ' + d.status,
+                    funcionario: 'Secretaria',
+                    dataAtual: d.data,
+                    tipo: 'documento'
+                });
+            }
+        });
+
+        // Ocorrências (saídas/entradas)
+        (data.ocorrencias || []).forEach(function(oc) {
+            if (alunosVinculados.includes(oc.aluno)) {
+                var icone = oc.tipo === 'Saída Antecipada' ? '🚪' : '⏰';
+                var horario = oc.data ? oc.data.split(' ')[1] : '';
+                todosRegistros.push({
+                    aluno: oc.aluno,
+                    setor: 'adm',
+                    texto: icone + ' ' + oc.tipo + ': ' + oc.motivo + ' | Autorizado por: ' + oc.autorizador + ' | Horário: ' + horario,
+                    funcionario: oc.autorizador || 'Secretaria',
+                    dataAtual: oc.data,
+                    tipo: 'ocorrencia'
+                });
+            }
+        });
+
+        // Atas disciplinares (aparecem como apontamentos)
+        (data.atas || []).forEach(function(ata) {
+            if (alunosVinculados.includes(ata.aluno)) {
+                todosRegistros.push({
+                    aluno: ata.aluno,
+                    setor: 'adm',
+                    texto: '📁 Ata Disciplinar nº ' + ata.numero + ': ' + ata.aluno + ' — ' + ata.data,
+                    funcionario: 'Coordenação',
+                    dataAtual: ata.data,
+                    tipo: 'ata'
+                });
+            }
+        });
+
+        filtrarRegistros();
+    } catch (e) {
+        container.innerHTML = '<div class="erro">Erro ao carregar: ' + e.message + '</div>';
+    }
+}
+
+ function filtrarRegistros() {
+    var filhoSelecionado = document.getElementById('filho-select').value;
+    var container = document.getElementById('lista-registros');
+    var registros = filhoSelecionado ? todosRegistros.filter(function(r) { return r.aluno === filhoSelecionado; }) : todosRegistros;
+    registros.sort(function(a, b) { return (b.dataAtual || '').localeCompare(a.dataAtual || ''); });
+    if (registros.length === 0) {
+        container.innerHTML = '<div class="sem-registros">Nenhum registro encontrado.</div>';
+        return;
+    }
+    container.innerHTML = registros.map(function(r) {
+        var setor, cor;
+        if (r.tipo === 'ata') {
+            setor = '📁 Ata Disciplinar';
+            cor = '#8b5cf6'; // roxo
+        } else {
+            setor = r.setor === 'meivs' ? "MEIV'S" : r.setor === 'pedagogico' ? 'Pedagógico' : r.setor === 'adm' ? 'ADM' : 'Professores';
+            cor = r.setor === 'meivs' ? '#0284c7' : r.setor === 'pedagogico' ? '#0d9488' : r.setor === 'adm' ? '#4f46e5' : '#b91c1c';
         }
+        return '<div class="registro" style="border-left-color:' + cor + '">' +
+               '<div class="setor" style="color:' + cor + '">' + setor + '</div>' +
+               '<div class="texto">' + r.texto + '</div>' +
+               '<div class="data">' + (r.dataAtual || '') + ' • ' + (r.funcionario || 'SIGA') + '</div>' +
+               '</div>';
+    }).join('');
+}
 
         async function carregarDocumentosAluno() {
             var container = document.getElementById('lista-documentos');
