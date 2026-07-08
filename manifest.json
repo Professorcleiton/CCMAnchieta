@@ -5,6 +5,7 @@
   "display": "standalone",
   "background_color": "#005088",
   "theme_color": "#005088",
+  "description": "Sistema Integrado de Gestão Anchieta",
   "icons": [
     {
       "src": "/img/SIG.png",
@@ -18,5 +19,6 @@
       "type": "image/png",
       "purpose": "maskable"
     }
-  ]
+  ],
+  "gcm_sender_id": "938576708621"
 }
