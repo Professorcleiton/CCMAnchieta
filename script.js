@@ -213,16 +213,21 @@ function inicializarPainel() {
     if (displayUser) displayUser.innerHTML = `<i class="fa-solid fa-user-check"></i> ${usuarioLogado.nome}`;
     aplicarBloqueioSetores(usuarioLogado.setor, usuarioLogado.nivel);
     
+    // Botão Gestão: apenas nível 4
     const btnGestao = document.getElementById('btn-abrir-admin');
     if (btnGestao) btnGestao.style.display = (usuarioLogado.nivel >= 4) ? 'inline-flex' : 'none';
 
+    // Botão Patrimônio: apenas nível 4 (se estiver nas Ações Rápidas, usar 'flex')
     const btnPatrimonio = document.getElementById('btn-abrir-patrimonio');
     if (btnPatrimonio) btnPatrimonio.style.display = (usuarioLogado.nivel >= 4) ? 'inline-flex' : 'none';
 
+    // Botão Secretaria (Ações Rápidas): nível 3+, secretaria ou direção
     const btnSec = document.getElementById('btn-aba-secretaria');
     if (btnSec) {
         if (usuarioLogado.nivel >= 3 || usuarioLogado.setor === 'secretaria' || usuarioLogado.setor === 'direcao') {
-            btnSec.style.display = 'inline-block';
+            btnSec.style.display = 'flex';  // ← Alterado para 'flex'
+        } else {
+            btnSec.style.display = 'none';
         }
     }
 
