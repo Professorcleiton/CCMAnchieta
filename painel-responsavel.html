@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel do Responsável - SIGA Anchieta</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#2e7d32">
     <style>
         body { font-family: Arial, sans-serif; background-color: #f4f6f8; margin: 0; padding: 20px; color: #333; }
         .header { background-color: #2e7d32; color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; text-align: center; }
@@ -28,6 +30,10 @@
         .btn-upload { background: #2563eb; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }
         .btn-upload:hover { background: #1d4ed8; }
         .btn-visualizar { background: #059669; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; text-decoration: none; display: inline-block; }
+        .push-container { background: #e8f5e9; border-left: 5px solid #2e7d32; padding: 15px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .push-container h3 { color: #2e7d32; margin-top: 0; }
+        .btn-push { padding: 12px 20px; background: #2e7d32; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
+        .btn-push:disabled { background: #a5d6a7; cursor: not-allowed; }
     </style>
 </head>
 <body>
@@ -36,7 +42,20 @@
         <p id="nome-responsavel">Carregando...</p>
         <a class="logout" onclick="logout()">Sair</a>
     </div>
-        <!-- Alerta de Atualização Cadastral -->
+
+    <!-- Botão de Notificações Push -->
+    <div id="push-container" class="push-container" style="display: none;">
+        <h3>🔔 Receber Notificações Instantâneas</h3>
+        <p style="font-size: 14px; color: #666; margin-bottom: 15px;">
+            Ative para receber alertas no seu celular quando houver novos apontamentos.
+        </p>
+        <button id="btn-ativar-push" class="btn-push" onclick="ativarPushNotifications()">
+            📳 Ativar Notificações
+        </button>
+        <p id="push-status" style="font-size: 12px; color: #666; margin-top: 10px;"></p>
+    </div>
+
+    <!-- Alerta de Atualização Cadastral -->
     <div id="alerta-atualizacao" style="display: none; background: #fff3cd; border-left: 5px solid #f59e0b; padding: 15px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
         <h3 style="color: #b45309; margin-top: 0;">⚠️ Atualização Cadastral Pendente</h3>
         <p style="font-size: 14px; color: #666; margin-bottom: 15px;">
@@ -47,6 +66,7 @@
             📝 Realizar Atualização Cadastral
         </a>
     </div>
+
     <div class="filtro">
         <label>Selecione o filho:</label>
         <select id="filho-select" onchange="filtrarRegistros()">
@@ -74,6 +94,10 @@
 
     <script>
         var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
+        
+        // Credencial Firebase VAPID
+        var VAPID_PUBLIC_KEY = 'BHWtt0EexrSfoRGPROyG8Ulw5pAJ-m6m0eFWrQkPr9eRcC7UWW2iaW0iN8RX-3Dt2SXShLKmHox2SyYXSQOZN2w';
+        
         var dadosResponsavel = null;
         var todosRegistros = [];
 
@@ -89,108 +113,104 @@
             carregarRegistros();
             carregarDocumentosAluno();
             verificarAtualizacaoCadastral();
+            verificarSuportePush();
         });
 
         function logout() { sessionStorage.removeItem('resp_logado'); window.location.href = 'responsaveis.html'; }
 
- async function carregarRegistros() {
-    var container = document.getElementById('lista-registros');
-    container.innerHTML = '<div class="sem-registros">Carregando dados do servidor...</div>';
-    try {
-        var res = await fetch(APPS_SCRIPT_URL + '?aba=todos_os_dados');
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        var data = await res.json();
+        async function carregarRegistros() {
+            var container = document.getElementById('lista-registros');
+            container.innerHTML = '<div class="sem-registros">Carregando dados do servidor...</div>';
+            try {
+                var res = await fetch(APPS_SCRIPT_URL + '?aba=todos_os_dados');
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                var data = await res.json();
 
-        // Verifica se há pelo menos algum tipo de dado (agora incluindo atas)
-        if (!data.apontamentos && !data.documentos && !data.ocorrencias && !data.atas) {
-            throw new Error('Dados não encontrados.');
+                if (!data.apontamentos && !data.documentos && !data.ocorrencias && !data.atas) {
+                    throw new Error('Dados não encontrados.');
+                }
+
+                var alunosVinculados = dadosResponsavel.alunos;
+                todosRegistros = [];
+
+                (data.apontamentos || []).forEach(function(r) {
+                    if (alunosVinculados.includes(r.aluno)) {
+                        todosRegistros.push(Object.assign({}, r, { tipo: 'apontamento' }));
+                    }
+                });
+
+                (data.documentos || []).forEach(function(d) {
+                    if (alunosVinculados.includes(d.aluno)) {
+                        todosRegistros.push({
+                            aluno: d.aluno,
+                            setor: 'adm',
+                            texto: '📄 Documento: ' + d.documento + ' - Status: ' + d.status,
+                            funcionario: 'Secretaria',
+                            dataAtual: d.data,
+                            tipo: 'documento'
+                        });
+                    }
+                });
+
+                (data.ocorrencias || []).forEach(function(oc) {
+                    if (alunosVinculados.includes(oc.aluno)) {
+                        var icone = oc.tipo === 'Saída Antecipada' ? '🚪' : '⏰';
+                        var horario = oc.data ? oc.data.split(' ')[1] : '';
+                        todosRegistros.push({
+                            aluno: oc.aluno,
+                            setor: 'adm',
+                            texto: icone + ' ' + oc.tipo + ': ' + oc.motivo + ' | Autorizado por: ' + oc.autorizador + ' | Horário: ' + horario,
+                            funcionario: oc.autorizador || 'Secretaria',
+                            dataAtual: oc.data,
+                            tipo: 'ocorrencia'
+                        });
+                    }
+                });
+
+                (data.atas || []).forEach(function(ata) {
+                    if (alunosVinculados.includes(ata.aluno)) {
+                        todosRegistros.push({
+                            aluno: ata.aluno,
+                            setor: 'adm',
+                            texto: '📁 Ata Disciplinar nº ' + ata.numero + ': ' + ata.aluno + ' — ' + ata.data,
+                            funcionario: 'Coordenação',
+                            dataAtual: ata.data,
+                            tipo: 'ata'
+                        });
+                    }
+                });
+
+                filtrarRegistros();
+            } catch (e) {
+                container.innerHTML = '<div class="erro">Erro ao carregar: ' + e.message + '</div>';
+            }
         }
 
-        var alunosVinculados = dadosResponsavel.alunos;
-        todosRegistros = [];
-
-        // Apontamentos
-        (data.apontamentos || []).forEach(function(r) {
-            if (alunosVinculados.includes(r.aluno)) {
-                todosRegistros.push(Object.assign({}, r, { tipo: 'apontamento' }));
+        function filtrarRegistros() {
+            var filhoSelecionado = document.getElementById('filho-select').value;
+            var container = document.getElementById('lista-registros');
+            var registros = filhoSelecionado ? todosRegistros.filter(function(r) { return r.aluno === filhoSelecionado; }) : todosRegistros;
+            registros.sort(function(a, b) { return (b.dataAtual || '').localeCompare(a.dataAtual || ''); });
+            if (registros.length === 0) {
+                container.innerHTML = '<div class="sem-registros">Nenhum registro encontrado.</div>';
+                return;
             }
-        });
-
-        // Documentos
-        (data.documentos || []).forEach(function(d) {
-            if (alunosVinculados.includes(d.aluno)) {
-                todosRegistros.push({
-                    aluno: d.aluno,
-                    setor: 'adm',
-                    texto: '📄 Documento: ' + d.documento + ' - Status: ' + d.status,
-                    funcionario: 'Secretaria',
-                    dataAtual: d.data,
-                    tipo: 'documento'
-                });
-            }
-        });
-
-        // Ocorrências (saídas/entradas)
-        (data.ocorrencias || []).forEach(function(oc) {
-            if (alunosVinculados.includes(oc.aluno)) {
-                var icone = oc.tipo === 'Saída Antecipada' ? '🚪' : '⏰';
-                var horario = oc.data ? oc.data.split(' ')[1] : '';
-                todosRegistros.push({
-                    aluno: oc.aluno,
-                    setor: 'adm',
-                    texto: icone + ' ' + oc.tipo + ': ' + oc.motivo + ' | Autorizado por: ' + oc.autorizador + ' | Horário: ' + horario,
-                    funcionario: oc.autorizador || 'Secretaria',
-                    dataAtual: oc.data,
-                    tipo: 'ocorrencia'
-                });
-            }
-        });
-
-        // Atas disciplinares (aparecem como apontamentos)
-        (data.atas || []).forEach(function(ata) {
-            if (alunosVinculados.includes(ata.aluno)) {
-                todosRegistros.push({
-                    aluno: ata.aluno,
-                    setor: 'adm',
-                    texto: '📁 Ata Disciplinar nº ' + ata.numero + ': ' + ata.aluno + ' — ' + ata.data,
-                    funcionario: 'Coordenação',
-                    dataAtual: ata.data,
-                    tipo: 'ata'
-                });
-            }
-        });
-
-        filtrarRegistros();
-    } catch (e) {
-        container.innerHTML = '<div class="erro">Erro ao carregar: ' + e.message + '</div>';
-    }
-}
-
- function filtrarRegistros() {
-    var filhoSelecionado = document.getElementById('filho-select').value;
-    var container = document.getElementById('lista-registros');
-    var registros = filhoSelecionado ? todosRegistros.filter(function(r) { return r.aluno === filhoSelecionado; }) : todosRegistros;
-    registros.sort(function(a, b) { return (b.dataAtual || '').localeCompare(a.dataAtual || ''); });
-    if (registros.length === 0) {
-        container.innerHTML = '<div class="sem-registros">Nenhum registro encontrado.</div>';
-        return;
-    }
-    container.innerHTML = registros.map(function(r) {
-        var setor, cor;
-        if (r.tipo === 'ata') {
-            setor = '📁 Ata Disciplinar';
-            cor = '#8b5cf6'; // roxo
-        } else {
-            setor = r.setor === 'meivs' ? "MEIV'S" : r.setor === 'pedagogico' ? 'Pedagógico' : r.setor === 'adm' ? 'ADM' : 'Professores';
-            cor = r.setor === 'meivs' ? '#0284c7' : r.setor === 'pedagogico' ? '#0d9488' : r.setor === 'adm' ? '#4f46e5' : '#b91c1c';
+            container.innerHTML = registros.map(function(r) {
+                var setor, cor;
+                if (r.tipo === 'ata') {
+                    setor = '📁 Ata Disciplinar';
+                    cor = '#8b5cf6';
+                } else {
+                    setor = r.setor === 'meivs' ? "MEIV'S" : r.setor === 'pedagogico' ? 'Pedagógico' : r.setor === 'adm' ? 'ADM' : 'Professores';
+                    cor = r.setor === 'meivs' ? '#0284c7' : r.setor === 'pedagogico' ? '#0d9488' : r.setor === 'adm' ? '#4f46e5' : '#b91c1c';
+                }
+                return '<div class="registro" style="border-left-color:' + cor + '">' +
+                       '<div class="setor" style="color:' + cor + '">' + setor + '</div>' +
+                       '<div class="texto">' + r.texto + '</div>' +
+                       '<div class="data">' + (r.dataAtual || '') + ' • ' + (r.funcionario || 'SIGA') + '</div>' +
+                       '</div>';
+            }).join('');
         }
-        return '<div class="registro" style="border-left-color:' + cor + '">' +
-               '<div class="setor" style="color:' + cor + '">' + setor + '</div>' +
-               '<div class="texto">' + r.texto + '</div>' +
-               '<div class="data">' + (r.dataAtual || '') + ' • ' + (r.funcionario || 'SIGA') + '</div>' +
-               '</div>';
-    }).join('');
-}
 
         async function carregarDocumentosAluno() {
             var container = document.getElementById('lista-documentos');
@@ -243,7 +263,7 @@
             input.click();
         }
 
-                async function verificarAtualizacaoCadastral() {
+        async function verificarAtualizacaoCadastral() {
             var email = dadosResponsavel.email;
             var ano = new Date().getFullYear();
             document.getElementById('ano-atual').innerText = ano;
@@ -267,11 +287,80 @@
                 }
             } catch (e) {
                 console.error('Erro ao verificar atualização:', e);
-                // Se der erro, não mostra o alerta
                 document.getElementById('alerta-atualizacao').style.display = 'none';
             }
         }
+
+        // =============================================
+        // PUSH NOTIFICATIONS
+        // =============================================
         
+        function verificarSuportePush() {
+            if (!('serviceWorker' in navigator)) return;
+            if (!('PushManager' in window)) return;
+            
+            navigator.serviceWorker.ready.then(function(registration) {
+                registration.pushManager.getSubscription().then(function(subscription) {
+                    if (!subscription) {
+                        document.getElementById('push-container').style.display = 'block';
+                    }
+                });
+            });
+        }
+        
+        async function ativarPushNotifications() {
+            var btn = document.getElementById('btn-ativar-push');
+            btn.disabled = true;
+            btn.innerText = 'Solicitando...';
+            
+            try {
+                var permission = await Notification.requestPermission();
+                if (permission !== 'granted') {
+                    document.getElementById('push-status').innerText = 'Permissão negada. Ative nas configurações do navegador.';
+                    btn.disabled = false;
+                    btn.innerText = '📳 Ativar Notificações';
+                    return;
+                }
+                
+                var registration = await navigator.serviceWorker.ready;
+                var subscription = await registration.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+                });
+                
+                var token = JSON.stringify(subscription.toJSON());
+                
+                await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({
+                        operacao: 'salvar_token_push',
+                        email: dadosResponsavel.email,
+                        token: token
+                    })
+                });
+                
+                document.getElementById('push-status').innerText = '✅ Notificações ativadas com sucesso!';
+                document.getElementById('push-container').style.display = 'none';
+                
+            } catch (e) {
+                console.error('Erro ao ativar push:', e);
+                document.getElementById('push-status').innerText = 'Erro ao ativar. Tente novamente.';
+                btn.disabled = false;
+                btn.innerText = '📳 Ativar Notificações';
+            }
+        }
+        
+        function urlBase64ToUint8Array(base64String) {
+            var padding = '='.repeat((4 - base64String.length % 4) % 4);
+            var base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+            var rawData = window.atob(base64);
+            var outputArray = new Uint8Array(rawData.length);
+            for (var i = 0; i < rawData.length; ++i) {
+                outputArray[i] = rawData.charCodeAt(i);
+            }
+            return outputArray;
+        }
     </script>
 </body>
 </html>
