@@ -155,9 +155,13 @@ async function carregarDocumentos() {
         }
 
         let htmlRows = '';
+        // Começa da última linha (mais recente) para a primeira
         for (let i = linhasPlanilha.length - 1; i > 0; i--) {
             let linha = linhasPlanilha[i];
             
+            // Colunas: 0=Aluno, 1=Turma, 2=Documento, 3=Status, 4=Data, 5=Link Drive, 6=Data Envio, 7=Obs
+            
+            // Formata a data
             let dataFormatada = 'Data inválida';
             if (linha[4]) {
                 const d = new Date(linha[4]);
@@ -168,19 +172,32 @@ async function carregarDocumentos() {
                 }
             }
             
+            // Verifica se tem link do arquivo
+            const linkArquivo = linha[5] ? linha[5].toString().trim() : '';
+            const status = linha[3] ? linha[3].toString().trim() : 'Pendente';
+            
+            // Cria o botão de download se tiver link E status for Enviado ou Verificado
+            let botaoDownload = '-';
+            if (linkArquivo && (status === 'Enviado' || status === 'Verificado')) {
+                botaoDownload = `<a href="${linkArquivo}" target="_blank" style="color:#4f46e5;text-decoration:underline;font-weight:bold;" title="Abrir documento no Drive">📎 Baixar</a>`;
+            } else if (status === 'Pendente') {
+                botaoDownload = '<span style="color:#d97706;">Pendente</span>';
+            }
+            
             htmlRows += `<tr>
                 <td>${linha[1] || '-'}</td>
                 <td>${linha[0] || '-'}</td>
                 <td>${linha[2] || '-'}</td>
-                <td>${linha[3] || '-'}</td>
+                <td>${status}</td>
                 <td>${dataFormatada}</td>
+                <td>${botaoDownload}</td>
             </tr>`;
         }
         tbody.innerHTML = htmlRows;
         
     } catch (e) { 
         console.error("Erro ao carregar documentos:", e);
-        tbody.innerHTML = '<tr><td colspan="5" style="color: red; text-align: center;">Erro ao carregar documentos.</td></tr>'; 
+        tbody.innerHTML = '<tr><td colspan="6" style="color: red; text-align: center;">Erro ao carregar documentos.</td></tr>'; 
     }
 }
 
