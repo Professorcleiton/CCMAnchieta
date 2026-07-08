@@ -6,6 +6,8 @@ let usuarioLogado = null, todosOsRegistros = [], cacheAlunosPorTurma = {}, turma
 let modalSetorAtivo = '', modalRegistrosFiltrados = [], modalItensExibidos = 50;
 let patTodos = [], patAmbientes = [], patSalaFiltro = 'TODOS', patCameraAtiva = null;
 let totalRegistrosAnterior = 0;
+let ultimoCarregamento = 0;
+const CACHE_TEMPO = 30000;
 
 if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
 
@@ -48,10 +50,6 @@ async function autenticarUsuario() {
         
         if (data.status === "success") {
             let setor = data.setor.toString().trim().toLowerCase();
-            if (setor === 'secretaria' || setor === 'direcao' || data.nivel >= 4) {
-                const btnSec = document.getElementById('btn-aba-secretaria');
-                if (btnSec) btnSec.style.display = 'inline-block';
-            }
             if (setor === 'direcao' || setor === 'professor' || setor === 'professores') setor = 'professores';
             
             usuarioLogado = { email, nome: data.nome, setorExibicao: 'PROFESSORES', setor, nivel: data.nivel };
@@ -72,9 +70,20 @@ function mostrarTab(tabSelecionada) {
     if (tabSelecionada === 'apontamentos') {
         document.getElementById('aba-apontamentos').style.display = 'block';
         document.getElementById('aba-documentos').style.display = 'none';
+        
+        document.getElementById('btn-voltar-apontamentos').style.display = 'none';
+        const btnSec = document.getElementById('btn-aba-secretaria');
+        if (btnSec && (usuarioLogado.nivel >= 3 || usuarioLogado.setor === 'secretaria' || usuarioLogado.setor === 'direcao')) {
+            btnSec.style.display = 'inline-block';
+        }
+        
     } else if (tabSelecionada === 'documentos') {
         document.getElementById('aba-apontamentos').style.display = 'none';
         document.getElementById('aba-documentos').style.display = 'block';
+        
+        document.getElementById('btn-aba-secretaria').style.display = 'none';
+        document.getElementById('btn-voltar-apontamentos').style.display = 'inline-block';
+        
         carregarDocumentos(); 
     }
 }
@@ -137,7 +146,7 @@ function salvarDocumento() {
 
 async function carregarDocumentos() {
     const tbody = document.getElementById('tabela-documentos-body');
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Carregando...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Carregando...</td></tr>';
 
     try {
         const resposta = await fetch(APPS_SCRIPT_URL, { 
@@ -150,18 +159,14 @@ async function carregarDocumentos() {
         tbody.innerHTML = ''; 
 
         if (linhasPlanilha.length <= 1) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Nenhum documento registrado.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Nenhum documento registrado.</td></tr>';
             return;
         }
 
         let htmlRows = '';
-        // Começa da última linha (mais recente) para a primeira
         for (let i = linhasPlanilha.length - 1; i > 0; i--) {
             let linha = linhasPlanilha[i];
             
-            // Colunas: 0=Aluno, 1=Turma, 2=Documento, 3=Status, 4=Data, 5=Link Drive, 6=Data Envio, 7=Obs
-            
-            // Formata a data
             let dataFormatada = 'Data inválida';
             if (linha[4]) {
                 const d = new Date(linha[4]);
@@ -172,14 +177,12 @@ async function carregarDocumentos() {
                 }
             }
             
-            // Verifica se tem link do arquivo
             const linkArquivo = linha[5] ? linha[5].toString().trim() : '';
             const status = linha[3] ? linha[3].toString().trim() : 'Pendente';
             
-            // Cria o botão de download se tiver link E status for Enviado ou Verificado
             let botaoDownload = '-';
             if (linkArquivo && (status === 'Enviado' || status === 'Verificado')) {
-                botaoDownload = `<a href="${linkArquivo}" target="_blank" style="color:#4f46e5;text-decoration:underline;font-weight:bold;" title="Abrir documento no Drive">📎 Baixar</a>`;
+                botaoDownload = `<a href="${linkArquivo}" target="_blank" style="color:#4f46e5;text-decoration:underline;font-weight:bold;">📎 Baixar</a>`;
             } else if (status === 'Pendente') {
                 botaoDownload = '<span style="color:#d97706;">Pendente</span>';
             }
@@ -210,18 +213,15 @@ function inicializarPainel() {
     if (displayUser) displayUser.innerHTML = `<i class="fa-solid fa-user-check"></i> ${usuarioLogado.nome}`;
     aplicarBloqueioSetores(usuarioLogado.setor, usuarioLogado.nivel);
     
-    // Botão Gestão: apenas nível 4
     const btnGestao = document.getElementById('btn-abrir-admin');
     if (btnGestao) btnGestao.style.display = (usuarioLogado.nivel >= 4) ? 'inline-flex' : 'none';
 
-    // Botão Patrimônio: apenas nível 4
     const btnPatrimonio = document.getElementById('btn-abrir-patrimonio');
     if (btnPatrimonio) btnPatrimonio.style.display = (usuarioLogado.nivel >= 4) ? 'inline-flex' : 'none';
 
-    // Aba Secretaria: nível 4, ou setor secretaria/direção
     const btnSec = document.getElementById('btn-aba-secretaria');
     if (btnSec) {
-        if (usuarioLogado.nivel >= 4 || usuarioLogado.setor === 'secretaria' || usuarioLogado.setor === 'direcao') {
+        if (usuarioLogado.nivel >= 3 || usuarioLogado.setor === 'secretaria' || usuarioLogado.setor === 'direcao') {
             btnSec.style.display = 'inline-block';
         }
     }
@@ -244,7 +244,7 @@ setInterval(async () => {
             totalRegistrosAnterior = contagemAtual;
         } catch (e) { console.log("Atualização em background falhou."); }
     }
-}, 180000);
+}, 120000);
 
 // ==== CARREGAMENTO DE ALUNOS ====
 async function carregarAlunosETurmas() {
@@ -334,13 +334,20 @@ function selecionarTurma(turma) {
 
 // ==== BUSCA E CARREGAMENTO DE DADOS (COM ATAS) ====
 async function carregarRegistrosDoServidor() {
+    const agora = Date.now();
+    if (agora - ultimoCarregamento < CACHE_TEMPO && todosOsRegistros.length > 0) {
+        atualizarGraficosMural();
+        if (document.getElementById('select-alunos').value) filtrarRegistrosPorAluno();
+        return;
+    }
+    ultimoCarregamento = agora;
+    
     try {
         const resposta = await fetch(APPS_SCRIPT_URL + "?aba=todos_os_dados"); 
         const data = await resposta.json(); 
         
         todosOsRegistros = [];
 
-        // 1. Apontamentos Pedagógicos
         data.apontamentos.forEach(row => {
             todosOsRegistros.push({
                 idLinha: row.idLinha,
@@ -353,10 +360,9 @@ async function carregarRegistrosDoServidor() {
             });
         });
 
-        // 2. Documentos da Secretaria (COM LINK DE DOWNLOAD)
         if (data.documentos) {
             data.documentos.forEach(doc => {
-                const linkDownload = doc.link ? ` <a href="${doc.link}" target="_blank" style="color:#4f46e5;text-decoration:underline;" title="Abrir documento no Drive">📎 Baixar</a>` : '';
+                const linkDownload = doc.link ? ` <a href="${doc.link}" target="_blank" style="color:#4f46e5;text-decoration:underline;">📎 Baixar</a>` : '';
                 todosOsRegistros.push({
                     aluno: doc.aluno,
                     setor: 'adm',
@@ -368,7 +374,6 @@ async function carregarRegistrosDoServidor() {
             });
         }
 
-        // 3. Ocorrências (Saídas Antecipadas / Entradas Atrasadas)
         if (data.ocorrencias) {
             data.ocorrencias.forEach(oc => {
                 const icone = oc.tipo === "Saída Antecipada" ? "🚪" : "⏰";
@@ -384,7 +389,6 @@ async function carregarRegistrosDoServidor() {
             });
         }
 
-        // 4. Atas Disciplinares (aparecem na ADM como apontamentos)
         if (data.atas) {
             data.atas.forEach(ata => {
                 const linkHtml = (usuarioLogado && usuarioLogado.nivel >= 3) ?
@@ -400,12 +404,21 @@ async function carregarRegistrosDoServidor() {
             });
         }
 
-        // Atualiza a interface
         atualizarGraficosMural();
         if (document.getElementById('select-alunos').value) filtrarRegistrosPorAluno();
 
     } catch (e) { console.error("Erro ao carregar dados unificados:", e); }
 }
+
+// ... (o restante das funções permanece igual ao último script.js completo)
+// Copie a partir daqui todas as outras funções que já existiam: 
+// atualizarGraficosMural, formatarDataEHora, filtrarRegistrosPorAluno,
+// verificarTeclaEnter, salvarPost, excluirRegistroServidor, editarRegistroServidor,
+// buscarAlunoGlobal, alternarTema, gerarFichaIndividualConselho, aplicarBloqueioSetores,
+// abrirModalRelatorio, abrirPainelAdmin, fecharModalAdmin, executarAcaoAluno,
+// salvarUsuarioAdmin, deletarUsuarioAdmin, abrirPreConselho, enviarPreConselho,
+// abrirCaixaTexto, fecharCaixaTexto, abrirModalSaida, fecharModalSaida,
+// fecharModalSaidaEvent, registrarSaidaAntecipada, patInicializar, etc.
 
 // ... (o restante das funções permanece igual ao seu último script.js completo)
 // Copie a partir daqui todas as outras funções que já existiam: atualizarGraficosMural, filtrarRegistrosPorAluno, etc.
