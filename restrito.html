@@ -75,11 +75,7 @@
                         <button class="btn-patrimonio" id="btn-abrir-admin" onclick="abrirPainelAdmin()" style="display: none; background-color: #475569;">
                             <i class="fa-solid fa-gear"></i> Gestão
                         </button>
-                    
-                     <!-- Botão Secretaria (visível conforme permissão) -->
-<button id="btn-aba-secretaria" onclick="mostrarTab('documentos')" style="display: none; padding: 10px 20px; background: #64748b; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
-    <i class="fa-solid fa-folder-open"></i> Secretaria / Docs
-</button>
+                
 
 <!-- Botão Voltar (aparece só quando estiver na aba Secretaria) -->
 <button id="btn-voltar-apontamentos" onclick="mostrarTab('apontamentos')" style="display: none; padding: 10px 20px; background: #005088; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
@@ -198,6 +194,10 @@
                         <div class="dash-panel">
                             <div class="dash-panel-title"><i class="fa-solid fa-bolt"></i> Ações Rápidas</div>
                             <p style="font-size: 13px; color: #64748b; margin-bottom: 15px;">Acesse as ferramentas gerenciais e relatórios pedagógicos.</p>
+
+                            <button id="btn-aba-secretaria" class="btn-salvar" onclick="mostrarTab('documentos')" style="display: none; background-color: #64748b; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(100, 116, 139, 0.2); margin-bottom: 10px;">
+    <i class="fa-solid fa-folder-open" style="font-size: 18px;"></i> Secretaria / Docs
+</button>
                             
                             <button class="btn-salvar" style="background-color: #0d9488; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(13, 148, 136, 0.2); margin-bottom: 10px;" onclick="abrirPreConselho()">
                                 <i class="fa-solid fa-clipboard-check" style="font-size: 18px;"></i> Preencher Pré-Conselho
