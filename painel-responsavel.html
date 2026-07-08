@@ -36,7 +36,17 @@
         <p id="nome-responsavel">Carregando...</p>
         <a class="logout" onclick="logout()">Sair</a>
     </div>
-
+        <!-- Alerta de Atualização Cadastral -->
+    <div id="alerta-atualizacao" style="display: none; background: #fff3cd; border-left: 5px solid #f59e0b; padding: 15px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+        <h3 style="color: #b45309; margin-top: 0;">⚠️ Atualização Cadastral Pendente</h3>
+        <p style="font-size: 14px; color: #666; margin-bottom: 15px;">
+            Você ainda não realizou a atualização cadastral de <strong><span id="ano-atual">2024</span></strong>.
+            É necessário anexar um comprovante de residência (preferencialmente da COPEL).
+        </p>
+        <a href="https://forms.gle/yKgcvaT81Pxnc9Ra9" target="_blank" style="display: inline-block; padding: 12px 20px; background: #f59e0b; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">
+            📝 Realizar Atualização Cadastral
+        </a>
+    </div>
     <div class="filtro">
         <label>Selecione o filho:</label>
         <select id="filho-select" onchange="filtrarRegistros()">
@@ -78,6 +88,7 @@
             });
             carregarRegistros();
             carregarDocumentosAluno();
+            verificarAtualizacaoCadastral();
         });
 
         function logout() { sessionStorage.removeItem('resp_logado'); window.location.href = 'responsaveis.html'; }
@@ -231,6 +242,36 @@
             };
             input.click();
         }
+
+                async function verificarAtualizacaoCadastral() {
+            var email = dadosResponsavel.email;
+            var ano = new Date().getFullYear();
+            document.getElementById('ano-atual').innerText = ano;
+            
+            try {
+                var res = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'text/plain'},
+                    body: JSON.stringify({
+                        operacao: 'verificar_atualizacao',
+                        email: email,
+                        ano: ano
+                    })
+                });
+                var data = await res.json();
+                
+                if (data.atualizado) {
+                    document.getElementById('alerta-atualizacao').style.display = 'none';
+                } else {
+                    document.getElementById('alerta-atualizacao').style.display = 'block';
+                }
+            } catch (e) {
+                console.error('Erro ao verificar atualização:', e);
+                // Se der erro, não mostra o alerta
+                document.getElementById('alerta-atualizacao').style.display = 'none';
+            }
+        }
+        
     </script>
 </body>
 </html>
