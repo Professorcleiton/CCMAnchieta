@@ -336,10 +336,10 @@ async function carregarRegistrosDoServidor() {
             });
         });
 
-        // 2. Documentos da Secretaria
+        // 2. Documentos da Secretaria (COM LINK DE DOWNLOAD)
         if (data.documentos) {
             data.documentos.forEach(doc => {
-                const linkDownload = doc.link ? ` <a href="${doc.link}" target="_blank" style="color:#4f46e5;text-decoration:underline;">📎 Baixar</a>` : '';
+                const linkDownload = doc.link ? ` <a href="${doc.link}" target="_blank" style="color:#4f46e5;text-decoration:underline;" title="Abrir documento no Drive">📎 Baixar</a>` : '';
                 todosOsRegistros.push({
                     aluno: doc.aluno,
                     setor: 'adm',
