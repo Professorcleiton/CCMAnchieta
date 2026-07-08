@@ -479,19 +479,33 @@ function filtrarRegistrosPorAluno() {
         if (feed) feed.innerHTML = '';
     });
 
-    let cm=0, cp=0, ca=0, cf=0;
+    // Contadores separados por tipo
+    let cm = 0, cp = 0, ca = 0, cf = 0;
+    let docs = 0, ocorr = 0, atas = 0;
 
     todosOsRegistros.forEach(r => {
         if (r.aluno && r.aluno.trim() === aluno) {
-            let setor = r.setor;
-            if (setor === 'meivs') cm++;
-            else if (setor === 'pedagogico') cp++;
-            else if (setor === 'adm') ca++;
-            else if (setor === 'professores' || setor === 'direcao') cf++;
+            // Contagem por tipo
+            if (r.tipo === 'documento') {
+                docs++;
+            } else if (r.tipo === 'ocorrencia') {
+                ocorr++;
+            } else if (r.tipo === 'ata') {
+                atas++;
+            } else {
+                // Apontamentos normais por setor
+                let setor = r.setor;
+                if (setor === 'meivs') cm++;
+                else if (setor === 'pedagogico') cp++;
+                else if (setor === 'adm') ca++;
+                else if (setor === 'professores' || setor === 'direcao') cf++;
+            }
             
-            if (setor === 'professores') setor = 'direcao';
+            // Exibição no feed
+            let setorExibicao = r.setor;
+            if (setorExibicao === 'professores') setorExibicao = 'direcao';
             
-            const feed = document.getElementById(`feed-${setor}`);
+            const feed = document.getElementById(`feed-${setorExibicao}`);
             if (feed) {
                 const card = document.createElement('div'); 
                 card.className = 'post-card';
@@ -504,25 +518,37 @@ function filtrarRegistrosPorAluno() {
         }
     });
 
-    const total = cm+cp+ca+cf;
+    // Total geral
+    const total = cm + cp + ca + cf + docs + ocorr + atas;
     document.getElementById('dash-total-count').innerText = total;
     
-    // Contadores numéricos no mini dashboard
-    document.getElementById('bar-meivs').style.width = '0%';  // esconde a barra
-    document.getElementById('bar-meivs').parentElement.querySelector('.mini-label-chart').innerHTML = 
-        'MEIVS <span style="background:#0284c7;color:white;padding:2px 8px;border-radius:10px;font-size:11px;">' + cm + '</span>';
+    // Função auxiliar para atualizar contador
+    const atualizarContador = (idBar, label, cor, valor) => {
+        const bar = document.getElementById(idBar);
+        if (bar) bar.style.width = '0%'; // esconde a barra
+        
+        // Procura o label dentro do mini-chart-bar-container
+        const container = document.querySelector('.mini-chart-bar-container');
+        if (container) {
+            const labels = container.querySelectorAll('.mini-label-chart');
+            labels.forEach(l => {
+                if (l.textContent.trim().startsWith(label)) {
+                    l.innerHTML = label + ' <span style="background:' + cor + ';color:white;padding:2px 8px;border-radius:10px;font-size:11px;">' + valor + '</span>';
+                }
+            });
+        }
+    };
+
+    // Apontamentos por setor
+    atualizarContador('bar-meivs', 'MEIVS', '#0284c7', cm);
+    atualizarContador('bar-pedag', 'PEDAG', '#0d9488', cp);
+    atualizarContador('bar-adm', 'ADM', '#4f46e5', ca);
+    atualizarContador('bar-profs', 'PROFS', '#b91c1c', cf);
     
-    document.getElementById('bar-pedag').style.width = '0%';
-    document.getElementById('bar-pedag').parentElement.querySelector('.mini-label-chart').innerHTML = 
-        'PEDAG <span style="background:#0d9488;color:white;padding:2px 8px;border-radius:10px;font-size:11px;">' + cp + '</span>';
-    
-    document.getElementById('bar-adm').style.width = '0%';
-    document.getElementById('bar-adm').parentElement.querySelector('.mini-label-chart').innerHTML = 
-        'ADM <span style="background:#4f46e5;color:white;padding:2px 8px;border-radius:10px;font-size:11px;">' + ca + '</span>';
-    
-    document.getElementById('bar-profs').style.width = '0%';
-    document.getElementById('bar-profs').parentElement.querySelector('.mini-label-chart').innerHTML = 
-        'PROFS <span style="background:#b91c1c;color:white;padding:2px 8px;border-radius:10px;font-size:11px;">' + cf + '</span>';
+    // Documentos, ocorrências e atas
+    atualizarContador('bar-profs', '📄 DOCS', '#8b5cf6', docs);
+    atualizarContador('bar-profs', '🚪 OCORR', '#f59e0b', ocorr);
+    atualizarContador('bar-profs', '📁 ATAS', '#dc2626', atas);
 }
 
 function verificarTeclaEnter(e, setor) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); salvarPost(setor); } }
