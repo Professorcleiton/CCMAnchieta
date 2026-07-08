@@ -12,7 +12,6 @@
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
-    <!-- LIGAÇÃO COM O NOVO ARQUIVO DE ESTILOS CSS -->
     <link rel="stylesheet" href="style.css">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -77,12 +76,12 @@
                             <i class="fa-solid fa-gear"></i> Gestão
                         </button>
                     
-            <button onclick="mostrarTab('apontamentos')" style="padding: 10px 20px; background: #005088; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
-                <i class="fa-solid fa-chalkboard-user"></i> Apontamentos
-            </button>
-                <button id="btn-aba-secretaria" onclick="mostrarTab('documentos')" style="display: none; padding: 10px 20px; background: #64748b; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
-                <i class="fa-solid fa-folder-open"></i> Secretaria / Docs
-            </button>
+                        <button onclick="mostrarTab('apontamentos')" style="padding: 10px 20px; background: #005088; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                            <i class="fa-solid fa-chalkboard-user"></i> Apontamentos
+                        </button>
+                        <button id="btn-aba-secretaria" onclick="mostrarTab('documentos')" style="display: none; padding: 10px 20px; background: #64748b; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                            <i class="fa-solid fa-folder-open"></i> Secretaria / Docs
+                        </button>
                         <div id="user-display" style="background: #e2e8f0; padding: 6px 12px; border-radius: 20px; font-weight: bold; color: #334155;">
                             <i class="fa-solid fa-user-check"></i> Carregando...
                         </div>
@@ -90,7 +89,6 @@
                 </div>
 
                 <div class="aluno-selector" style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap; width: 100%; background: #f8fafc; padding: 12px 15px; border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-
                     <div style="display: flex; align-items: center; gap: 8px;">
                         <label style="font-weight: bold; color: #0f172a;"><i class="fa-solid fa-user-graduate"></i> Aluno:</label>
                         <select id="select-alunos" onchange="filtrarRegistrosPorAluno()" style="padding: 8px 12px; border: 1px solid #94a3b8; border-radius: 6px; font-size: 14px; width: 220px; outline: none;">
@@ -116,18 +114,17 @@
                 
                 <div class="summary-dashboard-bar" id="student-mini-dash">
                     <div class="metric-mini-card"><i class="fa-solid fa-chart-line"></i> Apontamentos: <span class="count-number" id="dash-total-count">0</span></div>
-<div class="mini-chart-bar-container">
-    <span class="mini-label-chart">MEIVS</span><div class="visual-bar-fill" id="bar-meivs" style="background-color:#0284c7;"></div>
-    <span class="mini-label-chart">PEDAG</span><div class="visual-bar-fill" id="bar-pedag" style="background-color:#0d9488;"></div>
-    <span class="mini-label-chart">ADM</span><div class="visual-bar-fill" id="bar-adm" style="background-color:#4f46e5;"></div>
-    <span class="mini-label-chart">PROFS</span><div class="visual-bar-fill" id="bar-profs" style="background-color:#b91c1c;"></div>
-    <span class="mini-label-chart">📄 DOCS</span><div class="visual-bar-fill" id="bar-profs" style="background-color:#8b5cf6;"></div>
-    <span class="mini-label-chart">🚪 OCORR</span><div class="visual-bar-fill" id="bar-profs" style="background-color:#f59e0b;"></div>
-    <span class="mini-label-chart">📁 ATAS</span><div class="visual-bar-fill" id="bar-profs" style="background-color:#dc2626;"></div>
-</div>
+                    <div class="mini-chart-bar-container">
+                        <span class="mini-label-chart">MEIVS</span><div class="visual-bar-fill" id="bar-meivs" style="background-color:#0284c7;"></div>
+                        <span class="mini-label-chart">PEDAG</span><div class="visual-bar-fill" id="bar-pedag" style="background-color:#0d9488;"></div>
+                        <span class="mini-label-chart">ADM</span><div class="visual-bar-fill" id="bar-adm" style="background-color:#4f46e5;"></div>
+                        <span class="mini-label-chart">PROFS</span><div class="visual-bar-fill" id="bar-profs" style="background-color:#b91c1c;"></div>
+                        <span class="mini-label-chart">📄 DOCS</span><div class="visual-bar-fill" id="bar-profs" style="background-color:#8b5cf6;"></div>
+                        <span class="mini-label-chart">🚪 OCORR</span><div class="visual-bar-fill" id="bar-profs" style="background-color:#f59e0b;"></div>
+                        <span class="mini-label-chart">📁 ATAS</span><div class="visual-bar-fill" id="bar-profs" style="background-color:#dc2626;"></div>
+                    </div>
                 </div>
 
-                <!-- CABEÇALHO OCULTO EXCLUSIVO PARA IMPRESSÃO EM PDF -->
                 <div id="pdf-header" style="display:none; text-align:center; margin-bottom: 30px; color: #000; padding: 20px; font-family: Arial, sans-serif;">
                     <h2 style="margin: 0; font-size: 20px;">Colégio Cívico Militar Anchieta</h2>
                     <p style="margin: 5px 0; font-size: 14px;">Cruzeiro do Oeste - PR</p>
@@ -195,22 +192,22 @@
                                 <div class="dash-bar-track"><div class="dash-bar-fill" id="dash-bar-professores" style="background-color: #b91c1c; width: 0%;"></div></div>
                             </div>
                         </div>
-            <div class="dash-panel">
-    <div class="dash-panel-title"><i class="fa-solid fa-bolt"></i> Ações Rápidas</div>
-    <p style="font-size: 13px; color: #64748b; margin-bottom: 15px;">Acesse as ferramentas gerenciais e relatórios pedagógicos.</p>
-    
-    <button class="btn-salvar" style="background-color: #0d9488; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(13, 148, 136, 0.2); margin-bottom: 10px;" onclick="abrirPreConselho()">
-        <i class="fa-solid fa-clipboard-check" style="font-size: 18px;"></i> Preencher Pré-Conselho
-    </button>
-    
-    <button class="btn-salvar" style="background-color: #f59e0b; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(245, 158, 11, 0.2); margin-bottom: 10px;" onclick="abrirModalSaida()">
-        <i class="fa-solid fa-sign-out" style="font-size: 18px;"></i> Registrar Saída Antecipada
-    </button>
-    
-    <button class="btn-salvar" style="background-color: #005088; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(0, 80, 136, 0.2);" onclick="abrirModuloPatrimonio()">
-        <i class="fa-solid fa-boxes-stacked" style="font-size: 18px;"></i> Módulo Patrimônio
-    </button>
-</div>
+                        <div class="dash-panel">
+                            <div class="dash-panel-title"><i class="fa-solid fa-bolt"></i> Ações Rápidas</div>
+                            <p style="font-size: 13px; color: #64748b; margin-bottom: 15px;">Acesse as ferramentas gerenciais e relatórios pedagógicos.</p>
+                            
+                            <button class="btn-salvar" style="background-color: #0d9488; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(13, 148, 136, 0.2); margin-bottom: 10px;" onclick="abrirPreConselho()">
+                                <i class="fa-solid fa-clipboard-check" style="font-size: 18px;"></i> Preencher Pré-Conselho
+                            </button>
+                            
+                            <button class="btn-salvar" style="background-color: #f59e0b; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(245, 158, 11, 0.2); margin-bottom: 10px;" onclick="abrirModalSaida()">
+                                <i class="fa-solid fa-sign-out" style="font-size: 18px;"></i> Registrar Saída Antecipada
+                            </button>
+                            
+                            <button class="btn-salvar" style="background-color: #005088; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(0, 80, 136, 0.2);" onclick="abrirModuloPatrimonio()">
+                                <i class="fa-solid fa-boxes-stacked" style="font-size: 18px;"></i> Módulo Patrimônio
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -302,7 +299,7 @@
                         <div class="feed-container" id="feed-direcao"></div>
                     </section>
                 </div>
-            </div> <!-- FIM DA CAIXA DE APONTAMENTOS -->
+            </div>
 
             <!-- ========================================== -->
             <!-- CAIXA DA SECRETARIA (Aba de Documentos) -->
@@ -311,7 +308,6 @@
                 
                 <div style="display: flex; gap: 30px; align-items: flex-start; flex-wrap: wrap;">
                     
-                    <!-- CENTRO/ESQUERDA: NOVO PEDIDO -->
                     <div style="flex: 1; min-width: 300px; max-width: 350px; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
                         <h3 style="color: #005088; margin-top: 0; margin-bottom: 20px; font-size: 18px;">
                             <i class="fa-solid fa-file-circle-plus"></i> Novo Pedido
@@ -346,7 +342,6 @@
                         </div>
                     </div>
 
-                    <!-- DIREITA: HISTÓRICO DE DOCUMENTOS -->
                     <div style="flex: 2; min-width: 400px; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
                         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px; margin-bottom: 15px;">
                             <h3 style="color: #005088; margin: 0; font-size: 18px;">
@@ -366,19 +361,20 @@
                                         <th style="padding: 12px 10px; border-bottom: 2px solid #e2e8f0;">Documento</th>
                                         <th style="padding: 12px 10px; border-bottom: 2px solid #e2e8f0;">Status</th>
                                         <th style="padding: 12px 10px; border-bottom: 2px solid #e2e8f0;">Data</th>
+                                        <th style="padding: 12px 10px; border-bottom: 2px solid #e2e8f0;">Arquivo</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tabela-documentos-body">
-                                    <tr><td colspan="5" style="padding: 20px; text-align: center; color: #94a3b8;">Nenhum documento carregado.</td></tr>
+                                    <tr><td colspan="6" style="padding: 20px; text-align: center; color: #94a3b8;">Nenhum documento carregado.</td></tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
-            </div> <!-- FIM DA CAIXA DA SECRETARIA -->
+            </div>
             
         </main>
-    </div> <!-- FIM DA INTERFACE PRINCIPAL -->
+    </div>
 
     <!-- MODAIS E PAINÉIS DE PATRIMÔNIO / ADMIN -->
     <div id="patrimonio-interface">
@@ -474,70 +470,69 @@
         </main>
     </div>
 
-<!-- MODAL DE OCORRÊNCIAS (SAÍDA ANTECIPADA / ENTRADA ATRASADA) -->
-<div id="modal-saida" class="modal-overlay" style="display:none; z-index:10000;" onclick="fecharModalSaidaEvent(event)">
-    <div class="modal-content" style="max-width: 500px;">
-        <div class="modal-header" style="background-color: #f59e0b;">
-            <h3><i class="fa-solid fa-clock"></i> Registrar Ocorrência</h3>
-            <button onclick="fecharModalSaida()" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;">&times;</button>
-        </div>
-        <div class="modal-body" style="padding: 25px;">
-            <div style="margin-bottom: 15px;">
-                <label style="font-weight: bold; display: block; margin-bottom: 5px;">
-                    <i class="fa-solid fa-tag"></i> Tipo de Ocorrência:
-                </label>
-                <select id="ocorrencia-tipo" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
-                    <option value="Saída Antecipada">🚪 Saída Antecipada</option>
-                    <option value="Entrada Atrasada">⏰ Entrada Atrasada</option>
-                </select>
+    <!-- MODAL DE OCORRÊNCIAS (SAÍDA ANTECIPADA / ENTRADA ATRASADA) -->
+    <div id="modal-saida" class="modal-overlay" style="display:none; z-index:10000;" onclick="fecharModalSaidaEvent(event)">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header" style="background-color: #f59e0b;">
+                <h3><i class="fa-solid fa-clock"></i> Registrar Ocorrência</h3>
+                <button onclick="fecharModalSaida()" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;">&times;</button>
             </div>
-            <div style="margin-bottom: 15px;">
-                <label style="font-weight: bold; display: block; margin-bottom: 5px;">
-                    <i class="fa-solid fa-user-graduate"></i> Aluno:
-                </label>
-                <select id="saida-aluno" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
-                    <option value="">Selecione o aluno...</option>
-                </select>
-            </div>
-            <div style="margin-bottom: 15px;">
-                <label style="font-weight: bold; display: block; margin-bottom: 5px;">
-                    <i class="fa-solid fa-clock"></i> Horário:
-                </label>
-                <input type="time" id="ocorrencia-horario" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;" 
-                       value=<"">
-            </div>
-            <div style="margin-bottom: 15px;">
-                <label style="font-weight: bold; display: block; margin-bottom: 5px;">
-                    <i class="fa-solid fa-file-lines"></i> Motivo:
-                </label>
-                <input type="text" id="saida-motivo" placeholder="Descreva o motivo..." 
-                       style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
-            </div>
-            <div style="margin-bottom: 20px;">
-                <label style="font-weight: bold; display: block; margin-bottom: 5px;">
-                    <i class="fa-solid fa-user-check"></i> Autorizador:
-                </label>
-                <select id="saida-autorizador" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
-                    <option value="Responsável Legal">Responsável Legal</option>
-                    <option value="Autorização Pedagógica">Autorização Pedagógica</option>
-                    <option value="Direção">Direção</option>
-                    <option value="Secretaria">Secretaria</option>
-                </select>
-            </div>
-            
-            <div style="display: flex; gap: 10px;">
-                <button onclick="fecharModalSaida()" 
-                        style="flex: 1; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; background: #e2e8f0; color: #334155;">
-                    <i class="fa-solid fa-xmark"></i> Cancelar
-                </button>
-                <button onclick="registrarSaidaAntecipada()" 
-                        style="flex: 1; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; background: #f59e0b; color: white;">
-                    <i class="fa-solid fa-check"></i> Confirmar
-                </button>
+            <div class="modal-body" style="padding: 25px;">
+                <div style="margin-bottom: 15px;">
+                    <label style="font-weight: bold; display: block; margin-bottom: 5px;">
+                        <i class="fa-solid fa-tag"></i> Tipo de Ocorrência:
+                    </label>
+                    <select id="ocorrencia-tipo" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+                        <option value="Saída Antecipada">🚪 Saída Antecipada</option>
+                        <option value="Entrada Atrasada">⏰ Entrada Atrasada</option>
+                    </select>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label style="font-weight: bold; display: block; margin-bottom: 5px;">
+                        <i class="fa-solid fa-user-graduate"></i> Aluno:
+                    </label>
+                    <select id="saida-aluno" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+                        <option value="">Selecione o aluno...</option>
+                    </select>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label style="font-weight: bold; display: block; margin-bottom: 5px;">
+                        <i class="fa-solid fa-clock"></i> Horário:
+                    </label>
+                    <input type="time" id="ocorrencia-horario" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label style="font-weight: bold; display: block; margin-bottom: 5px;">
+                        <i class="fa-solid fa-file-lines"></i> Motivo:
+                    </label>
+                    <input type="text" id="saida-motivo" placeholder="Descreva o motivo..." 
+                           style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <label style="font-weight: bold; display: block; margin-bottom: 5px;">
+                        <i class="fa-solid fa-user-check"></i> Autorizador:
+                    </label>
+                    <select id="saida-autorizador" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+                        <option value="Responsável Legal">Responsável Legal</option>
+                        <option value="Autorização Pedagógica">Autorização Pedagógica</option>
+                        <option value="Direção">Direção</option>
+                        <option value="Secretaria">Secretaria</option>
+                    </select>
+                </div>
+                
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="fecharModalSaida()" 
+                            style="flex: 1; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; background: #e2e8f0; color: #334155;">
+                        <i class="fa-solid fa-xmark"></i> Cancelar
+                    </button>
+                    <button onclick="registrarSaidaAntecipada()" 
+                            style="flex: 1; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; background: #f59e0b; color: white;">
+                        <i class="fa-solid fa-check"></i> Confirmar
+                    </button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
     <!-- MODAL PRÉ-CONSELHO -->
     <div class="modal-overlay" id="modal-pre-conselho" style="z-index: 10000; display: none;">
@@ -576,35 +571,14 @@
 
                 <h4 style="color: #005088; margin-bottom: 10px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">1. Desempenho (Quantidade de Alunos)</h4>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
-                    <div class="input-group">
-                        <label>Abaixo do básico (< 5,9):</label>
-                        <input type="number" id="pc-q1" min="0" value="0">
-                    </div>
-                    <div class="input-group">
-                        <label>Básico (6,0 a 6,9):</label>
-                        <input type="number" id="pc-q2" min="0" value="0">
-                    </div>
-                    <div class="input-group">
-                        <label>Adequado (7,0 a 8,9):</label>
-                        <input type="number" id="pc-q3" min="0" value="0">
-                    </div>
-                    <div class="input-group">
-                        <label>Avançado (>= 9,0):</label>
-                        <input type="number" id="pc-q4" min="0" value="0">
-                    </div>
+                    <div class="input-group"><label>Abaixo do básico (< 5,9):</label><input type="number" id="pc-q1" min="0" value="0"></div>
+                    <div class="input-group"><label>Básico (6,0 a 6,9):</label><input type="number" id="pc-q2" min="0" value="0"></div>
+                    <div class="input-group"><label>Adequado (7,0 a 8,9):</label><input type="number" id="pc-q3" min="0" value="0"></div>
+                    <div class="input-group"><label>Avançado (>= 9,0):</label><input type="number" id="pc-q4" min="0" value="0"></div>
                 </div>
 
                 <h4 style="color: #005088; margin-bottom: 10px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">2. Perfil da Turma</h4>
-                <div class="input-group">
-                    <label>Comprometimento e responsabilidade na realização de tarefas (Sala e Digital):</label>
-                    <select id="pc-q5" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1;">
-                        <option value="1 - Ruim">1 - Ruim</option>
-                        <option value="2 - Regular">2 - Regular</option>
-                        <option value="3 - Bom" selected>3 - Bom</option>
-                        <option value="4 - Muito Bom">4 - Muito Bom</option>
-                        <option value="5 - Ótimo">5 - Ótimo</option>
-                    </select>
-                </div>
+                <div class="input-group"><label>Comprometimento e responsabilidade na realização de tarefas:</label><select id="pc-q5" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1;"><option value="1 - Ruim">1 - Ruim</option><option value="2 - Regular">2 - Regular</option><option value="3 - Bom" selected>3 - Bom</option><option value="4 - Muito Bom">4 - Muito Bom</option><option value="5 - Ótimo">5 - Ótimo</option></select></div>
                 <div class="input-group"><label>Destaque os aspectos POSITIVOS da turma:</label><textarea id="pc-q6" rows="2" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px;"></textarea></div>
                 <div class="input-group"><label>Destaque os aspectos NEGATIVOS da turma:</label><textarea id="pc-q7" rows="2" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px;"></textarea></div>
                 <div class="input-group"><label>Sugestões e procedimentos para melhorar a turma:</label><textarea id="pc-q8" rows="2" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px;"></textarea></div>
@@ -617,7 +591,7 @@
                 <div class="input-group"><label>Principais encaminhamentos metodológicos utilizados:</label><textarea id="pc-q10" rows="2" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px;"></textarea></div>
                 <div class="input-group"><label>Recursos didáticos utilizados para dificuldades de aprendizagem:</label><textarea id="pc-q11" rows="2" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px;"></textarea></div>
                 <div class="input-group">
-                    <label>Quais instrumentos de avaliação foram utilizados? (Selecione todos que se aplicam)</label>
+                    <label>Quais instrumentos de avaliação foram utilizados?</label>
                     <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 8px;" id="pc-q12-checkboxes">
                         <label><input type="checkbox" value="Objetiva"> Objetiva</label>
                         <label><input type="checkbox" value="Descritiva"> Descritiva</label>
@@ -626,21 +600,12 @@
                         <label><input type="checkbox" value="Trabalho/Pesquisa"> Trabalho/Pesquisa</label>
                     </div>
                 </div>
-                <div class="input-group" style="margin-top: 10px;">
-                    <label>Outros instrumentos (Justifique):</label>
-                    <input type="text" id="pc-q12-outros" placeholder="Descreva caso tenha usado outros...">
-                </div>
+                <div class="input-group" style="margin-top: 10px;"><label>Outros instrumentos (Justifique):</label><input type="text" id="pc-q12-outros" placeholder="Descreva caso tenha usado outros..."></div>
 
                 <h4 style="color: #005088; margin-bottom: 10px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; margin-top: 25px;">5. Recuperação de Estudos</h4>
-                <div class="input-group">
-                    <label>Foram realizadas avaliações específicas para alunos com dificuldades?</label>
-                    <select id="pc-q14" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1;"><option value="Sim">Sim</option><option value="Não">Não</option></select>
-                </div>
-                <div class="input-group"><label>Justifique sua resposta à questão anterior e explique como foi feita a recuperação:</label><textarea id="pc-q16" rows="2" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px;"></textarea></div>
-                <div class="input-group">
-                    <label>Foram utilizados instrumentos diferenciados para recuperação?</label>
-                    <select id="pc-q17" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1;"><option value="Sim">Sim</option><option value="Não">Não</option></select>
-                </div>
+                <div class="input-group"><label>Foram realizadas avaliações específicas?</label><select id="pc-q14" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1;"><option value="Sim">Sim</option><option value="Não">Não</option></select></div>
+                <div class="input-group"><label>Justifique e explique como foi feita a recuperação:</label><textarea id="pc-q16" rows="2" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px;"></textarea></div>
+                <div class="input-group"><label>Foram utilizados instrumentos diferenciados?</label><select id="pc-q17" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1;"><option value="Sim">Sim</option><option value="Não">Não</option></select></div>
             </div>
             
             <div style="padding: 15px 25px; background: white; border-top: 1px solid #e2e8f0; text-align: right;">
@@ -684,51 +649,18 @@
             </div>
             <div class="modal-body" style="padding: 25px; overflow-y: visible;">
                 <h4 style="margin-bottom: 15px; color: #005088;"><i class="fa-solid fa-user-pen"></i> Remanejar / Excluir Aluno</h4>
-                <div class="input-group">
-                    <label>Buscar Aluno:</label>
-                    <input type="text" id="admin-nome-aluno" list="lista-todos-alunos" placeholder="Digite o nome exato do aluno...">
-                </div>
-                <div class="input-group">
-                    <label>Ação / Nova Turma:</label>
-                    <select id="admin-nova-turma" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 16px;">
-                    </select>
-                </div>
+                <div class="input-group"><label>Buscar Aluno:</label><input type="text" id="admin-nome-aluno" list="lista-todos-alunos" placeholder="Digite o nome exato do aluno..."></div>
+                <div class="input-group"><label>Ação / Nova Turma:</label><select id="admin-nova-turma" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 16px;"></select></div>
                 <button class="btn-salvar" style="background-color: #475569; margin-top: 10px;" onclick="executarAcaoAluno()" id="btn-exec-admin">Confirmar Ação</button>
                 <hr style="margin: 25px 0; border: 0; border-top: 1px solid #cbd5e1;">
-
                 <h4 style="margin-bottom: 15px; color: #b45309;"><i class="fa-solid fa-users-gear"></i> Gestão de Equipe (Usuários)</h4>
-                <div class="input-group">
-                    <label>E-mail (Login / Chave de Busca):</label>
-                    <input type="email" id="admin-user-email" placeholder="email@escola.pr.gov.br">
-                </div>
-                <div class="input-group">
-                    <label>Nome Completo:</label>
-                    <input type="text" id="admin-user-nome" placeholder="Nome do Servidor">
-                </div>
+                <div class="input-group"><label>E-mail (Login / Chave de Busca):</label><input type="email" id="admin-user-email" placeholder="email@escola.pr.gov.br"></div>
+                <div class="input-group"><label>Nome Completo:</label><input type="text" id="admin-user-nome" placeholder="Nome do Servidor"></div>
                 <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                    <div style="flex: 1;">
-                        <label style="font-weight: bold; font-size: 14px; margin-bottom: 5px; display: block;">Setor:</label>
-                        <select id="admin-user-setor" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;">
-                            <option value="professores">Professores</option>
-                            <option value="meivs">MEIV'S</option>
-                            <option value="pedagogico">Pedagógico</option>
-                            <option value="adm">ADM</option>
-                            <option value="direcao">Direção</option>
-                        </select>
-                    </div>
-                    <div style="flex: 1;">
-                        <label style="font-weight: bold; font-size: 14px; margin-bottom: 5px; display: block;">Nível de Acesso:</label>
-                        <select id="admin-user-nivel" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;">
-                            <option value="1">1 - Padrão</option>
-                            <option value="2">2 - Intermediário</option>
-                            <option value="3">3 - Administrador</option>
-                        </select>
-                    </div>
+                    <div style="flex: 1;"><label style="font-weight: bold; font-size: 14px; margin-bottom: 5px; display: block;">Setor:</label><select id="admin-user-setor" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;"><option value="professores">Professores</option><option value="meivs">MEIV'S</option><option value="pedagogico">Pedagógico</option><option value="adm">ADM</option><option value="direcao">Direção</option></select></div>
+                    <div style="flex: 1;"><label style="font-weight: bold; font-size: 14px; margin-bottom: 5px; display: block;">Nível de Acesso:</label><select id="admin-user-nivel" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;"><option value="1">1 - Padrão</option><option value="2">2 - Intermediário</option><option value="3">3 - Administrador</option></select></div>
                 </div>
-                <div class="input-group">
-                    <label>Senha (Somente números - ex: RG):</label>
-                    <input type="text" id="admin-user-senha" placeholder="Deixe em branco para manter a atual (na edição)">
-                </div>
+                <div class="input-group"><label>Senha (Somente números - ex: RG):</label><input type="text" id="admin-user-senha" placeholder="Deixe em branco para manter a atual (na edição)"></div>
                 <div style="display: flex; gap: 10px; margin-top: 10px;">
                     <button class="btn-salvar" style="background-color: #059669; flex: 2;" onclick="salvarUsuarioAdmin()" id="btn-save-user">Salvar Usuário</button>
                     <button class="btn-salvar" style="background-color: #dc2626; flex: 1;" onclick="deletarUsuarioAdmin()" id="btn-del-user">Excluir</button>
@@ -737,7 +669,6 @@
         </div>
     </div>
 
-    <!-- LIGAÇÃO COM O NOVO ARQUIVO DE JAVASCRIPT -->
     <script src="script.js"></script>
 </body>
 </html>
