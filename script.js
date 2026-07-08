@@ -323,6 +323,7 @@ async function carregarRegistrosDoServidor() {
         
         todosOsRegistros = [];
 
+        // 1. Apontamentos Pedagógicos
         data.apontamentos.forEach(row => {
             todosOsRegistros.push({
                 idLinha: row.idLinha,
@@ -334,6 +335,60 @@ async function carregarRegistrosDoServidor() {
                 tipo: 'apontamento'
             });
         });
+
+        // 2. Documentos da Secretaria
+        if (data.documentos) {
+            data.documentos.forEach(doc => {
+                const linkDownload = doc.link ? ` <a href="${doc.link}" target="_blank" style="color:#4f46e5;text-decoration:underline;">📎 Baixar</a>` : '';
+                todosOsRegistros.push({
+                    aluno: doc.aluno,
+                    setor: 'adm',
+                    texto: `📄 Documento: ${doc.documento} - Status: ${doc.status}${linkDownload}`,
+                    funcionario: 'Secretaria',
+                    dataAtual: doc.data,
+                    tipo: 'documento'
+                });
+            });
+        }
+
+        // 3. Ocorrências (Saídas Antecipadas / Entradas Atrasadas)
+        if (data.ocorrencias) {
+            data.ocorrencias.forEach(oc => {
+                const icone = oc.tipo === "Saída Antecipada" ? "🚪" : "⏰";
+                const horario = oc.data ? oc.data.split(' ')[1] : '';
+                todosOsRegistros.push({
+                    aluno: oc.aluno,
+                    setor: 'adm',
+                    texto: `${icone} ${oc.tipo}: ${oc.motivo} | Autorizado por: ${oc.autorizador} | Horário: ${horario}`,
+                    funcionario: oc.autorizador || 'Secretaria',
+                    dataAtual: oc.data,
+                    tipo: 'ocorrencia'
+                });
+            });
+        }
+
+        // 4. Atas Disciplinares (aparecem na ADM como apontamentos)
+        if (data.atas) {
+            data.atas.forEach(ata => {
+                const linkHtml = (usuarioLogado && usuarioLogado.nivel >= 3) ?
+                    ` <a href="${ata.link}" target="_blank" style="color:#4f46e5;text-decoration:underline;">📎 Ver Ata</a>` : '';
+                todosOsRegistros.push({
+                    aluno: ata.aluno,
+                    setor: 'adm',
+                    texto: `📁 Ata Disciplinar nº ${ata.numero}: ${ata.aluno} — ${ata.data}${linkHtml}`,
+                    funcionario: 'Coordenação',
+                    dataAtual: ata.data,
+                    tipo: 'ata'
+                });
+            });
+        }
+
+        // Atualiza a interface
+        atualizarGraficosMural();
+        if (document.getElementById('select-alunos').value) filtrarRegistrosPorAluno();
+
+    } catch (e) { console.error("Erro ao carregar dados unificados:", e); }
+}
 
         // 2. Documentos da Secretaria
         data.documentos.forEach(doc => {
