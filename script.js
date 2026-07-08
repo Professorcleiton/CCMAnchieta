@@ -244,7 +244,7 @@ setInterval(async () => {
             totalRegistrosAnterior = contagemAtual;
         } catch (e) { console.log("Atualização em background falhou."); }
     }
-}, 60000);
+}, 180000);
 
 // ==== CARREGAMENTO DE ALUNOS ====
 async function carregarAlunosETurmas() {
