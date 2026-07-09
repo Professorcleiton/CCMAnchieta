@@ -62,7 +62,6 @@
             transition: background 0.2s;
         }
         .room-item:hover, .room-item.active { background-color: #eab308; color: #1e293b; }
-        /* NOVO: destaque sutil para Pendentes */
         .room-item.pendentes-filter { background-color: rgba(234, 179, 8, 0.15); }
         .room-item.pendentes-filter:hover, .room-item.pendentes-filter.active { background-color: #eab308; color: #1e293b; }
 
@@ -88,6 +87,22 @@
             padding: 6px 12px; border-radius: 6px; border: 1px solid #cbd5e1; width: 320px;
         }
         .search-box input { background: none; border: none; outline: none; width: 100%; font-size: 14px; margin-left: 8px; }
+
+        /* NOVO: Botão Pendentes na barra superior */
+        .btn-pendentes-top {
+            padding: 8px 16px; 
+            background: #f59e0b; 
+            color: white; 
+            border: none; 
+            border-radius: 6px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            font-size: 13px; 
+            white-space: nowrap;
+            transition: background 0.2s;
+        }
+        .btn-pendentes-top.active { background: #dc2626; }
+        .btn-pendentes-top:hover { opacity: 0.9; }
 
         .workspace { flex: 1; padding: 25px; overflow-y: auto; display: grid; grid-template-columns: 1fr 440px; gap: 25px; }
 
@@ -209,7 +224,13 @@
 
     <main class="main-content">
         <header class="top-bar">
-            <h1 id="panel-title-text">Almoxarifado Geral do Colégio</h1>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <h1 id="panel-title-text">Almoxarifado Geral do Colégio</h1>
+                <!-- NOVO: Botão Pendentes na barra superior -->
+                <button id="btn-filtro-pendentes" class="btn-pendentes-top" onclick="alternarFiltroPendentes()">
+                    <i class="fa-solid fa-clock"></i> Pendentes
+                </button>
+            </div>
             <div class="search-box">
                 <i class="fa-solid fa-barcode" style="color: #64748b;"></i>
                 <input type="text" id="search-input" placeholder="Pesquisar código, item ou pai..." oninput="filtrarTabelaPorBusca()">
@@ -444,12 +465,10 @@
                 listaDeAmbientes = await r.json();
                 
                 const sidebarList = document.getElementById('room-container-list');
-                // Mantém as duas opções fixas: Ver Tudo e Pendentes
                 sidebarList.innerHTML = `
                     <li class="room-item ${salaFiltroAtual==='TODOS'?'active':''}" onclick="filtrarPorSala('TODOS', this)">
                         <span><i class="fa-solid fa-boxes-stacked"></i> Ver Tudo</span>
                     </li>
-                    <!-- NOVO: Filtro Pendentes -->
                     <li class="room-item pendentes-filter ${salaFiltroAtual==='PENDENTES'?'active':''}" onclick="filtrarPorSala('PENDENTES', this)">
                         <span><i class="fa-solid fa-clock"></i> Pendentes</span>
                     </li>
@@ -514,7 +533,6 @@
             if (salaFiltroAtual === 'TODOS') {
                 itensFiltrados = todosOsPatrimonios;
             } else if (salaFiltroAtual === 'PENDENTES') {
-                // NOVO: filtra apenas itens com localização "Almoxarifado" (ainda não conferidos)
                 itensFiltrados = todosOsPatrimonios.filter(item => item.localizacao === 'Almoxarifado');
             } else {
                 itensFiltrados = todosOsPatrimonios.filter(item => item.localizacao === salaFiltroAtual);
@@ -602,15 +620,31 @@
             document.querySelectorAll('.room-item').forEach(el => el.classList.remove('active'));
             elementoBotao.classList.add('active');
             
+            const btn = document.getElementById('btn-filtro-pendentes');
+            
             if (sala === 'TODOS') {
                 document.getElementById('panel-title-text').innerText = 'Almoxarifado Geral do Colégio';
+                if (btn) { btn.className = 'btn-pendentes-top'; btn.innerHTML = '<i class="fa-solid fa-clock"></i> Pendentes'; }
             } else if (sala === 'PENDENTES') {
                 document.getElementById('panel-title-text').innerText = 'Itens Pendentes de Conferência';
+                if (btn) { btn.className = 'btn-pendentes-top active'; btn.innerHTML = '<i class="fa-solid fa-boxes-stacked"></i> Ver Tudo'; }
             } else {
                 document.getElementById('panel-title-text').innerText = `Ambiente: ${sala}`;
+                if (btn) { btn.className = 'btn-pendentes-top'; btn.innerHTML = '<i class="fa-solid fa-clock"></i> Pendentes'; }
             }
             
             renderizarTabelaInventario();
+        }
+
+        // NOVO: Função do botão Pendentes na barra superior
+        function alternarFiltroPendentes() {
+            if (salaFiltroAtual === 'PENDENTES') {
+                const itemVerTudo = document.querySelector('.room-item:first-child');
+                filtrarPorSala('TODOS', itemVerTudo);
+            } else {
+                const itemPendentes = document.querySelector('.room-item.pendentes-filter');
+                filtrarPorSala('PENDENTES', itemPendentes);
+            }
         }
 
         function buscarItemPorCodigoDigitado() {
