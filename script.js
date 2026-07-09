@@ -258,12 +258,17 @@ async function carregarAlunosETurmas() {
     try {
         let turmasPermitidas = null;
         
-        // Apenas para professores de nível 1-3, verifica restrição de turmas
+        // Apenas para professores de nível 1-3
         if (usuarioLogado && usuarioLogado.setor === 'professores' && usuarioLogado.nivel < 4) {
+            console.log('🔍 Verificando turmas para professor:', usuarioLogado.email);
             const respTurmas = await fetch(APPS_SCRIPT_URL + '?aba=turmas_professor&email=' + encodeURIComponent(usuarioLogado.email));
             turmasPermitidas = await respTurmas.json();
-            // Se o array estiver vazio, o professor vê todas as turmas
-            if (turmasPermitidas.length === 0) turmasPermitidas = null;
+            console.log('📋 Turmas permitidas:', turmasPermitidas);
+            
+            if (turmasPermitidas.length === 0) {
+                console.log('⚠️ Nenhuma turma encontrada. Mostrando todas.');
+                turmasPermitidas = null;
+            }
         }
         
         const response = await fetch(COLS_ALUNOS_URL);
@@ -276,7 +281,6 @@ async function carregarAlunosETurmas() {
                 const nome = r.c[1].v.toString().trim();
                 const turma = (r.c[2] && r.c[2].v) ? r.c[2].v.toString().trim() : 'Sem Turma';
                 
-                // Se tem restrição, filtra apenas as turmas permitidas
                 if (turmasPermitidas && !turmasPermitidas.includes(turma)) return;
                 
                 if (!cacheAlunosPorTurma[turma]) cacheAlunosPorTurma[turma] = [];
@@ -284,10 +288,10 @@ async function carregarAlunosETurmas() {
             }
         });
         
+        console.log('📊 Turmas carregadas:', Object.keys(cacheAlunosPorTurma));
         renderizarSidebarTurmas();
     } catch (e) { console.error(e); }
 }
-
 function encontrarTurmaDoAluno(nome) {
     const nomeLimpo = nome.trim().toLowerCase();
     for (let t in cacheAlunosPorTurma) {
