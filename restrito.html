@@ -584,37 +584,57 @@
     
     <!-- NOVAS FUNÇÕES PARA CARREGAR O PATRIMÔNIO SOB DEMANDA -->
     <script>
-        let patrimonioCarregado = false;
+ let patrimonioCarregado = false;
 
-        async function abrirModuloPatrimonio() {
-            const container = document.getElementById('patrimonio-interface');
+async function abrirModuloPatrimonio() {
+    const container = document.getElementById('patrimonio-interface');
+    
+    if (!patrimonioCarregado) {
+        try {
+            const response = await fetch('patrimonio.html');
+            if (!response.ok) throw new Error('Erro ao carregar patrimônio');
+            let html = await response.text();
             
-            if (!patrimonioCarregado) {
+            // Separa scripts do restante do HTML
+            const scripts = [];
+            html = html.replace(/<script\b[^>]*>([\s\S]*?)<\/script>/gi, (match, code) => {
+                scripts.push(code);
+                return '';
+            });
+            
+            // Insere o HTML (sem scripts)
+            container.innerHTML = html;
+            
+            // Executa cada script extraído
+            for (const script of scripts) {
                 try {
-                    const response = await fetch('patrimonio.html');
-                    if (!response.ok) throw new Error('Erro ao carregar patrimônio');
-                    const html = await response.text();
-                    container.innerHTML = html;
-                    patrimonioCarregado = true;
+                    eval(script);
                 } catch (e) {
-                    console.error(e);
-                    alert('Erro ao carregar o módulo de patrimônio.');
-                    return;
+                    console.error('Erro ao executar script do patrimônio:', e);
                 }
             }
             
-            document.getElementById('app-interface').style.display = 'none';
-            container.style.display = 'flex';
-            
-            if (typeof patInicializar === 'function') {
-                patInicializar();
-            }
+            patrimonioCarregado = true;
+        } catch (e) {
+            console.error(e);
+            alert('Erro ao carregar o módulo de patrimônio.');
+            return;
         }
+    }
+    
+    document.getElementById('app-interface').style.display = 'none';
+    container.style.display = 'flex';
+    
+    // Agora chama a inicialização do patrimônio
+    if (typeof patInicializar === 'function') {
+        patInicializar();
+    }
+}
 
-        function fecharModuloPatrimonio() {
-            document.getElementById('patrimonio-interface').style.display = 'none';
-            document.getElementById('app-interface').style.display = 'flex';
-        }
+function fecharModuloPatrimonio() {
+    document.getElementById('patrimonio-interface').style.display = 'none';
+    document.getElementById('app-interface').style.display = 'flex';
+}
     </script>
 </body>
 </html>
