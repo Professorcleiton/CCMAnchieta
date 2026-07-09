@@ -1,651 +1,628 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Controle de Patrimônio | CCM Anchieta</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="https://unpkg.com/html5-qrcode"></script>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background-color: #f1f5f9;
-            color: #1e293b;
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
-        }
+<style>
+    /* CSS específico do módulo de patrimônio (para não conflitar com o style.css principal) */
+    #patrimonio-interface .sidebar {
+        width: 290px;
+        background-color: #005088;
+        color: white;
+        display: flex;
+        flex-direction: column;
+        border-right: 4px solid #eab308;
+        justify-content: space-between;
+    }
+    #patrimonio-interface .sidebar-top {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-height: 0;
+    }
+    #patrimonio-interface .sidebar-header {
+        padding: 20px 15px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    #patrimonio-interface .sidebar-logo {
+        width: 70px; height: 70px; min-width: 70px;
+        object-fit: cover; border-radius: 50%;
+        background-color: white; border: 2px solid white;
+    }
+    #patrimonio-interface .sidebar-title h2 { font-size: 16px; font-weight: bold; }
+    #patrimonio-interface .sidebar-title p { font-size: 11px; color: #cbd5e1; }
+    #patrimonio-interface .room-list-title {
+        font-size: 11px; text-transform: uppercase; color: #eab308;
+        padding: 15px 15px 5px 15px; font-weight: bold; letter-spacing: 0.5px;
+    }
+    #patrimonio-interface .room-list { list-style: none; padding: 0 10px; overflow-y: auto; flex: 1; }
+    #patrimonio-interface .room-item {
+        padding: 10px 15px; margin-bottom: 5px;
+        background-color: rgba(255, 255, 255, 0.05); border-radius: 6px;
+        cursor: pointer; font-size: 13px; font-weight: 600;
+        display: flex; align-items: center; justify-content: flex-start; gap: 10px;
+        transition: background 0.2s;
+    }
+    #patrimonio-interface .room-item:hover, #patrimonio-interface .room-item.active { background-color: #eab308; color: #1e293b; }
+    #patrimonio-interface .room-item.pendentes-filter { background-color: rgba(234, 179, 8, 0.15); }
+    #patrimonio-interface .room-item.pendentes-filter:hover, #patrimonio-interface .room-item.pendentes-filter.active { background-color: #eab308; color: #1e293b; }
+    #patrimonio-interface .sidebar-footer { padding: 15px; border-top: 1px solid rgba(255, 255, 255, 0.1); }
+    #patrimonio-interface .btn-back {
+        width: 100%; padding: 10px; background-color: rgba(255,255,255,0.1);
+        color: white; border: none; border-radius: 6px; font-weight: bold;
+        font-size: 13px; cursor: pointer; display: flex; align-items: center;
+        justify-content: center; gap: 8px; text-decoration: none;
+    }
+    #patrimonio-interface .btn-back:hover { background-color: rgba(255,255,255,0.2); }
 
-        .sidebar {
-            width: 290px;
-            background-color: #005088;
-            color: white;
-            display: flex;
-            flex-direction: column;
-            border-right: 4px solid #eab308;
-            justify-content: space-between;
-        }
-        .sidebar-top {
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-            min-height: 0;
-        }
-        .sidebar-header {
-            padding: 20px 15px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .sidebar-logo {
-            width: 70px; height: 70px; min-width: 70px;
-            object-fit: cover; border-radius: 50%;
-            background-color: white; border: 2px solid white;
-        }
-        .sidebar-title h2 { font-size: 16px; font-weight: bold; }
-        .sidebar-title p { font-size: 11px; color: #cbd5e1; }
-        .room-list-title {
-            font-size: 11px; text-transform: uppercase; color: #eab308;
-            padding: 15px 15px 5px 15px; font-weight: bold; letter-spacing: 0.5px;
-        }
-        .room-list { list-style: none; padding: 0 10px; overflow-y: auto; flex: 1; }
-        .room-item {
-            padding: 10px 15px; margin-bottom: 5px;
-            background-color: rgba(255, 255, 255, 0.05); border-radius: 6px;
-            cursor: pointer; font-size: 13px; font-weight: 600;
-            display: flex; align-items: center; justify-content: flex-start; gap: 10px;
-            transition: background 0.2s;
-        }
-        .room-item:hover, .room-item.active { background-color: #eab308; color: #1e293b; }
-        .room-item.pendentes-filter { background-color: rgba(234, 179, 8, 0.15); }
-        .room-item.pendentes-filter:hover, .room-item.pendentes-filter.active { background-color: #eab308; color: #1e293b; }
-        .sidebar-footer { padding: 15px; border-top: 1px solid rgba(255, 255, 255, 0.1); }
-        .btn-back {
-            width: 100%; padding: 10px; background-color: rgba(255,255,255,0.1);
-            color: white; border: none; border-radius: 6px; font-weight: bold;
-            font-size: 13px; cursor: pointer; display: flex; align-items: center;
-            justify-content: center; gap: 8px; text-decoration: none;
-        }
-        .btn-back:hover { background-color: rgba(255,255,255,0.2); }
+    #patrimonio-interface .main-content { flex: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+    #patrimonio-interface .top-bar {
+        background-color: white; padding: 0 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        display: flex; justify-content: space-between; align-items: center; height: 65px; min-height: 65px;
+    }
+    #patrimonio-interface .top-bar h1 { font-size: 18px; color: #005088; font-weight: bold; }
+    #patrimonio-interface .search-box {
+        display: flex; align-items: center; background: #f1f5f9;
+        padding: 6px 12px; border-radius: 6px; border: 1px solid #cbd5e1; width: 320px;
+    }
+    #patrimonio-interface .search-box input { background: none; border: none; outline: none; width: 100%; font-size: 14px; margin-left: 8px; }
 
-        .main-content { flex: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-        .top-bar {
-            background-color: white; padding: 0 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            display: flex; justify-content: space-between; align-items: center; height: 65px; min-height: 65px;
-        }
-        .top-bar h1 { font-size: 18px; color: #005088; font-weight: bold; }
-        .search-box {
-            display: flex; align-items: center; background: #f1f5f9;
-            padding: 6px 12px; border-radius: 6px; border: 1px solid #cbd5e1; width: 320px;
-        }
-        .search-box input { background: none; border: none; outline: none; width: 100%; font-size: 14px; margin-left: 8px; }
+    #patrimonio-interface .btn-pendentes-top {
+        padding: 8px 16px;
+        background: #f59e0b;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 13px;
+        white-space: nowrap;
+        transition: background 0.2s;
+    }
+    #patrimonio-interface .btn-pendentes-top:hover { background: #d97706; }
+    #patrimonio-interface .btn-pendentes-top.ativo { background: #dc2626; }
 
-        .btn-pendentes-top {
-            padding: 8px 16px;
-            background: #f59e0b;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 13px;
-            white-space: nowrap;
-            transition: background 0.2s;
-        }
-        .btn-pendentes-top:hover { background: #d97706; }
-        .btn-pendentes-top.ativo { background: #dc2626; }
+    #patrimonio-interface .workspace { flex: 1; padding: 25px; overflow-y: auto; display: grid; grid-template-columns: 1fr 440px; gap: 25px; }
+    #patrimonio-interface .inventory-panel {
+        background: white; border-radius: 8px; border: 1px solid #e2e8f0;
+        padding: 20px; display: flex; flex-direction: column; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+    #patrimonio-interface .inventory-panel h3 { font-size: 15px; color: #005088; margin-bottom: 15px; text-transform: uppercase; }
+    #patrimonio-interface .table-wrapper { flex: 1; overflow-y: auto; }
+    #patrimonio-interface table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; table-layout: auto; }
+    #patrimonio-interface th { position: sticky; top: 0; background: #f8fafc; padding: 12px 14px; font-weight: bold; color: #64748b; border-bottom: 2px solid #e2e8f0; }
+    #patrimonio-interface td { padding: 14px 14px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; word-break: break-word; }
+    #patrimonio-interface tr:hover { background-color: #f8fafc; }
 
-        .workspace { flex: 1; padding: 25px; overflow-y: auto; display: grid; grid-template-columns: 1fr 440px; gap: 25px; }
+    #patrimonio-interface .item-tag-vinculo {
+        display: inline-block; font-size: 11px; background: #e0f2fe; color: #0369a1;
+        padding: 2px 6px; border-radius: 4px; margin-top: 4px; font-weight: 500;
+    }
+    #patrimonio-interface .parent-alert-box {
+        font-size: 11px; background: #fff7ed; color: #c2410c; padding: 2px 6px; border-radius: 4px; margin-top: 4px; display: inline-block;
+    }
+    #patrimonio-interface .status-badge { padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; white-space: nowrap; }
+    #patrimonio-interface .status-bom { background: #dcfce7; color: #166534; }
+    #patrimonio-interface .status-manutencao { background: #fef9c3; color: #854d0e; }
+    #patrimonio-interface .status-danificado { background: #fee2e2; color: #991b1b; }
+    #patrimonio-interface .status-inservivel { background: #e2e8f0; color: #475569; }
+    #patrimonio-interface .status-naolocalizado { background: #1e293b; color: #f8fafc; }
 
-        .inventory-panel {
-            background: white; border-radius: 8px; border: 1px solid #e2e8f0;
-            padding: 20px; display: flex; flex-direction: column; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-        }
-        .inventory-panel h3 { font-size: 15px; color: #005088; margin-bottom: 15px; text-transform: uppercase; }
-        .table-wrapper { flex: 1; overflow-y: auto; }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; table-layout: auto; }
-        th { position: sticky; top: 0; background: #f8fafc; padding: 12px 14px; font-weight: bold; color: #64748b; border-bottom: 2px solid #e2e8f0; }
-        td { padding: 14px 14px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; word-break: break-word; }
-        tr:hover { background-color: #f8fafc; }
+    #patrimonio-interface .control-side-panel { display: flex; flex-direction: column; gap: 15px; width: 100%; }
+    #patrimonio-interface .tab-menu-right {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        background: #e2e8f0;
+        padding: 4px;
+        border-radius: 8px;
+        width: 100%;
+    }
+    #patrimonio-interface .tab-nav-btn {
+        background: none; border: none; padding: 10px 1px; font-weight: bold;
+        font-size: 11px; cursor: pointer; border-radius: 6px; color: #475569; transition: all 0.2s;
+        white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 4px;
+    }
+    #patrimonio-interface .tab-nav-btn.active { background: white; color: #005088; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    #patrimonio-interface .action-card-panel {
+        background: white; border-radius: 8px; border: 1px solid #e2e8f0;
+        padding: 22px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); display: flex; flex-direction: column; gap: 14px;
+    }
+    #patrimonio-interface .action-card-panel h3 { font-size: 14px; color: #005088; border-bottom: 2px solid #f1f5f9; padding-bottom: 6px; text-transform: uppercase; }
+    #patrimonio-interface .form-group { display: flex; flex-direction: column; gap: 5px; }
+    #patrimonio-interface .form-group label { font-size: 11px; font-weight: 600; color: #475569; }
+    #patrimonio-interface .input-camera-group { display: flex; gap: 8px; width: 100%; }
+    #patrimonio-interface .input-camera-group input { flex: 1; padding: 9px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none; }
+    #patrimonio-interface .input-camera-group input:focus { border-color: #005088; }
+    #patrimonio-interface .btn-camera-scanner {
+        background: #eab308; color: #1e293b; border: none; padding: 0 14px;
+        border-radius: 6px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: background 0.2s;
+    }
+    #patrimonio-interface .btn-camera-scanner:hover { background: #ca8a04; }
+    #patrimonio-interface .form-group input, #patrimonio-interface .form-group select { padding: 9px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none; }
+    #patrimonio-interface .form-group input:focus, #patrimonio-interface .form-group select:focus { border-color: #005088; }
+    #patrimonio-interface .btn-action-trigger {
+        background: #005088; color: white; border: none; padding: 11px;
+        border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; margin-top: 5px; transition: background 0.2s;
+    }
+    #patrimonio-interface .btn-action-trigger:hover { background: #0c4a6e; }
+    #patrimonio-interface .btn-action-trigger:disabled { background: #cbd5e1; cursor: not-allowed; }
+    #patrimonio-interface .camera-scanner-container {
+        width: 100%; background: #000; border-radius: 8px; overflow: hidden;
+        display: none; border: 2px solid #eab308; margin-bottom: 5px; position: relative;
+    }
+    #patrimonio-interface .selected-item-preview { background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px; border-radius: 6px; font-size: 12px; }
+    #patrimonio-interface .mini-list-ambientes { list-style: none; max-height: 180px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 6px; }
+    #patrimonio-interface .mini-list-ambientes li {
+        padding: 8px 12px; font-size: 13px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9;
+    }
+    #patrimonio-interface .btn-del-mini { background: none; border: none; color: #ef4444; cursor: pointer; font-size: 12px; }
+    #patrimonio-interface .btn-del-mini:hover { color: #b91c1c; }
 
-        .item-tag-vinculo {
-            display: inline-block; font-size: 11px; background: #e0f2fe; color: #0369a1;
-            padding: 2px 6px; border-radius: 4px; margin-top: 4px; font-weight: 500;
-        }
-        .parent-alert-box {
-            font-size: 11px; background: #fff7ed; color: #c2410c; padding: 2px 6px; border-radius: 4px; margin-top: 4px; display: inline-block;
-        }
-        .status-badge { padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; white-space: nowrap; }
-        .status-bom { background: #dcfce7; color: #166534; }
-        .status-manutencao { background: #fef9c3; color: #854d0e; }
-        .status-danificado { background: #fee2e2; color: #991b1b; }
-        .status-inservivel { background: #e2e8f0; color: #475569; }
-        .status-naolocalizado { background: #1e293b; color: #f8fafc; }
+    @media (max-width: 1024px) {
+        #patrimonio-interface .workspace { grid-template-columns: 1fr; }
+        #patrimonio-interface .main-content, #patrimonio-interface .table-wrapper { height: auto; overflow: visible; }
+    }
+</style>
 
-        .control-side-panel { display: flex; flex-direction: column; gap: 15px; width: 100%; }
-        .tab-menu-right {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            background: #e2e8f0;
-            padding: 4px;
-            border-radius: 8px;
-            width: 100%;
-        }
-        .tab-nav-btn {
-            background: none; border: none; padding: 10px 1px; font-weight: bold;
-            font-size: 11px; cursor: pointer; border-radius: 6px; color: #475569; transition: all 0.2s;
-            white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 4px;
-        }
-        .tab-nav-btn.active { background: white; color: #005088; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .action-card-panel {
-            background: white; border-radius: 8px; border: 1px solid #e2e8f0;
-            padding: 22px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); display: flex; flex-direction: column; gap: 14px;
-        }
-        .action-card-panel h3 { font-size: 14px; color: #005088; border-bottom: 2px solid #f1f5f9; padding-bottom: 6px; text-transform: uppercase; }
-        .form-group { display: flex; flex-direction: column; gap: 5px; }
-        .form-group label { font-size: 11px; font-weight: 600; color: #475569; }
-        .input-camera-group { display: flex; gap: 8px; width: 100%; }
-        .input-camera-group input { flex: 1; padding: 9px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none; }
-        .input-camera-group input:focus { border-color: #005088; }
-        .btn-camera-scanner {
-            background: #eab308; color: #1e293b; border: none; padding: 0 14px;
-            border-radius: 6px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: background 0.2s;
-        }
-        .btn-camera-scanner:hover { background: #ca8a04; }
-        .form-group input, .form-group select { padding: 9px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none; }
-        .form-group input:focus, .form-group select:focus { border-color: #005088; }
-        .btn-action-trigger {
-            background: #005088; color: white; border: none; padding: 11px;
-            border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; margin-top: 5px; transition: background 0.2s;
-        }
-        .btn-action-trigger:hover { background: #0c4a6e; }
-        .btn-action-trigger:disabled { background: #cbd5e1; cursor: not-allowed; }
-        .camera-scanner-container {
-            width: 100%; background: #000; border-radius: 8px; overflow: hidden;
-            display: none; border: 2px solid #eab308; margin-bottom: 5px; position: relative;
-        }
-        .selected-item-preview { background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px; border-radius: 6px; font-size: 12px; }
-        .mini-list-ambientes { list-style: none; max-height: 180px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 6px; }
-        .mini-list-ambientes li {
-            padding: 8px 12px; font-size: 13px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9;
-        }
-        .btn-del-mini { background: none; border: none; color: #ef4444; cursor: pointer; font-size: 12px; }
-        .btn-del-mini:hover { color: #b91c1c; }
-
-        @media (max-width: 1024px) {
-            .workspace { grid-template-columns: 1fr; }
-            body { overflow: auto; height: auto; }
-            .main-content, .table-wrapper { height: auto; overflow: visible; }
-        }
-    </style>
-</head>
-<body>
-
-    <aside class="sidebar">
-        <div class="sidebar-top">
-            <div class="sidebar-header">
-                <img src="img/SIGA.png" alt="Logo" class="sidebar-logo">
-                <div class="sidebar-title">
-                    <h2>PATRIMÔNIO</h2>
-                    <p>CCM Anchieta</p>
-                </div>
-            </div>
-            <div class="room-list-title">Filtrar por Ambiente</div>
-            <ul class="room-list" id="room-container-list">
-                <li class="room-item active"><i class="fa-solid fa-spinner fa-spin"></i> Carregando salas...</li>
-            </ul>
-        </div>
-        <div class="sidebar-footer">
-            <a href="restrito.html" class="btn-back"><i class="fa-solid fa-arrow-left"></i> Voltar ao SIGA</a>
-        </div>
-    </aside>
-
-    <main class="main-content">
-        <header class="top-bar">
-            <div style="display: flex; align-items: center; gap: 15px;">
-                <h1 id="panel-title-text">Almoxarifado Geral do Colégio</h1>
-                <button id="btn-filtro-pendentes" class="btn-pendentes-top" onclick="alternarFiltroPendentes()">
-                    <i class="fa-solid fa-clock"></i> Pendentes
-                </button>
-            </div>
-            <div class="search-box">
-                <i class="fa-solid fa-barcode" style="color: #64748b;"></i>
-                <input type="text" id="search-input" placeholder="Pesquisar código, item ou pai..." oninput="filtrarTabelaPorBusca()">
-            </div>
-        </header>
-
-        <div class="workspace">
-            <div class="inventory-panel">
-                <h3 id="table-subtitle">Todos os Itens Registrados</h3>
-                <div class="table-wrapper">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th style="width: 150px;">Código Real</th>
-                                <th style="width: 180px;">Item / Descrição</th>
-                                <th>Categoria</th>
-                                <th>Localização Atual</th>
-                                <th>Responsável</th>
-                                <th>Última Movimentação</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="inventory-table-body">
-                            <tr><td colspan="7" style="text-align: center; padding: 30px; color: #64748b;"><i class="fa-solid fa-spinner fa-spin"></i> Carregando inventário...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div class="control-side-panel">
-                <div class="tab-menu-right">
-                    <button class="tab-nav-btn active" id="btn-tab-move" onclick="alternarAbaFormulario('MOVER')"><i class="fa-solid fa-right-left"></i> Movimentar</button>
-                    <button class="tab-nav-btn" id="btn-tab-reg" onclick="alternarAbaFormulario('CADASTRAR')"><i class="fa-solid fa-plus"></i> Novo / Editar</button>
-                    <button class="tab-nav-btn" id="btn-tab-amb" onclick="alternarAbaFormulario('AMBIENTES')"><i class="fa-solid fa-school"></i> Ambientes</button>
-                </div>
-
-                <div class="action-card-panel" id="panel-movimentar-bens">
-                    <h3>Transferência de Local</h3>
-                    <div class="form-group">
-                        <label for="trans-code">Código do Patrimônio:</label>
-                        <div id="scanner-reader-move" class="camera-scanner-container"></div>
-                        <div class="input-camera-group">
-                            <input type="text" id="trans-code" placeholder="Ex: 100003506623" oninput="buscarItemPorCodigoDigitado()">
-                            <button type="button" class="btn-camera-scanner" onclick="alternarCameraLeitora('trans-code', 'scanner-reader-move')"><i class="fa-solid fa-camera"></i></button>
-                        </div>
-                    </div>
-                    <div class="selected-item-preview" id="item-preview-box" style="display: none;">
-                        <p><strong>Item:</strong> <span id="prev-nome">-</span></p>
-                        <p><strong>Local Atual:</strong> <span id="prev-local">-</span></p>
-                        <p><strong>Responsável Atual:</strong> <span id="prev-resp">-</span></p>
-                        <div id="prev-box-vinculos"></div>
-                    </div>
-                    <div class="form-group"><label for="trans-room">Destino / Nova Localização:</label><select id="trans-room" class="select-salas-dinamicas"><option value="">Carregando...</option></select></div>
-                    <div class="form-group"><label for="trans-resp">Funcionário Responsável pela Retirada:</label><input type="text" id="trans-resp" placeholder="Nome de quem está levando"></div>
-                    <div class="form-group"><label for="trans-status">Alterar Estado do Item (Opcional):</label><select id="trans-status"><option value="">Manter estado atual</option><option value="Bom">Bom Estado</option><option value="Em Manutenção">Em Manutenção</option><option value="Danificado">Danificado / Quebrado</option><option value="Inservível">Inservível (Baixa)</option><option value="Não Localizado">Não Localizado</option></select></div>
-                    <button class="btn-action-trigger" id="btn-executar-transferencia" onclick="executarTransferenciaPatrimonio()" disabled>Confirmar Movimentação</button>
-                </div>
-
-                <div class="action-card-panel" id="panel-cadastrar-bens" style="display: none;">
-                    <h3 id="cad-form-title">Cadastrar Novo Patrimônio</h3>
-                    <div class="form-group">
-                        <label for="reg-code">Código / Etiqueta do Item:</label>
-                        <div id="scanner-reader-reg" class="camera-scanner-container"></div>
-                        <div class="input-camera-group">
-                            <input type="text" id="reg-code" placeholder="Ex: 100003506623" oninput="checarSeCodigoExisteParaEditar()">
-                            <button type="button" class="btn-camera-scanner" onclick="alternarCameraLeitora('reg-code', 'scanner-reader-reg')"><i class="fa-solid fa-camera"></i></button>
-                        </div>
-                    </div>
-                    <div class="form-group"><label for="reg-item">Nome / Descrição do Equipamento:</label><input type="text" id="reg-item" placeholder="Ex: Notebook Lenovo ThinkPad"></div>
-                    <div class="form-group"><label for="reg-cat">Categoria:</label><select id="reg-cat"><option value="Informática">Informática (PC, Note, Monitor)</option><option value="Robótica">Robótica (Kits, Sensores)</option><option value="Mobiliário">Mobiliário (Cadeira, Mesa)</option><option value="Eletrodomésticos">Eletrodomésticos / Som</option><option value="Outros">Outros</option></select></div>
-                    <div class="form-group"><label for="reg-room">Localização Inicial:</label><select id="reg-room" class="select-salas-dinamicas"><option value="Almoxarifado">Almoxarifado</option></select></div>
-                    <div class="form-group" style="background: #f8fafc; padding: 8px; border-radius: 6px; border: 1px dashed #cbd5e1;">
-                        <label for="reg-parent" style="color: #0269a1;"><i class="fa-solid fa-link"></i> Pertence ao Código Pai? (Opcional):</label>
-                        <input type="text" id="reg-parent" placeholder="Ex: Digite o código pai real" oninput="validarCodigoPaiDigitado()">
-                        <span id="reg-parent-preview" style="font-size: 11px; color:#64748b; display:block; margin-top:3px;"></span>
-                    </div>
-                    <div class="form-group"><label for="reg-resp">Funcionário Responsável:</label><input type="text" id="reg-resp" placeholder="Seu nome"></div>
-                    <div class="form-group"><label for="reg-status">Estado de Conservação:</label><select id="reg-status"><option value="Bom">Bom Estado</option><option value="Em Manutenção">Em Manutenção</option><option value="Danificado">Danificado / Quebrado</option><option value="Inservível">Inservível (Baixa)</option><option value="Não Localizado">Não Localizado</option></select></div>
-                    <button class="btn-action-trigger" id="btn-executar-cadastro" onclick="executarCadastroNovoPatrimonio()">Salvar na Planilha</button>
-                    <button class="btn-action-trigger" id="btn-excluir-cadastro" onclick="executarExcluirPatrimonio()" style="background: #ef4444; display: none; margin-top: 10px;"><i class="fa-solid fa-trash-can"></i> Excluir Patrimônio</button>
-                </div>
-
-                <div class="action-card-panel" id="panel-ambientes-gerenciar" style="display: none;">
-                    <h3>Gerenciar Ambientes da Escola</h3>
-                    <div class="form-group"><label for="new-amb-name">Nome do Novo Ambiente:</label><input type="text" id="new-amb-name" placeholder="Ex: Sala Maker / Bloco B"></div>
-                    <button class="btn-action-trigger" onclick="adicionarNovoAmbienteServidor()" style="margin-top:0;">+ Adicionar Sala</button>
-                    <label style="font-size: 11px; font-weight: 600; color: #475569; margin-top: 10px;">Salas Cadastradas Atualmente:</label>
-                    <ul class="mini-list-ambientes" id="mini-list-amb-box"><li>Carregando salas...</li></ul>
-                </div>
+<aside class="sidebar">
+    <div class="sidebar-top">
+        <div class="sidebar-header">
+            <img src="img/SIGA.png" alt="Logo" class="sidebar-logo">
+            <div class="sidebar-title">
+                <h2>PATRIMÔNIO</h2>
+                <p>CCM Anchieta</p>
             </div>
         </div>
-    </main>
+        <div class="room-list-title">Filtrar por Ambiente</div>
+        <ul class="room-list" id="pat-room-list-updated">
+            <li class="room-item active"><i class="fa-solid fa-spinner fa-spin"></i> Carregando salas...</li>
+        </ul>
+    </div>
+    <div class="sidebar-footer">
+        <a href="#" class="btn-back" onclick="fecharModuloPatrimonio()"><i class="fa-solid fa-arrow-left"></i> Voltar ao SIGA</a>
+    </div>
+</aside>
 
-    <script>
-        const APPS_SCRIPT_PAT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
-        let todosOsPatrimonios = [];
-        let listaDeAmbientes = [];
-        let salaFiltroAtual = 'TODOS';
-        let usuarioLogado = {};
-        let html5QrcodeScanner = null;
+<main class="main-content">
+    <header class="top-bar">
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <h1 id="pat-panel-title">Almoxarifado Geral do Colégio</h1>
+            <button id="btn-filtro-pendentes" class="btn-pendentes-top" onclick="alternarFiltroPendentes()">
+                <i class="fa-solid fa-clock"></i> Pendentes
+            </button>
+        </div>
+        <div class="search-box">
+            <i class="fa-solid fa-barcode" style="color: #64748b;"></i>
+            <input type="text" id="pat-search-input" placeholder="Pesquisar código, item ou pai..." oninput="filtrarTabelaPorBusca()">
+        </div>
+    </header>
 
-        window.addEventListener('DOMContentLoaded', () => {
-            const sessao = localStorage.getItem('sgi_ccma_session');
-            if (!sessao) { window.location.href = "index.html"; return; }
-            usuarioLogado = JSON.parse(sessao);
-            if (!usuarioLogado.nivel || parseInt(usuarioLogado.nivel) < 3) {
-                alert("Restrito ao Nível 3."); window.location.href = "restrito.html"; return;
-            }
-            if(document.getElementById('reg-resp')) document.getElementById('reg-resp').value = usuarioLogado.nome || "";
-            inicializarSistemaDinamico();
-        });
+    <div class="workspace">
+        <div class="inventory-panel">
+            <h3 id="pat-table-subtitle">Todos os Itens Registrados</h3>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 150px;">Código Real</th>
+                            <th style="width: 180px;">Item / Descrição</th>
+                            <th>Categoria</th>
+                            <th>Localização Atual</th>
+                            <th>Responsável</th>
+                            <th>Última Movimentação</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pat-table-body">
+                        <tr><td colspan="7" style="text-align: center; padding: 30px; color: #64748b;"><i class="fa-solid fa-spinner fa-spin"></i> Carregando inventário...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-        async function inicializarSistemaDinamico() {
-            await carregarAmbientesDoServidor();
-            await carregarPatrimonioDoServidor();
-        }
+        <div class="control-side-panel">
+            <div class="tab-menu-right">
+                <button class="tab-nav-btn active" id="btn-tab-move" onclick="patAlternarAba('MOVER')"><i class="fa-solid fa-right-left"></i> Movimentar</button>
+                <button class="tab-nav-btn" id="btn-tab-reg" onclick="patAlternarAba('CADASTRAR')"><i class="fa-solid fa-plus"></i> Novo / Editar</button>
+                <button class="tab-nav-btn" id="btn-tab-amb" onclick="patAlternarAba('AMBIENTES')"><i class="fa-solid fa-school"></i> Ambientes</button>
+            </div>
 
-        function alternarAbaFormulario(abaAlvo) {
-            fecharCameraScannerAtiva();
-            const tabs = { 'MOVER': 'btn-tab-move', 'CADASTRAR': 'btn-tab-reg', 'AMBIENTES': 'btn-tab-amb' };
-            const panels = { 'MOVER': 'panel-movimentar-bens', 'CADASTRAR': 'panel-cadastrar-bens', 'AMBIENTES': 'panel-ambientes-gerenciar' };
-            Object.keys(tabs).forEach(k => {
-                document.getElementById(tabs[k]).classList.toggle('active', k === abaAlvo);
-                document.getElementById(panels[k]).style.display = k === abaAlvo ? "flex" : "none";
-            });
-            if(abaAlvo === 'CADASTRAR') resetarFormularioCadastro();
-        }
+            <div class="action-card-panel" id="pat-panel-mover">
+                <h3>Transferência de Local</h3>
+                <div class="form-group">
+                    <label for="pat-trans-code">Código do Patrimônio:</label>
+                    <div id="pat-scanner-move" class="camera-scanner-container"></div>
+                    <div class="input-camera-group">
+                        <input type="text" id="pat-trans-code" placeholder="Ex: 100003506623" oninput="patBuscarItem()">
+                        <button type="button" class="btn-camera-scanner" onclick="patLigarCamera('pat-trans-code', 'pat-scanner-move')"><i class="fa-solid fa-camera"></i></button>
+                    </div>
+                </div>
+                <div class="selected-item-preview" id="pat-item-preview" style="display: none;">
+                    <p><strong>Item:</strong> <span id="pat-prev-nome">-</span></p>
+                    <p><strong>Local Atual:</strong> <span id="pat-prev-local">-</span></p>
+                    <p><strong>Responsável Atual:</strong> <span id="pat-prev-resp">-</span></p>
+                    <div id="pat-prev-box-vinculos"></div>
+                </div>
+                <div class="form-group"><label for="pat-trans-room">Destino / Nova Localização:</label><select id="pat-trans-room" class="select-salas-dinamicas"><option value="">Carregando...</option></select></div>
+                <div class="form-group"><label for="pat-trans-resp">Funcionário Responsável pela Retirada:</label><input type="text" id="pat-trans-resp" placeholder="Nome de quem está levando"></div>
+                <div class="form-group"><label for="pat-trans-status">Alterar Estado do Item (Opcional):</label><select id="pat-trans-status"><option value="">Manter estado atual</option><option value="Bom">Bom Estado</option><option value="Em Manutenção">Em Manutenção</option><option value="Danificado">Danificado / Quebrado</option><option value="Inservível">Inservível (Baixa)</option><option value="Não Localizado">Não Localizado</option></select></div>
+                <button class="btn-action-trigger" id="pat-btn-mover" onclick="patExecutarTransferencia()" disabled>Confirmar Movimentação</button>
+            </div>
 
-        function alternarCameraLeitora(inputIdAlvo, containerIdDiv) {
-            const containerBox = document.getElementById(containerIdDiv);
-            if (html5QrcodeScanner) { fecharCameraScannerAtiva(); return; }
-            containerBox.style.display = "block";
-            html5QrcodeScanner = new Html5Qrcode(containerIdDiv);
-            const configConfig = { fps: 25, qrbox: { width: 280, height: 140 } };
-            html5QrcodeScanner.start(
-                { facingMode: "environment" }, configConfig,
-                (decodedText) => {
-                    document.getElementById(inputIdAlvo).value = decodedText.trim();
-                    fecharCameraScannerAtiva();
-                    if (inputIdAlvo === 'trans-code') buscarItemPorCodigoDigitado();
-                    if (inputIdAlvo === 'reg-code') checarSeCodigoExisteParaEditar();
-                },
-                (errorMessage) => {}
-            ).catch(err => {
-                alert("Permita o acesso à câmera para escanear.");
-                containerBox.style.display = "none";
-                html5QrcodeScanner = null;
-            });
-        }
+            <div class="action-card-panel" id="pat-panel-cadastrar" style="display: none;">
+                <h3 id="pat-cad-title">Cadastrar Novo Patrimônio</h3>
+                <div class="form-group">
+                    <label for="pat-reg-code">Código / Etiqueta do Item:</label>
+                    <div id="pat-scanner-reg" class="camera-scanner-container"></div>
+                    <div class="input-camera-group">
+                        <input type="text" id="pat-reg-code" placeholder="Ex: 100003506623" oninput="patChecarEdicao()">
+                        <button type="button" class="btn-camera-scanner" onclick="patLigarCamera('pat-reg-code', 'pat-scanner-reg')"><i class="fa-solid fa-camera"></i></button>
+                    </div>
+                </div>
+                <div class="form-group"><label for="pat-reg-item">Nome / Descrição do Equipamento:</label><input type="text" id="pat-reg-item" placeholder="Ex: Notebook Lenovo ThinkPad"></div>
+                <div class="form-group"><label for="pat-reg-cat">Categoria:</label><select id="pat-reg-cat"><option value="Informática">Informática (PC, Note, Monitor)</option><option value="Robótica">Robótica (Kits, Sensores)</option><option value="Mobiliário">Mobiliário (Cadeira, Mesa)</option><option value="Eletrodomésticos">Eletrodomésticos / Som</option><option value="Outros">Outros</option></select></div>
+                <div class="form-group"><label for="pat-reg-room">Localização Inicial:</label><select id="pat-reg-room" class="select-salas-dinamicas"><option value="Almoxarifado">Almoxarifado</option></select></div>
+                <div class="form-group" style="background: #f8fafc; padding: 8px; border-radius: 6px; border: 1px dashed #cbd5e1;">
+                    <label for="pat-reg-parent" style="color: #0269a1;"><i class="fa-solid fa-link"></i> Pertence ao Código Pai? (Opcional):</label>
+                    <input type="text" id="pat-reg-parent" placeholder="Ex: Digite o código pai real" oninput="patValidarPai()">
+                    <span id="pat-reg-parent-preview" style="font-size: 11px; color:#64748b; display:block; margin-top:3px;"></span>
+                </div>
+                <div class="form-group"><label for="pat-reg-resp">Funcionário Responsável:</label><input type="text" id="pat-reg-resp" placeholder="Seu nome"></div>
+                <div class="form-group"><label for="pat-reg-status">Estado de Conservação:</label><select id="pat-reg-status"><option value="Bom">Bom Estado</option><option value="Em Manutenção">Em Manutenção</option><option value="Danificado">Danificado / Quebrado</option><option value="Inservível">Inservível (Baixa)</option><option value="Não Localizado">Não Localizado</option></select></div>
+                <button class="btn-action-trigger" id="pat-btn-cadastrar" onclick="patExecutarCadastro()">Salvar na Planilha</button>
+                <button class="btn-action-trigger" id="pat-btn-excluir" onclick="patExcluirItem()" style="background: #ef4444; display: none; margin-top: 10px;"><i class="fa-solid fa-trash-can"></i> Excluir Patrimônio</button>
+            </div>
 
-        function fecharCameraScannerAtiva() {
-            document.querySelectorAll('.camera-scanner-container').forEach(c => c.style.display = 'none');
-            if (html5QrcodeScanner) {
-                html5QrcodeScanner.stop().then(() => { html5QrcodeScanner = null; }).catch(() => { html5QrcodeScanner = null; });
-            }
-        }
+            <div class="action-card-panel" id="pat-panel-ambientes" style="display: none;">
+                <h3>Gerenciar Ambientes da Escola</h3>
+                <div class="form-group"><label for="pat-new-amb">Nome do Novo Ambiente:</label><input type="text" id="pat-new-amb" placeholder="Ex: Sala Maker / Bloco B"></div>
+                <button class="btn-action-trigger" onclick="patAdicionarAmbiente()" style="margin-top:0;">+ Adicionar Sala</button>
+                <label style="font-size: 11px; font-weight: 600; color: #475569; margin-top: 10px;">Salas Cadastradas Atualmente:</label>
+                <ul class="mini-list-ambientes" id="pat-mini-amb-list"><li>Carregando salas...</li></ul>
+            </div>
+        </div>
+    </div>
+</main>
 
-        async function carregarAmbientesDoServidor() {
-            try {
-                const r = await fetch(`${APPS_SCRIPT_PAT_URL}?aba=ambientes`, { method: 'GET', cache: 'no-cache' });
-                listaDeAmbientes = await r.json();
-                const sidebarList = document.getElementById('room-container-list');
-                sidebarList.innerHTML = `
-                    <li class="room-item ${salaFiltroAtual==='TODOS'?'active':''}" onclick="filtrarPorSala('TODOS', this)"><span><i class="fa-solid fa-boxes-stacked"></i> Ver Tudo</span></li>
-                    <li class="room-item pendentes-filter ${salaFiltroAtual==='PENDENTES'?'active':''}" onclick="filtrarPorSala('PENDENTES', this)"><span><i class="fa-solid fa-clock"></i> Pendentes</span></li>
-                `;
-                listaDeAmbientes.forEach(sala => {
-                    let li = document.createElement('li');
-                    li.className = `room-item ${salaFiltroAtual===sala?'active':''}`;
-                    li.onclick = () => filtrarPorSala(sala, li);
-                    li.innerHTML = `<span><i class="fa-solid fa-location-dot"></i> ${sala}</span>`;
-                    sidebarList.appendChild(li);
-                });
-                document.querySelectorAll('.select-salas-dinamicas').forEach(select => {
-                    select.innerHTML = '<option value="">-- Selecione o Local --</option>';
-                    listaDeAmbientes.forEach(sala => { select.innerHTML += `<option value="${sala}">${sala}</option>`; });
-                });
-                const miniBox = document.getElementById('mini-list-amb-box');
-                miniBox.innerHTML = '';
-                listaDeAmbientes.forEach(sala => {
-                    miniBox.innerHTML += `<li><span>${sala}</span><button class="btn-del-mini" onclick="deletarAmbienteServidor('${sala}')"><i class="fa-solid fa-trash"></i></button></li>`;
-                });
-            } catch(e) { console.error(e); }
-        }
+<script>
+    // Script isolado para o módulo de patrimônio
+    const APPS_SCRIPT_PAT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
+    let patTodos = [], patAmbientes = [], patSalaFiltro = 'TODOS', patCameraAtiva = null;
+    let usuarioLogadoPat = {};
 
-        async function adicionarNovoAmbienteServidor() {
-            const input = document.getElementById('new-amb-name');
-            const nome = input.value.trim();
-            if(!nome) return;
-            try {
-                await fetch(APPS_SCRIPT_PAT_URL, { method: 'POST', body: JSON.stringify({ operacao: "AMB_ADICIONAR", ambiente: nome }) });
-                input.value = ''; await carregarAmbientesDoServidor();
-            } catch(e) { alert("Erro ao salvar sala."); }
-        }
-
-        async function deletarAmbienteServidor(nomeSala) {
-            if(!confirm(`Deseja remover o ambiente "${nomeSala}"?`)) return;
-            try {
-                await fetch(APPS_SCRIPT_PAT_URL, { method: 'POST', body: JSON.stringify({ operacao: "AMB_DELETAR", ambiente: nomeSala }) });
-                await carregarAmbientesDoServidor();
-            } catch(e) { alert("Erro ao deletar."); }
-        }
-
-        async function carregarPatrimonioDoServidor() {
-            try {
-                const response = await fetch(`${APPS_SCRIPT_PAT_URL}?aba=patrimonio`, { method: 'GET', cache: 'no-cache' });
-                todosOsPatrimonios = await response.json();
-                renderizarTabelaInventario();
-            } catch (error) {
-                document.getElementById('inventory-table-body').innerHTML = `<tr><td colspan="7" style="text-align: center; color: red;">Erro ao processar dados da planilha.</td></tr>`;
-            }
-        }
-
-        function renderizarTabelaInventario() {
-            const tbody = document.getElementById('inventory-table-body');
-            tbody.innerHTML = '';
-            let itensFiltrados;
-            if (salaFiltroAtual === 'TODOS') {
-                itensFiltrados = todosOsPatrimonios;
-            } else if (salaFiltroAtual === 'PENDENTES') {
-                itensFiltrados = todosOsPatrimonios.filter(item => item.localizacao === 'Almoxarifado');
-            } else {
-                itensFiltrados = todosOsPatrimonios.filter(item => item.localizacao === salaFiltroAtual);
-            }
-            if (itensFiltrados.length === 0) {
-                const msg = salaFiltroAtual === 'PENDENTES' ? 'Nenhum item pendente de conferência.' : 'Nenhum item neste local.';
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #64748b; padding: 20px;">${msg}</td></tr>`;
+    function patInicializar() {
+        const sessao = localStorage.getItem('sgi_ccma_session');
+        if (sessao) {
+            usuarioLogadoPat = JSON.parse(sessao);
+            if (parseInt(usuarioLogadoPat.nivel) < 3) {
+                alert("Acesso restrito ao Nível 3 ou superior.");
+                fecharModuloPatrimonio();
                 return;
             }
-            itensFiltrados.forEach(item => {
-                let statusLimpo = item.status.toLowerCase();
-                let badgeClass = statusLimpo.includes('manuten') ? 'status-manutencao' : statusLimpo.includes('danific') || statusLimpo.includes('quebr') ? 'status-danificado' : statusLimpo.includes('inserv') ? 'status-inservivel' : statusLimpo.includes('localiz') ? 'status-naolocalizado' : 'status-bom';
-                let labelVinculoPai = "";
-                if (item.itemPai) {
-                    const paiObjeto = todosOsPatrimonios.find(p => p.codigo === item.itemPai);
-                    let nomePai = paiObjeto ? `(${paiObjeto.item})` : '';
-                    labelVinculoPai = `<br><span class="item-tag-vinculo"><i class="fa-solid fa-paperclip"></i> Acoplado ao Pai: ${item.itemPai} ${nomePai}</span>`;
-                }
-                let tr = document.createElement('tr');
-                tr.style.cursor = 'pointer';
-                tr.onclick = () => { alternarAbaFormulario('MOVER'); carregarItemNoFormulario(item.codigo); };
-                tr.innerHTML = `
-                    <td style="color:#005088; font-weight:bold; letter-spacing:0.5px;">${item.codigo}</td>
-                    <td><strong>${item.item}</strong>${labelVinculoPai}</td>
-                    <td style="color:#64748b;">${item.categoria}</td>
-                    <td><i class="fa-solid fa-location-dot" style="color:#eab308; margin-right:5px;"></i>${item.localizacao}</td>
-                    <td>${item.responsavel || '-'}</td>
-                    <td style="font-size:11px; color:#64748b;">${item.dataAtualizacao || '-'}</td>
-                    <td><span class="status-badge ${badgeClass}">${item.status}</span></td>
-                `;
-                tbody.appendChild(tr);
+        } else {
+            fecharModuloPatrimonio();
+            return;
+        }
+        if (document.getElementById('pat-reg-resp')) document.getElementById('pat-reg-resp').value = usuarioLogadoPat.nome || "";
+        patCarregarAmbientes();
+        patCarregarItens();
+    }
+
+    function patAlternarAba(aba) {
+        if (patCameraAtiva) { patDesligarCamera(); }
+        const tabs = { 'MOVER': 'btn-tab-move', 'CADASTRAR': 'btn-tab-reg', 'AMBIENTES': 'btn-tab-amb' };
+        const panels = { 'MOVER': 'pat-panel-mover', 'CADASTRAR': 'pat-panel-cadastrar', 'AMBIENTES': 'pat-panel-ambientes' };
+        Object.keys(tabs).forEach(k => {
+            document.getElementById(tabs[k]).classList.toggle('active', k === aba);
+            document.getElementById(panels[k]).style.display = k === aba ? "flex" : "none";
+        });
+        if (aba === 'CADASTRAR') patResetarCadastro();
+    }
+
+    function patLigarCamera(inputId, containerId) {
+        const containerBox = document.getElementById(containerId);
+        if (patCameraAtiva) { patDesligarCamera(); return; }
+        containerBox.style.display = "block";
+        patCameraAtiva = new Html5Qrcode(containerId);
+        patCameraAtiva.start(
+            { facingMode: "environment" },
+            { fps: 25, qrbox: { width: 280, height: 140 } },
+            (decodedText) => {
+                document.getElementById(inputId).value = decodedText.trim();
+                patDesligarCamera();
+                if (inputId === 'pat-trans-code') patBuscarItem();
+                if (inputId === 'pat-reg-code') patChecarEdicao();
+            },
+            (errorMessage) => {}
+        ).catch(err => {
+            alert("Permita o acesso à câmera para escanear.");
+            containerBox.style.display = "none";
+            patCameraAtiva = null;
+        });
+    }
+
+    function patDesligarCamera() {
+        document.querySelectorAll('.camera-scanner-container').forEach(c => c.style.display = 'none');
+        if (patCameraAtiva) {
+            patCameraAtiva.stop().then(() => { patCameraAtiva = null; }).catch(() => { patCameraAtiva = null; });
+        }
+    }
+
+    async function patCarregarAmbientes() {
+        try {
+            const r = await fetch(`${APPS_SCRIPT_PAT_URL}?aba=ambientes`, { method: 'GET', cache: 'no-cache' });
+            patAmbientes = await r.json();
+            const sidebarList = document.getElementById('pat-room-list-updated');
+            sidebarList.innerHTML = `
+                <li class="room-item ${patSalaFiltro==='TODOS'?'active':''}" onclick="patFiltrarSala('TODOS', this)"><span><i class="fa-solid fa-boxes-stacked"></i> Ver Tudo</span></li>
+                <li class="room-item pendentes-filter ${patSalaFiltro==='PENDENTES'?'active':''}" onclick="patFiltrarSala('PENDENTES', this)"><span><i class="fa-solid fa-clock"></i> Pendentes</span></li>
+            `;
+            patAmbientes.forEach(sala => {
+                let li = document.createElement('li');
+                li.className = `room-item ${patSalaFiltro===sala?'active':''}`;
+                li.onclick = () => patFiltrarSala(sala, li);
+                li.innerHTML = `<span><i class="fa-solid fa-location-dot"></i> ${sala}</span>`;
+                sidebarList.appendChild(li);
             });
-        }
-
-        function filtrarTabelaPorBusca() {
-            const termo = document.getElementById('search-input').value.trim().toLowerCase();
-            if (termo === "") { renderizarTabelaInventario(); return; }
-            const tbody = document.getElementById('inventory-table-body');
-            tbody.innerHTML = '';
-            let correspondencias = todosOsPatrimonios.filter(item => item.codigo.toLowerCase().includes(termo) || item.item.toLowerCase().includes(termo) || item.itemPai.toLowerCase().includes(termo) || item.categoria.toLowerCase().includes(termo));
-            correspondencias.forEach(item => {
-                let statusLimpo = item.status.toLowerCase();
-                let badgeClass = statusLimpo.includes('manuten') ? 'status-manutencao' : statusLimpo.includes('danific') || statusLimpo.includes('quebr') ? 'status-danificado' : statusLimpo.includes('inserv') ? 'status-inservivel' : statusLimpo.includes('localiz') ? 'status-naolocalizado' : 'status-bom';
-                let labelVinculoPai = item.itemPai ? `<br><span class="item-tag-vinculo">Pai: ${item.itemPai}</span>` : '';
-                let tr = document.createElement('tr');
-                tr.style.cursor = 'pointer';
-                tr.onclick = () => { alternarAbaFormulario('MOVER'); carregarItemNoFormulario(item.codigo); };
-                tr.innerHTML = `
-                    <td style="color:#005088; font-weight:bold;">${item.codigo}</td>
-                    <td><strong>${item.item}</strong>${labelVinculoPai}</td>
-                    <td>${item.categoria}</td>
-                    <td><i class="fa-solid fa-location-dot" style="color:#eab308; margin-right:5px;"></i>${item.localizacao}</td>
-                    <td>${item.responsavel || '-'}</td>
-                    <td style="font-size:11px; color:#64748b;">${item.dataAtualizacao || '-'}</td>
-                    <td><span class="status-badge ${badgeClass}">${item.status}</span></td>
-                `;
-                tbody.appendChild(tr);
+            document.querySelectorAll('.select-salas-dinamicas').forEach(select => {
+                select.innerHTML = '<option value="">-- Selecione o Local --</option>';
+                patAmbientes.forEach(sala => { select.innerHTML += `<option value="${sala}">${sala}</option>`; });
             });
-        }
+            const miniBox = document.getElementById('pat-mini-amb-list');
+            miniBox.innerHTML = '';
+            patAmbientes.forEach(sala => {
+                miniBox.innerHTML += `<li><span>${sala}</span><button class="btn-del-mini" onclick="patDeletarAmbiente('${sala}')"><i class="fa-solid fa-trash"></i></button></li>`;
+            });
+        } catch(e) { console.error(e); }
+    }
 
-        function filtrarPorSala(sala, elementoBotao) {
-            salaFiltroAtual = sala;
-            document.querySelectorAll('.room-item').forEach(el => el.classList.remove('active'));
-            if (elementoBotao) elementoBotao.classList.add('active');
-            const btn = document.getElementById('btn-filtro-pendentes');
-            if (sala === 'PENDENTES') {
-                document.getElementById('panel-title-text').innerText = 'Itens Pendentes de Conferência';
-                if (btn) { btn.classList.add('ativo'); btn.innerHTML = '<i class="fa-solid fa-boxes-stacked"></i> Ver Tudo'; }
-            } else if (sala === 'TODOS') {
-                document.getElementById('panel-title-text').innerText = 'Almoxarifado Geral do Colégio';
-                if (btn) { btn.classList.remove('ativo'); btn.innerHTML = '<i class="fa-solid fa-clock"></i> Pendentes'; }
-            } else {
-                document.getElementById('panel-title-text').innerText = `Ambiente: ${sala}`;
-                if (btn) { btn.classList.remove('ativo'); btn.innerHTML = '<i class="fa-solid fa-clock"></i> Pendentes'; }
+    async function patAdicionarAmbiente() {
+        const input = document.getElementById('pat-new-amb');
+        const nome = input.value.trim();
+        if(!nome) return;
+        try {
+            await fetch(APPS_SCRIPT_PAT_URL, { method: 'POST', body: JSON.stringify({ operacao: "AMB_ADICIONAR", ambiente: nome }) });
+            input.value = ''; await patCarregarAmbientes();
+        } catch(e) { alert("Erro ao salvar sala."); }
+    }
+
+    async function patDeletarAmbiente(nomeSala) {
+        if(!confirm(`Deseja remover o ambiente "${nomeSala}"?`)) return;
+        try {
+            await fetch(APPS_SCRIPT_PAT_URL, { method: 'POST', body: JSON.stringify({ operacao: "AMB_DELETAR", ambiente: nomeSala }) });
+            await patCarregarAmbientes();
+        } catch(e) { alert("Erro ao deletar."); }
+    }
+
+    async function patCarregarItens() {
+        try {
+            const response = await fetch(`${APPS_SCRIPT_PAT_URL}?aba=patrimonio`, { method: 'GET', cache: 'no-cache' });
+            patTodos = await response.json();
+            patRenderizarTabela();
+        } catch (error) {
+            document.getElementById('pat-table-body').innerHTML = `<tr><td colspan="7" style="text-align: center; color: red;">Erro ao processar dados da planilha.</td></tr>`;
+        }
+    }
+
+    function patRenderizarTabela() {
+        const tbody = document.getElementById('pat-table-body');
+        tbody.innerHTML = '';
+        let itensFiltrados;
+        if (patSalaFiltro === 'TODOS') {
+            itensFiltrados = patTodos;
+        } else if (patSalaFiltro === 'PENDENTES') {
+            itensFiltrados = patTodos.filter(item => item.localizacao === 'Almoxarifado');
+        } else {
+            itensFiltrados = patTodos.filter(item => item.localizacao === patSalaFiltro);
+        }
+        if (itensFiltrados.length === 0) {
+            const msg = patSalaFiltro === 'PENDENTES' ? 'Nenhum item pendente de conferência.' : 'Nenhum item neste local.';
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #64748b; padding: 20px;">${msg}</td></tr>`;
+            return;
+        }
+        itensFiltrados.forEach(item => {
+            let statusLimpo = item.status.toLowerCase();
+            let badgeClass = statusLimpo.includes('manuten') ? 'status-manutencao' : statusLimpo.includes('danific') || statusLimpo.includes('quebr') ? 'status-danificado' : statusLimpo.includes('inserv') ? 'status-inservivel' : statusLimpo.includes('localiz') ? 'status-naolocalizado' : 'status-bom';
+            let labelVinculoPai = "";
+            if (item.itemPai) {
+                const paiObjeto = patTodos.find(p => p.codigo === item.itemPai);
+                let nomePai = paiObjeto ? `(${paiObjeto.item})` : '';
+                labelVinculoPai = `<br><span class="item-tag-vinculo"><i class="fa-solid fa-paperclip"></i> Acoplado ao Pai: ${item.itemPai} ${nomePai}</span>`;
             }
-            renderizarTabelaInventario();
-        }
+            let tr = document.createElement('tr');
+            tr.style.cursor = 'pointer';
+            tr.onclick = () => { patAlternarAba('MOVER'); patCarregarMovimentacao(item.codigo); };
+            tr.innerHTML = `
+                <td style="color:#005088; font-weight:bold; letter-spacing:0.5px;">${item.codigo}</td>
+                <td><strong>${item.item}</strong>${labelVinculoPai}</td>
+                <td style="color:#64748b;">${item.categoria}</td>
+                <td><i class="fa-solid fa-location-dot" style="color:#eab308; margin-right:5px;"></i>${item.localizacao}</td>
+                <td>${item.responsavel || '-'}</td>
+                <td style="font-size:11px; color:#64748b;">${item.dataAtualizacao || '-'}</td>
+                <td><span class="status-badge ${badgeClass}">${item.status}</span></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
 
-        function alternarFiltroPendentes() {
-            if (salaFiltroAtual === 'PENDENTES') {
-                const itemVerTudo = document.querySelector('.room-item:first-child');
-                filtrarPorSala('TODOS', itemVerTudo);
-            } else {
-                const itemPendentes = document.querySelector('.room-item.pendentes-filter');
-                filtrarPorSala('PENDENTES', itemPendentes);
+    function filtrarTabelaPorBusca() {
+        const termo = document.getElementById('pat-search-input').value.trim().toLowerCase();
+        if (termo === "") { patRenderizarTabela(); return; }
+        const tbody = document.getElementById('pat-table-body');
+        tbody.innerHTML = '';
+        let correspondencias = patTodos.filter(item => item.codigo.toLowerCase().includes(termo) || item.item.toLowerCase().includes(termo) || item.itemPai.toLowerCase().includes(termo) || item.categoria.toLowerCase().includes(termo));
+        correspondencias.forEach(item => {
+            let statusLimpo = item.status.toLowerCase();
+            let badgeClass = statusLimpo.includes('manuten') ? 'status-manutencao' : statusLimpo.includes('danific') || statusLimpo.includes('quebr') ? 'status-danificado' : statusLimpo.includes('inserv') ? 'status-inservivel' : statusLimpo.includes('localiz') ? 'status-naolocalizado' : 'status-bom';
+            let labelVinculoPai = item.itemPai ? `<br><span class="item-tag-vinculo">Pai: ${item.itemPai}</span>` : '';
+            let tr = document.createElement('tr');
+            tr.style.cursor = 'pointer';
+            tr.onclick = () => { patAlternarAba('MOVER'); patCarregarMovimentacao(item.codigo); };
+            tr.innerHTML = `
+                <td style="color:#005088; font-weight:bold;">${item.codigo}</td>
+                <td><strong>${item.item}</strong>${labelVinculoPai}</td>
+                <td>${item.categoria}</td>
+                <td><i class="fa-solid fa-location-dot" style="color:#eab308; margin-right:5px;"></i>${item.localizacao}</td>
+                <td>${item.responsavel || '-'}</td>
+                <td style="font-size:11px; color:#64748b;">${item.dataAtualizacao || '-'}</td>
+                <td><span class="status-badge ${badgeClass}">${item.status}</span></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function patFiltrarSala(sala, elementoBotao) {
+        patSalaFiltro = sala;
+        document.querySelectorAll('#pat-room-list-updated .room-item').forEach(el => el.classList.remove('active'));
+        if (elementoBotao) elementoBotao.classList.add('active');
+        const btn = document.getElementById('btn-filtro-pendentes');
+        if (sala === 'PENDENTES') {
+            document.getElementById('pat-panel-title').innerText = 'Itens Pendentes de Conferência';
+            if (btn) { btn.classList.add('ativo'); btn.innerHTML = '<i class="fa-solid fa-boxes-stacked"></i> Ver Tudo'; }
+        } else if (sala === 'TODOS') {
+            document.getElementById('pat-panel-title').innerText = 'Almoxarifado Geral do Colégio';
+            if (btn) { btn.classList.remove('ativo'); btn.innerHTML = '<i class="fa-solid fa-clock"></i> Pendentes'; }
+        } else {
+            document.getElementById('pat-panel-title').innerText = `Ambiente: ${sala}`;
+            if (btn) { btn.classList.remove('ativo'); btn.innerHTML = '<i class="fa-solid fa-clock"></i> Pendentes'; }
+        }
+        patRenderizarTabela();
+    }
+
+    function alternarFiltroPendentes() {
+        if (patSalaFiltro === 'PENDENTES') {
+            const itemVerTudo = document.querySelector('#pat-room-list-updated .room-item:first-child');
+            patFiltrarSala('TODOS', itemVerTudo);
+        } else {
+            const itemPendentes = document.querySelector('#pat-room-list-updated .room-item.pendentes-filter');
+            patFiltrarSala('PENDENTES', itemPendentes);
+        }
+    }
+
+    function patBuscarItem() {
+        const codigo = document.getElementById('pat-trans-code').value.trim();
+        const itemEncontrado = patTodos.find(item => item.codigo === codigo);
+        const previewBox = document.getElementById('pat-item-preview');
+        const btn = document.getElementById('pat-btn-mover');
+        const vinculoContainer = document.getElementById('pat-prev-box-vinculos');
+        if (itemEncontrado) {
+            document.getElementById('pat-prev-nome').innerText = itemEncontrado.item;
+            document.getElementById('pat-prev-local').innerText = itemEncontrado.localizacao;
+            document.getElementById('pat-prev-resp').innerText = itemEncontrado.responsavel || 'Ninguém';
+            let subItens = patTodos.filter(p => p.itemPai === itemEncontrado.codigo);
+            if(subItens.length > 0) {
+                vinculoContainer.innerHTML = `<span class="parent-alert-box"><i class="fa-solid fa-boxes-stacked"></i> Alerta: Existem ${subItens.length} itens vinculados.</span>`;
+            } else { vinculoContainer.innerHTML = ''; }
+            previewBox.style.display = "block"; btn.disabled = false;
+        } else { previewBox.style.display = "none"; btn.disabled = true; }
+    }
+
+    function patValidarPai() {
+        const codPai = document.getElementById('pat-reg-parent').value.trim();
+        const label = document.getElementById('pat-reg-parent-preview');
+        if(!codPai) { label.innerText = ""; return; }
+        const pai = patTodos.find(p => p.codigo === codPai);
+        if(pai) { label.innerHTML = `<i class="fa-solid fa-check" style="color:green;"></i> Item Pai Localizado: <strong>${pai.item}</strong>`; }
+        else { label.innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="color:orange;"></i> Código Pai não localizado na tabela.`; }
+    }
+
+    function patChecarEdicao() {
+        const codigo = document.getElementById('pat-reg-code').value.trim();
+        const itemEncontrado = patTodos.find(item => item.codigo === codigo);
+        const h3Title = document.getElementById('pat-cad-title');
+        const btnSalvar = document.getElementById('pat-btn-cadastrar');
+        const btnExcluir = document.getElementById('pat-btn-excluir');
+        if(itemEncontrado) {
+            h3Title.innerHTML = `<i class="fa-solid fa-pen-to-square" style="color:#eab308;"></i> Modo de Edição`;
+            document.getElementById('pat-reg-item').value = itemEncontrado.item;
+            document.getElementById('pat-reg-cat').value = itemEncontrado.categoria;
+            document.getElementById('pat-reg-room').value = itemEncontrado.localizacao;
+            document.getElementById('pat-reg-parent').value = itemEncontrado.itemPai || "";
+            let statusLimpo = itemEncontrado.status.toLowerCase();
+            let statusValor = "Bom";
+            if(statusLimpo.includes('manuten')) statusValor = "Em Manutenção";
+            if(statusLimpo.includes('danific')) statusValor = "Danificado";
+            if(statusLimpo.includes('inserv')) statusValor = "Inservível";
+            if(statusLimpo.includes('localiz')) statusValor = "Não Localizado";
+            document.getElementById('pat-reg-status').value = statusValor;
+            btnSalvar.innerText = "Atualizar Patrimônio";
+            btnExcluir.style.display = "block";
+            patValidarPai();
+        } else {
+            h3Title.innerText = "Cadastrar Novo Patrimônio";
+            btnSalvar.innerText = "Salvar na Planilha";
+            btnExcluir.style.display = "none";
+        }
+    }
+
+    function patCarregarMovimentacao(codigo) {
+        document.getElementById('pat-trans-code').value = codigo;
+        patBuscarItem();
+        document.getElementById('pat-trans-room').focus();
+    }
+
+    function patResetarCadastro() {
+        document.getElementById('pat-cad-title').innerText = "Cadastrar Novo Patrimônio";
+        document.getElementById('pat-reg-code').value = '';
+        document.getElementById('pat-reg-item').value = '';
+        document.getElementById('pat-reg-parent').value = '';
+        document.getElementById('pat-reg-parent-preview').innerText = '';
+        document.getElementById('pat-btn-cadastrar').innerText = "Salvar na Planilha";
+        document.getElementById('pat-btn-excluir').style.display = "none";
+        if(document.getElementById('pat-reg-resp')) document.getElementById('pat-reg-resp').value = usuarioLogadoPat.nome || "";
+    }
+
+    async function patExecutarTransferencia() {
+        const codigo = document.getElementById('pat-trans-code').value.trim();
+        const novaSala = document.getElementById('pat-trans-room').value;
+        const responsavel = document.getElementById('pat-trans-resp').value.trim();
+        const novoStatus = document.getElementById('pat-trans-status').value;
+        const btn = document.getElementById('pat-btn-mover');
+        if (!codigo || !novaSala || !responsavel) { alert("Preencha o Destino e o Responsável."); return; }
+        btn.disabled = true; btn.innerText = "Processando...";
+        try {
+            const r = await fetch(APPS_SCRIPT_PAT_URL, { method: 'POST', body: JSON.stringify({ operacao: "PAT_TRANSFERIR", codigo: codigo, novaLocalizacao: novaSala, responsavel: responsavel, status: novoStatus || null }) });
+            const res = await r.json();
+            if (res.status === "success") {
+                document.getElementById('pat-trans-code').value = ''; document.getElementById('pat-item-preview').style.display = "none";
+                alert("Movimentação concluída!"); await patCarregarItens();
             }
-        }
+        } catch (e) { alert("Erro de comunicação."); } finally { btn.disabled = false; btn.innerText = "Confirmar Movimentação"; }
+    }
 
-        function buscarItemPorCodigoDigitado() {
-            const codigo = document.getElementById('trans-code').value.trim();
-            const itemEncontrado = todosOsPatrimonios.find(item => item.codigo === codigo);
-            const previewBox = document.getElementById('item-preview-box');
-            const btn = document.getElementById('btn-executar-transferencia');
-            const vinculoContainer = document.getElementById('prev-box-vinculos');
-            if (itemEncontrado) {
-                document.getElementById('prev-nome').innerText = itemEncontrado.item;
-                document.getElementById('prev-local').innerText = itemEncontrado.localizacao;
-                document.getElementById('prev-resp').innerText = itemEncontrado.responsavel || 'Ninguém';
-                let subItens = todosOsPatrimonios.filter(p => p.itemPai === itemEncontrado.codigo);
-                if(subItens.length > 0) {
-                    vinculoContainer.innerHTML = `<span class="parent-alert-box"><i class="fa-solid fa-boxes-stacked"></i> Alerta: Existem ${subItens.length} itens vinculados.</span>`;
-                } else { vinculoContainer.innerHTML = ''; }
-                previewBox.style.display = "block"; btn.disabled = false;
-            } else { previewBox.style.display = "none"; btn.disabled = true; }
-        }
-
-        function validarCodigoPaiDigitado() {
-            const codPai = document.getElementById('reg-parent').value.trim();
-            const label = document.getElementById('reg-parent-preview');
-            if(!codPai) { label.innerText = ""; return; }
-            const pai = todosOsPatrimonios.find(p => p.codigo === codPai);
-            if(pai) { label.innerHTML = `<i class="fa-solid fa-check" style="color:green;"></i> Item Pai Localizado: <strong>${pai.item}</strong>`; }
-            else { label.innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="color:orange;"></i> Código Pai não localizado na tabela.`; }
-        }
-
-        function checarSeCodigoExisteParaEditar() {
-            const codigo = document.getElementById('reg-code').value.trim();
-            const itemEncontrado = todosOsPatrimonios.find(item => item.codigo === codigo);
-            const h3Title = document.getElementById('cad-form-title');
-            const btnSalvar = document.getElementById('btn-executar-cadastro');
-            const btnExcluir = document.getElementById('btn-excluir-cadastro');
-            if(itemEncontrado) {
-                h3Title.innerHTML = `<i class="fa-solid fa-pen-to-square" style="color:#eab308;"></i> Modo de Edição`;
-                document.getElementById('reg-item').value = itemEncontrado.item;
-                document.getElementById('reg-cat').value = itemEncontrado.categoria;
-                document.getElementById('reg-room').value = itemEncontrado.localizacao;
-                document.getElementById('reg-parent').value = itemEncontrado.itemPai || "";
-                let statusLimpo = itemEncontrado.status.toLowerCase();
-                let statusValor = "Bom";
-                if(statusLimpo.includes('manuten')) statusValor = "Em Manutenção";
-                if(statusLimpo.includes('danific')) statusValor = "Danificado";
-                if(statusLimpo.includes('inserv')) statusValor = "Inservível";
-                if(statusLimpo.includes('localiz')) statusValor = "Não Localizado";
-                document.getElementById('reg-status').value = statusValor;
-                btnSalvar.innerText = "Atualizar Patrimônio";
-                btnExcluir.style.display = "block";
-                validarCodigoPaiDigitado();
-            } else {
-                h3Title.innerText = "Cadastrar Novo Patrimônio";
-                btnSalvar.innerText = "Salvar na Planilha";
-                btnExcluir.style.display = "none";
+    async function patExecutarCadastro() {
+        const codigo = document.getElementById('pat-reg-code').value.trim();
+        const item = document.getElementById('pat-reg-item').value.trim();
+        const category = document.getElementById('pat-reg-cat').value;
+        const sala = document.getElementById('pat-reg-room').value;
+        const funcionario = document.getElementById('pat-reg-resp').value.trim();
+        const status = document.getElementById('pat-reg-status').value;
+        const itemPai = document.getElementById('pat-reg-parent').value.trim();
+        const btn = document.getElementById('pat-btn-cadastrar');
+        if(!codigo || !item || !funcionario || !sala) { alert("Preencha os campos obrigatórios."); return; }
+        btn.disabled = true;
+        const payload = { operacao: "PAT_CADASTRAR", codigo: codigo, item: item, categoria: category, localizacao: sala, responsavel: funcionario, status: status, itemPai: itemPai };
+        try {
+            const r = await fetch(APPS_SCRIPT_PAT_URL, { method: 'POST', body: JSON.stringify(payload) });
+            const res = await r.json();
+            if(res.status === "success" || res.status === "updated") {
+                alert(res.status === "updated" ? "Patrimônio atualizado!" : "Novo item gravado!");
+                patResetarCadastro(); await patCarregarItens();
             }
-        }
+        } catch (e) { alert("Erro ao salvar."); } finally { btn.disabled = false; }
+    }
 
-        function carregarItemNoFormulario(codigo) {
-            document.getElementById('trans-code').value = codigo;
-            buscarItemPorCodigoDigitado();
-            document.getElementById('trans-room').focus();
-        }
-
-        function resetarFormularioCadastro() {
-            document.getElementById('cad-form-title').innerText = "Cadastrar Novo Patrimônio";
-            document.getElementById('reg-code').value = '';
-            document.getElementById('reg-item').value = '';
-            document.getElementById('reg-parent').value = '';
-            document.getElementById('reg-parent-preview').innerText = '';
-            document.getElementById('btn-executar-cadastro').innerText = "Salvar na Planilha";
-            document.getElementById('btn-excluir-cadastro').style.display = "none";
-            if(document.getElementById('reg-resp')) document.getElementById('reg-resp').value = usuarioLogado.nome || "";
-        }
-
-        async function executarTransferenciaPatrimonio() {
-            const codigo = document.getElementById('trans-code').value.trim();
-            const novaSala = document.getElementById('trans-room').value;
-            const responsavel = document.getElementById('trans-resp').value.trim();
-            const novoStatus = document.getElementById('trans-status').value;
-            const btn = document.getElementById('btn-executar-transferencia');
-            if (!codigo || !novaSala || !responsavel) { alert("Preencha o Destino e o Responsável."); return; }
-            btn.disabled = true; btn.innerText = "Processando...";
-            try {
-                const r = await fetch(APPS_SCRIPT_PAT_URL, { method: 'POST', body: JSON.stringify({ operacao: "PAT_TRANSFERIR", codigo: codigo, novaLocalizacao: novaSala, responsavel: responsavel, status: novoStatus || null }) });
-                const res = await r.json();
-                if (res.status === "success") {
-                    document.getElementById('trans-code').value = ''; document.getElementById('item-preview-box').style.display = "none";
-                    alert("Movimentação concluída!"); await carregarPatrimonioDoServidor();
-                }
-            } catch (e) { alert("Erro de comunicação."); } finally { btn.disabled = false; btn.innerText = "Confirmar Movimentação"; }
-        }
-
-        async function executarCadastroNovoPatrimonio() {
-            const codigo = document.getElementById('reg-code').value.trim();
-            const item = document.getElementById('reg-item').value.trim();
-            const category = document.getElementById('reg-cat').value;
-            const sala = document.getElementById('reg-room').value;
-            const funcionario = document.getElementById('reg-resp').value.trim();
-            const status = document.getElementById('reg-status').value;
-            const itemPai = document.getElementById('reg-parent').value.trim();
-            const btn = document.getElementById('btn-executar-cadastro');
-            if(!codigo || !item || !funcionario || !sala) { alert("Preencha os campos obrigatórios."); return; }
-            btn.disabled = true;
-            const payload = { operacao: "PAT_CADASTRAR", codigo: codigo, item: item, categoria: category, localizacao: sala, responsavel: funcionario, status: status, itemPai: itemPai };
-            try {
-                const r = await fetch(APPS_SCRIPT_PAT_URL, { method: 'POST', body: JSON.stringify(payload) });
-                const res = await r.json();
-                if(res.status === "success" || res.status === "updated") {
-                    alert(res.status === "updated" ? "Patrimônio atualizado!" : "Novo item gravado!");
-                    resetarFormularioCadastro(); await carregarPatrimonioDoServidor();
-                }
-            } catch (e) { alert("Erro ao salvar."); } finally { btn.disabled = false; }
-        }
-
-        async function executarExcluirPatrimonio() {
-            const codigo = document.getElementById('reg-code').value.trim();
-            if(!codigo) return;
-            if(!confirm(`Atenção Direção: Deseja EXCLUIR DEFINITIVAMENTE o patrimônio ${codigo}? Esta ação não pode ser desfeita.`)) return;
-            const btn = document.getElementById('btn-excluir-cadastro');
-            btn.disabled = true; btn.innerText = "Excluindo...";
-            try {
-                const r = await fetch(APPS_SCRIPT_PAT_URL, { method: 'POST', body: JSON.stringify({ operacao: "PAT_EXCLUIR", codigo: codigo }) });
-                const res = await r.json();
-                if(res.status === "success") {
-                    alert("Patrimônio apagado do banco de dados!");
-                    resetarFormularioCadastro(); await carregarPatrimonioDoServidor();
-                }
-            } catch(e) { alert("Erro ao excluir item."); } finally { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-trash-can"></i> Excluir Patrimônio'; }
-        }
-    </script>
-</body>
-</html>
+    async function patExcluirItem() {
+        const codigo = document.getElementById('pat-reg-code').value.trim();
+        if(!codigo) return;
+        if(!confirm(`Atenção Direção: Deseja EXCLUIR DEFINITIVAMENTE o patrimônio ${codigo}? Esta ação não pode ser desfeita.`)) return;
+        const btn = document.getElementById('pat-btn-excluir');
+        btn.disabled = true; btn.innerText = "Excluindo...";
+        try {
+            const r = await fetch(APPS_SCRIPT_PAT_URL, { method: 'POST', body: JSON.stringify({ operacao: "PAT_EXCLUIR", codigo: codigo }) });
+            const res = await r.json();
+            if(res.status === "success") {
+                alert("Patrimônio apagado do banco de dados!");
+                patResetarCadastro(); await patCarregarItens();
+            }
+        } catch(e) { alert("Erro ao excluir item."); } finally { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-trash-can"></i> Excluir Patrimônio'; }
+    }
+</script>
