@@ -28,7 +28,6 @@
             justify-content: space-between;
         }
         
-        /* CORREÇÃO DA BARRA DE ROLAGEM */
         .sidebar-top {
             display: flex;
             flex-direction: column;
@@ -63,6 +62,9 @@
             transition: background 0.2s;
         }
         .room-item:hover, .room-item.active { background-color: #eab308; color: #1e293b; }
+        /* NOVO: destaque sutil para Pendentes */
+        .room-item.pendentes-filter { background-color: rgba(234, 179, 8, 0.15); }
+        .room-item.pendentes-filter:hover, .room-item.pendentes-filter.active { background-color: #eab308; color: #1e293b; }
 
         .sidebar-footer { padding: 15px; border-top: 1px solid rgba(255, 255, 255, 0.1); }
         .btn-back {
@@ -142,7 +144,6 @@
         .form-group { display: flex; flex-direction: column; gap: 5px; }
         .form-group label { font-size: 11px; font-weight: 600; color: #475569; }
         
-        /* LINHA COM INPUT + BOTÃO DE CÂMERA */
         .input-camera-group { display: flex; gap: 8px; width: 100%; }
         .input-camera-group input { flex: 1; padding: 9px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none; }
         .input-camera-group input:focus { border-color: #005088; }
@@ -163,7 +164,6 @@
         .btn-action-trigger:hover { background: #0c4a6e; }
         .btn-action-trigger:disabled { background: #cbd5e1; cursor: not-allowed; }
 
-        /* CONTAINER DA CÂMERA DE LEITURA */
         .camera-scanner-container {
             width: 100%; background: #000; border-radius: 8px; overflow: hidden;
             display: none; border: 2px solid #eab308; margin-bottom: 5px; position: relative;
@@ -171,7 +171,6 @@
 
         .selected-item-preview { background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px; border-radius: 6px; font-size: 12px; }
         
-        /* LISTA SIMPLES DE AMBIENTES INTERNOS */
         .mini-list-ambientes { list-style: none; max-height: 180px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 6px; }
         .mini-list-ambientes li {
             padding: 8px 12px; font-size: 13px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9;
@@ -405,7 +404,6 @@
             if(abaAlvo === 'CADASTRAR') resetarFormularioCadastro();
         }
 
-        // CÂMERA DE 12 DÍGITOS REAIS SEM CORTES DE PREFIXO
         function alternarCameraLeitora(inputIdAlvo, containerIdDiv) {
             const containerBox = document.getElementById(containerIdDiv);
             if (html5QrcodeScanner) { fecharCameraScannerAtiva(); return; }
@@ -419,7 +417,6 @@
                 configConfig,
                 (decodedText) => {
                     let codigoCompletoReal = decodedText.trim();
-
                     document.getElementById(inputIdAlvo).value = codigoCompletoReal;
                     fecharCameraScannerAtiva();
                     
@@ -447,7 +444,16 @@
                 listaDeAmbientes = await r.json();
                 
                 const sidebarList = document.getElementById('room-container-list');
-                sidebarList.innerHTML = `<li class="room-item ${salaFiltroAtual==='TODOS'?'active':''}" onclick="filtrarPorSala('TODOS', this)"><span><i class="fa-solid fa-boxes-stacked"></i> Ver Tudo</span></li>`;
+                // Mantém as duas opções fixas: Ver Tudo e Pendentes
+                sidebarList.innerHTML = `
+                    <li class="room-item ${salaFiltroAtual==='TODOS'?'active':''}" onclick="filtrarPorSala('TODOS', this)">
+                        <span><i class="fa-solid fa-boxes-stacked"></i> Ver Tudo</span>
+                    </li>
+                    <!-- NOVO: Filtro Pendentes -->
+                    <li class="room-item pendentes-filter ${salaFiltroAtual==='PENDENTES'?'active':''}" onclick="filtrarPorSala('PENDENTES', this)">
+                        <span><i class="fa-solid fa-clock"></i> Pendentes</span>
+                    </li>
+                `;
                 
                 listaDeAmbientes.forEach(sala => {
                     let li = document.createElement('li');
@@ -504,10 +510,19 @@
             const tbody = document.getElementById('inventory-table-body');
             tbody.innerHTML = '';
 
-            let itensFiltrados = salaFiltroAtual === 'TODOS' ? todosOsPatrimonios : todosOsPatrimonios.filter(item => item.localizacao === salaFiltroAtual);
+            let itensFiltrados;
+            if (salaFiltroAtual === 'TODOS') {
+                itensFiltrados = todosOsPatrimonios;
+            } else if (salaFiltroAtual === 'PENDENTES') {
+                // NOVO: filtra apenas itens com localização "Almoxarifado" (ainda não conferidos)
+                itensFiltrados = todosOsPatrimonios.filter(item => item.localizacao === 'Almoxarifado');
+            } else {
+                itensFiltrados = todosOsPatrimonios.filter(item => item.localizacao === salaFiltroAtual);
+            }
 
             if (itensFiltrados.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #64748b; padding: 20px;">Nenhum item neste local.</td></tr>`;
+                const msg = salaFiltroAtual === 'PENDENTES' ? 'Nenhum item pendente de conferência.' : 'Nenhum item neste local.';
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #64748b; padding: 20px;">${msg}</td></tr>`;
                 return;
             }
 
@@ -586,7 +601,15 @@
             salaFiltroAtual = sala;
             document.querySelectorAll('.room-item').forEach(el => el.classList.remove('active'));
             elementoBotao.classList.add('active');
-            document.getElementById('panel-title-text').innerText = sala === 'TODOS' ? 'Almoxarifado Geral do Colégio' : `Ambiente: ${sala}`;
+            
+            if (sala === 'TODOS') {
+                document.getElementById('panel-title-text').innerText = 'Almoxarifado Geral do Colégio';
+            } else if (sala === 'PENDENTES') {
+                document.getElementById('panel-title-text').innerText = 'Itens Pendentes de Conferência';
+            } else {
+                document.getElementById('panel-title-text').innerText = `Ambiente: ${sala}`;
+            }
+            
             renderizarTabelaInventario();
         }
 
@@ -638,7 +661,6 @@
                 document.getElementById('reg-room').value = itemEncontrado.localizacao;
                 document.getElementById('reg-parent').value = itemEncontrado.itemPai || "";
                 
-                // Mapear Status Corretamente na Edição
                 let statusLimpo = itemEncontrado.status.toLowerCase();
                 let statusValor = "Bom";
                 if(statusLimpo.includes('manuten')) statusValor = "Em Manutenção";
@@ -648,12 +670,12 @@
                 document.getElementById('reg-status').value = statusValor;
                 
                 btnSalvar.innerText = "Atualizar Patrimônio";
-                btnExcluir.style.display = "block"; // MOSTRA O BOTÃO DE DELETAR
+                btnExcluir.style.display = "block";
                 validarCodigoPaiDigitado();
             } else {
                 h3Title.innerText = "Cadastrar Novo Patrimônio";
                 btnSalvar.innerText = "Salvar na Planilha";
-                btnExcluir.style.display = "none"; // ESCONDE O BOTÃO DE DELETAR
+                btnExcluir.style.display = "none";
             }
         }
 
