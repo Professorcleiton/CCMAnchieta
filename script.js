@@ -4,7 +4,6 @@ const SHEET_ID = '1UUiVcCaSb_9Lx7gdEpmBzeRQPlBwDZRouQC2pf1q8Vg';
 const COLS_ALUNOS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=Alunos`;
 let usuarioLogado = null, todosOsRegistros = [], cacheAlunosPorTurma = {}, turmaSelecionadaAtiva = '';
 let modalSetorAtivo = '', modalRegistrosFiltrados = [], modalItensExibidos = 50;
-let patTodos = [], patAmbientes = [], patSalaFiltro = 'TODOS', patCameraAtiva = null;
 let totalRegistrosAnterior = 0;
 let ultimoCarregamento = 0;
 const CACHE_TEMPO = 30000;
@@ -292,23 +291,13 @@ async function carregarAlunosETurmas() {
         renderizarSidebarTurmas();
     } catch (e) { console.error(e); }
 }
+
 function encontrarTurmaDoAluno(nome) {
     const nomeLimpo = nome.trim().toLowerCase();
     for (let t in cacheAlunosPorTurma) {
         if (cacheAlunosPorTurma[t].map(n => n.trim().toLowerCase()).includes(nomeLimpo)) return t;
     }
     return 'Sem Turma';
-}
-
-function abrirModuloPatrimonio() {
-    document.getElementById('app-interface').style.display = 'none';
-    document.getElementById('patrimonio-interface').style.display = 'flex';
-    patInicializar();
-}
-
-function fecharModuloPatrimonio() {
-    document.getElementById('patrimonio-interface').style.display = 'none';
-    document.getElementById('app-interface').style.display = 'flex';
 }
 
 function alternarMenuLateral() { document.getElementById('app-sidebar').classList.toggle('open'); }
@@ -435,16 +424,6 @@ async function carregarRegistrosDoServidor() {
 
     } catch (e) { console.error("Erro ao carregar dados unificados:", e); }
 }
-
-// ... (o restante das funções permanece igual ao último script.js completo)
-// Copie a partir daqui todas as outras funções que já existiam: 
-// atualizarGraficosMural, formatarDataEHora, filtrarRegistrosPorAluno,
-// verificarTeclaEnter, salvarPost, excluirRegistroServidor, editarRegistroServidor,
-// buscarAlunoGlobal, alternarTema, gerarFichaIndividualConselho, aplicarBloqueioSetores,
-// abrirModalRelatorio, abrirPainelAdmin, fecharModalAdmin, executarAcaoAluno,
-// salvarUsuarioAdmin, deletarUsuarioAdmin, abrirPreConselho, enviarPreConselho,
-// abrirCaixaTexto, fecharCaixaTexto, abrirModalSaida, fecharModalSaida,
-// fecharModalSaidaEvent, registrarSaidaAntecipada, patInicializar, etc.
 
 // ... (o restante das funções permanece igual ao seu último script.js completo)
 // Copie a partir daqui todas as outras funções que já existiam: atualizarGraficosMural, filtrarRegistrosPorAluno, etc.
@@ -1253,208 +1232,4 @@ async function registrarSaidaAntecipada() {
     } catch (e) {
         mostrarToast('Erro ao registrar a ocorrência.', 'erro');
     }
-}
-
-// ========== MÓDULO PATRIMÔNIO ==========
-function patInicializar() {
-    document.getElementById('pat-reg-resp').value = usuarioLogado.nome || '';
-    patCarregarAmbientes(); patCarregarItens();
-}
-
-function patAlternarAba(aba) {
-    document.querySelectorAll('.pat-tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelector(`.pat-tab-btn:nth-child(${aba === 'MOVER' ? 1 : aba === 'CADASTRAR' ? 2 : 3})`).classList.add('active');
-    document.getElementById('pat-panel-mover').style.display = aba === 'MOVER' ? 'flex' : 'none';
-    document.getElementById('pat-panel-cadastrar').style.display = aba === 'CADASTRAR' ? 'flex' : 'none';
-    document.getElementById('pat-panel-ambientes').style.display = aba === 'AMBIENTES' ? 'flex' : 'none';
-    if (aba === 'CADASTRAR') patResetarCadastro();
-}
-
-async function patCarregarAmbientes() {
-    try {
-        const r = await fetch(`${APPS_SCRIPT_URL}?aba=ambientes`);
-        patAmbientes = await r.json();
-        const sidebar = document.getElementById('pat-room-list');
-        sidebar.innerHTML = `<li class="pat-room-item ${patSalaFiltro === 'TODOS' ? 'active' : ''}" onclick="patFiltrarSala('TODOS', this)"><i class="fa-solid fa-boxes-stacked"></i> Ver Tudo</li>`;
-        patAmbientes.forEach(s => {
-            sidebar.innerHTML += `<li class="pat-room-item" onclick="patFiltrarSala('${s}', this)"><i class="fa-solid fa-location-dot"></i> ${s}</li>`;
-        });
-        ['pat-trans-room','pat-reg-room'].forEach(id => {
-            const sel = document.getElementById(id);
-            sel.innerHTML = '<option value="">-- Selecione --</option>';
-            patAmbientes.forEach(s => sel.innerHTML += `<option>${s}</option>`);
-        });
-        document.getElementById('pat-mini-amb-list').innerHTML = patAmbientes.map(s => `<li style="display:flex;justify-content:space-between;padding:8px 12px;">${s} <button onclick="patDeletarAmbiente('${s}')" style="background:none;border:none;color:red;">🗑</button></li>`).join('');
-    } catch (e) { console.error(e); }
-}
-
-async function patCarregarItens() {
-    try {
-        const r = await fetch(`${APPS_SCRIPT_URL}?aba=patrimonio`);
-        patTodos = await r.json();
-        patRenderizarTabela();
-    } catch (e) {}
-}
-
-function patRenderizarTabela() {
-    const tbody = document.getElementById('pat-table-body');
-    const itens = patSalaFiltro === 'TODOS' ? patTodos : patTodos.filter(i => i.localizacao === patSalaFiltro);
-    if (!itens.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Nenhum item.</td></tr>'; return; }
-    tbody.innerHTML = itens.map(i => {
-        const st = i.status.toLowerCase(), cls = st.includes('manuten') ? 'status-manutencao' : st.includes('danific') ? 'status-danificado' : st.includes('inserv') ? 'status-inservivel' : st.includes('localiz') ? 'status-naolocalizado' : 'status-bom';
-        const vinculo = i.itemPai ? `<br><span class="pat-item-vinculo">Pai: ${i.itemPai}</span>` : '';
-        return `<tr style="cursor:pointer" onclick="patCarregarMovimentacao('${i.codigo}')"><td>${i.codigo}</td><td>${i.item}${vinculo}</td><td>${i.categoria}</td><td>${i.localizacao}</td><td>${i.responsavel || '-'}</td><td>${i.dataAtualizacao || '-'}</td><td><span class="pat-status-badge ${cls}">${i.status}</span></td></tr>`;
-    }).join('');
-}
-
-function patFiltrarSala(sala, el) {
-    patSalaFiltro = sala;
-    document.querySelectorAll('.pat-room-item').forEach(e => e.classList.remove('active'));
-    el.classList.add('active');
-    document.getElementById('pat-panel-title').innerText = sala === 'TODOS' ? 'Almoxarifado Geral' : `Ambiente: ${sala}`;
-    patRenderizarTabela();
-}
-
-function patFiltrarTabela() {
-    const termo = document.getElementById('pat-search-input').value.toLowerCase();
-    if (!termo) { patRenderizarTabela(); return; }
-    const tbody = document.getElementById('pat-table-body');
-    const filtrados = patTodos.filter(i => i.codigo.toLowerCase().includes(termo) || i.item.toLowerCase().includes(termo));
-    tbody.innerHTML = filtrados.map(i => `<tr onclick="patCarregarMovimentacao('${i.codigo}')"><td>${i.codigo}</td><td>${i.item}</td><td>${i.categoria}</td><td>${i.localizacao}</td><td>${i.responsavel}</td><td>${i.dataAtualizacao}</td><td>${i.status}</td></tr>`).join('');
-}
-
-function patBuscarItem() {
-    const cod = document.getElementById('pat-trans-code').value.trim();
-    const item = patTodos.find(i => i.codigo === cod);
-    const preview = document.getElementById('pat-item-preview'), btn = document.getElementById('pat-btn-mover');
-    if (item) {
-        document.getElementById('pat-prev-nome').innerText = item.item;
-        document.getElementById('pat-prev-local').innerText = item.localizacao;
-        document.getElementById('pat-prev-resp').innerText = item.responsavel || '-';
-        preview.style.display = 'block'; btn.disabled = false;
-    } else { preview.style.display = 'none'; btn.disabled = true; }
-}
-
-function patCarregarMovimentacao(codigo) {
-    patAlternarAba('MOVER');
-    document.getElementById('pat-trans-code').value = codigo;
-    patBuscarItem();
-}
-
-function patLigarCamera(inputId, containerId) {
-    const container = document.getElementById(containerId);
-    if (patCameraAtiva) { patDesligarCamera(); return; }
-    container.style.display = 'block';
-    patCameraAtiva = new Html5Qrcode(containerId);
-    patCameraAtiva.start({ facingMode: "environment" }, { fps: 25, qrbox: { width: 280, height: 140 } },
-        (decoded) => { document.getElementById(inputId).value = decoded.trim(); patDesligarCamera(); if (inputId === 'pat-trans-code') patBuscarItem(); else patChecarEdicao(); },
-        () => {}
-    ).catch(() => { alert('Permita a câmera.'); patDesligarCamera(); });
-}
-
-function patDesligarCamera() {
-    document.querySelectorAll('.pat-camera-container').forEach(c => c.style.display = 'none');
-    if (patCameraAtiva) { patCameraAtiva.stop().then(() => patCameraAtiva = null).catch(() => patCameraAtiva = null); }
-}
-
-function patChecarEdicao() {
-    const cod = document.getElementById('pat-reg-code').value.trim();
-    const item = patTodos.find(i => i.codigo === cod);
-    document.getElementById('pat-cad-title').innerHTML = item ? '<i class="fa-solid fa-pen-to-square"></i> Modo Edição' : 'Cadastrar Novo';
-    document.getElementById('pat-btn-cadastrar').innerText = item ? 'Atualizar' : 'Salvar';
-    document.getElementById('pat-btn-excluir').style.display = item ? 'block' : 'none';
-    if (item) {
-        document.getElementById('pat-reg-item').value = item.item;
-        document.getElementById('pat-reg-cat').value = item.categoria;
-        document.getElementById('pat-reg-room').value = item.localizacao;
-        document.getElementById('pat-reg-parent').value = item.itemPai || '';
-        document.getElementById('pat-reg-status').value = item.status;
-    }
-}
-
-function patResetarCadastro() {
-    ['pat-reg-code','pat-reg-item','pat-reg-parent'].forEach(id => document.getElementById(id).value = '');
-    document.getElementById('pat-cad-title').innerText = 'Cadastrar Novo';
-    document.getElementById('pat-btn-cadastrar').innerText = 'Salvar';
-    document.getElementById('pat-btn-excluir').style.display = 'none';
-}
-
-async function patExecutarTransferencia() {
-    const cod = document.getElementById('pat-trans-code').value.trim();
-    const sala = document.getElementById('pat-trans-room').value;
-    const resp = document.getElementById('pat-trans-resp').value.trim();
-    const status = document.getElementById('pat-trans-status').value;
-    if (!cod || !sala || !resp) {
-        mostrarToast('Preencha todos os campos da transferência.', 'aviso');
-        return;
-    }
-    try {
-        await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ operacao: "PAT_TRANSFERIR", codigo: cod, novaLocalizacao: sala, responsavel: resp, status: status || null }) });
-        mostrarToast('Transferência concluída com sucesso!', 'sucesso');
-        document.getElementById('pat-trans-code').value = ''; document.getElementById('pat-item-preview').style.display = 'none';
-        await patCarregarItens();
-    } catch (e) { 
-        mostrarToast('Erro ao processar transferência.', 'erro'); 
-    }
-}
-
-async function patExecutarCadastro() {
-    const payload = {
-        operacao: "PAT_CADASTRAR",
-        codigo: document.getElementById('pat-reg-code').value.trim(),
-        item: document.getElementById('pat-reg-item').value.trim(),
-        categoria: document.getElementById('pat-reg-cat').value,
-        localizacao: document.getElementById('pat-reg-room').value,
-        responsavel: document.getElementById('pat-reg-resp').value.trim(),
-        status: document.getElementById('pat-reg-status').value,
-        itemPai: document.getElementById('pat-reg-parent').value.trim()
-    };
-    if (!payload.codigo || !payload.item || !payload.responsavel || !payload.localizacao) {
-        mostrarToast('Preencha os campos obrigatórios.', 'aviso');
-        return;
-    }
-    try {
-        await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-        mostrarToast('Item salvo com sucesso no patrimônio!', 'sucesso'); 
-        patResetarCadastro(); await patCarregarItens();
-    } catch (e) { 
-        mostrarToast('Erro ao cadastrar item.', 'erro'); 
-    }
-}
-
-async function patExcluirItem() {
-    const cod = document.getElementById('pat-reg-code').value.trim();
-    if (!cod || !confirm('Excluir permanentemente?')) return;
-    try {
-        await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ operacao: "PAT_EXCLUIR", codigo: cod }) });
-        mostrarToast('Item excluído permanentemente.', 'sucesso'); 
-        patResetarCadastro(); await patCarregarItens();
-    } catch (e) { 
-        mostrarToast('Erro ao excluir item.', 'erro'); 
-    }
-}
-
-async function patAdicionarAmbiente() {
-    const nome = document.getElementById('pat-new-amb').value.trim();
-    if (!nome) return;
-    try {
-        await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ operacao: "AMB_ADICIONAR", ambiente: nome }) });
-        document.getElementById('pat-new-amb').value = ''; await patCarregarAmbientes();
-    } catch (e) { alert('Erro.'); }
-}
-
-async function patDeletarAmbiente(nome) {
-    if (!confirm(`Remover "${nome}"?`)) return;
-    try {
-        await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ operacao: "AMB_DELETAR", ambiente: nome }) });
-        await patCarregarAmbientes();
-    } catch (e) { alert('Erro.'); }
-}
-
-function patValidarPai() {
-    const cod = document.getElementById('pat-reg-parent').value.trim();
-    const preview = document.getElementById('pat-reg-parent-preview');
-    if (!cod) { preview.innerText = ''; return; }
-    const pai = patTodos.find(i => i.codigo === cod);
-    preview.innerHTML = pai ? '✅ Pai: ' + pai.item : '⚠️ Não localizado.';
 }
