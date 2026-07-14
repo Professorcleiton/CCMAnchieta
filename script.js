@@ -363,7 +363,7 @@ async function carregarRegistrosDoServidor() {
         
         todosOsRegistros = [];
 
-        // 1. Apontamentos Normais
+        // 1. Apontamentos
         data.apontamentos.forEach(row => {
             todosOsRegistros.push({
                 idLinha: row.idLinha,
@@ -376,7 +376,7 @@ async function carregarRegistrosDoServidor() {
             });
         });
 
-        // 2. Documentos Secretaria
+        // 2. Documentos
         if (data.documentos) {
             data.documentos.forEach(doc => {
                 const linkDownload = doc.link ? ' <a href="' + doc.link + '" target="_blank" style="color:#4f46e5;text-decoration:underline;">📎 Baixar</a>' : '';
@@ -391,7 +391,7 @@ async function carregarRegistrosDoServidor() {
             });
         }
 
-        // 3. Ocorrências (Saídas/Atrasos)
+        // 3. Ocorrências
         if (data.ocorrencias) {
             data.ocorrencias.forEach(oc => {
                 const icone = oc.tipo === "Saída Antecipada" ? "🚪" : "⏰";
@@ -407,7 +407,7 @@ async function carregarRegistrosDoServidor() {
             });
         }
 
-        // 4. Atas Disciplinares (CORRIGIDO - sem template literals)
+        // 4. Atas Disciplinares
         if (data.atas) {
             data.atas.forEach(ata => {
                 const linkHtml = (usuarioLogado && usuarioLogado.nivel >= 3) ?
@@ -423,20 +423,20 @@ async function carregarRegistrosDoServidor() {
             });
         }
 
-        // 5. FATOS SEED-PR (corrigido - sem template literals)
+        // 5. Fatos SEED-PR
         if (data.fatos_seed) {
             data.fatos_seed.forEach(fato => {
-                let isPositivo = fato.tipo.toLowerCase().includes("positivo");
-                let iconeFato = isPositivo ? "🌟" : "⚠️";
-                let corFato = isPositivo ? "#16a34a" : "#dc2626";
+                const isPositivo = fato.tipo.toLowerCase().includes("positivo");
+                const iconeFato = isPositivo ? "🌟" : "⚠️";
+                const corFato = isPositivo ? "#16a34a" : "#dc2626";
 
                 todosOsRegistros.push({
                     aluno: fato.aluno,
                     setor: 'pedagogico',
-                    texto: '<div style="background-color: #f8fafc; border-left: 4px solid ' + corFato + '; padding: 10px; margin-top: 5px; border-radius: 4px; border: 1px solid #e2e8f0;">' +
-                                '<strong style="color: ' + corFato + '; font-size: 13px;">' + iconeFato + ' Fato ' + fato.tipo + ' (SEED-PR)</strong><br>' + 
-                                '<span style="font-size: 13px; color: #334155;">' + fato.descricao + '</span>' +
-                            '</div>',
+                    texto: '<div style="background-color:#f8fafc;border-left:4px solid ' + corFato + ';padding:10px;margin-top:5px;border-radius:4px;border:1px solid #e2e8f0;">' +
+                           '<strong style="color:' + corFato + ';font-size:13px;">' + iconeFato + ' Fato ' + fato.tipo + ' (SEED-PR)</strong><br>' +
+                           '<span style="font-size:13px;color:#334155;">' + fato.descricao + '</span>' +
+                           '</div>',
                     funcionario: 'Sistema Estadual',
                     dataAtual: fato.data,
                     tipo: 'fato_seed'
@@ -449,7 +449,7 @@ async function carregarRegistrosDoServidor() {
         if (document.getElementById('select-alunos').value) filtrarRegistrosPorAluno();
 
     } catch (e) { 
-        console.error("Erro ao carregar dados unificados do servidor:", e); 
+        console.error("Erro ao carregar dados:", e); 
     }
 }
 
