@@ -379,11 +379,11 @@ async function carregarRegistrosDoServidor() {
         // 2. Documentos Secretaria
         if (data.documentos) {
             data.documentos.forEach(doc => {
-                const linkDownload = doc.link ? ` <a href="${doc.link}" target="_blank" style="color:#4f46e5;text-decoration:underline;">📎 Baixar</a>` : '';
+                const linkDownload = doc.link ? ' <a href="' + doc.link + '" target="_blank" style="color:#4f46e5;text-decoration:underline;">📎 Baixar</a>' : '';
                 todosOsRegistros.push({
                     aluno: doc.aluno,
                     setor: 'adm',
-                    texto: `📄 Documento: ${doc.documento} - Status: ${doc.status}${linkDownload}`,
+                    texto: '📄 Documento: ' + doc.documento + ' - Status: ' + doc.status + linkDownload,
                     funcionario: 'Secretaria',
                     dataAtual: doc.data,
                     tipo: 'documento'
@@ -399,7 +399,7 @@ async function carregarRegistrosDoServidor() {
                 todosOsRegistros.push({
                     aluno: oc.aluno,
                     setor: 'adm',
-                    texto: `${icone} ${oc.tipo}: ${oc.motivo} | Autorizado por: ${oc.autorizador} | Horário: ${horario}`,
+                    texto: icone + ' ' + oc.tipo + ': ' + oc.motivo + ' | Autorizado por: ' + oc.autorizador + ' | Horário: ' + horario,
                     funcionario: oc.autorizador || 'Secretaria',
                     dataAtual: oc.data,
                     tipo: 'ocorrencia'
@@ -407,15 +407,15 @@ async function carregarRegistrosDoServidor() {
             });
         }
 
-        // 4. Atas Disciplinares
+        // 4. Atas Disciplinares (CORRIGIDO - sem template literals)
         if (data.atas) {
             data.atas.forEach(ata => {
                 const linkHtml = (usuarioLogado && usuarioLogado.nivel >= 3) ?
-                    ` <a href="${ata.link}" target="_blank" style="color:#4f46e5;text-decoration:underline;">📎 Ver Ata</a>` : '';
+                    ' <a href="' + ata.link + '" target="_blank" style="color:#4f46e5;text-decoration:underline;">📎 Ver Ata</a>' : '';
                 todosOsRegistros.push({
                     aluno: ata.aluno,
                     setor: 'adm',
-                    texto: `📁 Ata Disciplinar nº ${ata.numero}: ${ata.aluno} — ${ata.data}${linkHtml}`,
+                    texto: '📁 Ata Disciplinar nº ' + ata.numero + ': ' + ata.aluno + ' — ' + ata.data + linkHtml,
                     funcionario: 'Coordenação',
                     dataAtual: ata.data,
                     tipo: 'ata'
@@ -423,22 +423,20 @@ async function carregarRegistrosDoServidor() {
             });
         }
 
-        // ==========================================
-        // 5. FATOS SEED-PR (A NOVA IMPORTAÇÃO)
-        // ==========================================
+        // 5. FATOS SEED-PR (corrigido - sem template literals)
         if (data.fatos_seed) {
             data.fatos_seed.forEach(fato => {
                 let isPositivo = fato.tipo.toLowerCase().includes("positivo");
                 let iconeFato = isPositivo ? "🌟" : "⚠️";
-                let corFato = isPositivo ? "#16a34a" : "#dc2626"; // Verde para positivo, Vermelho para negativo
+                let corFato = isPositivo ? "#16a34a" : "#dc2626";
 
                 todosOsRegistros.push({
                     aluno: fato.aluno,
-                    setor: 'pedagogico', // Vai aparecer na coluna Pedagógico do painel do aluno
-                    texto: `<div style="background-color: #f8fafc; border-left: 4px solid ${corFato}; padding: 10px; margin-top: 5px; border-radius: 4px; border: 1px solid #e2e8f0;">
-                                <strong style="color: ${corFato}; font-size: 13px;">${iconeFato} Fato ${fato.tipo} (SEED-PR)</strong><br> 
-                                <span style="font-size: 13px; color: #334155;">${fato.descricao}</span>
-                            </div>`,
+                    setor: 'pedagogico',
+                    texto: '<div style="background-color: #f8fafc; border-left: 4px solid ' + corFato + '; padding: 10px; margin-top: 5px; border-radius: 4px; border: 1px solid #e2e8f0;">' +
+                                '<strong style="color: ' + corFato + '; font-size: 13px;">' + iconeFato + ' Fato ' + fato.tipo + ' (SEED-PR)</strong><br>' + 
+                                '<span style="font-size: 13px; color: #334155;">' + fato.descricao + '</span>' +
+                            '</div>',
                     funcionario: 'Sistema Estadual',
                     dataAtual: fato.data,
                     tipo: 'fato_seed'
