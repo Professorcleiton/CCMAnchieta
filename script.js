@@ -363,7 +363,7 @@ async function carregarRegistrosDoServidor() {
         
         todosOsRegistros = [];
 
-        // 1. Apontamentos
+        // 1. Apontamentos Pedagógicos
         data.apontamentos.forEach(row => {
             todosOsRegistros.push({
                 idLinha: row.idLinha,
@@ -376,10 +376,10 @@ async function carregarRegistrosDoServidor() {
             });
         });
 
-        // 2. Documentos
+        // 2. Documentos da Secretaria
         if (data.documentos) {
             data.documentos.forEach(doc => {
-                const linkDownload = doc.link ? ' <a href="' + doc.link + '" target="_blank" style="color:#4f46e5;text-decoration:underline;">📎 Baixar</a>' : '';
+                var linkDownload = doc.link ? ' <a href="' + doc.link + '" target="_blank" style="color:#4f46e5;text-decoration:underline;">📎 Baixar</a>' : '';
                 todosOsRegistros.push({
                     aluno: doc.aluno,
                     setor: 'adm',
@@ -391,11 +391,11 @@ async function carregarRegistrosDoServidor() {
             });
         }
 
-        // 3. Ocorrências
+        // 3. Ocorrências (Saídas/Atrasos)
         if (data.ocorrencias) {
             data.ocorrencias.forEach(oc => {
-                const icone = oc.tipo === "Saída Antecipada" ? "🚪" : "⏰";
-                const horario = oc.data ? oc.data.split(' ')[1] : '';
+                var icone = oc.tipo === "Saída Antecipada" ? "🚪" : "⏰";
+                var horario = oc.data ? oc.data.split(' ')[1] : '';
                 todosOsRegistros.push({
                     aluno: oc.aluno,
                     setor: 'adm',
@@ -410,7 +410,7 @@ async function carregarRegistrosDoServidor() {
         // 4. Atas Disciplinares
         if (data.atas) {
             data.atas.forEach(ata => {
-                const linkHtml = (usuarioLogado && usuarioLogado.nivel >= 3) ?
+                var linkHtml = (usuarioLogado && usuarioLogado.nivel >= 3) ?
                     ' <a href="' + ata.link + '" target="_blank" style="color:#4f46e5;text-decoration:underline;">📎 Ver Ata</a>' : '';
                 todosOsRegistros.push({
                     aluno: ata.aluno,
@@ -426,9 +426,9 @@ async function carregarRegistrosDoServidor() {
         // 5. Fatos SEED-PR
         if (data.fatos_seed) {
             data.fatos_seed.forEach(fato => {
-                const isPositivo = fato.tipo.toLowerCase().includes("positivo");
-                const iconeFato = isPositivo ? "🌟" : "⚠️";
-                const corFato = isPositivo ? "#16a34a" : "#dc2626";
+                var isPositivo = fato.tipo.toLowerCase().indexOf('positivo') !== -1;
+                var iconeFato = isPositivo ? '🌟' : '⚠️';
+                var corFato = isPositivo ? '#16a34a' : '#dc2626';
 
                 todosOsRegistros.push({
                     aluno: fato.aluno,
