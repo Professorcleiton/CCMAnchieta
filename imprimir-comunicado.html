@@ -148,13 +148,43 @@
     <div style="margin-top: 20px;" class="botoes-controle">
         <button class="btn-laranja" id="btnEmitir" onclick="emitirEImprimir()">✅ Emitir e Imprimir</button>
         <button class="btn-imprimir" id="btnImprimir" onclick="window.print()" style="display: none;">🖨️ Imprimir 2ª via</button>
+        <button class="btn-emitir" style="background-color: #f59e0b;" onclick="abrirModalNovoFato()">✍️ Registrar Fato</button>
     </div>
 </div>
 
 <div class="comunicados-container" id="conteudoComunicado" style="display: none;">
     <!-- Comunicados serão inseridos aqui -->
 </div>
-
+<!-- Modal Registrar Fato -->
+<div id="modal-novo-fato" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center;">
+    <div class="modal-content" style="background:white; padding:25px; border-radius:10px; max-width:500px; width:90%;">
+        <h3 style="margin-top:0;">Registrar Novo Fato Observado</h3>
+        <div style="margin-bottom:15px;">
+            <label>Aluno:</label>
+            <input list="listaAlunosFato" id="fato-aluno" placeholder="Digite o nome..." style="width:100%; padding:8px; border:1px solid #ccc; border-radius:5px;">
+            <datalist id="listaAlunosFato"></datalist>
+        </div>
+        <div style="margin-bottom:15px;">
+            <label>Tipo:</label>
+            <select id="fato-tipo" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:5px;">
+                <option value="Positivo">Positivo</option>
+                <option value="Negativo">Negativo</option>
+            </select>
+        </div>
+        <div style="margin-bottom:15px;">
+            <label>Descrição:</label>
+            <textarea id="fato-descricao" rows="3" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:5px;"></textarea>
+        </div>
+        <div style="margin-bottom:15px;">
+            <label>Data do Fato:</label>
+            <input type="date" id="fato-data" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:5px;">
+        </div>
+        <div style="display:flex; gap:10px; justify-content:flex-end;">
+            <button onclick="fecharModalNovoFato()" style="padding:10px 20px; border:none; border-radius:5px; background:#ccc; cursor:pointer;">Cancelar</button>
+            <button onclick="salvarNovoFato()" style="padding:10px 20px; border:none; border-radius:5px; background:#2e7d32; color:white; cursor:pointer;">Salvar</button>
+        </div>
+    </div>
+</div>
 <script>
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
 
@@ -362,6 +392,64 @@
             document.getElementById('btnEmitir').innerText = '✅ Emitir e Imprimir';
         }
     }
+    // Abrir modal de novo fato (preenche lista de alunos se necessário)
+async function abrirModalNovoFato() {
+    // Garantir que a lista de alunos esteja carregada
+    if (document.getElementById('listaAlunosFato').options.length === 0) {
+        await carregarListaAlunos(); // já existente
+        // Copiar opções para o datalist do modal
+        const datalistOrig = document.getElementById('listaAlunos');
+        const datalistFato = document.getElementById('listaAlunosFato');
+        datalistFato.innerHTML = datalistOrig.innerHTML;
+    }
+    // Preencher data atual
+    const hoje = new Date().toISOString().split('T')[0];
+    document.getElementById('fato-data').value = hoje;
+    document.getElementById('modal-novo-fato').style.display = 'flex';
+}
+
+function fecharModalNovoFato() {
+    document.getElementById('modal-novo-fato').style.display = 'none';
+}
+
+async function salvarNovoFato() {
+    const aluno = document.getElementById('fato-aluno').value.trim();
+    const tipo = document.getElementById('fato-tipo').value;
+    const descricao = document.getElementById('fato-descricao').value.trim();
+    const data = document.getElementById('fato-data').value;
+
+    if (!aluno || !descricao || !data) {
+        alert('Preencha todos os campos.');
+        return;
+    }
+
+    try {
+        const res = await fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                operacao: "SALVAR_FATO_SEED",
+                aluno: aluno,
+                tipo: tipo,
+                descricao: descricao,
+                data: data,
+                emailOperador: user.email || 'sistema'
+            })
+        });
+        const result = await res.json();
+        if (result.status === 'success') {
+            alert('Fato registrado com sucesso!');
+            fecharModalNovoFato();
+            // Limpar campos
+            document.getElementById('fato-aluno').value = '';
+            document.getElementById('fato-descricao').value = '';
+        } else {
+            alert('Erro: ' + result.message);
+        }
+    } catch (e) {
+        alert('Erro de conexão.');
+    }
+}
 </script>
 </body>
 </html>
