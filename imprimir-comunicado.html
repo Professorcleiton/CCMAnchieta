@@ -355,7 +355,7 @@ async function emitirEImprimir() {
     try {
         const res = await fetch(APPS_SCRIPT_URL, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'text/plain' },
             body: JSON.stringify({
                 operacao: "marcar_fatos_emitidos",
                 aluno: aluno,
@@ -417,7 +417,7 @@ async function salvarNovoFato() {
     try {
         const res = await fetch(APPS_SCRIPT_URL, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'text/plain' },
             body: JSON.stringify({
                 operacao: "SALVAR_FATO_SEED",
                 aluno: aluno,
