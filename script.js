@@ -229,7 +229,7 @@ function inicializarPainel() {
             btnSec.style.display = 'none';
         }
     }
-
+    verificarBotaoComunicado();
     carregarAlunosETurmas(); 
     carregarRegistrosDoServidor();
 }
