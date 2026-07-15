@@ -113,20 +113,32 @@
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
 
     // Verificar autenticação (MEIVS ou nível >= 4)
-    const user = JSON.parse(localStorage.getItem('sgi_ccma_session') || '{}');
-    if (!user.setor || (user.setor.toLowerCase() !== 'meivs' && (user.nivel || 0) < 4)) {
-        document.getElementById('painelControle').innerHTML = '<div class="erro">Acesso restrito. Apenas MEIVS ou administradores nível 4 podem emitir comunicados.</div>';
-    } else {
-        // Carregar lista de alunos para autocomplete
-        carregarListaAlunos();
-        // Verificar se veio um aluno via URL
-        const params = new URLSearchParams(window.location.search);
-        const alunoUrl = params.get('aluno');
-        if (alunoUrl) {
-            document.getElementById('alunoSelect').value = alunoUrl;
-            carregarFatos();
-        }
+ // Verificar token de autorização (MEIVS ou nível >= 4)
+const params = new URLSearchParams(window.location.search);
+const token = params.get('token');
+let user = null;
+
+if (token) {
+    try {
+        const decoded = atob(token).split(':');
+        user = { email: decoded[0], nivel: parseInt(decoded[1]) || 0, setor: decoded[2] };
+    } catch (e) {
+        user = null;
     }
+}
+
+if (!user || (user.setor !== 'meivs' && user.nivel < 4)) {
+    document.getElementById('painelControle').innerHTML = '<div class="erro">Acesso restrito. Apenas MEIVS ou administradores nível 4 podem emitir comunicados.</div>';
+} else {
+    // Carregar lista de alunos para autocomplete
+    carregarListaAlunos();
+    // Verificar se veio um aluno via URL
+    const alunoUrl = params.get('aluno');
+    if (alunoUrl) {
+        document.getElementById('alunoSelect').value = alunoUrl;
+        carregarFatos();
+    }
+}
 
     async function carregarListaAlunos() {
         try {
