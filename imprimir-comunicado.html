@@ -272,19 +272,17 @@
         const hoje = new Date().toLocaleDateString('pt-BR');
 
         let html = `
-        <div class="cabecalho">
-            <div class="logos">
-                <img src="img/logoA.png" alt="Logo Escola">
-                <img src="img/nreumuarama.jpg" alt="NRE Umuarama">
-            </div>
-            <div class="info-escola">
-                <h2>Anchieta, C E C-M-Ef M N</h2>
-                <strong>Colégio Cívico Militar Anchieta</strong><br>
-                Av. Wenceslau Bras, 356 – Sul Brasileira<br>
-                87.400-000 – Cruzeiro do Oeste – PR<br>
-                Telefone: (44) 3676-1247 | E-mail: cztanchieta@seed.pr.gov.br
-            </div>
-        </div>
+<div class="cabecalho">
+    <img src="img/logoA.png" alt="Logo Escola" class="logo-esquerda">
+    <div class="info-escola">
+        <h2>Anchieta, C E C-M-Ef M N</h2>
+        <strong>Colégio Cívico Militar Anchieta</strong><br>
+        Av. Wenceslau Bras, 356 – Sul Brasileira<br>
+        87.400-000 – Cruzeiro do Oeste – PR<br>
+        Telefone: (44) 3676-1247 | E-mail: cztanchieta@seed.pr.gov.br
+    </div>
+    <img src="img/nreumuarama.jpg" alt="Logo NRE" class="logo-direita">
+</div>
         <div class="titulo-comunicado">Comunicado de Fato Observado – F.O.</div>
         <div class="dados-aluno">
             <div>Aluno(a): <span>${data.aluno}</span></div>
