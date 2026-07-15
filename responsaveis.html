@@ -201,13 +201,17 @@ O sistema reconhece mesmo sem acentos ou letras maiúsculas."></textarea>
                     })
                 });
                 const data = await res.json();
-                if (data.status === "success") {
-                    msg.innerText = '✅ Login bem-sucedido! Redirecionando...';
-                    sessionStorage.setItem('resp_logado', JSON.stringify(data));
-                    setTimeout(() => {
-                        window.location.href = 'painel-responsavel.html';
-                    }, 1500);
-                } else {
+ if (data.status === "success") {
+    msg.innerText = '✅ Login bem-sucedido! Redirecionando...';
+    sessionStorage.setItem('resp_logado', JSON.stringify(data));
+
+    // Ativa notificações push (não bloqueia o redirecionamento)
+    ativarPush(email);
+
+    setTimeout(() => {
+        window.location.href = 'painel-responsavel.html';
+    }, 1500);
+} else {
                     msg.innerText = '❌ E-mail ou senha incorretos.';
                 }
             } catch (e) {
@@ -283,6 +287,75 @@ O sistema reconhece mesmo sem acentos ou letras maiúsculas."></textarea>
                 btn.innerText = 'Cadastrar';
             }
         }
+
+        // =============================================
+// NOTIFICAÇÕES PUSH
+// =============================================
+
+const VAPID_PUBLIC_KEY  = 'BNJ9Pz0rHohfjvPgrPNqahNelLVvKARagFsoAo8UOU0B2ORFFGHt4kmumrPr698MtL6rOaIht8QjX5XXncehrB0';
+
+// Converte chave VAPID para Uint8Array (necessário para a inscrição)
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
+// Função que ativa as notificações push para o responsável logado
+async function ativarPush(emailResponsavel) {
+  // Verifica se o navegador suporta os recursos necessários
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+    console.warn('Push não suportado neste navegador.');
+    return;
+  }
+
+  try {
+    // 1. Registrar o service worker (já existente)
+    const registration = await navigator.serviceWorker.register('/sw.js');
+    await navigator.serviceWorker.ready;
+
+    // 2. Pedir permissão de notificação (se ainda não tiver)
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') {
+      console.warn('Permissão de notificação negada.');
+      return;
+    }
+
+    // 3. Inscrever-se no serviço de push
+    let subscription = await registration.pushManager.getSubscription();
+    if (!subscription) {
+      subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+      });
+    }
+
+    // 4. Enviar o objeto subscription (token) para o Google Apps Script
+    const response = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        operacao: 'salvar_token_push',
+        email: emailResponsavel,                     // e-mail do responsável logado
+        token: JSON.stringify(subscription)          // subscription completa
+      })
+    });
+
+    const result = await response.json();
+    if (result.status === 'success') {
+      console.log('✅ Token push salvo com sucesso!');
+    } else {
+      console.error('❌ Erro ao salvar token push:', result);
+    }
+  } catch (err) {
+    console.error('Erro ao ativar push:', err);
+  }
+}
     </script>
 </body>
 </html>
