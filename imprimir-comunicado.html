@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comunicado de Fato Observado – SEED</title>
+    <style>
+        :root { --verde: #2e7d32; --vermelho: #c62828; --cinza: #f4f6f8; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: var(--cinza);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            color: #333;
+        }
+        .painel-controle {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 30px;
+        }
+        .painel-controle h3 { margin-bottom: 15px; }
+        .painel-controle select, .painel-controle input {
+            padding: 10px; width: 100%; font-size: 16px;
+            margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px;
+        }
+        .btn-emitir {
+            background: var(--verde); color: white;
+            border: none; padding: 12px 20px; font-size: 16px; font-weight: bold;
+            border-radius: 5px; cursor: pointer; margin-right: 10px;
+        }
+        .btn-emitir:disabled { background: #aaa; cursor: not-allowed; }
+        .comunicado {
+            background: white; padding: 40px; border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            width: 210mm; min-height: 297mm; margin: 0 auto; position: relative;
+        }
+        .cabecalho {
+            display: flex; align-items: center; border-bottom: 3px solid var(--verde);
+            padding-bottom: 15px; margin-bottom: 25px;
+        }
+        .cabecalho img { height: 70px; margin-right: 20px; }
+        .cabecalho .info-escola { font-size: 13px; color: #555; line-height: 1.4; }
+        .cabecalho h2 { color: var(--verde); font-size: 18px; margin-bottom: 5px; }
+        .titulo-comunicado {
+            text-align: center; font-size: 22px; font-weight: bold;
+            margin: 25px 0 20px; color: #222;
+        }
+        .dados-aluno {
+            font-size: 16px; margin-bottom: 25px; display: flex; justify-content: space-between;
+        }
+        .dados-aluno span { font-weight: bold; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+        th { background: var(--verde); color: white; padding: 10px; text-align: left; }
+        td { padding: 10px; border-bottom: 1px solid #ddd; vertical-align: top; }
+        .tipo-positivo { color: var(--verde); font-weight: bold; }
+        .tipo-negativo { color: var(--vermelho); font-weight: bold; }
+        .assinaturas { display: flex; justify-content: space-between; margin-top: 50px; }
+        .linha-ass { border-top: 1px solid #000; width: 45%; padding-top: 8px; text-align: center; font-size: 14px; }
+        .protocolo {
+            margin-top: 30px; font-size: 13px; color: #777;
+            display: flex; justify-content: space-between;
+            border-top: 1px dashed #ccc; padding-top: 10px;
+        }
+        .marca-dagua {
+            position: absolute; top: 40%; left: 50%;
+            transform: translate(-50%, -50%) rotate(-30deg);
+            font-size: 80px; color: rgba(0,0,0,0.03); font-weight: bold;
+            pointer-events: none; white-space: nowrap;
+        }
+        @media print {
+            body { background: white; padding: 0; }
+            .painel-controle { display: none; }
+            .comunicado { box-shadow: none; border-radius: 0; width: 100%; height: auto; }
+        }
+        .btn-imprimir {
+            background: #1565c0; color: white; border: none;
+            padding: 12px 20px; font-size: 16px; font-weight: bold;
+            border-radius: 5px; cursor: pointer;
+        }
+        .erro { color: red; font-weight: bold; text-align: center; }
+        .loading { text-align: center; font-size: 18px; color: #666; }
+    </style>
+</head>
+<body>
+
+<div class="painel-controle" id="painelControle">
+    <h3>📄 Emitir Comunicado de Fato Observado</h3>
+    <label for="alunoSelect">Selecione o aluno:</label>
+    <input list="listaAlunos" id="alunoSelect" placeholder="Digite o nome do aluno...">
+    <datalist id="listaAlunos"></datalist>
+    <button class="btn-emitir" id="btnCarregar" onclick="carregarFatos()">🔍 Buscar fatos pendentes</button>
+    <div id="msgErro" class="erro"></div>
+</div>
+
+<div id="conteudoComunicado" style="display: none;">
+    <div class="comunicado" id="comunicadoPrint">
+        <!-- Preenchido via JS -->
+    </div>
+    <div style="text-align: center; margin-top: 20px;">
+        <button class="btn-emitir" id="btnEmitir" onclick="emitirEImprimir()">✅ Emitir e Imprimir</button>
+        <button class="btn-imprimir" id="btnImprimir" onclick="window.print()" style="display: none;">🖨️ Imprimir 2ª via</button>
+    </div>
+</div>
+
+<script>
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
+
+    // Verificar autenticação (MEIVS ou nível >= 4)
+    const user = JSON.parse(sessionStorage.getItem('user') || '{}');
+    if (!user.setor || (user.setor.toLowerCase() !== 'meivs' && (user.nivel || 0) < 4)) {
+        document.getElementById('painelControle').innerHTML = '<div class="erro">Acesso restrito. Apenas MEIVS ou administradores nível 4 podem emitir comunicados.</div>';
+    } else {
+        // Carregar lista de alunos para autocomplete
+        carregarListaAlunos();
+        // Verificar se veio um aluno via URL
+        const params = new URLSearchParams(window.location.search);
+        const alunoUrl = params.get('aluno');
+        if (alunoUrl) {
+            document.getElementById('alunoSelect').value = alunoUrl;
+            carregarFatos();
+        }
+    }
+
+    async function carregarListaAlunos() {
+        try {
+            const res = await fetch(APPS_SCRIPT_URL + '?aba=alunos');
+            const alunos = await res.json();
+            const datalist = document.getElementById('listaAlunos');
+            alunos.forEach(nome => {
+                const option = document.createElement('option');
+                option.value = nome;
+                datalist.appendChild(option);
+            });
+        } catch (e) {
+            console.error('Erro ao carregar alunos:', e);
+        }
+    }
+
+    let fatosPendentes = [];
+
+    async function carregarFatos() {
+        const aluno = document.getElementById('alunoSelect').value.trim();
+        if (!aluno) {
+            document.getElementById('msgErro').innerText = 'Selecione um aluno.';
+            return;
+        }
+        document.getElementById('msgErro').innerText = '';
+        document.getElementById('conteudoComunicado').style.display = 'none';
+        document.getElementById('btnEmitir').style.display = 'inline-block';
+        document.getElementById('btnImprimir').style.display = 'none';
+
+        try {
+            const res = await fetch(APPS_SCRIPT_URL + '?aba=fatos_aluno&aluno=' + encodeURIComponent(aluno));
+            const data = await res.json();
+            if (data.error) {
+                document.getElementById('msgErro').innerText = data.error;
+                return;
+            }
+            fatosPendentes = data.fatos;
+            if (fatosPendentes.length === 0) {
+                document.getElementById('msgErro').innerText = 'Nenhum fato pendente para este aluno.';
+                return;
+            }
+            renderizarComunicado(data);
+        } catch (e) {
+            document.getElementById('msgErro').innerText = 'Erro ao buscar dados.';
+        }
+    }
+
+    function renderizarComunicado(data) {
+        const aluno = data.aluno;
+        const turma = data.turma || 'Não informada';
+        const hoje = new Date().toLocaleDateString('pt-BR');
+
+        let html = `
+        <div class="cabecalho">
+            <img src="img/logoA.png" alt="Logo">
+            <div class="info-escola">
+                <h2>Anchieta, C E C-M-Ef M N</h2>
+                <strong>Colégio Cívico Militar Anchieta</strong><br>
+                Av. Wenceslau Bras, 356 – Sul Brasileira<br>
+                87.400-000 – Cruzeiro do Oeste – PR<br>
+                Telefone: (44) 3676-1247 | E-mail: cztanchieta@seed.pr.gov.br
+            </div>
+        </div>
+        <div class="titulo-comunicado">Comunicado de Fato Observado – SEED</div>
+        <div class="dados-aluno">
+            <div>Aluno(a): <span>${aluno}</span></div>
+            <div>Turma: <span>${turma}</span></div>
+        </div>
+        <table>
+            <thead>
+                <tr><th>Data</th><th>Tipo</th><th>Descrição</th></tr>
+            </thead>
+            <tbody>
+        `;
+
+        fatosPendentes.forEach(f => {
+            const classeTipo = f.tipo.toLowerCase() === 'positivo' ? 'tipo-positivo' : 'tipo-negativo';
+            html += `
+            <tr>
+                <td>${f.data}</td>
+                <td class="${classeTipo}">${f.tipo}</td>
+                <td>${f.descricao}</td>
+            </tr>`;
+        });
+
+        html += `
+            </tbody>
+        </table>
+        <div class="assinaturas">
+            <div class="linha-ass">Responsável pelo aluno</div>
+            <div class="linha-ass">Coordenação / Direção</div>
+        </div>
+        <div class="protocolo" id="infoProtocolo">
+            <span>Data de emissão: ${hoje}</span>
+            <span>Protocolo: <span id="numProtocolo">---</span></span>
+        </div>
+        <div class="marca-dagua" id="marcaDagua" style="display: none;">2ª VIA</div>
+        `;
+
+        document.getElementById('comunicadoPrint').innerHTML = html;
+        document.getElementById('conteudoComunicado').style.display = 'block';
+    }
+
+    async function emitirEImprimir() {
+        const aluno = document.getElementById('alunoSelect').value.trim();
+        const ids = fatosPendentes.map(f => f.idLinha);
+        if (ids.length === 0) return;
+
+        document.getElementById('btnEmitir').disabled = true;
+        document.getElementById('btnEmitir').innerText = 'Emitindo...';
+
+        try {
+            const res = await fetch(APPS_SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    operacao: "marcar_fatos_emitidos",
+                    aluno: aluno,
+                    emailOperador: user.email || 'sistema',
+                    ids: ids
+                })
+            });
+            const result = await res.json();
+            if (result.status === 'success') {
+                document.getElementById('numProtocolo').innerText = result.protocolo;
+                document.getElementById('btnEmitir').style.display = 'none';
+                document.getElementById('btnImprimir').style.display = 'inline-block';
+                window.print(); // Abre diálogo de impressão
+            } else {
+                alert('Erro ao emitir comunicado: ' + (result.message || 'Tente novamente.'));
+                document.getElementById('btnEmitir').disabled = false;
+                document.getElementById('btnEmitir').innerText = '✅ Emitir e Imprimir';
+            }
+        } catch (e) {
+            alert('Erro de conexão.');
+            document.getElementById('btnEmitir').disabled = false;
+            document.getElementById('btnEmitir').innerText = '✅ Emitir e Imprimir';
+        }
+    }
+</script>
+</body>
+</html>
