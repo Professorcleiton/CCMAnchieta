@@ -113,7 +113,7 @@
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
 
     // Verificar autenticação (MEIVS ou nível >= 4)
-    const user = JSON.parse(sessionStorage.getItem('user') || '{}');
+    const user = JSON.parse(localStorage.getItem('sgi_ccma_session') || '{}');
     if (!user.setor || (user.setor.toLowerCase() !== 'meivs' && (user.nivel || 0) < 4)) {
         document.getElementById('painelControle').innerHTML = '<div class="erro">Acesso restrito. Apenas MEIVS ou administradores nível 4 podem emitir comunicados.</div>';
     } else {
