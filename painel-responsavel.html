@@ -73,7 +73,14 @@
             <option value="">Todos os filhos</option>
         </select>
     </div>
-
+    <div id="comunicados-recebidos" style="margin-top: 30px;">
+  <h3 style="color: #2e7d32; border-bottom: 2px solid #2e7d32; padding-bottom: 5px;">
+    <i class="fa-solid fa-file-lines"></i> Comunicados Recebidos
+  </h3>
+  <div id="lista-comunicados" style="display: flex; flex-direction: column; gap: 15px;">
+    <p style="color: #64748b;">Nenhum comunicado encontrado para seus filhos.</p>
+  </div>
+</div>
     <div class="filtro" style="margin-top: 20px;">
         <h3 style="margin-top: 0; color: #2e7d32;">📁 Documentos Solicitados</h3>
         <p style="font-size: 14px; color: #666; margin-bottom: 15px;">
@@ -114,6 +121,7 @@
             carregarDocumentosAluno();
             verificarAtualizacaoCadastral();
             verificarSuportePush();
+            carregarComunicadosEmitidos(alunos);
         });
 
         function logout() { sessionStorage.removeItem('resp_logado'); window.location.href = 'responsaveis.html'; }
@@ -361,6 +369,43 @@
             }
             return outputArray;
         }
+
+        async function carregarComunicadosEmitidos(alunos) {
+  if (!alunos || alunos.length === 0) return;
+  
+  try {
+    const nomes = alunos.join(',');
+    const res = await fetch(APPS_SCRIPT_URL + '?aba=fatos_emitidos&alunos=' + encodeURIComponent(nomes));
+    const comunicados = await res.json();
+    
+    const container = document.getElementById('lista-comunicados');
+    if (!comunicados.length) {
+      container.innerHTML = '<p style="color: #64748b;">Nenhum comunicado recebido até o momento.</p>';
+      return;
+    }
+    
+    container.innerHTML = '';
+    comunicados.forEach(f => {
+      const cor = f.tipo.toLowerCase() === 'positivo' ? '#2e7d32' : '#c62828';
+      const div = document.createElement('div');
+      div.style.cssText = `border: 1px solid #e0e0e0; border-left: 5px solid ${cor}; padding: 15px; border-radius: 6px; background: #fff;`;
+      div.innerHTML = `
+        <div style="display: flex; justify-content: space-between; font-size: 14px;">
+          <strong>${f.aluno}</strong>
+          <span style="color: ${cor}; font-weight: bold;">${f.tipo}</span>
+        </div>
+        <p style="margin: 8px 0 4px; font-size: 14px;">${f.descricao}</p>
+        <div style="display: flex; justify-content: space-between; font-size: 12px; color: #777;">
+          <span>Data: ${f.data}</span>
+          <span>Protocolo: ${f.protocolo || '---'}</span>
+        </div>
+      `;
+      container.appendChild(div);
+    });
+  } catch (e) {
+    console.error('Erro ao carregar comunicados:', e);
+  }
+}
     </script>
 </body>
 </html>
