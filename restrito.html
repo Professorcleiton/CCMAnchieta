@@ -1080,7 +1080,10 @@
 
         // Função para abrir a página de comunicado SEED
 function abrirComunicadoSEED() {
-    window.open('imprimir-comunicado.html', '_blank');
+    if (!usuarioLogado || !usuarioLogado.email) return;
+    // Codifica email, nivel e setor em base64 (token simples)
+    const token = btoa(usuarioLogado.email + ':' + usuarioLogado.nivel + ':' + usuarioLogado.setor);
+    window.open('imprimir-comunicado.html?token=' + encodeURIComponent(token), '_blank');
 }
 
 // Função para controlar a visibilidade do botão (baseada no perfil)
