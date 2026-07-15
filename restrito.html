@@ -1077,6 +1077,22 @@
             document.getElementById('patrimonio-interface').style.display = 'none';
             document.getElementById('app-interface').style.display = 'flex';
         }
+
+        // Função para abrir a página de comunicado SEED
+function abrirComunicadoSEED() {
+    window.open('imprimir-comunicado.html', '_blank');
+}
+
+// Função para controlar a visibilidade do botão (baseada no perfil)
+function verificarBotaoComunicado() {
+    const btn = document.getElementById('btn-comunicado-seed');
+    if (!btn || !usuarioLogado) return;
+    
+    // Mostrar apenas para MEIVS ou nível 4+
+    if (usuarioLogado.setor === 'meivs' || (usuarioLogado.nivel && usuarioLogado.nivel >= 4)) {
+        btn.style.display = 'flex';
+    }
+}
     </script>
     <script src="script.js"></script>
 </body>
