@@ -63,17 +63,324 @@
         </aside>
 
         <main class="main-content">
-            <!-- ... (todo o conteúdo da interface principal: header, apontamentos, secretaria, etc.) ... -->
-            <!-- Mantenha exatamente igual ao seu arquivo atual, apenas certifique-se de que a div abaixo está presente -->
-            <!-- ... -->
+            <header class="top-bar-app" style="display: flex; flex-direction: column; gap: 15px; padding: 15px; height: auto;">
+                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                    <button class="menu-toggle" onclick="alternarMenuLateral()"><i class="fa-solid fa-bars"></i></button>
+                    
+                    <div class="user-and-nre-wrapper" style="display: flex; align-items: center; gap: 12px;">
+                        <button class="btn-tema" onclick="alternarTema()" id="btn-icone-tema">
+                            <i class="fa-solid fa-moon"></i>
+                        </button>
+                        <img src="img/nreumuarama.jpg" alt="NRE" class="right-nre-logo" style="height: 35px; border-radius: 4px;">
+                        <button class="btn-patrimonio" id="btn-abrir-admin" onclick="abrirPainelAdmin()" style="display: none; background-color: #475569;">
+                            <i class="fa-solid fa-gear"></i> Gestão
+                        </button>
+
+                        <button id="btn-voltar-apontamentos" onclick="mostrarTab('apontamentos')" style="display: none; padding: 10px 20px; background: #005088; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                            <i class="fa-solid fa-arrow-left"></i> Voltar
+                        </button>
+                        <div id="user-display" style="background: #e2e8f0; padding: 6px 12px; border-radius: 20px; font-weight: bold; color: #334155;">
+                            <i class="fa-solid fa-user-check"></i> Carregando...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="aluno-selector" style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap; width: 100%; background: #f8fafc; padding: 12px 15px; border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <label style="font-weight: bold; color: #0f172a;"><i class="fa-solid fa-user-graduate"></i> Aluno:</label>
+                        <select id="select-alunos" onchange="filtrarRegistrosPorAluno()" style="padding: 8px 12px; border: 1px solid #94a3b8; border-radius: 6px; font-size: 14px; width: 220px; outline: none;">
+                            <option value="">Selecione uma turma...</option>
+                        </select>
+                    </div>
+                    <div style="flex-grow: 1;"></div>
+                    <div style="display: flex; gap: 10px;">
+                        <button id="btn-gerar-pdf-oficial" onclick="gerarFichaIndividualConselho()" style="background-color: #2563eb; color: white; padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2); display: none;">
+                            <i class="fa-solid fa-file-invoice"></i> Apontamentos
+                        </button>
+                        <button id="btn-gerar-pdf-pre-conselho" onclick="abrirModalTurmasPreConselho()" style="display: none; background-color: #8b5cf6; color: white; padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; box-shadow: 0 2px 4px rgba(139, 92, 246, 0.2);">
+                            <i class="fa-solid fa-users-gear"></i> Relatório Pré-Conselho
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- ========================================== -->
+            <!-- CAIXA PRINCIPAL DOS APONTAMENTOS -->
+            <!-- ========================================== -->
+            <div id="aba-apontamentos" style="display: block; width: 100%;">
+                
+                <div class="summary-dashboard-bar" id="student-mini-dash">
+                    <div class="metric-mini-card"><i class="fa-solid fa-chart-line"></i> Apontamentos: <span class="count-number" id="dash-total-count">0</span></div>
+                    <div class="mini-chart-bar-container">
+                        <span class="mini-label-chart">MEIVS</span><div class="visual-bar-fill" id="bar-meivs" style="background-color:#0284c7;"></div>
+                        <span class="mini-label-chart">PEDAG</span><div class="visual-bar-fill" id="bar-pedag" style="background-color:#0d9488;"></div>
+                        <span class="mini-label-chart">ADM</span><div class="visual-bar-fill" id="bar-adm" style="background-color:#4f46e5;"></div>
+                        <span class="mini-label-chart">PROFS</span><div class="visual-bar-fill" id="bar-profs" style="background-color:#b91c1c;"></div>
+                        <span class="mini-label-chart">📄 DOCS</span><div class="visual-bar-fill" id="bar-profs" style="background-color:#8b5cf6;"></div>
+                        <span class="mini-label-chart">🚪 OCORR</span><div class="visual-bar-fill" id="bar-profs" style="background-color:#f59e0b;"></div>
+                        <span class="mini-label-chart">📁 ATAS</span><div class="visual-bar-fill" id="bar-profs" style="background-color:#dc2626;"></div>
+                    </div>
+                </div>
+
+                <div id="pdf-header" style="display:none; text-align:center; margin-bottom: 30px; color: #000; padding: 20px; font-family: Arial, sans-serif;">
+                    <h2 style="margin: 0; font-size: 20px;">Colégio Cívico Militar Anchieta</h2>
+                    <p style="margin: 5px 0; font-size: 14px;">Cruzeiro do Oeste - PR</p>
+                    <p style="margin: 5px 0; font-size: 14px;">Direção e Secretaria Escolar</p>
+                    <hr style="border: 1px solid #000; margin-top: 15px;">
+                    <h3 style="margin-top: 15px; font-size: 18px;">Relatório de Apontamentos</h3>
+                </div>
+
+                <div class="dash-container" id="welcome-dashboard-mural" style="overflow-y: auto;">
+                    <div class="dash-cards-grid">
+                        <div class="dash-card total" style="cursor: pointer;" onclick="abrirModalRelatorio('geral')">
+                            <div class="dash-card-icon"><i class="fa-solid fa-chart-pie"></i></div>
+                            <div class="dash-card-info">
+                                <span class="dash-card-title">Total Registros</span>
+                                <span class="dash-card-value" id="dash-val-total">0</span>
+                            </div>
+                        </div>
+                        <div class="dash-card meivs" style="cursor: pointer;" onclick="abrirModalRelatorio('meivs')">
+                            <div class="dash-card-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                            <div class="dash-card-info">
+                                <span class="dash-card-title">MEIV'S</span>
+                                <span class="dash-card-value" id="dash-val-meivs">0</span>
+                            </div>
+                        </div>
+                        <div class="dash-card pedagogico" style="cursor: pointer;" onclick="abrirModalRelatorio('pedagogico')">
+                            <div class="dash-card-icon"><i class="fa-solid fa-book-open"></i></div>
+                            <div class="dash-card-info">
+                                <span class="dash-card-title">Pedagógico</span>
+                                <span class="dash-card-value" id="dash-val-pedagogico">0</span>
+                            </div>
+                        </div>
+                        <div class="dash-card adm" style="cursor: pointer;" onclick="abrirModalRelatorio('adm')">
+                            <div class="dash-card-icon"><i class="fa-solid fa-folder-open"></i></div>
+                            <div class="dash-card-info">
+                                <span class="dash-card-title">ADM</span>
+                                <span class="dash-card-value" id="dash-val-adm">0</span>
+                            </div>
+                        </div>
+                        <div class="dash-card professores" style="cursor: pointer;" onclick="abrirModalRelatorio('direcao')">
+                            <div class="dash-card-icon"><i class="fa-solid fa-chalkboard-user"></i></div>
+                            <div class="dash-card-info">
+                                <span class="dash-card-title">Professores</span>
+                                <span class="dash-card-value" id="dash-val-professores">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dash-lower-grid">
+                        <div class="dash-panel">
+                            <div class="dash-panel-title"><i class="fa-solid fa-chart-column"></i> Distribuição de Apontamentos</div>
+                            <div class="dash-bar-item">
+                                <div class="dash-bar-header"><span>MEIV'S</span><span id="dash-pct-meivs">0%</span></div>
+                                <div class="dash-bar-track"><div class="dash-bar-fill" id="dash-bar-meivs" style="background-color: #0284c7; width: 0%;"></div></div>
+                            </div>
+                            <div class="dash-bar-item">
+                                <div class="dash-bar-header"><span>Pedagógico</span><span id="dash-pct-pedagogico">0%</span></div>
+                                <div class="dash-bar-track"><div class="dash-bar-fill" id="dash-bar-pedagogico" style="background-color: #0d9488; width: 0%;"></div></div>
+                            </div>
+                            <div class="dash-bar-item">
+                                <div class="dash-bar-header"><span>ADM</span><span id="dash-pct-adm">0%</span></div>
+                                <div class="dash-bar-track"><div class="dash-bar-fill" id="dash-bar-adm" style="background-color: #4f46e5; width: 0%;"></div></div>
+                            </div>
+                            <div class="dash-bar-item">
+                                <div class="dash-bar-header"><span>Professores</span><span id="dash-pct-professores">0%</span></div>
+                                <div class="dash-bar-track"><div class="dash-bar-fill" id="dash-bar-professores" style="background-color: #b91c1c; width: 0%;"></div></div>
+                            </div>
+                        </div>
+                        <div class="dash-panel">
+                            <div class="dash-panel-title"><i class="fa-solid fa-bolt"></i> Ações Rápidas</div>
+                            <p style="font-size: 13px; color: #64748b; margin-bottom: 15px;">Acesse as ferramentas gerenciais e relatórios pedagógicos.</p>
+
+                            <button id="btn-aba-secretaria" class="btn-salvar" onclick="mostrarTab('documentos')" style="display: none; background-color: #64748b; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(100, 116, 139, 0.2); margin-bottom: 10px;">
+                                <i class="fa-solid fa-folder-open" style="font-size: 18px;"></i> Secretaria / Docs
+                            </button>
+                            
+                            <button class="btn-salvar" style="background-color: #0d9488; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(13, 148, 136, 0.2); margin-bottom: 10px;" onclick="abrirPreConselho()">
+                                <i class="fa-solid fa-clipboard-check" style="font-size: 18px;"></i> Preencher Pré-Conselho
+                            </button>
+                            
+                            <button class="btn-salvar" style="background-color: #f59e0b; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(245, 158, 11, 0.2); margin-bottom: 10px;" onclick="abrirModalSaida()">
+                                <i class="fa-solid fa-sign-out" style="font-size: 18px;"></i> Registrar Saída Antecipada
+                            </button>
+                            
+                            <button class="btn-salvar" style="background-color: #005088; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(0, 80, 136, 0.2);" onclick="abrirModuloPatrimonio()">
+                                <i class="fa-solid fa-boxes-stacked" style="font-size: 18px;"></i> Módulo Patrimônio
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="mobile-tabs-container">
+                    <button class="tab-button active" onclick="alternarAbaMobile('meivs', this)">MEIV'S</button>
+                    <button class="tab-button" onclick="alternarAbaMobile('pedagogico', this)">PEDAG.</button>
+                    <button class="tab-button" onclick="alternarAbaMobile('adm', this)">ADM</button>
+                    <button class="tab-button" onclick="alternarAbaMobile('direcao', this)">PROFS.</button>
+                </div>
+
+                <div class="board-container" id="siga-columns-grid">
+                    <section class="sector-column active" id="col-meivs">
+                        <div class="column-header" style="background:#0284c7;">MEIV'S</div>
+                        <div style="padding: 15px; text-align: center; border-bottom: 1px solid #e2e8f0;">
+                            <button onclick="abrirCaixaTexto('meivs')" style="background: #0284c7; color: white; padding: 14px 20px; border: none; border-radius: 8px; font-weight: bold; width: 100%; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                                <i class="fa-solid fa-pen-to-square"></i> + Novo Apontamento
+                            </button>
+                        </div>
+                        <div class="overlay-apontamento" id="overlay-text-meivs" style="display: none;">
+                            <div class="caixa-dialogo">
+                                <h3 style="color: #0284c7; margin-top: 0; text-align: center;"><i class="fa-solid fa-shield-halved"></i> Apontamento MEIV'S</h3>
+                                <textarea id="text-meivs" placeholder="Descreva os detalhes aqui..." onkeydown="verificarTeclaEnter(event, 'meivs')"></textarea>
+                                <div class="botoes-dialogo">
+                                    <button class="btn-cancelar" onclick="fecharCaixaTexto('meivs')">Cancelar</button>
+                                    <button id="btn-meivs" class="btn-salvar-modal" style="background:#0284c7;" onclick="salvarPost('meivs'); fecharCaixaTexto('meivs');">Salvar</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="feed-container" id="feed-meivs"></div>
+                    </section>
+                    
+                    <section class="sector-column" id="col-pedagogico">
+                        <div class="column-header" style="background:#0d9488;">PEDAGÓGICO</div>
+                        <div style="padding: 15px; text-align: center; border-bottom: 1px solid #e2e8f0;">
+                            <button onclick="abrirCaixaTexto('pedagogico')" style="background: #0d9488; color: white; padding: 14px 20px; border: none; border-radius: 8px; font-weight: bold; width: 100%; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                                <i class="fa-solid fa-pen-to-square"></i> + Novo Apontamento
+                            </button>
+                        </div>
+                        <div class="overlay-apontamento" id="overlay-text-pedagogico" style="display: none;">
+                            <div class="caixa-dialogo">
+                                <h3 style="color: #0d9488; margin-top: 0; text-align: center;"><i class="fa-solid fa-book-open"></i> Apontamento Pedagógico</h3>
+                                <textarea id="text-pedagogico" placeholder="Descreva os detalhes aqui..." onkeydown="verificarTeclaEnter(event, 'pedagogico')"></textarea>
+                                <div class="botoes-dialogo">
+                                    <button class="btn-cancelar" onclick="fecharCaixaTexto('pedagogico')">Cancelar</button>
+                                    <button id="btn-pedagogico" class="btn-salvar-modal" style="background:#0d9488;" onclick="salvarPost('pedagogico'); fecharCaixaTexto('pedagogico');">Salvar</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="feed-container" id="feed-pedagogico"></div>
+                    </section>
+                    
+                    <section class="sector-column" id="col-adm">
+                        <div class="column-header" style="background:#4f46e5;">ADM</div>
+                        <div style="padding: 15px; text-align: center; border-bottom: 1px solid #e2e8f0;">
+                            <button onclick="abrirCaixaTexto('adm')" style="background: #4f46e5; color: white; padding: 14px 20px; border: none; border-radius: 8px; font-weight: bold; width: 100%; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                                <i class="fa-solid fa-pen-to-square"></i> + Novo Apontamento
+                            </button>
+                        </div>
+                        <div class="overlay-apontamento" id="overlay-text-adm" style="display: none;">
+                            <div class="caixa-dialogo">
+                                <h3 style="color: #4f46e5; margin-top: 0; text-align: center;"><i class="fa-solid fa-folder-open"></i> Apontamento ADM</h3>
+                                <textarea id="text-adm" placeholder="Descreva os detalhes aqui..." onkeydown="verificarTeclaEnter(event, 'adm')"></textarea>
+                                <div class="botoes-dialogo">
+                                    <button class="btn-cancelar" onclick="fecharCaixaTexto('adm')">Cancelar</button>
+                                    <button id="btn-adm" class="btn-salvar-modal" style="background:#4f46e5;" onclick="salvarPost('adm'); fecharCaixaTexto('adm');">Salvar</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="feed-container" id="feed-adm"></div>
+                    </section>
+                    
+                    <section class="sector-column" id="col-direcao">
+                        <div class="column-header" style="background:#b91c1c;">PROFESSORES</div>
+                        <div style="padding: 15px; text-align: center; border-bottom: 1px solid #e2e8f0;">
+                            <button onclick="abrirCaixaTexto('direcao')" style="background: #b91c1c; color: white; padding: 14px 20px; border: none; border-radius: 8px; font-weight: bold; width: 100%; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                                <i class="fa-solid fa-pen-to-square"></i> + Novo Apontamento
+                            </button>
+                        </div>
+                        <div class="overlay-apontamento" id="overlay-text-direcao" style="display: none;">
+                            <div class="caixa-dialogo">
+                                <h3 style="color: #b91c1c; margin-top: 0; text-align: center;"><i class="fa-solid fa-chalkboard-user"></i> Apontamento Professores</h3>
+                                <textarea id="text-direcao" placeholder="Descreva os detalhes aqui..." onkeydown="verificarTeclaEnter(event, 'direcao')"></textarea>
+                                <div class="botoes-dialogo">
+                                    <button class="btn-cancelar" onclick="fecharCaixaTexto('direcao')">Cancelar</button>
+                                    <button id="btn-direcao" class="btn-salvar-modal" style="background:#b91c1c;" onclick="salvarPost('direcao'); fecharCaixaTexto('direcao');">Salvar</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="feed-container" id="feed-direcao"></div>
+                    </section>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- CAIXA DA SECRETARIA (Aba de Documentos) -->
+            <!-- ========================================== -->
+            <div id="aba-documentos" style="display: none; width: 100%; padding: 20px; background: transparent;">
+                
+                <div style="display: flex; gap: 30px; align-items: flex-start; flex-wrap: wrap;">
+                    
+                    <div style="flex: 1; min-width: 300px; max-width: 350px; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+                        <h3 style="color: #005088; margin-top: 0; margin-bottom: 20px; font-size: 18px;">
+                            <i class="fa-solid fa-file-circle-plus"></i> Novo Pedido
+                        </h3>
+                        
+                        <div style="display: flex; flex-direction: column; gap: 15px;">
+                            <div>
+                                <label style="font-weight: 600; font-size: 13px; color: #475569;">Nome do Estudante:</label>
+                                <input type="text" id="doc-aluno" placeholder="Ex: João da Silva" style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none;">
+                            </div>
+                            <div>
+                                <label style="font-weight: 600; font-size: 13px; color: #475569;">Documento Solicitado:</label>
+                                <select id="doc-tipo" style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none;">
+                                    <option value="Histórico Escolar">Histórico Escolar</option>
+                                    <option value="Certidão de Nascimento">Certidão de Nascimento</option>
+                                    <option value="Comprovante de Residência">Comprovante de Residência</option>
+                                    <option value="RG / CPF">RG / CPF</option>
+                                    <option value="Carteira de Vacinação">Carteira de Vacinação</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="font-weight: 600; font-size: 13px; color: #475569;">Status:</label>
+                                <select id="doc-status" style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none;">
+                                    <option value="Pendente">Pendente</option>
+                                    <option value="Entregue">Entregue</option>
+                                </select>
+                            </div>
+                            <button id="btn-salvar-doc" onclick="salvarDocumento()" style="width: 100%; padding: 12px; background: #0d9488; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 10px; transition: background 0.2s;">
+                                <i class="fa-solid fa-cloud-arrow-up"></i> Salvar no Sistema
+                            </button>
+                            <div id="msg-doc" style="font-size: 13px; display: none; text-align: center; font-weight: bold; margin-top: 5px;"></div>
+                        </div>
+                    </div>
+
+                    <div style="flex: 2; min-width: 400px; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px; margin-bottom: 15px;">
+                            <h3 style="color: #005088; margin: 0; font-size: 18px;">
+                                <i class="fa-solid fa-list-check"></i> Histórico de Documentos
+                            </h3>
+                            <button onclick="carregarDocumentos()" style="padding: 8px 15px; background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold;">
+                                <i class="fa-solid fa-rotate"></i> Atualizar
+                            </button>
+                        </div>
+                        
+                        <div style="overflow-x: auto; max-height: 450px; overflow-y: auto;">
+                            <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                                <thead style="position: sticky; top: 0; background: white; z-index: 1;">
+                                    <tr style="text-align: left; color: #475569;">
+                                        <th style="padding: 12px 10px; border-bottom: 2px solid #e2e8f0;">Turma</th>
+                                        <th style="padding: 12px 10px; border-bottom: 2px solid #e2e8f0;">Aluno</th>
+                                        <th style="padding: 12px 10px; border-bottom: 2px solid #e2e8f0;">Documento</th>
+                                        <th style="padding: 12px 10px; border-bottom: 2px solid #e2e8f0;">Status</th>
+                                        <th style="padding: 12px 10px; border-bottom: 2px solid #e2e8f0;">Data</th>
+                                        <th style="padding: 12px 10px; border-bottom: 2px solid #e2e8f0;">Arquivo</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabela-documentos-body">
+                                    <tr><td colspan="6" style="padding: 20px; text-align: center; color: #94a3b8;">Nenhum documento carregado.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </main>
     </div>
 
     <!-- ========================================== -->
     <!-- MÓDULO DE PATRIMÔNIO (INCORPORADO) -->
     <!-- ========================================== -->
+      <div id="patrimonio-interface" style="display: none; width: 100%; height: 100vh; flex-direction: row;">
         <style>
-            /* CSS do módulo (prefixado com #patrimonio-interface) */
             #patrimonio-interface .sidebar { width: 290px; background-color: #005088; color: white; display: flex; flex-direction: column; border-right: 4px solid #eab308; justify-content: space-between; }
             #patrimonio-interface .sidebar-top { display: flex; flex-direction: column; flex: 1; min-height: 0; }
             #patrimonio-interface .sidebar-header { padding: 20px 15px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 12px; }
@@ -236,9 +543,7 @@
                 </div>
             </div>
         </main>
-
-        <script>
-            // ========== MÓDULO DE PATRIMÔNIO (script completo) ==========
+            <script>
             const APPS_SCRIPT_PAT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
             let patTodos = [], patAmbientes = [], patSalaFiltro = 'TODOS', patCameraAtiva = null;
             let usuarioLogadoPat = {};
@@ -277,9 +582,7 @@
                 if (patCameraAtiva) { patDesligarCamera(); return; }
                 containerBox.style.display = "block";
                 patCameraAtiva = new Html5Qrcode(containerId);
-                patCameraAtiva.start(
-                    { facingMode: "environment" },
-                    { fps: 25, qrbox: { width: 280, height: 140 } },
+                patCameraAtiva.start({ facingMode: "environment" }, { fps: 25, qrbox: { width: 280, height: 140 } },
                     (decodedText) => {
                         document.getElementById(inputId).value = decodedText.trim();
                         patDesligarCamera();
@@ -287,18 +590,12 @@
                         if (inputId === 'pat-reg-code') patChecarEdicao();
                     },
                     (errorMessage) => {}
-                ).catch(err => {
-                    alert("Permita o acesso à câmera para escanear.");
-                    containerBox.style.display = "none";
-                    patCameraAtiva = null;
-                });
+                ).catch(err => { alert("Permita o acesso à câmera."); containerBox.style.display = "none"; patCameraAtiva = null; });
             }
 
             function patDesligarCamera() {
                 document.querySelectorAll('.camera-scanner-container').forEach(c => c.style.display = 'none');
-                if (patCameraAtiva) {
-                    patCameraAtiva.stop().then(() => { patCameraAtiva = null; }).catch(() => { patCameraAtiva = null; });
-                }
+                if (patCameraAtiva) { patCameraAtiva.stop().then(() => { patCameraAtiva = null; }).catch(() => { patCameraAtiva = null; }); }
             }
 
             async function patCarregarAmbientes() {
@@ -361,13 +658,9 @@
                 const tbody = document.getElementById('pat-table-body');
                 tbody.innerHTML = '';
                 let itensFiltrados;
-                if (patSalaFiltro === 'TODOS') {
-                    itensFiltrados = patTodos;
-                } else if (patSalaFiltro === 'PENDENTES') {
-                    itensFiltrados = patTodos.filter(item => item.localizacao === 'Almoxarifado');
-                } else {
-                    itensFiltrados = patTodos.filter(item => item.localizacao === patSalaFiltro);
-                }
+                if (patSalaFiltro === 'TODOS') { itensFiltrados = patTodos; }
+                else if (patSalaFiltro === 'PENDENTES') { itensFiltrados = patTodos.filter(item => item.localizacao === 'Almoxarifado'); }
+                else { itensFiltrados = patTodos.filter(item => item.localizacao === patSalaFiltro); }
                 if (itensFiltrados.length === 0) {
                     const msg = patSalaFiltro === 'PENDENTES' ? 'Nenhum item pendente de conferência.' : 'Nenhum item neste local.';
                     tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #64748b; padding: 20px;">${msg}</td></tr>`;
@@ -385,15 +678,7 @@
                     let tr = document.createElement('tr');
                     tr.style.cursor = 'pointer';
                     tr.onclick = () => { patAlternarAba('MOVER'); patCarregarMovimentacao(item.codigo); };
-                    tr.innerHTML = `
-                        <td style="color:#005088; font-weight:bold; letter-spacing:0.5px;">${item.codigo}</td>
-                        <td><strong>${item.item}</strong>${labelVinculoPai}</td>
-                        <td style="color:#64748b;">${item.categoria}</td>
-                        <td><i class="fa-solid fa-location-dot" style="color:#eab308; margin-right:5px;"></i>${item.localizacao}</td>
-                        <td>${item.responsavel || '-'}</td>
-                        <td style="font-size:11px; color:#64748b;">${item.dataAtualizacao || '-'}</td>
-                        <td><span class="status-badge ${badgeClass}">${item.status}</span></td>
-                    `;
+                    tr.innerHTML = `<td style="color:#005088; font-weight:bold; letter-spacing:0.5px;">${item.codigo}</td><td><strong>${item.item}</strong>${labelVinculoPai}</td><td style="color:#64748b;">${item.categoria}</td><td><i class="fa-solid fa-location-dot" style="color:#eab308; margin-right:5px;"></i>${item.localizacao}</td><td>${item.responsavel || '-'}</td><td style="font-size:11px; color:#64748b;">${item.dataAtualizacao || '-'}</td><td><span class="status-badge ${badgeClass}">${item.status}</span></td>`;
                     tbody.appendChild(tr);
                 });
             }
@@ -411,15 +696,7 @@
                     let tr = document.createElement('tr');
                     tr.style.cursor = 'pointer';
                     tr.onclick = () => { patAlternarAba('MOVER'); patCarregarMovimentacao(item.codigo); };
-                    tr.innerHTML = `
-                        <td style="color:#005088; font-weight:bold;">${item.codigo}</td>
-                        <td><strong>${item.item}</strong>${labelVinculoPai}</td>
-                        <td>${item.categoria}</td>
-                        <td><i class="fa-solid fa-location-dot" style="color:#eab308; margin-right:5px;"></i>${item.localizacao}</td>
-                        <td>${item.responsavel || '-'}</td>
-                        <td style="font-size:11px; color:#64748b;">${item.dataAtualizacao || '-'}</td>
-                        <td><span class="status-badge ${badgeClass}">${item.status}</span></td>
-                    `;
+                    tr.innerHTML = `<td style="color:#005088; font-weight:bold;">${item.codigo}</td><td><strong>${item.item}</strong>${labelVinculoPai}</td><td>${item.categoria}</td><td><i class="fa-solid fa-location-dot" style="color:#eab308; margin-right:5px;"></i>${item.localizacao}</td><td>${item.responsavel || '-'}</td><td style="font-size:11px; color:#64748b;">${item.dataAtualizacao || '-'}</td><td><span class="status-badge ${badgeClass}">${item.status}</span></td>`;
                     tbody.appendChild(tr);
                 });
             }
@@ -463,9 +740,8 @@
                     document.getElementById('pat-prev-local').innerText = itemEncontrado.localizacao;
                     document.getElementById('pat-prev-resp').innerText = itemEncontrado.responsavel || 'Ninguém';
                     let subItens = patTodos.filter(p => p.itemPai === itemEncontrado.codigo);
-                    if(subItens.length > 0) {
-                        vinculoContainer.innerHTML = `<span class="parent-alert-box"><i class="fa-solid fa-boxes-stacked"></i> Alerta: Existem ${subItens.length} itens vinculados.</span>`;
-                    } else { vinculoContainer.innerHTML = ''; }
+                    if(subItens.length > 0) { vinculoContainer.innerHTML = `<span class="parent-alert-box"><i class="fa-solid fa-boxes-stacked"></i> Alerta: Existem ${subItens.length} itens vinculados.</span>`; }
+                    else { vinculoContainer.innerHTML = ''; }
                     previewBox.style.display = "block"; btn.disabled = false;
                 } else { previewBox.style.display = "none"; btn.disabled = true; }
             }
@@ -781,37 +1057,22 @@
             </div>
         </div>
     </div>
-
-<script>
-    // Garante que o script do patrimônio seja executado ao carregar a página
-    window.addEventListener('load', function() {
-        // Força a execução do script do patrimônio
-        var scriptContent = document.querySelector('#patrimonio-interface script');
-        if (scriptContent && typeof patInicializar === 'undefined') {
-            eval(scriptContent.textContent);
-        }
-    });
-
-    function abrirModuloPatrimonio() {
-        document.getElementById('app-interface').style.display = 'none';
-        document.getElementById('patrimonio-interface').style.display = 'flex';
-        if (typeof patInicializar === 'function') {
-            patInicializar();
-        } else {
-            // Se a função não existir, tenta executar o script novamente
-            var scriptContent = document.querySelector('#patrimonio-interface script');
-            if (scriptContent) {
-                eval(scriptContent.textContent);
-                if (typeof patInicializar === 'function') patInicializar();
+    <script>
+        function abrirModuloPatrimonio() {
+            document.getElementById('app-interface').style.display = 'none';
+            document.getElementById('patrimonio-interface').style.display = 'flex';
+            if (typeof patInicializar === 'function') patInicializar();
+            else {
+                var scriptContent = document.querySelector('#patrimonio-interface script');
+                if (scriptContent) { eval(scriptContent.textContent); patInicializar(); }
             }
         }
-    }
 
-    function fecharModuloPatrimonio() {
-        document.getElementById('patrimonio-interface').style.display = 'none';
-        document.getElementById('app-interface').style.display = 'flex';
-    }
-</script>++++++++++++++++++++++++++++++++++++++++++++++++++++
+        function fecharModuloPatrimonio() {
+            document.getElementById('patrimonio-interface').style.display = 'none';
+            document.getElementById('app-interface').style.display = 'flex';
+        }
+    </script>
     <script src="script.js"></script>
 </body>
 </html>
