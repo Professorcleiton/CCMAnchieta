@@ -782,19 +782,36 @@
         </div>
     </div>
 
-    <script>
-        // Funções simplificadas para abrir/fechar o módulo de patrimônio (agora incorporado)
-        function abrirModuloPatrimonio() {
-            document.getElementById('app-interface').style.display = 'none';
-            document.getElementById('patrimonio-interface').style.display = 'flex';
-            if (typeof patInicializar === 'function') patInicializar();
+<script>
+    // Garante que o script do patrimônio seja executado ao carregar a página
+    window.addEventListener('load', function() {
+        // Força a execução do script do patrimônio
+        var scriptContent = document.querySelector('#patrimonio-interface script');
+        if (scriptContent && typeof patInicializar === 'undefined') {
+            eval(scriptContent.textContent);
         }
+    });
 
-        function fecharModuloPatrimonio() {
-            document.getElementById('patrimonio-interface').style.display = 'none';
-            document.getElementById('app-interface').style.display = 'flex';
+    function abrirModuloPatrimonio() {
+        document.getElementById('app-interface').style.display = 'none';
+        document.getElementById('patrimonio-interface').style.display = 'flex';
+        if (typeof patInicializar === 'function') {
+            patInicializar();
+        } else {
+            // Se a função não existir, tenta executar o script novamente
+            var scriptContent = document.querySelector('#patrimonio-interface script');
+            if (scriptContent) {
+                eval(scriptContent.textContent);
+                if (typeof patInicializar === 'function') patInicializar();
+            }
         }
-    </script>
+    }
+
+    function fecharModuloPatrimonio() {
+        document.getElementById('patrimonio-interface').style.display = 'none';
+        document.getElementById('app-interface').style.display = 'flex';
+    }
+</script>++++++++++++++++++++++++++++++++++++++++++++++++++++
     <script src="script.js"></script>
 </body>
 </html>
