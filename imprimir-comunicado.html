@@ -231,167 +231,158 @@
         }
     }
 
-    let fatosAluno1 = [];
-    let fatosAluno2 = [];
-    let dadosAluno1 = null;
-    let dadosAluno2 = null;
+let comunicados = []; // cada elemento: { aluno, turma, fato }
 
-    async function carregarFatos(numero) {
-        const campoAluno = document.getElementById(`alunoSelect${numero}`);
-        const msgErro = document.getElementById(`msgErro${numero}`);
-        const aluno = campoAluno.value.trim();
-        if (!aluno) {
-            msgErro.innerText = 'Selecione um aluno.';
+async function carregarFatos(numero) {
+    const campoAluno = document.getElementById(`alunoSelect${numero}`);
+    const msgErro = document.getElementById(`msgErro${numero}`);
+    const aluno = campoAluno.value.trim();
+    if (!aluno) {
+        msgErro.innerText = 'Selecione um aluno.';
+        return;
+    }
+    msgErro.innerText = '';
+
+    try {
+        const res = await fetch(APPS_SCRIPT_URL + '?aba=fatos_aluno&aluno=' + encodeURIComponent(aluno));
+        const data = await res.json();
+        if (data.error) {
+            msgErro.innerText = data.error;
             return;
         }
-        msgErro.innerText = '';
-
-        try {
-            const res = await fetch(APPS_SCRIPT_URL + '?aba=fatos_aluno&aluno=' + encodeURIComponent(aluno));
-            const data = await res.json();
-            if (data.error) {
-                msgErro.innerText = data.error;
-                return;
-            }
-            if (numero === 1) {
-                fatosAluno1 = data.fatos;
-                dadosAluno1 = data;
-            } else {
-                fatosAluno2 = data.fatos;
-                dadosAluno2 = data;
-            }
-            if (data.fatos.length === 0) {
-                msgErro.innerText = 'Nenhum fato pendente para este aluno.';
-            } else {
-                msgErro.innerText = `✅ ${data.fatos.length} fato(s) encontrado(s).`;
-            }
-            atualizarVisualizacao();
-        } catch (e) {
-            msgErro.innerText = 'Erro ao buscar dados.';
-        }
-    }
-
-    function atualizarVisualizacao() {
-        const temAluno1 = fatosAluno1.length > 0;
-        const temAluno2 = fatosAluno2.length > 0;
-        const container = document.getElementById('conteudoComunicado');
-        const btnEmitir = document.getElementById('btnEmitir');
-        
-        if (!temAluno1 && !temAluno2) {
-            container.style.display = 'none';
-            btnEmitir.style.display = 'none';
+        if (data.fatos.length === 0) {
+            msgErro.innerText = 'Nenhum fato pendente para este aluno.';
             return;
         }
-        
-        container.style.display = 'flex';
-        container.innerHTML = '';
-        
-        if (temAluno1) {
-            container.appendChild(criarComunicadoHTML(dadosAluno1, fatosAluno1));
-        }
-        if (temAluno2) {
-            container.appendChild(criarComunicadoHTML(dadosAluno2, fatosAluno2));
-        }
-        
-        btnEmitir.style.display = 'inline-block';
+
+        // Para cada fato, cria um comunicado individual
+        const novosComunicados = data.fatos.map(f => ({
+            aluno: data.aluno,
+            turma: data.turma || 'Não informada',
+            fato: f
+        }));
+
+        // Remove comunicados anteriores do mesmo número (para evitar duplicar ao buscar de novo)
+        comunicados = comunicados.filter(c => c.aluno !== data.aluno || numero !== (c.aluno === data.aluno ? numero : null));
+        // Adiciona os novos
+        comunicados = comunicados.concat(novosComunicados);
+
+        // Atualiza a visualização
+        atualizarVisualizacao();
+        msgErro.innerText = `✅ ${data.fatos.length} fato(s) encontrado(s).`;
+    } catch (e) {
+        msgErro.innerText = 'Erro ao buscar dados.';
     }
+}
 
-    function criarComunicadoHTML(data, fatos) {
-        const div = document.createElement('div');
-        div.className = 'comunicado';
-        const hoje = new Date().toLocaleDateString('pt-BR');
+function atualizarVisualizacao() {
+    const container = document.getElementById('conteudoComunicado');
+    const btnEmitir = document.getElementById('btnEmitir');
+    
+    if (comunicados.length === 0) {
+        container.style.display = 'none';
+        btnEmitir.style.display = 'none';
+        return;
+    }
+    
+    container.style.display = 'flex';
+    container.innerHTML = '';
+    
+    comunicados.forEach(com => {
+        container.appendChild(criarComunicadoHTML(com));
+    });
+    
+    btnEmitir.style.display = 'inline-block';
+}
 
-        let html = `
-<div class="cabecalho">
-    <img src="img/logoA.png" alt="Logo Escola" class="logo-esquerda">
-    <div class="info-escola">
-        <h2>Anchieta, C E C-M-Ef M N</h2>
-        <strong>Colégio Cívico Militar Anchieta</strong><br>
-        Av. Wenceslau Bras, 356 – Sul Brasileira<br>
-        87.400-000 – Cruzeiro do Oeste – PR<br>
-        Telefone: (44) 3676-1247 | E-mail: cztanchieta@seed.pr.gov.br
-    </div>
-    <img src="img/nreumuarama.jpg" alt="Logo NRE" class="logo-direita">
-</div>
-        <div class="titulo-comunicado">Comunicado de Fato Observado – F.O.</div>
-        <div class="dados-aluno">
-            <div>Aluno(a): <span>${data.aluno}</span></div>
-            <div>Turma: <span>${data.turma || 'Não informada'}</span></div>
+function criarComunicadoHTML(com) {
+    const div = document.createElement('div');
+    div.className = 'comunicado';
+    const hoje = new Date().toLocaleDateString('pt-BR');
+    const f = com.fato;
+    const classeTipo = f.tipo.toLowerCase() === 'positivo' ? 'tipo-positivo' : 'tipo-negativo';
+
+    div.innerHTML = `
+    <div class="cabecalho">
+        <img src="img/logoA.png" alt="Logo Escola" class="logo-esquerda">
+        <div class="info-escola">
+            <h2>Anchieta, C E C-M-Ef M N</h2>
+            <strong>Colégio Cívico Militar Anchieta</strong><br>
+            Av. Wenceslau Bras, 356 – Sul Brasileira<br>
+            87.400-000 – Cruzeiro do Oeste – PR<br>
+            Telefone: (44) 3676-1247 | E-mail: cztanchieta@seed.pr.gov.br
         </div>
-        <table>
-            <thead>
-                <tr><th>Data</th><th>Tipo</th><th>Descrição</th></tr>
-            </thead>
-            <tbody>`;
-
-        fatos.forEach(f => {
-            const classeTipo = f.tipo.toLowerCase() === 'positivo' ? 'tipo-positivo' : 'tipo-negativo';
-            html += `
+        <img src="img/nreumuarama.jpg" alt="Logo NRE" class="logo-direita">
+    </div>
+    <div class="titulo-comunicado">Comunicado de Fato Observado – F.O.</div>
+    <div class="dados-aluno">
+        <div>Aluno(a): <span>${com.aluno}</span></div>
+        <div>Turma: <span>${com.turma}</span></div>
+    </div>
+    <table>
+        <thead>
+            <tr><th>Data</th><th>Tipo</th><th>Descrição</th></tr>
+        </thead>
+        <tbody>
             <tr>
                 <td>${f.data}</td>
                 <td class="${classeTipo}">${f.tipo}</td>
                 <td>${f.descricao}</td>
-            </tr>`;
+            </tr>
+        </tbody>
+    </table>
+    <div class="assinaturas">
+        <div class="linha-ass">Coordenação / Direção</div>
+    </div>
+    <div class="protocolo">
+        <span>Data de emissão: ${hoje}</span>
+        <span>Protocolo: <span class="numProtocolo" data-id="${f.idLinha}">---</span></span>
+    </div>`;
+    
+    return div;
+}
+
+async function emitirEImprimir() {
+    const ids = comunicados.map(c => c.fato.idLinha);
+    if (ids.length === 0) return;
+
+    document.getElementById('btnEmitir').disabled = true;
+    document.getElementById('btnEmitir').innerText = 'Emitindo...';
+
+    // Obtém um nome de aluno qualquer para passar (pode ser o do primeiro comunicado)
+    const aluno = comunicados[0].aluno;
+
+    try {
+        const res = await fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                operacao: "marcar_fatos_emitidos",
+                aluno: aluno,
+                emailOperador: user.email || 'sistema',
+                ids: ids
+            })
         });
-
-        html += `
-            </tbody>
-        </table>
-        <div class="assinaturas">
-            <div class="linha-ass">Coordenação / Direção</div>
-        </div>
-        <div class="protocolo">
-            <span>Data de emissão: ${hoje}</span>
-            <span>Protocolo: <span class="numProtocolo">---</span></span>
-        </div>`;
-
-        div.innerHTML = html;
-        return div;
-    }
-
-    async function emitirEImprimir() {
-        const ids1 = fatosAluno1.map(f => f.idLinha);
-        const ids2 = fatosAluno2.map(f => f.idLinha);
-        const todosIds = ids1.concat(ids2);
-        if (todosIds.length === 0) return;
-
-        document.getElementById('btnEmitir').disabled = true;
-        document.getElementById('btnEmitir').innerText = 'Emitindo...';
-
-        // Emite todos os fatos de uma vez
-        const aluno = dadosAluno1 ? dadosAluno1.aluno : (dadosAluno2 ? dadosAluno2.aluno : '');
-        try {
-            const res = await fetch(APPS_SCRIPT_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    operacao: "marcar_fatos_emitidos",
-                    aluno: aluno,
-                    emailOperador: user.email || 'sistema',
-                    ids: todosIds
-                })
+        const result = await res.json();
+        if (result.status === 'success' && result.protocolos) {
+            // Atualiza cada comunicado com seu protocolo
+            result.protocolos.forEach(p => {
+                const span = document.querySelector(`.numProtocolo[data-id="${p.idLinha}"]`);
+                if (span) span.innerText = p.protocolo;
             });
-            const result = await res.json();
-            if (result.status === 'success') {
-                // Atualiza todos os protocolos no HTML
-                document.querySelectorAll('.numProtocolo').forEach(el => {
-                    el.innerText = result.protocolo;
-                });
-                document.getElementById('btnEmitir').style.display = 'none';
-                document.getElementById('btnImprimir').style.display = 'inline-block';
-                // Não chama window.print automaticamente – o usuário clica em "Imprimir 2ª via"
-                // window.print(); 
-            } else {
-                alert('Erro ao emitir comunicado: ' + (result.message || 'Tente novamente.'));
-                document.getElementById('btnEmitir').disabled = false;
-                document.getElementById('btnEmitir').innerText = '✅ Emitir e Imprimir';
-            }
-        } catch (e) {
-            alert('Erro de conexão.');
+            document.getElementById('btnEmitir').style.display = 'none';
+            document.getElementById('btnImprimir').style.display = 'inline-block';
+        } else {
+            alert('Erro ao emitir comunicado: ' + (result.message || 'Tente novamente.'));
             document.getElementById('btnEmitir').disabled = false;
             document.getElementById('btnEmitir').innerText = '✅ Emitir e Imprimir';
         }
+    } catch (e) {
+        alert('Erro de conexão.');
+        document.getElementById('btnEmitir').disabled = false;
+        document.getElementById('btnEmitir').innerText = '✅ Emitir e Imprimir';
     }
+}
     // Abrir modal de novo fato (preenche lista de alunos se necessário)
 async function abrirModalNovoFato() {
     // Garantir que a lista de alunos esteja carregada
