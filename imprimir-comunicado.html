@@ -22,7 +22,7 @@
             border-radius: 10px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             width: 100%;
-            max-width: 800px;
+            max-width: 900px;
             margin-bottom: 30px;
         }
         .painel-controle h3 { margin-bottom: 15px; }
@@ -30,170 +30,248 @@
             padding: 10px; width: 100%; font-size: 16px;
             margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px;
         }
+        .botoes-controle {
+            display: flex; gap: 10px; flex-wrap: wrap;
+        }
         .btn-emitir {
             background: var(--verde); color: white;
             border: none; padding: 12px 20px; font-size: 16px; font-weight: bold;
             border-radius: 5px; cursor: pointer; margin-right: 10px;
         }
         .btn-emitir:disabled { background: #aaa; cursor: not-allowed; }
-        .comunicado {
-            background: white; padding: 40px; border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-            width: 210mm; min-height: 297mm; margin: 0 auto; position: relative;
-        }
-        .cabecalho {
-            display: flex; align-items: center; border-bottom: 3px solid var(--verde);
-            padding-bottom: 15px; margin-bottom: 25px;
-        }
-        .cabecalho img { height: 70px; margin-right: 20px; }
-        .cabecalho .info-escola { font-size: 13px; color: #555; line-height: 1.4; }
-        .cabecalho h2 { color: var(--verde); font-size: 18px; margin-bottom: 5px; }
-        .titulo-comunicado {
-            text-align: center; font-size: 22px; font-weight: bold;
-            margin: 25px 0 20px; color: #222;
-        }
-        .dados-aluno {
-            font-size: 16px; margin-bottom: 25px; display: flex; justify-content: space-between;
-        }
-        .dados-aluno span { font-weight: bold; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
-        th { background: var(--verde); color: white; padding: 10px; text-align: left; }
-        td { padding: 10px; border-bottom: 1px solid #ddd; vertical-align: top; }
-        .tipo-positivo { color: var(--verde); font-weight: bold; }
-        .tipo-negativo { color: var(--vermelho); font-weight: bold; }
-        .assinaturas { display: flex; justify-content: space-between; margin-top: 50px; }
-        .linha-ass { border-top: 1px solid #000; width: 45%; padding-top: 8px; text-align: center; font-size: 14px; }
-        .protocolo {
-            margin-top: 30px; font-size: 13px; color: #777;
-            display: flex; justify-content: space-between;
-            border-top: 1px dashed #ccc; padding-top: 10px;
-        }
-        .marca-dagua {
-            position: absolute; top: 40%; left: 50%;
-            transform: translate(-50%, -50%) rotate(-30deg);
-            font-size: 80px; color: rgba(0,0,0,0.03); font-weight: bold;
-            pointer-events: none; white-space: nowrap;
-        }
-        @media print {
-            body { background: white; padding: 0; }
-            .painel-controle { display: none; }
-            .comunicado { box-shadow: none; border-radius: 0; width: 100%; height: auto; }
-        }
         .btn-imprimir {
             background: #1565c0; color: white; border: none;
             padding: 12px 20px; font-size: 16px; font-weight: bold;
             border-radius: 5px; cursor: pointer;
         }
+        .btn-laranja {
+            background: #f59e0b; color: white; border: none;
+            padding: 12px 20px; font-size: 16px; font-weight: bold;
+            border-radius: 5px; cursor: pointer;
+        }
+        .comunicados-container {
+            display: flex; flex-wrap: wrap; gap: 30px; justify-content: center;
+        }
+        .comunicado {
+            background: white; padding: 30px 25px; border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            width: 45%; min-width: 380px; min-height: 400px;
+            position: relative; margin-bottom: 20px;
+        }
+        .cabecalho {
+            display: flex; align-items: center; border-bottom: 2px solid var(--verde);
+            padding-bottom: 10px; margin-bottom: 15px;
+        }
+        .cabecalho .logos {
+            display: flex; align-items: center; gap: 10px;
+        }
+        .cabecalho img {
+            height: 40px; object-fit: contain;
+        }
+        .cabecalho .info-escola {
+            font-size: 11px; color: #555; line-height: 1.3;
+        }
+        .cabecalho h2 {
+            color: var(--verde); font-size: 16px; margin-bottom: 2px;
+        }
+        .titulo-comunicado {
+            text-align: center; font-size: 18px; font-weight: bold;
+            margin: 15px 0 10px; color: #222;
+        }
+        .dados-aluno {
+            font-size: 14px; margin-bottom: 15px; display: flex; justify-content: space-between;
+        }
+        .dados-aluno span { font-weight: bold; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th { background: var(--verde); color: white; padding: 8px; text-align: left; font-size: 13px; }
+        td { padding: 8px; border-bottom: 1px solid #ddd; vertical-align: top; font-size: 13px; }
+        .tipo-positivo { color: var(--verde); font-weight: bold; }
+        .tipo-negativo { color: var(--vermelho); font-weight: bold; }
+        .assinaturas {
+            display: flex; justify-content: center; margin-top: 30px;
+        }
+        .linha-ass {
+            border-top: 1px solid #000; width: 55%; padding-top: 8px;
+            text-align: center; font-size: 13px;
+        }
+        .protocolo {
+            margin-top: 20px; font-size: 11px; color: #777;
+            display: flex; justify-content: space-between;
+            border-top: 1px dashed #ccc; padding-top: 8px;
+        }
+        .marca-dagua {
+            position: absolute; top: 40%; left: 50%;
+            transform: translate(-50%, -50%) rotate(-30deg);
+            font-size: 60px; color: rgba(0,0,0,0.03); font-weight: bold;
+            pointer-events: none; white-space: nowrap;
+        }
+        @media print {
+            body { background: white; padding: 0; }
+            .painel-controle { display: none; }
+            .comunicados-container { display: block; }
+            .comunicado {
+                box-shadow: none; border-radius: 0; width: 48%;
+                margin: 0 1% 20px 1%; display: inline-block;
+                vertical-align: top; page-break-inside: avoid;
+            }
+            @page { size: A4; margin: 10mm; }
+        }
         .erro { color: red; font-weight: bold; text-align: center; }
-        .loading { text-align: center; font-size: 18px; color: #666; }
     </style>
 </head>
 <body>
 
 <div class="painel-controle" id="painelControle">
-    <h3>📄 Emitir Comunicado de Fato Observado</h3>
-    <label for="alunoSelect">Selecione o aluno:</label>
-    <input list="listaAlunos" id="alunoSelect" placeholder="Digite o nome do aluno...">
-    <datalist id="listaAlunos"></datalist>
-    <button class="btn-emitir" id="btnCarregar" onclick="carregarFatos()">🔍 Buscar fatos pendentes</button>
-    <div id="msgErro" class="erro"></div>
-</div>
-
-<div id="conteudoComunicado" style="display: none;">
-    <div class="comunicado" id="comunicadoPrint">
-        <!-- Preenchido via JS -->
+    <h3>📄 Emitir Comunicado de Fato Observado (F.O.)</h3>
+    <p style="margin-bottom: 15px;">Selecione até <strong>dois alunos</strong>. Se quiser imprimir dois na mesma folha, selecione dois alunos e clique em "Emitir e Imprimir".</p>
+    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 250px;">
+            <label>Aluno 1:</label>
+            <input list="listaAlunos1" id="alunoSelect1" placeholder="Digite o nome...">
+            <datalist id="listaAlunos1"></datalist>
+            <button class="btn-emitir" onclick="carregarFatos(1)">🔍 Buscar fatos</button>
+            <div id="msgErro1" class="erro"></div>
+        </div>
+        <div style="flex: 1; min-width: 250px;">
+            <label>Aluno 2 (opcional):</label>
+            <input list="listaAlunos2" id="alunoSelect2" placeholder="Digite o nome...">
+            <datalist id="listaAlunos2"></datalist>
+            <button class="btn-emitir" onclick="carregarFatos(2)">🔍 Buscar fatos</button>
+            <div id="msgErro2" class="erro"></div>
+        </div>
     </div>
-    <div style="text-align: center; margin-top: 20px;">
-        <button class="btn-emitir" id="btnEmitir" onclick="emitirEImprimir()">✅ Emitir e Imprimir</button>
+    <div style="margin-top: 20px;" class="botoes-controle">
+        <button class="btn-laranja" id="btnEmitir" onclick="emitirEImprimir()">✅ Emitir e Imprimir</button>
         <button class="btn-imprimir" id="btnImprimir" onclick="window.print()" style="display: none;">🖨️ Imprimir 2ª via</button>
     </div>
+</div>
+
+<div class="comunicados-container" id="conteudoComunicado" style="display: none;">
+    <!-- Comunicados serão inseridos aqui -->
 </div>
 
 <script>
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
 
-    // Verificar autenticação (MEIVS ou nível >= 4)
- // Verificar token de autorização (MEIVS ou nível >= 4)
-const params = new URLSearchParams(window.location.search);
-const token = params.get('token');
-let user = null;
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+    let user = null;
 
-if (token) {
-    try {
-        const decoded = atob(token).split(':');
-        user = { email: decoded[0], nivel: parseInt(decoded[1]) || 0, setor: decoded[2] };
-    } catch (e) {
-        user = null;
+    if (token) {
+        try {
+            const decoded = atob(token).split(':');
+            user = { email: decoded[0], nivel: parseInt(decoded[1]) || 0, setor: decoded[2] };
+        } catch (e) {
+            user = null;
+        }
     }
-}
 
-if (!user || (user.setor !== 'meivs' && user.nivel < 4)) {
-    document.getElementById('painelControle').innerHTML = '<div class="erro">Acesso restrito. Apenas MEIVS ou administradores nível 4 podem emitir comunicados.</div>';
-} else {
-    // Carregar lista de alunos para autocomplete
-    carregarListaAlunos();
-    // Verificar se veio um aluno via URL
-    const alunoUrl = params.get('aluno');
-    if (alunoUrl) {
-        document.getElementById('alunoSelect').value = alunoUrl;
-        carregarFatos();
+    if (!user || (user.setor !== 'meivs' && user.nivel < 4)) {
+        document.getElementById('painelControle').innerHTML = '<div class="erro">Acesso restrito. Apenas MEIVS ou administradores nível 4 podem emitir comunicados.</div>';
+    } else {
+        carregarListaAlunos();
+        const alunoUrl = params.get('aluno');
+        if (alunoUrl) {
+            document.getElementById('alunoSelect1').value = alunoUrl;
+            carregarFatos(1);
+        }
     }
-}
 
     async function carregarListaAlunos() {
         try {
             const res = await fetch(APPS_SCRIPT_URL + '?aba=alunos');
             const alunos = await res.json();
-            const datalist = document.getElementById('listaAlunos');
+            const datalist1 = document.getElementById('listaAlunos1');
+            const datalist2 = document.getElementById('listaAlunos2');
             alunos.forEach(nome => {
-                const option = document.createElement('option');
-                option.value = nome;
-                datalist.appendChild(option);
+                const option1 = document.createElement('option');
+                option1.value = nome;
+                datalist1.appendChild(option1);
+                const option2 = document.createElement('option');
+                option2.value = nome;
+                datalist2.appendChild(option2);
             });
         } catch (e) {
             console.error('Erro ao carregar alunos:', e);
         }
     }
 
-    let fatosPendentes = [];
+    let fatosAluno1 = [];
+    let fatosAluno2 = [];
+    let dadosAluno1 = null;
+    let dadosAluno2 = null;
 
-    async function carregarFatos() {
-        const aluno = document.getElementById('alunoSelect').value.trim();
+    async function carregarFatos(numero) {
+        const campoAluno = document.getElementById(`alunoSelect${numero}`);
+        const msgErro = document.getElementById(`msgErro${numero}`);
+        const aluno = campoAluno.value.trim();
         if (!aluno) {
-            document.getElementById('msgErro').innerText = 'Selecione um aluno.';
+            msgErro.innerText = 'Selecione um aluno.';
             return;
         }
-        document.getElementById('msgErro').innerText = '';
-        document.getElementById('conteudoComunicado').style.display = 'none';
-        document.getElementById('btnEmitir').style.display = 'inline-block';
-        document.getElementById('btnImprimir').style.display = 'none';
+        msgErro.innerText = '';
 
         try {
             const res = await fetch(APPS_SCRIPT_URL + '?aba=fatos_aluno&aluno=' + encodeURIComponent(aluno));
             const data = await res.json();
             if (data.error) {
-                document.getElementById('msgErro').innerText = data.error;
+                msgErro.innerText = data.error;
                 return;
             }
-            fatosPendentes = data.fatos;
-            if (fatosPendentes.length === 0) {
-                document.getElementById('msgErro').innerText = 'Nenhum fato pendente para este aluno.';
-                return;
+            if (numero === 1) {
+                fatosAluno1 = data.fatos;
+                dadosAluno1 = data;
+            } else {
+                fatosAluno2 = data.fatos;
+                dadosAluno2 = data;
             }
-            renderizarComunicado(data);
+            if (data.fatos.length === 0) {
+                msgErro.innerText = 'Nenhum fato pendente para este aluno.';
+            } else {
+                msgErro.innerText = `✅ ${data.fatos.length} fato(s) encontrado(s).`;
+            }
+            atualizarVisualizacao();
         } catch (e) {
-            document.getElementById('msgErro').innerText = 'Erro ao buscar dados.';
+            msgErro.innerText = 'Erro ao buscar dados.';
         }
     }
 
-    function renderizarComunicado(data) {
-        const aluno = data.aluno;
-        const turma = data.turma || 'Não informada';
+    function atualizarVisualizacao() {
+        const temAluno1 = fatosAluno1.length > 0;
+        const temAluno2 = fatosAluno2.length > 0;
+        const container = document.getElementById('conteudoComunicado');
+        const btnEmitir = document.getElementById('btnEmitir');
+        
+        if (!temAluno1 && !temAluno2) {
+            container.style.display = 'none';
+            btnEmitir.style.display = 'none';
+            return;
+        }
+        
+        container.style.display = 'flex';
+        container.innerHTML = '';
+        
+        if (temAluno1) {
+            container.appendChild(criarComunicadoHTML(dadosAluno1, fatosAluno1));
+        }
+        if (temAluno2) {
+            container.appendChild(criarComunicadoHTML(dadosAluno2, fatosAluno2));
+        }
+        
+        btnEmitir.style.display = 'inline-block';
+    }
+
+    function criarComunicadoHTML(data, fatos) {
+        const div = document.createElement('div');
+        div.className = 'comunicado';
         const hoje = new Date().toLocaleDateString('pt-BR');
 
         let html = `
         <div class="cabecalho">
-            <img src="img/logoA.png" alt="Logo">
+            <div class="logos">
+                <img src="img/logoA.png" alt="Logo Escola">
+                <img src="img/nreumuarama.jpg" alt="NRE Umuarama">
+            </div>
             <div class="info-escola">
                 <h2>Anchieta, C E C-M-Ef M N</h2>
                 <strong>Colégio Cívico Militar Anchieta</strong><br>
@@ -202,19 +280,18 @@ if (!user || (user.setor !== 'meivs' && user.nivel < 4)) {
                 Telefone: (44) 3676-1247 | E-mail: cztanchieta@seed.pr.gov.br
             </div>
         </div>
-        <div class="titulo-comunicado">Comunicado de Fato Observado – SEED</div>
+        <div class="titulo-comunicado">Comunicado de Fato Observado – F.O.</div>
         <div class="dados-aluno">
-            <div>Aluno(a): <span>${aluno}</span></div>
-            <div>Turma: <span>${turma}</span></div>
+            <div>Aluno(a): <span>${data.aluno}</span></div>
+            <div>Turma: <span>${data.turma || 'Não informada'}</span></div>
         </div>
         <table>
             <thead>
                 <tr><th>Data</th><th>Tipo</th><th>Descrição</th></tr>
             </thead>
-            <tbody>
-        `;
+            <tbody>`;
 
-        fatosPendentes.forEach(f => {
+        fatos.forEach(f => {
             const classeTipo = f.tipo.toLowerCase() === 'positivo' ? 'tipo-positivo' : 'tipo-negativo';
             html += `
             <tr>
@@ -228,28 +305,28 @@ if (!user || (user.setor !== 'meivs' && user.nivel < 4)) {
             </tbody>
         </table>
         <div class="assinaturas">
-            <div class="linha-ass">Responsável pelo aluno</div>
             <div class="linha-ass">Coordenação / Direção</div>
         </div>
-        <div class="protocolo" id="infoProtocolo">
+        <div class="protocolo">
             <span>Data de emissão: ${hoje}</span>
-            <span>Protocolo: <span id="numProtocolo">---</span></span>
-        </div>
-        <div class="marca-dagua" id="marcaDagua" style="display: none;">2ª VIA</div>
-        `;
+            <span>Protocolo: <span class="numProtocolo">---</span></span>
+        </div>`;
 
-        document.getElementById('comunicadoPrint').innerHTML = html;
-        document.getElementById('conteudoComunicado').style.display = 'block';
+        div.innerHTML = html;
+        return div;
     }
 
     async function emitirEImprimir() {
-        const aluno = document.getElementById('alunoSelect').value.trim();
-        const ids = fatosPendentes.map(f => f.idLinha);
-        if (ids.length === 0) return;
+        const ids1 = fatosAluno1.map(f => f.idLinha);
+        const ids2 = fatosAluno2.map(f => f.idLinha);
+        const todosIds = ids1.concat(ids2);
+        if (todosIds.length === 0) return;
 
         document.getElementById('btnEmitir').disabled = true;
         document.getElementById('btnEmitir').innerText = 'Emitindo...';
 
+        // Emite todos os fatos de uma vez
+        const aluno = dadosAluno1 ? dadosAluno1.aluno : (dadosAluno2 ? dadosAluno2.aluno : '');
         try {
             const res = await fetch(APPS_SCRIPT_URL, {
                 method: 'POST',
@@ -258,15 +335,19 @@ if (!user || (user.setor !== 'meivs' && user.nivel < 4)) {
                     operacao: "marcar_fatos_emitidos",
                     aluno: aluno,
                     emailOperador: user.email || 'sistema',
-                    ids: ids
+                    ids: todosIds
                 })
             });
             const result = await res.json();
             if (result.status === 'success') {
-                document.getElementById('numProtocolo').innerText = result.protocolo;
+                // Atualiza todos os protocolos no HTML
+                document.querySelectorAll('.numProtocolo').forEach(el => {
+                    el.innerText = result.protocolo;
+                });
                 document.getElementById('btnEmitir').style.display = 'none';
                 document.getElementById('btnImprimir').style.display = 'inline-block';
-                window.print(); // Abre diálogo de impressão
+                // Não chama window.print automaticamente – o usuário clica em "Imprimir 2ª via"
+                // window.print(); 
             } else {
                 alert('Erro ao emitir comunicado: ' + (result.message || 'Tente novamente.'));
                 document.getElementById('btnEmitir').disabled = false;
