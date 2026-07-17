@@ -8,38 +8,8 @@ let totalRegistrosAnterior = 0;
 let ultimoCarregamento = 0;
 const CACHE_TEMPO = 30000;
 
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').then(registration => {
-         Verifica se há uma atualização pendente
-        registration.addEventListener('updatefound', () => {
-            const newWorker = registration.installing;
-            newWorker.addEventListener('statechange', () => {
-               if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                    // Nova versão disponível!
-                    mostrarToast('🔄 Nova versão disponível! Atualize para aplicar.', 'aviso');
-                     Opcional: exibir um botão para recarregar
-                    const btnAtualizar = document.createElement('button');
-                    btnAtualizar.innerText = 'Atualizar agora';
-                    btnAtualizar.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#005088;color:white;padding:10px 20px;border-radius:30px;border:none;font-weight:bold;z-index:9999;cursor:pointer;box-shadow:0 4px 8px rgba(0,0,0,0.2);';
-                    btnAtualizar.onclick = () => {
-                        // Envia mensagem para o SW pular a espera e recarregar
-                        newWorker.postMessage({ action: 'skipWaiting' });
-                        window.location.reload();
-                    };
-                    document.body.appendChild(btnAtualizar);
-                   setTimeout(() => btnAtualizar.remove(), 15000); // Remove após 15s
-                }
-            });
-        });
-    });
-
-    // Listener para o SW assumir o controle imediatamente quando solicitado
-    navigator.serviceWorker.addEventListener('message', event => {
-        if (event.data && event.data.action === 'skipWaiting') {
-            self.skipWaiting();
-        }
-   });
-}
+// Não registra o Service Worker por enquanto (evita interferências)
+// if ('serviceWorker' in navigator) { ... }
 
 // ==== FUNÇÕES DE INICIALIZAÇÃO E SUPORTE ====
 function mostrarToast(mensagem, tipo = 'sucesso') {
