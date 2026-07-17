@@ -27,16 +27,11 @@ self.addEventListener('activate', event => {
     self.clients.claim();
 });
 
-// Apenas cacheia recursos locais; ignora requisições para Google Apps Script
+// NÃO intercepta chamadas para o Google Apps Script
 self.addEventListener('fetch', event => {
     const url = new URL(event.request.url);
+    if (url.hostname.includes('script.google.com')) return;
 
-    // Se for uma chamada ao Google Apps Script, não intercepta – vai direto para a rede
-    if (url.hostname.includes('script.google.com')) {
-        return;
-    }
-
-    // Para arquivos locais, tenta rede primeiro (network-first)
     event.respondWith(
         fetch(event.request)
             .then(response => {
@@ -50,7 +45,7 @@ self.addEventListener('fetch', event => {
     );
 });
 
-// Push notification (mantenha o que já existia)
+// Push notification (mantenha o código já existente)
 self.addEventListener('push', event => {
     let data = {};
     if (event.data) {
@@ -78,9 +73,7 @@ self.addEventListener('notificationclick', event => {
     event.waitUntil(
         clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
             for (const client of windowClients) {
-                if (client.url.includes('responsaveis') && 'focus' in client) {
-                    return client.focus();
-                }
+                if (client.url.includes('responsaveis') && 'focus' in client) return client.focus();
             }
             if (clients.openWindow) return clients.openWindow(urlToOpen);
         })
