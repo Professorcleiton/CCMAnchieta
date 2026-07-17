@@ -1,4 +1,4 @@
-const CACHE_NAME = 'siga-cache-v4'; // Versão incrementada para forçar atualização
+const CACHE_NAME = 'siga-cache-v5';
 const urlsToCache = [
     '/restrito.html',
     '/responsaveis.html',
@@ -9,65 +9,48 @@ const urlsToCache = [
     '/img/logoA.png'
 ];
 
-// Instalação: guarda os recursos essenciais no cache
 self.addEventListener('install', event => {
     event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then(cache => cache.addAll(urlsToCache))
+        caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
     );
-    self.skipWaiting(); // Ativa o novo SW imediatamente
+    self.skipWaiting();
 });
 
-// Ativação: limpa caches antigos
 self.addEventListener('activate', event => {
     event.waitUntil(
         caches.keys().then(cacheNames => {
             return Promise.all(
-                cacheNames.map(cache => {
-                    if (cache !== CACHE_NAME) {
-                        return caches.delete(cache);
-                    }
-                })
+                cacheNames.filter(cache => cache !== CACHE_NAME).map(cache => caches.delete(cache))
             );
         })
     );
-    self.clients.claim(); // Assume controle de todas as abas
+    self.clients.claim();
 });
 
-// Fetch: network-first para arquivos críticos, cache-first para imagens/estáticos
+// Apenas cacheia recursos locais; ignora requisições para Google Apps Script
 self.addEventListener('fetch', event => {
-    const { request } = event;
-    const url = new URL(request.url);
+    const url = new URL(event.request.url);
 
-    // Para imagens e fontes, use cache-first (mais rápido)
-    if (url.pathname.match(/\.(png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)$/)) {
-        event.respondWith(
-            caches.match(request).then(cached => cached || fetch(request))
-        );
+    // Se for uma chamada ao Google Apps Script, não intercepta – vai direto para a rede
+    if (url.hostname.includes('script.google.com')) {
         return;
     }
 
-    // Para HTML, CSS, JS: network-first, com fallback para cache
+    // Para arquivos locais, tenta rede primeiro (network-first)
     event.respondWith(
-        fetch(request)
+        fetch(event.request)
             .then(response => {
-                // Se a resposta for válida, atualiza o cache
                 if (response && response.status === 200) {
-                    const responseClone = response.clone();
-                    caches.open(CACHE_NAME).then(cache => {
-                        cache.put(request, responseClone);
-                    });
+                    const clone = response.clone();
+                    caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
                 }
                 return response;
             })
-            .catch(() => {
-                // Se falhar a rede (offline), serve do cache
-                return caches.match(request);
-            })
+            .catch(() => caches.match(event.request))
     );
 });
 
-// Push notification (mantenha o código já existente)
+// Push notification (mantenha o que já existia)
 self.addEventListener('push', event => {
     let data = {};
     if (event.data) {
@@ -82,8 +65,7 @@ self.addEventListener('push', event => {
         vibrate: [200, 100, 200],
         data: { url: data.url || 'https://www.ccmanchieta.com.br/responsaveis.html' },
         actions: [{ action: 'open', title: 'Ver detalhes' }],
-        requireInteraction: true,
-        tag: 'siga-notificacao-' + Date.now()
+        requireInteraction: true
     };
     event.waitUntil(
         self.registration.showNotification(data.title || 'SIGA Anchieta', options)
@@ -100,9 +82,7 @@ self.addEventListener('notificationclick', event => {
                     return client.focus();
                 }
             }
-            if (clients.openWindow) {
-                return clients.openWindow(urlToOpen);
-            }
+            if (clients.openWindow) return clients.openWindow(urlToOpen);
         })
     );
 });
