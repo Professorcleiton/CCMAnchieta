@@ -130,13 +130,17 @@ window.addEventListener('DOMContentLoaded', function() {
         function logout() { sessionStorage.removeItem('resp_logado'); window.location.href = 'responsaveis.html'; }
 
         async function carregarRegistros() {
-            var container = document.getElementById('lista-registros');
-            container.innerHTML = '<div class="sem-registros">Carregando dados do servidor...</div>';
+    var container = document.getElementById('lista-registros');
+    container.innerHTML = '<div class="sem-registros">Carregando dados do servidor...</div>';
+    
+    try {
+        const callbackName = 'jsonpCallback_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+        const url = APPS_SCRIPT_URL + '?aba=todos_os_dados&callback=' + callbackName;
+        
+        window[callbackName] = function(data) {
+            console.log('📦 Dados recebidos:', data);
+            
             try {
-                var res = await fetch(APPS_SCRIPT_URL + '?aba=todos_os_dados');
-                if (!res.ok) throw new Error('HTTP ' + res.status);
-                var data = await res.json();
-
                 if (!data.apontamentos && !data.documentos && !data.ocorrencias && !data.atas) {
                     throw new Error('Dados não encontrados.');
                 }
@@ -193,11 +197,28 @@ window.addEventListener('DOMContentLoaded', function() {
 
                 filtrarRegistros();
             } catch (e) {
-                container.innerHTML = '<div class="erro">Erro ao carregar: ' + e.message + '</div>';
+                container.innerHTML = '<div class="erro">Erro ao processar: ' + e.message + '</div>';
             }
-        }
+            
+            delete window[callbackName];
+            if (script.parentNode) script.parentNode.removeChild(script);
+        };
+        
+        const script = document.createElement('script');
+        script.src = url;
+        script.onerror = function() {
+            container.innerHTML = '<div class="erro">Erro ao carregar dados. Verifique sua conexão.</div>';
+            delete window[callbackName];
+            if (script.parentNode) script.parentNode.removeChild(script);
+        };
+        document.head.appendChild(script);
+        
+    } catch (e) {
+        container.innerHTML = '<div class="erro">Erro ao carregar: ' + e.message + '</div>';
+    }
+}
 
-        function filtrarRegistros() {
+    async function filtrarRegistros() {
             var filhoSelecionado = document.getElementById('filho-select').value;
             var container = document.getElementById('lista-registros');
             var registros = filhoSelecionado ? todosRegistros.filter(function(r) { return r.aluno === filhoSelecionado; }) : todosRegistros;
@@ -373,41 +394,71 @@ window.addEventListener('DOMContentLoaded', function() {
             return outputArray;
         }
 
-        async function carregarComunicadosEmitidos(alunos) {
-  if (!alunos || alunos.length === 0) return;
-  
-  try {
-    const nomes = alunos.join(',');
-    const res = await fetch(APPS_SCRIPT_URL + '?aba=fatos_emitidos&alunos=' + encodeURIComponent(nomes));
-    const comunicados = await res.json();
+function carregarComunicadosEmitidos(alunos) {
+    console.log('🔍 carregarComunicadosEmitidos chamado com:', alunos);
     
-    const container = document.getElementById('lista-comunicados');
-    if (!comunicados.length) {
-      container.innerHTML = '<p style="color: #64748b;">Nenhum comunicado recebido até o momento.</p>';
-      return;
+    if (!alunos || alunos.length === 0) {
+        console.log('⚠️ Nenhum aluno encontrado.');
+        return;
     }
     
-    container.innerHTML = '';
-    comunicados.forEach(f => {
-      const cor = f.tipo.toLowerCase() === 'positivo' ? '#2e7d32' : '#c62828';
-      const div = document.createElement('div');
-      div.style.cssText = `border: 1px solid #e0e0e0; border-left: 5px solid ${cor}; padding: 15px; border-radius: 6px; background: #fff;`;
-      div.innerHTML = `
-        <div style="display: flex; justify-content: space-between; font-size: 14px;">
-          <strong>${f.aluno}</strong>
-          <span style="color: ${cor}; font-weight: bold;">${f.tipo}</span>
-        </div>
-        <p style="margin: 8px 0 4px; font-size: 14px;">${f.descricao}</p>
-        <div style="display: flex; justify-content: space-between; font-size: 12px; color: #777;">
-          <span>Data: ${f.data}</span>
-          <span>Protocolo: ${f.protocolo || '---'}</span>
-        </div>
-      `;
-      container.appendChild(div);
-    });
-  } catch (e) {
-    console.error('Erro ao carregar comunicados:', e);
-  }
+    const container = document.getElementById('lista-comunicados');
+    container.innerHTML = '<p style="color: #64748b;">Carregando comunicados...</p>';
+    
+    try {
+        const nomes = alunos.join(',');
+        const callbackName = 'jsonpCallback_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+        
+        // Cria a URL com callback
+        const url = APPS_SCRIPT_URL + '?aba=fatos_emitidos&alunos=' + encodeURIComponent(nomes) + '&callback=' + callbackName;
+        console.log('📤 URL JSONP:', url);
+        
+        // Define a função de callback global
+        window[callbackName] = function(data) {
+            console.log('📦 Dados recebidos via JSONP:', data);
+            
+            if (!data || data.length === 0) {
+                container.innerHTML = '<p style="color: #64748b;">Nenhum comunicado recebido até o momento.</p>';
+            } else {
+                container.innerHTML = '';
+                data.forEach(function(f) {
+                    const cor = f.tipo && f.tipo.toLowerCase() === 'positivo' ? '#2e7d32' : '#c62828';
+                    const div = document.createElement('div');
+                    div.style.cssText = 'border: 1px solid #e0e0e0; border-left: 5px solid ' + cor + '; padding: 15px; border-radius: 6px; background: #fff; margin-bottom: 10px;';
+                    div.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; font-size: 14px;">
+                            <strong>${f.aluno || 'Aluno'}</strong>
+                            <span style="color: ${cor}; font-weight: bold;">${f.tipo || 'Neutro'}</span>
+                        </div>
+                        <p style="margin: 8px 0 4px; font-size: 14px;">${f.descricao || 'Sem descrição'}</p>
+                        <div style="display: flex; justify-content: space-between; font-size: 12px; color: #777;">
+                            <span>Data: ${f.data || '-'}</span>
+                            <span>Protocolo: ${f.protocolo || '---'}</span>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            }
+            
+            // Limpa o callback
+            delete window[callbackName];
+            if (script.parentNode) script.parentNode.removeChild(script);
+        };
+        
+        // Cria o script tag
+        const script = document.createElement('script');
+        script.src = url;
+        script.onerror = function() {
+            container.innerHTML = '<p style="color: #dc2626;">❌ Erro ao carregar comunicados. Verifique sua conexão.</p>';
+            delete window[callbackName];
+            if (script.parentNode) script.parentNode.removeChild(script);
+        };
+        document.head.appendChild(script);
+        
+    } catch (e) {
+        console.error('❌ Erro ao carregar comunicados:', e);
+        container.innerHTML = '<p style="color: #dc2626;">❌ Erro ao carregar comunicados: ' + e.message + '</p>';
+    }
 }
     </script>
 </body>
