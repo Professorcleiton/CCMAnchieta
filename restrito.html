@@ -85,23 +85,23 @@
                     </div>
                 </div>
 
-                <div class="aluno-selector" style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap; width: 100%; background: #f8fafc; padding: 12px 15px; border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <label style="font-weight: bold; color: #0f172a;"><i class="fa-solid fa-user-graduate"></i> Aluno:</label>
-                        <select id="select-alunos" onchange="filtrarRegistrosPorAluno()" style="padding: 8px 12px; border: 1px solid #94a3b8; border-radius: 6px; font-size: 14px; width: 220px; outline: none;">
-                            <option value="">Selecione uma turma...</option>
-                        </select>
-                    </div>
-                    <div style="flex-grow: 1;"></div>
-                    <div style="display: flex; gap: 10px;">
-                        <button id="btn-gerar-pdf-oficial" onclick="gerarFichaIndividualConselho()" style="background-color: #2563eb; color: white; padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2); display: none;">
-                            <i class="fa-solid fa-file-invoice"></i> Apontamentos
-                        </button>
-                        <button id="btn-gerar-pdf-pre-conselho" onclick="abrirModalTurmasPreConselho()" style="display: none; background-color: #8b5cf6; color: white; padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; box-shadow: 0 2px 4px rgba(139, 92, 246, 0.2);">
-                            <i class="fa-solid fa-users-gear"></i> Relatório Pré-Conselho
-                        </button>
-                    </div>
-                </div>
+<div id="aluno-selector-container" class="aluno-selector" style="display: flex !important; align-items: center; gap: 15px; flex-wrap: wrap; width: 100%; background: #f8fafc; padding: 12px 15px; border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+    <div style="display: flex; align-items: center; gap: 8px;">
+        <label style="font-weight: bold; color: #0f172a;"><i class="fa-solid fa-user-graduate"></i> Aluno:</label>
+        <select id="select-alunos" onchange="filtrarRegistrosPorAluno()" style="padding: 8px 12px; border: 1px solid #94a3b8; border-radius: 6px; font-size: 14px; width: 220px; outline: none;">
+            <option value="">Selecione uma turma...</option>
+        </select>
+    </div>
+    <div style="flex-grow: 1;"></div>
+    <div style="display: flex; gap: 10px;">
+        <button id="btn-gerar-pdf-oficial" onclick="gerarFichaIndividualConselho()" style="background-color: #2563eb; color: white; padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2); display: none;">
+            <i class="fa-solid fa-file-invoice"></i> Apontamentos
+        </button>
+        <button id="btn-gerar-pdf-pre-conselho" onclick="abrirModalTurmasPreConselho()" style="display: none; background-color: #8b5cf6; color: white; padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; box-shadow: 0 2px 4px rgba(139, 92, 246, 0.2);">
+            <i class="fa-solid fa-users-gear"></i> Relatório Pré-Conselho
+        </button>
+    </div>
+</div>
             </header>
 
             <!-- ========================================== -->
