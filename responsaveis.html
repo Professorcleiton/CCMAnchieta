@@ -179,148 +179,138 @@ O sistema reconhece mesmo sem acentos ou letras maiúsculas."></textarea>
         }
     }
 
-    // =============================================
-    // FUNÇÃO PARA FAZER REQUISIÇÕES JSONP
-    // =============================================
-    function fazerRequisicaoJSONP(params, callback) {
-        const callbackName = 'jsonpCallback_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
-        
+// =============================================
+// FUNÇÃO PARA FAZER REQUISIÇÕES (SEM JSONP)
+// =============================================
+async function fazerRequisicao(params) {
+    try {
         // Constrói a URL com os parâmetros
         let url = APPS_SCRIPT_URL + '?';
         for (let key in params) {
             url += key + '=' + encodeURIComponent(params[key]) + '&';
         }
-        url += 'callback=' + callbackName;
+        // Remove o último '&'
+        url = url.slice(0, -1);
         
-        console.log('📤 URL JSONP:', url);
+        console.log('📤 URL:', url);
         
-        // Define a função callback global
-        window[callbackName] = function(data) {
-            console.log('📦 Resposta JSONP:', data);
-            callback(data);
-            delete window[callbackName];
-            if (script.parentNode) script.parentNode.removeChild(script);
-        };
+        const response = await fetch(url);
+        const data = await response.json();
+        console.log('📦 Resposta:', data);
         
-        // Cria o script tag
-        const script = document.createElement('script');
-        script.src = url;
-        script.onerror = function() {
-            callback({ status: 'error', message: 'Erro de conexão' });
-            delete window[callbackName];
-            if (script.parentNode) script.parentNode.removeChild(script);
-        };
-        document.head.appendChild(script);
+        return data;
+    } catch (error) {
+        console.error('❌ Erro:', error);
+        return { status: 'error', message: 'Erro de conexão: ' + error.message };
+    }
+}
+
+ // =============================================
+// LOGIN
+// =============================================
+async function fazerLogin() {
+    const email = document.getElementById('login-email').value.trim().toLowerCase();
+    const senha = document.getElementById('login-senha').value.trim().replace(/\D/g, '');
+    const msg = document.getElementById('msg-login');
+
+    if (!email || !senha) {
+        msg.innerText = 'Preencha e-mail e senha.';
+        return;
     }
 
-    // =============================================
-    // LOGIN
-    // =============================================
-    async function fazerLogin() {
-        const email = document.getElementById('login-email').value.trim().toLowerCase();
-        const senha = document.getElementById('login-senha').value.trim().replace(/\D/g, '');
-        const msg = document.getElementById('msg-login');
+    msg.innerText = 'Verificando...';
 
-        if (!email || !senha) {
-            msg.innerText = 'Preencha e-mail e senha.';
-            return;
+    try {
+        const data = await fazerRequisicao({
+            operacao: 'LOGIN_RESPONSAVEL',
+            email: email,
+            senha: senha
+        });
+        
+        console.log('📦 Resposta do login:', data);
+        
+        if (data.status === "success") {
+            msg.innerText = '✅ Login bem-sucedido! Redirecionando...';
+            sessionStorage.setItem('resp_logado', JSON.stringify(data));
+
+            // Ativa notificações push
+            ativarPush(email);
+
+            setTimeout(() => {
+                window.location.href = 'painel-responsavel.html';
+            }, 1500);
+        } else {
+            msg.innerText = '❌ ' + (data.message || 'E-mail ou senha incorretos.');
         }
+    } catch (e) {
+        console.error('Erro no login:', e);
+        msg.innerText = 'Erro de conexão.';
+    }
+}
 
-        msg.innerText = 'Verificando...';
+// =============================================
+// CADASTRO
+// =============================================
+async function cadastrar() {
+    const nome = document.getElementById('cad-nome').value.trim();
+    const email = document.getElementById('cad-email').value.trim().toLowerCase();
+    const senha = document.getElementById('cad-senha').value.trim().replace(/\D/g, '');
+    const telefone = document.getElementById('cad-telefone').value.trim();
+    const filhosTexto = document.getElementById('cad-filhos').value.trim();
+    const msg = document.getElementById('msg-cadastro');
+    const btn = document.getElementById('btn-cadastrar');
 
-        try {
-            // Usa JSONP para login
-            fazerRequisicaoJSONP({
-                operacao: 'LOGIN_RESPONSAVEL',
-                email: email,
-                senha: senha
-            }, function(data) {
-                if (data.status === "success") {
-                    msg.innerText = '✅ Login bem-sucedido! Redirecionando...';
-                    sessionStorage.setItem('resp_logado', JSON.stringify(data));
-
-                    // Ativa notificações push (não bloqueia o redirecionamento)
-                    ativarPush(email);
-
-                    setTimeout(() => {
-                        window.location.href = 'painel-responsavel.html';
-                    }, 1500);
-                } else {
-                    msg.innerText = '❌ E-mail ou senha incorretos.';
-                }
-            });
-        } catch (e) {
-            msg.innerText = 'Erro de conexão.';
-            console.error(e);
-        }
+    if (!nome || !email || !senha || !telefone || !filhosTexto) {
+        msg.innerText = 'Preencha todos os campos obrigatórios.';
+        return;
     }
 
-    // =============================================
-    // CADASTRO
-    // =============================================
-    async function cadastrar() {
-        const nome = document.getElementById('cad-nome').value.trim();
-        const email = document.getElementById('cad-email').value.trim().toLowerCase();
-        const senha = document.getElementById('cad-senha').value.trim().replace(/\D/g, '');
-        const telefone = document.getElementById('cad-telefone').value.trim();
-        const filhosTexto = document.getElementById('cad-filhos').value.trim();
-        const msg = document.getElementById('msg-cadastro');
-        const btn = document.getElementById('btn-cadastrar');
-
-        if (!nome || !email || !senha || !telefone || !filhosTexto) {
-            msg.innerText = 'Preencha todos os campos obrigatórios.';
-            return;
-        }
-
-        if (telefone.replace(/\D/g, '').length < 10) {
-            msg.innerText = 'Informe um número de telefone válido (com DDD).';
-            return;
-        }
-
-        const filhos = filhosTexto.split('\n').map(f => f.trim()).filter(f => f !== '');
-        if (filhos.length === 0) {
-            msg.innerText = 'Informe pelo menos um nome de filho.';
-            return;
-        }
-
-        btn.disabled = true;
-        btn.innerText = 'Cadastrando...';
-        msg.innerText = '';
-
-        try {
-            // Usa JSONP para cadastro
-            fazerRequisicaoJSONP({
-                operacao: 'CADASTRAR_RESPONSAVEL',
-                nome: nome,
-                email: email,
-                senha: senha,
-                telefone: telefone,
-                filhos: JSON.stringify(filhos)  // Envia como JSON string
-            }, function(data) {
-                console.log('Resposta do servidor:', data);
-                
-                if (data.status === 'success') {
-                    msg.innerText = '✅ Cadastro realizado! Agora você pode entrar.';
-                    document.getElementById('cad-nome').value = '';
-                    document.getElementById('cad-email').value = '';
-                    document.getElementById('cad-senha').value = '';
-                    document.getElementById('cad-telefone').value = '';
-                    document.getElementById('cad-filhos').value = '';
-                    mostrarAba('login');
-                } else if (data.status === 'partial') {
-                    msg.innerText = '⚠️ ' + data.message;
-                } else {
-                    msg.innerText = '❌ ' + (data.message || 'Erro ao cadastrar.');
-                }
-            });
-        } catch (e) {
-            console.error('Erro na requisição:', e);
-            msg.innerText = 'Erro de conexão. Verifique sua internet e tente novamente.';
-        } finally {
-            btn.disabled = false;
-            btn.innerText = 'Cadastrar';
-        }
+    if (telefone.replace(/\D/g, '').length < 10) {
+        msg.innerText = 'Informe um número de telefone válido (com DDD).';
+        return;
     }
+
+    const filhos = filhosTexto.split('\n').map(f => f.trim()).filter(f => f !== '');
+    if (filhos.length === 0) {
+        msg.innerText = 'Informe pelo menos um nome de filho.';
+        return;
+    }
+
+    btn.disabled = true;
+    btn.innerText = 'Cadastrando...';
+    msg.innerText = '';
+
+    try {
+        const data = await fazerRequisicao({
+            operacao: 'CADASTRAR_RESPONSAVEL',
+            nome: nome,
+            email: email,
+            senha: senha,
+            telefone: telefone,
+            filhos: JSON.stringify(filhos)
+        });
+        
+        console.log('Resposta do servidor:', data);
+        
+        if (data.status === 'success') {
+            msg.innerText = '✅ Cadastro realizado! Agora você pode entrar.';
+            document.getElementById('cad-nome').value = '';
+            document.getElementById('cad-email').value = '';
+            document.getElementById('cad-senha').value = '';
+            document.getElementById('cad-telefone').value = '';
+            document.getElementById('cad-filhos').value = '';
+            mostrarAba('login');
+        } else {
+            msg.innerText = '❌ ' + (data.message || 'Erro ao cadastrar.');
+        }
+    } catch (e) {
+        console.error('Erro na requisição:', e);
+        msg.innerText = 'Erro de conexão. Verifique sua internet e tente novamente.';
+    } finally {
+        btn.disabled = false;
+        btn.innerText = 'Cadastrar';
+    }
+}
 
     // =============================================
     // NOTIFICAÇÕES PUSH
