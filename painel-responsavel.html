@@ -108,21 +108,24 @@
         var dadosResponsavel = null;
         var todosRegistros = [];
 
-        window.addEventListener('DOMContentLoaded', function() {
-            var sessao = sessionStorage.getItem('resp_logado');
-            if (!sessao) { window.location.href = 'responsaveis.html'; return; }
-            dadosResponsavel = JSON.parse(sessao);
-            document.getElementById('nome-responsavel').innerText = 'Bem-vindo(a), ' + dadosResponsavel.nome;
-            var select = document.getElementById('filho-select');
-            dadosResponsavel.alunos.forEach(function(aluno) {
-                var opt = document.createElement('option'); opt.value = aluno; opt.textContent = aluno; select.appendChild(opt);
-            });
-            carregarRegistros();
-            carregarDocumentosAluno();
-            verificarAtualizacaoCadastral();
-            verificarSuportePush();
-            carregarComunicadosEmitidos(alunos);
-        });
+window.addEventListener('DOMContentLoaded', function() {
+    var sessao = sessionStorage.getItem('resp_logado');
+    if (!sessao) { window.location.href = 'responsaveis.html'; return; }
+    dadosResponsavel = JSON.parse(sessao);
+    document.getElementById('nome-responsavel').innerText = 'Bem-vindo(a), ' + dadosResponsavel.nome;
+    var select = document.getElementById('filho-select');
+    dadosResponsavel.alunos.forEach(function(aluno) {
+        var opt = document.createElement('option'); 
+        opt.value = aluno; 
+        opt.textContent = aluno; 
+        select.appendChild(opt);
+    });
+    carregarRegistros();
+    carregarDocumentosAluno();
+    verificarAtualizacaoCadastral();
+    verificarSuportePush();
+    carregarComunicadosEmitidos(dadosResponsavel.alunos);  // ← CORRIGIDO!
+});
 
         function logout() { sessionStorage.removeItem('resp_logado'); window.location.href = 'responsaveis.html'; }
 
