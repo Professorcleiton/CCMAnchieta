@@ -164,108 +164,142 @@ O sistema reconhece mesmo sem acentos ou letras maiúsculas."></textarea>
 
     <a href="index.html" class="voltar">← Voltar ao site</a>
 
-    <script>
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
+  <script>
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
 
-        function mostrarAba(tipo) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.form').forEach(f => f.classList.remove('active'));
-            if (tipo === 'login') {
-                document.querySelector('.tab:first-child').classList.add('active');
-                document.getElementById('form-login').classList.add('active');
-            } else {
-                document.querySelector('.tab:last-child').classList.add('active');
-                document.getElementById('form-cadastro').classList.add('active');
-            }
+    function mostrarAba(tipo) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.form').forEach(f => f.classList.remove('active'));
+        if (tipo === 'login') {
+            document.querySelector('.tab:first-child').classList.add('active');
+            document.getElementById('form-login').classList.add('active');
+        } else {
+            document.querySelector('.tab:last-child').classList.add('active');
+            document.getElementById('form-cadastro').classList.add('active');
+        }
+    }
+
+    // =============================================
+    // FUNÇÃO PARA FAZER REQUISIÇÕES JSONP
+    // =============================================
+    function fazerRequisicaoJSONP(params, callback) {
+        const callbackName = 'jsonpCallback_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+        
+        // Constrói a URL com os parâmetros
+        let url = APPS_SCRIPT_URL + '?';
+        for (let key in params) {
+            url += key + '=' + encodeURIComponent(params[key]) + '&';
+        }
+        url += 'callback=' + callbackName;
+        
+        console.log('📤 URL JSONP:', url);
+        
+        // Define a função callback global
+        window[callbackName] = function(data) {
+            console.log('📦 Resposta JSONP:', data);
+            callback(data);
+            delete window[callbackName];
+            if (script.parentNode) script.parentNode.removeChild(script);
+        };
+        
+        // Cria o script tag
+        const script = document.createElement('script');
+        script.src = url;
+        script.onerror = function() {
+            callback({ status: 'error', message: 'Erro de conexão' });
+            delete window[callbackName];
+            if (script.parentNode) script.parentNode.removeChild(script);
+        };
+        document.head.appendChild(script);
+    }
+
+    // =============================================
+    // LOGIN
+    // =============================================
+    async function fazerLogin() {
+        const email = document.getElementById('login-email').value.trim().toLowerCase();
+        const senha = document.getElementById('login-senha').value.trim().replace(/\D/g, '');
+        const msg = document.getElementById('msg-login');
+
+        if (!email || !senha) {
+            msg.innerText = 'Preencha e-mail e senha.';
+            return;
         }
 
-        async function fazerLogin() {
-            const email = document.getElementById('login-email').value.trim().toLowerCase();
-            const senha = document.getElementById('login-senha').value.trim().replace(/\D/g, '');
-            const msg = document.getElementById('msg-login');
+        msg.innerText = 'Verificando...';
 
-            if (!email || !senha) {
-                msg.innerText = 'Preencha e-mail e senha.';
-                return;
-            }
+        try {
+            // Usa JSONP para login
+            fazerRequisicaoJSONP({
+                operacao: 'LOGIN_RESPONSAVEL',
+                email: email,
+                senha: senha
+            }, function(data) {
+                if (data.status === "success") {
+                    msg.innerText = '✅ Login bem-sucedido! Redirecionando...';
+                    sessionStorage.setItem('resp_logado', JSON.stringify(data));
 
-            msg.innerText = 'Verificando...';
-            try {
-                const res = await fetch(APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain' },
-                    body: JSON.stringify({
-                        operacao: "LOGIN_RESPONSAVEL",
-                        email: email,
-                        senha: senha
-                    })
-                });
-                const data = await res.json();
- if (data.status === "success") {
-    msg.innerText = '✅ Login bem-sucedido! Redirecionando...';
-    sessionStorage.setItem('resp_logado', JSON.stringify(data));
+                    // Ativa notificações push (não bloqueia o redirecionamento)
+                    ativarPush(email);
 
-    // Ativa notificações push (não bloqueia o redirecionamento)
-    ativarPush(email);
-
-    setTimeout(() => {
-        window.location.href = 'painel-responsavel.html';
-    }, 1500);
-} else {
+                    setTimeout(() => {
+                        window.location.href = 'painel-responsavel.html';
+                    }, 1500);
+                } else {
                     msg.innerText = '❌ E-mail ou senha incorretos.';
                 }
-            } catch (e) {
-                msg.innerText = 'Erro de conexão.';
-            }
+            });
+        } catch (e) {
+            msg.innerText = 'Erro de conexão.';
+            console.error(e);
+        }
+    }
+
+    // =============================================
+    // CADASTRO
+    // =============================================
+    async function cadastrar() {
+        const nome = document.getElementById('cad-nome').value.trim();
+        const email = document.getElementById('cad-email').value.trim().toLowerCase();
+        const senha = document.getElementById('cad-senha').value.trim().replace(/\D/g, '');
+        const telefone = document.getElementById('cad-telefone').value.trim();
+        const filhosTexto = document.getElementById('cad-filhos').value.trim();
+        const msg = document.getElementById('msg-cadastro');
+        const btn = document.getElementById('btn-cadastrar');
+
+        if (!nome || !email || !senha || !telefone || !filhosTexto) {
+            msg.innerText = 'Preencha todos os campos obrigatórios.';
+            return;
         }
 
-        async function cadastrar() {
-            const nome = document.getElementById('cad-nome').value.trim();
-            const email = document.getElementById('cad-email').value.trim().toLowerCase();
-            const senha = document.getElementById('cad-senha').value.trim().replace(/\D/g, '');
-            const telefone = document.getElementById('cad-telefone').value.trim();
-            const filhosTexto = document.getElementById('cad-filhos').value.trim();
-            const msg = document.getElementById('msg-cadastro');
-            const btn = document.getElementById('btn-cadastrar');
+        if (telefone.replace(/\D/g, '').length < 10) {
+            msg.innerText = 'Informe um número de telefone válido (com DDD).';
+            return;
+        }
 
-            if (!nome || !email || !senha || !telefone || !filhosTexto) {
-                msg.innerText = 'Preencha todos os campos obrigatórios.';
-                return;
-            }
+        const filhos = filhosTexto.split('\n').map(f => f.trim()).filter(f => f !== '');
+        if (filhos.length === 0) {
+            msg.innerText = 'Informe pelo menos um nome de filho.';
+            return;
+        }
 
-            if (telefone.replace(/\D/g, '').length < 10) {
-                msg.innerText = 'Informe um número de telefone válido (com DDD).';
-                return;
-            }
+        btn.disabled = true;
+        btn.innerText = 'Cadastrando...';
+        msg.innerText = '';
 
-            const filhos = filhosTexto.split('\n').map(f => f.trim()).filter(f => f !== '');
-            if (filhos.length === 0) {
-                msg.innerText = 'Informe pelo menos um nome de filho.';
-                return;
-            }
-
-            btn.disabled = true;
-            btn.innerText = 'Cadastrando...';
-            msg.innerText = '';
-
-            try {
-                const res = await fetch(APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain' },
-                    body: JSON.stringify({
-                        operacao: "CADASTRAR_RESPONSAVEL",
-                        nome: nome,
-                        email: email,
-                        senha: senha,
-                        telefone: telefone,
-                        filhos: filhos
-                    })
-                });
-
-                const resposta = await res.text();
-                console.log('Resposta do servidor:', resposta);
-
-                if (resposta === 'success') {
+        try {
+            // Usa JSONP para cadastro
+            fazerRequisicaoJSONP({
+                operacao: 'CADASTRAR_RESPONSAVEL',
+                nome: nome,
+                email: email,
+                senha: senha,
+                telefone: telefone,
+                filhos: JSON.stringify(filhos)  // Envia como JSON string
+            }, function(data) {
+                console.log('Resposta do servidor:', data);
+                
+                if (data.status === 'success') {
                     msg.innerText = '✅ Cadastro realizado! Agora você pode entrar.';
                     document.getElementById('cad-nome').value = '';
                     document.getElementById('cad-email').value = '';
@@ -273,89 +307,79 @@ O sistema reconhece mesmo sem acentos ou letras maiúsculas."></textarea>
                     document.getElementById('cad-telefone').value = '';
                     document.getElementById('cad-filhos').value = '';
                     mostrarAba('login');
-                } else if (resposta.startsWith('Cadastro parcial')) {
-                    msg.innerText = '⚠️ ' + resposta;
-                    document.getElementById('cad-filhos').value = ''; // limpa apenas os filhos para corrigir
+                } else if (data.status === 'partial') {
+                    msg.innerText = '⚠️ ' + data.message;
                 } else {
-                    msg.innerText = '❌ ' + resposta;
+                    msg.innerText = '❌ ' + (data.message || 'Erro ao cadastrar.');
                 }
-            } catch (e) {
-                console.error('Erro na requisição:', e);
-                msg.innerText = 'Erro de conexão. Verifique sua internet e tente novamente.';
-            } finally {
-                btn.disabled = false;
-                btn.innerText = 'Cadastrar';
-            }
+            });
+        } catch (e) {
+            console.error('Erro na requisição:', e);
+            msg.innerText = 'Erro de conexão. Verifique sua internet e tente novamente.';
+        } finally {
+            btn.disabled = false;
+            btn.innerText = 'Cadastrar';
+        }
+    }
+
+    // =============================================
+    // NOTIFICAÇÕES PUSH
+    // =============================================
+
+    const VAPID_PUBLIC_KEY = 'BNJ9Pz0rHohfjvPgrPNqahNelLVvKARagFsoAo8UOU0B2ORFFGHt4kmumrPr698MtL6rOaIht8QjX5XXncehrB0';
+
+    function urlBase64ToUint8Array(base64String) {
+        const padding = '='.repeat((4 - base64String.length % 4) % 4);
+        const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+        const rawData = window.atob(base64);
+        const outputArray = new Uint8Array(rawData.length);
+        for (let i = 0; i < rawData.length; ++i) {
+            outputArray[i] = rawData.charCodeAt(i);
+        }
+        return outputArray;
+    }
+
+    async function ativarPush(emailResponsavel) {
+        if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+            console.warn('Push não suportado neste navegador.');
+            return;
         }
 
-        // =============================================
-// NOTIFICAÇÕES PUSH
-// =============================================
+        try {
+            const registration = await navigator.serviceWorker.register('/sw.js');
+            await navigator.serviceWorker.ready;
 
-const VAPID_PUBLIC_KEY  = 'BNJ9Pz0rHohfjvPgrPNqahNelLVvKARagFsoAo8UOU0B2ORFFGHt4kmumrPr698MtL6rOaIht8QjX5XXncehrB0';
+            const permission = await Notification.requestPermission();
+            if (permission !== 'granted') {
+                console.warn('Permissão de notificação negada.');
+                return;
+            }
 
-// Converte chave VAPID para Uint8Array (necessário para a inscrição)
-function urlBase64ToUint8Array(base64String) {
-  const padding = '='.repeat((4 - base64String.length % 4) % 4);
-  const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
-  const rawData = window.atob(base64);
-  const outputArray = new Uint8Array(rawData.length);
-  for (let i = 0; i < rawData.length; ++i) {
-    outputArray[i] = rawData.charCodeAt(i);
-  }
-  return outputArray;
-}
+            let subscription = await registration.pushManager.getSubscription();
+            if (!subscription) {
+                subscription = await registration.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+                });
+            }
 
-// Função que ativa as notificações push para o responsável logado
-async function ativarPush(emailResponsavel) {
-  // Verifica se o navegador suporta os recursos necessários
-  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-    console.warn('Push não suportado neste navegador.');
-    return;
-  }
+            // Usa JSONP para salvar o token
+            fazerRequisicaoJSONP({
+                operacao: 'salvar_token_push',
+                email: emailResponsavel,
+                token: JSON.stringify(subscription)
+            }, function(result) {
+                if (result.status === 'success') {
+                    console.log('✅ Token push salvo com sucesso!');
+                } else {
+                    console.error('❌ Erro ao salvar token push:', result);
+                }
+            });
 
-  try {
-    // 1. Registrar o service worker (já existente)
-    const registration = await navigator.serviceWorker.register('/sw.js');
-    await navigator.serviceWorker.ready;
-
-    // 2. Pedir permissão de notificação (se ainda não tiver)
-    const permission = await Notification.requestPermission();
-    if (permission !== 'granted') {
-      console.warn('Permissão de notificação negada.');
-      return;
+        } catch (err) {
+            console.error('Erro ao ativar push:', err);
+        }
     }
-
-    // 3. Inscrever-se no serviço de push
-    let subscription = await registration.pushManager.getSubscription();
-    if (!subscription) {
-      subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-      });
-    }
-
-    // 4. Enviar o objeto subscription (token) para o Google Apps Script
-    const response = await fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        operacao: 'salvar_token_push',
-        email: emailResponsavel,                     // e-mail do responsável logado
-        token: JSON.stringify(subscription)          // subscription completa
-      })
-    });
-
-    const result = await response.json();
-    if (result.status === 'success') {
-      console.log('✅ Token push salvo com sucesso!');
-    } else {
-      console.error('❌ Erro ao salvar token push:', result);
-    }
-  } catch (err) {
-    console.error('Erro ao ativar push:', err);
-  }
-}
-    </script>
+</script>
 </body>
 </html>
