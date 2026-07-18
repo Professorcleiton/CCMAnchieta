@@ -129,92 +129,91 @@ window.addEventListener('DOMContentLoaded', function() {
 
         function logout() { sessionStorage.removeItem('resp_logado'); window.location.href = 'responsaveis.html'; }
 
-        async function carregarRegistros() {
+  function carregarRegistros() {
     var container = document.getElementById('lista-registros');
     container.innerHTML = '<div class="sem-registros">Carregando dados do servidor...</div>';
     
     try {
-        const callbackName = 'jsonpCallback_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
-        const url = APPS_SCRIPT_URL + '?aba=todos_os_dados&callback=' + callbackName;
+        // Usa operacao=todos_os_dados em vez de aba=todos_os_dados
+        const url = APPS_SCRIPT_URL + '?operacao=todos_os_dados';
+        console.log('📤 Carregando registros de:', url);
         
-        window[callbackName] = function(data) {
-            console.log('📦 Dados recebidos:', data);
-            
-            try {
-                if (!data.apontamentos && !data.documentos && !data.ocorrencias && !data.atas) {
-                    throw new Error('Dados não encontrados.');
+        fetch(url)
+            .then(function(response) {
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                return response.json();
+            })
+            .then(function(data) {
+                console.log('📦 Dados recebidos:', data);
+                
+                try {
+                    if (!data.apontamentos && !data.documentos && !data.ocorrencias && !data.atas) {
+                        throw new Error('Dados não encontrados.');
+                    }
+
+                    var alunosVinculados = dadosResponsavel.alunos;
+                    todosRegistros = [];
+
+                    (data.apontamentos || []).forEach(function(r) {
+                        if (alunosVinculados.includes(r.aluno)) {
+                            todosRegistros.push(Object.assign({}, r, { tipo: 'apontamento' }));
+                        }
+                    });
+
+                    (data.documentos || []).forEach(function(d) {
+                        if (alunosVinculados.includes(d.aluno)) {
+                            todosRegistros.push({
+                                aluno: d.aluno,
+                                setor: 'adm',
+                                texto: '📄 Documento: ' + d.documento + ' - Status: ' + d.status,
+                                funcionario: 'Secretaria',
+                                dataAtual: d.data,
+                                tipo: 'documento'
+                            });
+                        }
+                    });
+
+                    (data.ocorrencias || []).forEach(function(oc) {
+                        if (alunosVinculados.includes(oc.aluno)) {
+                            var icone = oc.tipo === 'Saída Antecipada' ? '🚪' : '⏰';
+                            var horario = oc.data ? oc.data.split(' ')[1] : '';
+                            todosRegistros.push({
+                                aluno: oc.aluno,
+                                setor: 'adm',
+                                texto: icone + ' ' + oc.tipo + ': ' + oc.motivo + ' | Autorizado por: ' + oc.autorizador + ' | Horário: ' + horario,
+                                funcionario: oc.autorizador || 'Secretaria',
+                                dataAtual: oc.data,
+                                tipo: 'ocorrencia'
+                            });
+                        }
+                    });
+
+                    (data.atas || []).forEach(function(ata) {
+                        if (alunosVinculados.includes(ata.aluno)) {
+                            todosRegistros.push({
+                                aluno: ata.aluno,
+                                setor: 'adm',
+                                texto: '📁 Ata Disciplinar nº ' + ata.numero + ': ' + ata.aluno + ' — ' + ata.data,
+                                funcionario: 'Coordenação',
+                                dataAtual: ata.data,
+                                tipo: 'ata'
+                            });
+                        }
+                    });
+
+                    filtrarRegistros();
+                } catch (e) {
+                    container.innerHTML = '<div class="erro">Erro ao processar: ' + e.message + '</div>';
                 }
-
-                var alunosVinculados = dadosResponsavel.alunos;
-                todosRegistros = [];
-
-                (data.apontamentos || []).forEach(function(r) {
-                    if (alunosVinculados.includes(r.aluno)) {
-                        todosRegistros.push(Object.assign({}, r, { tipo: 'apontamento' }));
-                    }
-                });
-
-                (data.documentos || []).forEach(function(d) {
-                    if (alunosVinculados.includes(d.aluno)) {
-                        todosRegistros.push({
-                            aluno: d.aluno,
-                            setor: 'adm',
-                            texto: '📄 Documento: ' + d.documento + ' - Status: ' + d.status,
-                            funcionario: 'Secretaria',
-                            dataAtual: d.data,
-                            tipo: 'documento'
-                        });
-                    }
-                });
-
-                (data.ocorrencias || []).forEach(function(oc) {
-                    if (alunosVinculados.includes(oc.aluno)) {
-                        var icone = oc.tipo === 'Saída Antecipada' ? '🚪' : '⏰';
-                        var horario = oc.data ? oc.data.split(' ')[1] : '';
-                        todosRegistros.push({
-                            aluno: oc.aluno,
-                            setor: 'adm',
-                            texto: icone + ' ' + oc.tipo + ': ' + oc.motivo + ' | Autorizado por: ' + oc.autorizador + ' | Horário: ' + horario,
-                            funcionario: oc.autorizador || 'Secretaria',
-                            dataAtual: oc.data,
-                            tipo: 'ocorrencia'
-                        });
-                    }
-                });
-
-                (data.atas || []).forEach(function(ata) {
-                    if (alunosVinculados.includes(ata.aluno)) {
-                        todosRegistros.push({
-                            aluno: ata.aluno,
-                            setor: 'adm',
-                            texto: '📁 Ata Disciplinar nº ' + ata.numero + ': ' + ata.aluno + ' — ' + ata.data,
-                            funcionario: 'Coordenação',
-                            dataAtual: ata.data,
-                            tipo: 'ata'
-                        });
-                    }
-                });
-
-                filtrarRegistros();
-            } catch (e) {
-                container.innerHTML = '<div class="erro">Erro ao processar: ' + e.message + '</div>';
-            }
-            
-            delete window[callbackName];
-            if (script.parentNode) script.parentNode.removeChild(script);
-        };
-        
-        const script = document.createElement('script');
-        script.src = url;
-        script.onerror = function() {
-            container.innerHTML = '<div class="erro">Erro ao carregar dados. Verifique sua conexão.</div>';
-            delete window[callbackName];
-            if (script.parentNode) script.parentNode.removeChild(script);
-        };
-        document.head.appendChild(script);
+            })
+            .catch(function(error) {
+                console.error('❌ Erro no fetch:', error);
+                container.innerHTML = '<div class="erro">❌ Erro ao carregar dados. Verifique sua conexão.</div>';
+            });
         
     } catch (e) {
-        container.innerHTML = '<div class="erro">Erro ao carregar: ' + e.message + '</div>';
+        console.error('❌ Erro:', e);
+        container.innerHTML = '<div class="erro">❌ Erro ao carregar dados. Verifique sua conexão.</div>';
     }
 }
 
@@ -244,33 +243,45 @@ window.addEventListener('DOMContentLoaded', function() {
             }).join('');
         }
 
-        async function carregarDocumentosAluno() {
-            var container = document.getElementById('lista-documentos');
-            container.innerHTML = '<div class="sem-registros">Carregando documentos...</div>';
-            var todosDocumentos = [];
-            for (var i = 0; i < dadosResponsavel.alunos.length; i++) {
-                var aluno = dadosResponsavel.alunos[i];
-                try {
-                    var res = await fetch(APPS_SCRIPT_URL, { method: 'POST', headers: {'Content-Type': 'text/plain'}, body: JSON.stringify({operacao: 'listar_documentos_aluno', aluno: aluno}) });
-                    var docs = await res.json();
-                    docs.forEach(function(d) { d.aluno = aluno; });
-                    todosDocumentos = todosDocumentos.concat(docs);
-                } catch (e) { console.error('Erro ao carregar docs de', aluno, e); }
-            }
-            if (todosDocumentos.length === 0) { container.innerHTML = '<div class="sem-registros">Nenhum documento solicitado.</div>'; return; }
-            var html = '<table class="tabela-documentos"><thead><tr><th>Aluno</th><th>Documento</th><th>Status</th><th>Data</th><th>Ação</th></tr></thead><tbody>';
-            todosDocumentos.forEach(function(doc) {
-                var statusClass = doc.status === 'Pendente' ? 'status-pendente' : doc.status === 'Enviado' ? 'status-enviado' : doc.status === 'Verificado' ? 'status-verificado' : 'status-rejeitado';
-                var botao = '';
-                if (doc.status === 'Pendente') botao = '<button class="btn-upload" onclick="abrirUpload(\'' + doc.aluno + '\',\'' + doc.documento + '\')">📤 Enviar</button>';
-                else if (doc.status === 'Enviado' || doc.status === 'Verificado') botao = '<a href="' + doc.link + '" target="_blank" class="btn-visualizar">👁️ Ver</a>';
-                var dataExibicao = doc.dataSolicitacao || '-';
-                if (dataExibicao.length > 10) dataExibicao = dataExibicao.substring(0, 10);
-                html += '<tr><td>' + doc.aluno + '</td><td>' + doc.documento + '</td><td class="' + statusClass + '">' + doc.status + '</td><td>' + dataExibicao + '</td><td>' + botao + '</td></tr>';
-            });
-            html += '</tbody></table>';
-            container.innerHTML = html;
+     async function carregarDocumentosAluno() {
+    var container = document.getElementById('lista-documentos');
+    container.innerHTML = '<div class="sem-registros">Carregando documentos...</div>';
+    var todosDocumentos = [];
+    
+    for (var i = 0; i < dadosResponsavel.alunos.length; i++) {
+        var aluno = dadosResponsavel.alunos[i];
+        try {
+            var url = APPS_SCRIPT_URL + '?operacao=listar_documentos_aluno&aluno=' + encodeURIComponent(aluno);
+            var res = await fetch(url);
+            var docs = await res.json();
+            docs.forEach(function(d) { d.aluno = aluno; });
+            todosDocumentos = todosDocumentos.concat(docs);
+        } catch (e) { 
+            console.error('Erro ao carregar docs de', aluno, e); 
         }
+    }
+    
+    if (todosDocumentos.length === 0) { 
+        container.innerHTML = '<div class="sem-registros">Nenhum documento solicitado.</div>'; 
+        return; 
+    }
+    
+    var html = '<table class="tabela-documentos"><thead><tr><th>Aluno</th><th>Documento</th><th>Status</th><th>Data</th><th>Ação</th></tr></thead><tbody>';
+    todosDocumentos.forEach(function(doc) {
+        var statusClass = doc.status === 'Pendente' ? 'status-pendente' : doc.status === 'Enviado' ? 'status-enviado' : doc.status === 'Verificado' ? 'status-verificado' : 'status-rejeitado';
+        var botao = '';
+        if (doc.status === 'Pendente') {
+            botao = '<button class="btn-upload" onclick="abrirUpload(\'' + doc.aluno + '\',\'' + doc.documento + '\')">📤 Enviar</button>';
+        } else if (doc.status === 'Enviado' || doc.status === 'Verificado') {
+            botao = '<a href="' + doc.link + '" target="_blank" class="btn-visualizar">👁️ Ver</a>';
+        }
+        var dataExibicao = doc.dataSolicitacao || '-';
+        if (dataExibicao.length > 10) dataExibicao = dataExibicao.substring(0, 10);
+        html += '<tr><td>' + doc.aluno + '</td><td>' + doc.documento + '</td><td class="' + statusClass + '">' + doc.status + '</td><td>' + dataExibicao + '</td><td>' + botao + '</td></tr>';
+    });
+    html += '</tbody></table>';
+    container.innerHTML = html;
+}
 
         function abrirUpload(aluno, documento) {
             var input = document.createElement('input');
@@ -407,21 +418,24 @@ function carregarComunicadosEmitidos(alunos) {
     
     try {
         const nomes = alunos.join(',');
-        const callbackName = 'jsonpCallback_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+        const url = APPS_SCRIPT_URL + '?operacao=fatos_emitidos&alunos=' + encodeURIComponent(nomes);
+        console.log('📤 URL dos comunicados:', url);
         
-        // Cria a URL com callback
-        const url = APPS_SCRIPT_URL + '?aba=fatos_emitidos&alunos=' + encodeURIComponent(nomes) + '&callback=' + callbackName;
-        console.log('📤 URL JSONP:', url);
-        
-        // Define a função de callback global
-        window[callbackName] = function(data) {
-            console.log('📦 Dados recebidos via JSONP:', data);
-            
-            if (!data || data.length === 0) {
-                container.innerHTML = '<p style="color: #64748b;">Nenhum comunicado recebido até o momento.</p>';
-            } else {
+        fetch(url)
+            .then(function(response) {
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                return response.json();
+            })
+            .then(function(comunicados) {
+                console.log('📦 Comunicados recebidos:', comunicados);
+                
+                if (!comunicados || comunicados.length === 0) {
+                    container.innerHTML = '<p style="color: #64748b;">Nenhum comunicado recebido até o momento.</p>';
+                    return;
+                }
+                
                 container.innerHTML = '';
-                data.forEach(function(f) {
+                comunicados.forEach(function(f) {
                     const cor = f.tipo && f.tipo.toLowerCase() === 'positivo' ? '#2e7d32' : '#c62828';
                     const div = document.createElement('div');
                     div.style.cssText = 'border: 1px solid #e0e0e0; border-left: 5px solid ' + cor + '; padding: 15px; border-radius: 6px; background: #fff; margin-bottom: 10px;';
@@ -438,26 +452,15 @@ function carregarComunicadosEmitidos(alunos) {
                     `;
                     container.appendChild(div);
                 });
-            }
-            
-            // Limpa o callback
-            delete window[callbackName];
-            if (script.parentNode) script.parentNode.removeChild(script);
-        };
-        
-        // Cria o script tag
-        const script = document.createElement('script');
-        script.src = url;
-        script.onerror = function() {
-            container.innerHTML = '<p style="color: #dc2626;">❌ Erro ao carregar comunicados. Verifique sua conexão.</p>';
-            delete window[callbackName];
-            if (script.parentNode) script.parentNode.removeChild(script);
-        };
-        document.head.appendChild(script);
+            })
+            .catch(function(error) {
+                console.error('❌ Erro ao carregar comunicados:', error);
+                container.innerHTML = '<p style="color: #dc2626;">❌ Erro ao carregar comunicados. Verifique sua conexão.</p>';
+            });
         
     } catch (e) {
         console.error('❌ Erro ao carregar comunicados:', e);
-        container.innerHTML = '<p style="color: #dc2626;">❌ Erro ao carregar comunicados: ' + e.message + '</p>';
+        container.innerHTML = '<p style="color: #dc2626;">❌ Erro ao carregar comunicados. Verifique sua conexão.</p>';
     }
 }
     </script>
