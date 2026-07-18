@@ -85,7 +85,7 @@
                     </div>
                 </div>
 
-<div class="aluno-selector" style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap; width: 100%; background: #f8fafc; padding: 12px 15px; border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+<div class="aluno-selector" id="aluno-selector-container" style="display: flex !important; align-items: center; gap: 15px; flex-wrap: wrap; width: 100%; background: #f8fafc; padding: 12px 15px; border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 1px 3px rgba(0,0,0,0.05); min-height: 60px;">
     <div style="display: flex; align-items: center; gap: 8px;">
         <label style="font-weight: bold; color: #0f172a;"><i class="fa-solid fa-user-graduate"></i> Aluno:</label>
         <select id="select-alunos" onchange="filtrarRegistrosPorAluno()" style="padding: 8px 12px; border: 1px solid #94a3b8; border-radius: 6px; font-size: 14px; width: 220px; outline: none;">
@@ -1096,6 +1096,36 @@ function verificarBotaoComunicado() {
         btn.style.display = 'flex';
     }
 }
+
+            // Força a exibição do seletor de alunos
+    document.addEventListener('DOMContentLoaded', function() {
+        const container = document.getElementById('aluno-selector-container');
+        if (container) {
+            container.style.display = 'flex !important';
+            container.style.visibility = 'visible';
+            container.style.opacity = '1';
+            container.style.height = 'auto';
+            container.style.overflow = 'visible';
+            container.style.minHeight = '60px';
+            console.log('✅ Seletor de alunos FORÇADO a aparecer');
+        }
+        
+        // Verifica se o select tem opções
+        const select = document.getElementById('select-alunos');
+        if (select) {
+            console.log('📊 Select encontrado, opções:', select.options.length);
+            if (select.options.length <= 1) {
+                console.log('⚠️ Select vazio, tentando popular...');
+                // Tenta popular com as turmas
+                if (typeof cacheAlunosPorTurma !== 'undefined' && Object.keys(cacheAlunosPorTurma).length > 0) {
+                    const turmas = Object.keys(cacheAlunosPorTurma);
+                    if (turmas.length > 0 && typeof selecionarTurma === 'function') {
+                        selecionarTurma(turmas[0]);
+                    }
+                }
+            }
+        }
+    });
     </script>
     <script src="script.js"></script>
 </body>
