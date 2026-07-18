@@ -289,3 +289,15 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f1f5f9; di
 .dark-mode select, .dark-mode input[type="text"], .dark-mode input[type="number"], .dark-mode input[type="email"], .dark-mode input[type="password"] { background-color: #0f172a !important; color: #f8fafc !important; border-color: #475569 !important; }
 .dark-mode input:disabled { background-color: #1e293b !important; color: #94a3b8 !important; }
 .dark-mode .modal-body div[style*="background: #f8fafc"] { background-color: #1e293b !important; }
+
+/* Força a exibição do seletor de alunos em todas as telas */
+#aluno-selector-container {
+    display: flex !important;
+}
+
+/* Garante que em telas grandes também apareça */
+@media (min-width: 768px) {
+    #aluno-selector-container {
+        display: flex !important;
+    }
+}
