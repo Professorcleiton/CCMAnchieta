@@ -293,6 +293,9 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f1f5f9; di
 /* =============================================
    FORÇA A EXIBIÇÃO DO SELETOR DE ALUNOS
    ============================================= */
+
+/* Força o container do seletor a aparecer */
+#aluno-selector-container,
 .aluno-selector {
     display: flex !important;
     visibility: visible !important;
@@ -300,37 +303,48 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f1f5f9; di
     height: auto !important;
     max-height: none !important;
     overflow: visible !important;
+    min-height: 60px !important;
 }
 
-#aluno-selector-container {
-    display: flex !important;
+/* Força o select dentro do container */
+#aluno-selector-container select,
+.aluno-selector select {
+    display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
-    height: auto !important;
-    max-height: none !important;
-    overflow: visible !important;
 }
 
-/* Garante que em telas grandes também apareça */
+/* Garante que em telas grandes (desktop) também apareça */
 @media (min-width: 768px) {
+    #aluno-selector-container,
     .aluno-selector {
         display: flex !important;
         visibility: visible !important;
         opacity: 1 !important;
         height: auto !important;
-    }
-    #aluno-selector-container {
-        display: flex !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
     }
 }
 
-/* Corrige possíveis conflitos com outras classes */
+/* Corrige possíveis conflitos com o top-bar */
 .top-bar-app .aluno-selector {
     display: flex !important;
     visibility: visible !important;
     opacity: 1 !important;
     height: auto !important;
+}
+
+/* Remove qualquer overflow hidden que possa estar escondendo */
+.aluno-selector {
+    overflow: visible !important;
+}
+
+/* Garante que o select seja visível */
+select#select-alunos {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 220px !important;
+    min-width: 150px !important;
 }
