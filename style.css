@@ -290,23 +290,47 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f1f5f9; di
 .dark-mode input:disabled { background-color: #1e293b !important; color: #94a3b8 !important; }
 .dark-mode .modal-body div[style*="background: #f8fafc"] { background-color: #1e293b !important; }
 
-/* FORÇA A EXIBIÇÃO DO SELETOR DE ALUNOS EM TODAS AS TELAS */
-#aluno-selector-container,
+/* =============================================
+   FORÇA A EXIBIÇÃO DO SELETOR DE ALUNOS
+   ============================================= */
 .aluno-selector {
     display: flex !important;
     visibility: visible !important;
     opacity: 1 !important;
     height: auto !important;
+    max-height: none !important;
     overflow: visible !important;
 }
 
-/* GARANTE QUE EM TELAS GRANDES TAMBÉM APAREÇA */
+#aluno-selector-container {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+}
+
+/* Garante que em telas grandes também apareça */
 @media (min-width: 768px) {
-    #aluno-selector-container,
     .aluno-selector {
         display: flex !important;
         visibility: visible !important;
         opacity: 1 !important;
         height: auto !important;
     }
+    #aluno-selector-container {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        height: auto !important;
+    }
+}
+
+/* Corrige possíveis conflitos com outras classes */
+.top-bar-app .aluno-selector {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    height: auto !important;
 }
