@@ -408,11 +408,28 @@ async function salvarNovoFato() {
     const tipo = document.getElementById('fato-tipo').value;
     const descricao = document.getElementById('fato-descricao').value.trim();
     const data = document.getElementById('fato-data').value;
+    const btn = document.querySelector('#modal-novo-fato button:last-child');
 
-    if (!aluno || !descricao || !data) {
-        alert('Preencha todos os campos.');
+    // Validações
+    if (!aluno) {
+        alert('⚠️ Por favor, informe o nome do aluno.');
+        document.getElementById('fato-aluno').focus();
         return;
     }
+    if (!descricao) {
+        alert('⚠️ Por favor, descreva o fato observado.');
+        document.getElementById('fato-descricao').focus();
+        return;
+    }
+    if (!data) {
+        alert('⚠️ Por favor, informe a data do fato.');
+        document.getElementById('fato-data').focus();
+        return;
+    }
+
+    // Desabilita o botão
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando...';
 
     try {
         const res = await fetch(APPS_SCRIPT_URL, {
@@ -424,21 +441,34 @@ async function salvarNovoFato() {
                 tipo: tipo,
                 descricao: descricao,
                 data: data,
-                emailOperador: user.email || 'sistema'
+                funcionario: user ? user.email : 'Sistema',
+                emailOperador: user ? user.email : 'sistema'
             })
         });
+        
         const result = await res.json();
+        
         if (result.status === 'success') {
-            alert('Fato registrado com sucesso!');
+            alert('✅ Fato registrado com sucesso! ID: ' + (result.id || ''));
             fecharModalNovoFato();
-            // Limpar campos
+            
+            // Limpa os campos
             document.getElementById('fato-aluno').value = '';
             document.getElementById('fato-descricao').value = '';
+            document.getElementById('fato-tipo').value = 'Positivo';
+            
+            // Recarrega a lista de alunos (opcional)
+            // carregarListaAlunos();
+            
         } else {
-            alert('Erro: ' + result.message);
+            alert('❌ Erro ao registrar: ' + (result.message || 'Tente novamente.'));
         }
     } catch (e) {
-        alert('Erro de conexão.');
+        alert('❌ Erro de conexão com o servidor. Verifique sua internet.');
+        console.error('Erro ao salvar fato:', e);
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'Salvar';
     }
 }
 </script>
