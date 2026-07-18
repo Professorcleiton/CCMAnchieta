@@ -384,18 +384,19 @@ async function emitirEImprimir() {
     }
 }
     // Abrir modal de novo fato (preenche lista de alunos se necessário)
-async function abrirModalNovoFato() {
-    // Garantir que a lista de alunos esteja carregada
-    if (document.getElementById('listaAlunosFato').options.length === 0) {
-        await carregarListaAlunos(); // já existente
-        // Copiar opções para o datalist do modal
-        const datalistOrig = document.getElementById('listaAlunos');
-        const datalistFato = document.getElementById('listaAlunosFato');
-        datalistFato.innerHTML = datalistOrig.innerHTML;
-    }
+function abrirModalNovoFato() {
     // Preencher data atual
-    const hoje = new Date().toISOString().split('T')[0];
-    document.getElementById('fato-data').value = hoje;
+    const hoje = new Date();
+    const ano = hoje.getFullYear();
+    const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+    const dia = String(hoje.getDate()).padStart(2, '0');
+    document.getElementById('fato-data').value = ano + '-' + mes + '-' + dia;
+    
+    // Limpa campos anteriores
+    document.getElementById('fato-aluno').value = '';
+    document.getElementById('fato-descricao').value = '';
+    
+    // Mostra o modal
     document.getElementById('modal-novo-fato').style.display = 'flex';
 }
 
@@ -409,6 +410,7 @@ async function salvarNovoFato() {
     const descricao = document.getElementById('fato-descricao').value.trim();
     const data = document.getElementById('fato-data').value;
     const btn = document.querySelector('#modal-novo-fato button:last-child');
+    const btnOriginalText = btn.innerHTML;
 
     // Validações
     if (!aluno) {
@@ -429,9 +431,11 @@ async function salvarNovoFato() {
 
     // Desabilita o botão
     btn.disabled = true;
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando...';
+    btn.innerHTML = '⏳ Salvando...';
 
     try {
+        console.log('📤 Enviando dados:', { aluno, tipo, descricao, data });
+
         const res = await fetch(APPS_SCRIPT_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'text/plain' },
@@ -445,11 +449,14 @@ async function salvarNovoFato() {
                 emailOperador: user ? user.email : 'sistema'
             })
         });
-        
+
+        console.log('📥 Resposta recebida:', res.status);
+
         const result = await res.json();
-        
+        console.log('📦 Resultado:', result);
+
         if (result.status === 'success') {
-            alert('✅ Fato registrado com sucesso! ID: ' + (result.id || ''));
+            alert('✅ Fato registrado com sucesso!');
             fecharModalNovoFato();
             
             // Limpa os campos
@@ -464,11 +471,11 @@ async function salvarNovoFato() {
             alert('❌ Erro ao registrar: ' + (result.message || 'Tente novamente.'));
         }
     } catch (e) {
+        console.error('❌ Erro de conexão:', e);
         alert('❌ Erro de conexão com o servidor. Verifique sua internet.');
-        console.error('Erro ao salvar fato:', e);
     } finally {
         btn.disabled = false;
-        btn.innerHTML = 'Salvar';
+        btn.innerHTML = btnOriginalText;
     }
 }
 </script>
