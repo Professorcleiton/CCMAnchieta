@@ -10,21 +10,23 @@ let ultimoCarregamento = 0;
 const CACHE_TEMPO = 30000;
 
 // =============================================
-// BANCO DE DADOS LOCAL
+// BANCO DE DADOS LOCAL - VERIFICAÇÃO
 // =============================================
-let db = null;
 
-// Tenta carregar o banco de dados local
+// db já está declarado no db.js - apenas verifica se está disponível
 try {
-    if (typeof window.db !== 'undefined' && window.db) {
-        db = window.db;
+    if (typeof db !== 'undefined' && db && db.db) {
         console.log('✅ Banco de dados local disponível');
     } else {
         console.log('ℹ️ Banco de dados local não disponível - modo offline desativado');
+        // Cria um objeto fake para não quebrar o código
+        if (typeof db === 'undefined') {
+            var db = null;
+        }
     }
 } catch (e) {
     console.log('ℹ️ Banco de dados local não disponível');
-    db = null;
+    var db = null;
 }
 
 // ==== FUNÇÕES DE INICIALIZAÇÃO E SUPORTE ====
