@@ -636,38 +636,43 @@ async function salvarPost(setor) {
     };
 
     try {
-        // VERIFICA SE O BANCO LOCAL EXISTE E ESTÁ FUNCIONANDO
-        if (db && db.db) {
-            try {
-                // 1. SALVA LOCALMENTE
+        // VERIFICA SE ESTÁ ONLINE
+        if (navigator.onLine) {
+            // ONLINE: Salva direto no servidor
+            console.log('📡 Online - salvando no servidor...');
+            const result = await salvarNoServidor(dadosApontamento);
+            
+            if (result.status === 'success') {
+                mostrarToast('✅ Apontamento salvo!', 'sucesso');
+                textarea.value = '';
+                fecharCaixaTexto(setor);
+                // Recarrega os dados para mostrar o novo apontamento
+                await carregarRegistrosDoServidor();
+                // Filtra para o aluno atual
+                if (document.getElementById('select-alunos').value) {
+                    filtrarRegistrosPorAluno();
+                }
+            } else {
+                mostrarToast('❌ Erro ao salvar. Tente novamente.', 'erro');
+            }
+        } else {
+            // OFFLINE: Salva localmente
+            console.log('📡 Offline - salvando localmente...');
+            
+            if (db && db.db) {
                 const apontamentoLocal = await db.salvarApontamento(dadosApontamento);
                 console.log('✅ Apontamento salvo localmente:', apontamentoLocal);
                 
-                // 2. MOSTRA NA TELA
+                // Mostra na tela com indicação de pendente
                 mostrarApontamentoLocal(apontamentoLocal);
-                mostrarToast('✅ Apontamento salvo localmente!', 'sucesso');
+                mostrarToast('✅ Apontamento salvo localmente! (será sincronizado quando a internet voltar)', 'sucesso');
                 
-                // 3. LIMPA O CAMPO
                 textarea.value = '';
                 fecharCaixaTexto(setor);
-                
-                // 4. TENTA SINCRONIZAR (se tiver internet)
-                if (navigator.onLine) {
-                    setTimeout(sincronizarApontamentos, 1000);
-                }
-                btn.disabled = false;
-                return;
-            } catch (localError) {
-                console.warn('⚠️ Erro ao salvar localmente, tentando servidor:', localError);
-                // Se falhar localmente, tenta o servidor
+            } else {
+                mostrarToast('❌ Banco de dados local não disponível.', 'erro');
             }
         }
-        
-        // FALLBACK: Salva direto no servidor
-        await salvarNoServidor(dadosApontamento);
-        mostrarToast('✅ Apontamento salvo!', 'sucesso');
-        textarea.value = '';
-        fecharCaixaTexto(setor);
         
     } catch (error) {
         console.error('❌ Erro ao salvar apontamento:', error);
@@ -676,7 +681,6 @@ async function salvarPost(setor) {
         btn.disabled = false;
     }
 }
-
 async function salvarNoServidor(dados) {
     const payload = {
         operacao: "SALVAR",
@@ -1346,6 +1350,12 @@ function mostrarApontamentoLocal(apontamento) {
     const feed = document.getElementById(`feed-${setorExibicao}`);
     
     if (feed) {
+        // Verifica se já existe um card com este idLocal
+        const existente = feed.querySelector(`.post-card-local[data-id-local="${apontamento.idLocal}"]`);
+        if (existente) {
+            existente.remove();
+        }
+        
         const card = document.createElement('div');
         card.className = 'post-card post-card-local';
         card.dataset.idLocal = apontamento.idLocal;
@@ -1394,36 +1404,60 @@ async function sincronizarApontamentos() {
     
     try {
         const pendentes = await db.getApontamentosNaoSincronizados();
-        console.log(`📤 ${pendentes.length} apontamentos pendentes`);
+        console.log(`📤 ${pendentes.length} apontamentos pendentes de sincronização`);
         
         if (!pendentes || pendentes.length === 0) {
             estaSincronizando = false;
             return;
         }
         
+        let sincronizados = 0;
+        let erros = 0;
+        
         for (const apontamento of pendentes) {
             console.log(`🔄 Sincronizando:`, apontamento);
             
             try {
-                const result = await salvarNoServidor(apontamento);
+                // Remove campos que não devem ir para o servidor
+                const dadosParaEnviar = {
+                    aluno: apontamento.aluno,
+                    setor: apontamento.setor,
+                    texto: apontamento.texto,
+                    funcionario: apontamento.funcionario,
+                    dataAtual: apontamento.dataAtual
+                };
+                
+                const result = await salvarNoServidor(dadosParaEnviar);
                 console.log(`📥 Resultado:`, result);
                 
                 if (result.status === 'success') {
                     await db.marcarApontamentoSincronizado(apontamento.idLocal);
+                    sincronizados++;
                     console.log(`✅ Apontamento ${apontamento.idLocal} sincronizado!`);
+                    // Atualiza o card visual
                     atualizarStatusApontamento(apontamento.idLocal, true);
-                    
-                    // Recarrega os registros para mostrar o apontamento salvo
-                    await carregarRegistrosDoServidor();
                 } else {
+                    erros++;
                     console.error(`❌ Falha ao sincronizar:`, result);
                 }
             } catch (error) {
+                erros++;
                 console.error(`❌ Erro ao sincronizar apontamento:`, error);
             }
         }
         
-        mostrarToast('📡 Dados sincronizados!', 'sucesso');
+        if (sincronizados > 0) {
+            mostrarToast(`📡 ${sincronizados} apontamento(s) sincronizado(s)!`, 'sucesso');
+            // Recarrega os dados para mostrar os apontamentos salvos
+            await carregarRegistrosDoServidor();
+            if (document.getElementById('select-alunos').value) {
+                filtrarRegistrosPorAluno();
+            }
+        }
+        
+        if (erros > 0) {
+            console.warn(`⚠️ ${erros} apontamento(s) falharam na sincronização`);
+        }
         
     } catch (error) {
         console.error('❌ Erro na sincronização:', error);
