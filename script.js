@@ -1,5 +1,4 @@
 // ========== GLOBAIS ==========
-const db = window.db || null;
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxEMx6NmZvQqPMmmxsrTaV1DrMHa-F16_ARFR1cjm_5v054lUtF80YWtW88g6MsyhajRg/exec';
 const APPS_SCRIPT_PAT_URL = APPS_SCRIPT_URL; 
 const SHEET_ID = '1UUiVcCaSb_9Lx7gdEpmBzeRQPlBwDZRouQC2pf1q8Vg';
@@ -10,12 +9,28 @@ let totalRegistrosAnterior = 0;
 let ultimoCarregamento = 0;
 const CACHE_TEMPO = 30000;
 
-// Não registra o Service Worker por enquanto (evita interferências)
-// if ('serviceWorker' in navigator) { ... }
+// =============================================
+// BANCO DE DADOS LOCAL
+// =============================================
+let db = null;
+
+// Tenta carregar o banco de dados local
+try {
+    if (typeof window.db !== 'undefined' && window.db) {
+        db = window.db;
+        console.log('✅ Banco de dados local disponível');
+    } else {
+        console.log('ℹ️ Banco de dados local não disponível - modo offline desativado');
+    }
+} catch (e) {
+    console.log('ℹ️ Banco de dados local não disponível');
+    db = null;
+}
 
 // ==== FUNÇÕES DE INICIALIZAÇÃO E SUPORTE ====
 function mostrarToast(mensagem, tipo = 'sucesso') {
     const container = document.getElementById('toast-container');
+    if (!container) return;
     const toast = document.createElement('div');
     toast.className = `toast ${tipo}`;
     let icone = tipo === 'erro' ? 'fa-circle-xmark' : tipo === 'aviso' ? 'fa-triangle-exclamation' : 'fa-circle-check';
@@ -62,6 +77,7 @@ async function autenticarUsuario() {
         }
     } catch (e) { 
         err.style.display = 'block'; btn.disabled = false; btn.innerHTML = 'Entrar no Sistema'; 
+        console.error('Erro no login:', e);
     }
 }
 
@@ -72,20 +88,16 @@ function mostrarTab(tabSelecionada) {
     if (tabSelecionada === 'apontamentos') {
         document.getElementById('aba-apontamentos').style.display = 'block';
         document.getElementById('aba-documentos').style.display = 'none';
-        
         document.getElementById('btn-voltar-apontamentos').style.display = 'none';
         const btnSec = document.getElementById('btn-aba-secretaria');
         if (btnSec && (usuarioLogado.nivel >= 3 || usuarioLogado.setor === 'secretaria' || usuarioLogado.setor === 'direcao')) {
             btnSec.style.display = 'inline-block';
         }
-        
     } else if (tabSelecionada === 'documentos') {
         document.getElementById('aba-apontamentos').style.display = 'none';
         document.getElementById('aba-documentos').style.display = 'block';
-        
         document.getElementById('btn-aba-secretaria').style.display = 'none';
         document.getElementById('btn-voltar-apontamentos').style.display = 'inline-block';
-        
         carregarDocumentos(); 
     }
 }
@@ -215,19 +227,16 @@ function inicializarPainel() {
     if (displayUser) displayUser.innerHTML = `<i class="fa-solid fa-user-check"></i> ${usuarioLogado.nome}`;
     aplicarBloqueioSetores(usuarioLogado.setor, usuarioLogado.nivel);
     
-    // Botão Gestão: apenas nível 4
     const btnGestao = document.getElementById('btn-abrir-admin');
     if (btnGestao) btnGestao.style.display = (usuarioLogado.nivel >= 4) ? 'inline-flex' : 'none';
 
-    // Botão Patrimônio: apenas nível 4 (se estiver nas Ações Rápidas, usar 'flex')
     const btnPatrimonio = document.getElementById('btn-abrir-patrimonio');
     if (btnPatrimonio) btnPatrimonio.style.display = (usuarioLogado.nivel >= 4) ? 'inline-flex' : 'none';
 
-    // Botão Secretaria (Ações Rápidas): nível 3+, secretaria ou direção
     const btnSec = document.getElementById('btn-aba-secretaria');
     if (btnSec) {
         if (usuarioLogado.nivel >= 3 || usuarioLogado.setor === 'secretaria' || usuarioLogado.setor === 'direcao') {
-            btnSec.style.display = 'flex';  // ← Alterado para 'flex'
+            btnSec.style.display = 'flex';
         } else {
             btnSec.style.display = 'none';
         }
@@ -235,6 +244,9 @@ function inicializarPainel() {
     verificarBotaoComunicado();
     carregarAlunosETurmas(); 
     carregarRegistrosDoServidor();
+    
+    // Inicializa o status de conexão
+    setTimeout(atualizarStatusConexao, 2000);
 }
 
 // ==== ALERTA EM TEMPO REAL ====
@@ -260,7 +272,6 @@ async function carregarAlunosETurmas() {
     try {
         let turmasPermitidas = null;
         
-        // Apenas para professores de nível 1-3
         if (usuarioLogado && usuarioLogado.setor === 'professores' && usuarioLogado.nivel < 4) {
             console.log('🔍 Verificando turmas para professor:', usuarioLogado.email);
             const respTurmas = await fetch(APPS_SCRIPT_URL + '?aba=turmas_professor&email=' + encodeURIComponent(usuarioLogado.email));
@@ -366,8 +377,7 @@ async function carregarRegistrosDoServidor() {
         
         todosOsRegistros = [];
 
-        // 1. Apontamentos Pedagógicos
-        data.apontamentos.forEach(row => {
+        (data.apontamentos || []).forEach(row => {
             todosOsRegistros.push({
                 idLinha: row.idLinha,
                 aluno: row.aluno,
@@ -379,7 +389,6 @@ async function carregarRegistrosDoServidor() {
             });
         });
 
-        // 2. Documentos da Secretaria
         if (data.documentos) {
             data.documentos.forEach(doc => {
                 var linkDownload = doc.link ? ' <a href="' + doc.link + '" target="_blank" style="color:#4f46e5;text-decoration:underline;">📎 Baixar</a>' : '';
@@ -394,7 +403,6 @@ async function carregarRegistrosDoServidor() {
             });
         }
 
-        // 3. Ocorrências (Saídas/Atrasos)
         if (data.ocorrencias) {
             data.ocorrencias.forEach(oc => {
                 var icone = oc.tipo === "Saída Antecipada" ? "🚪" : "⏰";
@@ -410,7 +418,6 @@ async function carregarRegistrosDoServidor() {
             });
         }
 
-        // 4. Atas Disciplinares
         if (data.atas) {
             data.atas.forEach(ata => {
                 var linkHtml = (usuarioLogado && usuarioLogado.nivel >= 3) ?
@@ -426,7 +433,6 @@ async function carregarRegistrosDoServidor() {
             });
         }
 
-        // 5. Fatos SEED-PR
         if (data.fatos_seed) {
             data.fatos_seed.forEach(fato => {
                 var isPositivo = fato.tipo.toLowerCase().indexOf('positivo') !== -1;
@@ -447,7 +453,6 @@ async function carregarRegistrosDoServidor() {
             });
         }
 
-        // Atualiza a interface
         atualizarGraficosMural();
         if (document.getElementById('select-alunos').value) filtrarRegistrosPorAluno();
 
@@ -456,8 +461,6 @@ async function carregarRegistrosDoServidor() {
     }
 }
 
-// ... (o restante das funções permanece igual ao seu último script.js completo)
-// Copie a partir daqui todas as outras funções que já existiam: atualizarGraficosMural, filtrarRegistrosPorAluno, etc.
 function atualizarGraficosMural() {
     const total = todosOsRegistros.length;
     const meivs = todosOsRegistros.filter(r => r.setor.toLowerCase() === 'meivs').length;
@@ -545,13 +548,11 @@ function filtrarRegistrosPorAluno() {
         if (feed) feed.innerHTML = '';
     });
 
-    // Contadores separados por tipo
     let cm = 0, cp = 0, ca = 0, cf = 0;
     let docs = 0, ocorr = 0, atas = 0;
 
     todosOsRegistros.forEach(r => {
         if (r.aluno && r.aluno.trim() === aluno) {
-            // Contagem por tipo
             if (r.tipo === 'documento') {
                 docs++;
             } else if (r.tipo === 'ocorrencia') {
@@ -559,7 +560,6 @@ function filtrarRegistrosPorAluno() {
             } else if (r.tipo === 'ata') {
                 atas++;
             } else {
-                // Apontamentos normais por setor
                 let setor = r.setor;
                 if (setor === 'meivs') cm++;
                 else if (setor === 'pedagogico') cp++;
@@ -567,7 +567,6 @@ function filtrarRegistrosPorAluno() {
                 else if (setor === 'professores' || setor === 'direcao') cf++;
             }
             
-            // Exibição no feed
             let setorExibicao = r.setor;
             if (setorExibicao === 'professores') setorExibicao = 'direcao';
             
@@ -584,16 +583,12 @@ function filtrarRegistrosPorAluno() {
         }
     });
 
-    // Total geral
     const total = cm + cp + ca + cf + docs + ocorr + atas;
     document.getElementById('dash-total-count').innerText = total;
     
-    // Função auxiliar para atualizar contador
     const atualizarContador = (idBar, label, cor, valor) => {
         const bar = document.getElementById(idBar);
-        if (bar) bar.style.width = '0%'; // esconde a barra
-        
-        // Procura o label dentro do mini-chart-bar-container
+        if (bar) bar.style.width = '0%';
         const container = document.querySelector('.mini-chart-bar-container');
         if (container) {
             const labels = container.querySelectorAll('.mini-label-chart');
@@ -605,19 +600,20 @@ function filtrarRegistrosPorAluno() {
         }
     };
 
-    // Apontamentos por setor
     atualizarContador('bar-meivs', 'MEIVS', '#0284c7', cm);
     atualizarContador('bar-pedag', 'PEDAG', '#0d9488', cp);
     atualizarContador('bar-adm', 'ADM', '#4f46e5', ca);
     atualizarContador('bar-profs', 'PROFS', '#b91c1c', cf);
-    
-    // Documentos, ocorrências e atas
     atualizarContador('bar-profs', '📄 DOCS', '#8b5cf6', docs);
     atualizarContador('bar-profs', '🚪 OCORR', '#f59e0b', ocorr);
     atualizarContador('bar-profs', '📁 ATAS', '#dc2626', atas);
 }
 
 function verificarTeclaEnter(e, setor) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); salvarPost(setor); } }
+
+// =============================================
+// SALVAR APONTAMENTO (COM SUPORTE OFFLINE)
+// =============================================
 
 async function salvarPost(setor) {
     const textarea = document.getElementById(`text-${setor}`);
@@ -645,31 +641,38 @@ async function salvarPost(setor) {
     };
 
     try {
-        // VERIFICA SE O BANCO LOCAL EXISTE
-        if (typeof db !== 'undefined' && db) {
-            // 1. SALVA LOCALMENTE
-            const apontamentoLocal = await db.salvarApontamento(dadosApontamento);
-            console.log('✅ Apontamento salvo localmente:', apontamentoLocal);
-            
-            // 2. MOSTRA NA TELA
-            mostrarApontamentoLocal(apontamentoLocal);
-            mostrarToast('✅ Apontamento salvo!', 'sucesso');
-            
-            // 3. LIMPA O CAMPO
-            textarea.value = '';
-            fecharCaixaTexto(setor);
-            
-            // 4. TENTA SINCRONIZAR (se tiver internet)
-            if (navigator.onLine) {
-                setTimeout(sincronizarApontamentos, 1000);
+        // VERIFICA SE O BANCO LOCAL EXISTE E ESTÁ FUNCIONANDO
+        if (db && db.db) {
+            try {
+                // 1. SALVA LOCALMENTE
+                const apontamentoLocal = await db.salvarApontamento(dadosApontamento);
+                console.log('✅ Apontamento salvo localmente:', apontamentoLocal);
+                
+                // 2. MOSTRA NA TELA
+                mostrarApontamentoLocal(apontamentoLocal);
+                mostrarToast('✅ Apontamento salvo localmente!', 'sucesso');
+                
+                // 3. LIMPA O CAMPO
+                textarea.value = '';
+                fecharCaixaTexto(setor);
+                
+                // 4. TENTA SINCRONIZAR (se tiver internet)
+                if (navigator.onLine) {
+                    setTimeout(sincronizarApontamentos, 1000);
+                }
+                btn.disabled = false;
+                return;
+            } catch (localError) {
+                console.warn('⚠️ Erro ao salvar localmente, tentando servidor:', localError);
+                // Se falhar localmente, tenta o servidor
             }
-        } else {
-            // FALLBACK: Salva direto no servidor (modo antigo)
-            await salvarNoServidor(dadosApontamento);
-            mostrarToast('✅ Apontamento salvo!', 'sucesso');
-            textarea.value = '';
-            fecharCaixaTexto(setor);
         }
+        
+        // FALLBACK: Salva direto no servidor
+        await salvarNoServidor(dadosApontamento);
+        mostrarToast('✅ Apontamento salvo!', 'sucesso');
+        textarea.value = '';
+        fecharCaixaTexto(setor);
         
     } catch (error) {
         console.error('❌ Erro ao salvar apontamento:', error);
@@ -1209,7 +1212,7 @@ async function carregarRegistrosPreConselho() {
 
 function abrirCaixaTexto(setor) {
     const selectAlunos = document.getElementById('select-alunos');
-    const alunoSelecionado = selectAlunos.options[selectAlunos.selectedIndex].text;
+    const alunoSelecionado = selectAlunos.options[selectAlunos.selectedIndex]?.text || '';
     const alunoValor = selectAlunos.value;
 
     if (!alunoValor || alunoValor === "Selecione uma turma..." || alunoValor === "") {
@@ -1244,17 +1247,14 @@ function abrirModalSaida() {
     const modal = document.getElementById('modal-saida');
     const selectAluno = document.getElementById('saida-aluno');
     
-    // Limpa campos
     document.getElementById('saida-motivo').value = '';
     document.getElementById('ocorrencia-tipo').value = 'Saída Antecipada';
     
-    // Define hora atual
     const agora = new Date();
     const hora = String(agora.getHours()).padStart(2, '0');
     const minutos = String(agora.getMinutes()).padStart(2, '0');
     document.getElementById('ocorrencia-horario').value = hora + ':' + minutos;
     
-    // Popula alunos
     selectAluno.innerHTML = '<option value="">-- Selecione o Aluno --</option>';
     let todosAlunos = [];
     for (let turma in cacheAlunosPorTurma) {
@@ -1324,147 +1324,10 @@ async function registrarSaidaAntecipada() {
         mostrarToast('Erro ao registrar a ocorrência.', 'erro');
     }
 }
-// =============================================
-// SISTEMA DE SINCRONIZAÇÃO
-// =============================================
-
-let estaSincronizando = false;
-
-async function sincronizarApontamentos() {
-    if (!db || estaSincronizando || !navigator.onLine) return;
-    estaSincronizando = true;
-    
-    try {
-        const pendentes = await db.getApontamentosNaoSincronizados();
-        
-        if (pendentes.length === 0) {
-            estaSincronizando = false;
-            return;
-        }
-        
-        console.log(`📤 Sincronizando ${pendentes.length} apontamentos...`);
-        
-        let sincronizados = 0;
-        for (const apontamento of pendentes) {
-            try {
-                const result = await salvarNoServidor(apontamento);
-                if (result.status === 'success') {
-                    await db.marcarApontamentoSincronizado(apontamento.idLocal);
-                    sincronizados++;
-                    atualizarStatusApontamento(apontamento.idLocal, true);
-                }
-            } catch (error) {
-                console.error('❌ Erro ao sincronizar:', error);
-            }
-        }
-        
-        if (sincronizados > 0) {
-            mostrarToast(`📡 ${sincronizados} apontamentos sincronizados!`, 'sucesso');
-        }
-        
-    } catch (error) {
-        console.error('❌ Erro na sincronização:', error);
-    } finally {
-        estaSincronizando = false;
-    }
-}
-
-function mostrarApontamentoLocal(apontamento) {
-    const setorExibicao = apontamento.setor === 'professores' ? 'direcao' : apontamento.setor;
-    const feed = document.getElementById(`feed-${setorExibicao}`);
-    
-    if (feed) {
-        const card = document.createElement('div');
-        card.className = 'post-card post-card-local';
-        card.dataset.idLocal = apontamento.idLocal;
-        card.style.borderLeft = '4px solid #f59e0b';
-        card.style.background = '#fffbeb';
-        
-        card.innerHTML = `
-            <p class="post-text">${apontamento.texto}</p>
-            <div class="post-footer">
-                <span><i class="fa-solid fa-user"></i> ${apontamento.funcionario || 'SIGA'}</span>
-                <span><i class="fa-solid fa-clock"></i> ${apontamento.dataAtual} 
-                    <span style="font-size: 10px; color: #f59e0b; margin-left: 5px;">
-                        ⏳ pendente
-                    </span>
-                </span>
-            </div>
-        `;
-        feed.prepend(card);
-    }
-}
-
-function atualizarStatusApontamento(idLocal, sincronizado) {
-    const cards = document.querySelectorAll(`.post-card-local[data-id-local="${idLocal}"]`);
-    cards.forEach(card => {
-        if (sincronizado) {
-            card.style.borderLeft = '4px solid #22c55e';
-            card.style.background = '#f0fdf4';
-            const span = card.querySelector('.post-footer span:last-child');
-            if (span) {
-                const text = span.innerHTML.replace('⏳ pendente', '✅ sincronizado');
-                span.innerHTML = text;
-            }
-        }
-    });
-}
 
 // =============================================
-// EVENTOS DE CONEXÃO
+// FUNÇÕES OFFLINE E SINCRONIZAÇÃO (VERSÃO LIMPA)
 // =============================================
-
-window.addEventListener('online', function() {
-    console.log('📡 Internet voltou! Sincronizando...');
-    mostrarToast('📡 Conexão restabelecida! Sincronizando...', 'sucesso');
-    setTimeout(sincronizarApontamentos, 2000);
-});
-
-window.addEventListener('offline', function() {
-    console.log('📡 Internet caiu! Modo offline ativado.');
-    mostrarToast('⚠️ Modo offline. Dados serão salvos localmente.', 'aviso');
-});
-
-// Sincroniza a cada 60 segundos
-setInterval(() => {
-    if (navigator.onLine) {
-        sincronizarApontamentos();
-    }
-}, 60000);
-
-// Sincroniza ao carregar
-document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(() => {
-        if (navigator.onLine) {
-            sincronizarApontamentos();
-        }
-    }, 5000);
-});
-
-console.log('🔄 Sistema de sincronização inicializado!');
-// =============================================
-// FUNÇÕES AUXILIARES PARA O MODO OFFLINE
-// =============================================
-
-// Salva no servidor (fallback)
-async function salvarNoServidor(dados) {
-    const payload = {
-        operacao: "SALVAR",
-        aluno: dados.aluno,
-        setor: dados.setor,
-        texto: dados.texto,
-        funcionario: dados.funcionario,
-        dataAtual: dados.dataAtual
-    };
-    
-    const response = await fetch(APPS_SCRIPT_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify(payload)
-    });
-    
-    return await response.json();
-}
 
 // Mostra apontamento local na tela
 function mostrarApontamentoLocal(apontamento) {
@@ -1493,17 +1356,39 @@ function mostrarApontamentoLocal(apontamento) {
     }
 }
 
-// Sincroniza apontamentos pendentes
+function atualizarStatusApontamento(idLocal, sincronizado) {
+    const cards = document.querySelectorAll(`.post-card-local[data-id-local="${idLocal}"]`);
+    cards.forEach(card => {
+        if (sincronizado) {
+            card.style.borderLeft = '4px solid #22c55e';
+            card.style.background = '#f0fdf4';
+            const span = card.querySelector('.post-footer span:last-child');
+            if (span) {
+                const text = span.innerHTML.replace('⏳ pendente', '✅ sincronizado');
+                span.innerHTML = text;
+            }
+        }
+    });
+}
+
 let estaSincronizando = false;
 
 async function sincronizarApontamentos() {
-    if (!db || estaSincronizando || !navigator.onLine) return;
+    if (!db || !db.db || estaSincronizando || !navigator.onLine) {
+        console.log('ℹ️ Sincronização ignorada:', {
+            db: !!db,
+            dbDb: !!(db && db.db),
+            sincronizando: estaSincronizando,
+            online: navigator.onLine
+        });
+        return;
+    }
     estaSincronizando = true;
     
     try {
         const pendentes = await db.getApontamentosNaoSincronizados();
         
-        if (pendentes.length === 0) {
+        if (!pendentes || pendentes.length === 0) {
             estaSincronizando = false;
             return;
         }
@@ -1520,7 +1405,7 @@ async function sincronizarApontamentos() {
                     atualizarStatusApontamento(apontamento.idLocal, true);
                 }
             } catch (error) {
-                console.error('❌ Erro ao sincronizar:', error);
+                console.error('❌ Erro ao sincronizar apontamento:', error);
             }
         }
         
@@ -1532,63 +1417,15 @@ async function sincronizarApontamentos() {
         console.error('❌ Erro na sincronização:', error);
     } finally {
         estaSincronizando = false;
+        // Atualiza o status de conexão
+        if (typeof atualizarStatusConexao === 'function') {
+            atualizarStatusConexao();
+        }
     }
 }
 
-function atualizarStatusApontamento(idLocal, sincronizado) {
-    const cards = document.querySelectorAll(`.post-card-local[data-id-local="${idLocal}"]`);
-    cards.forEach(card => {
-        if (sincronizado) {
-            card.style.borderLeft = '4px solid #22c55e';
-            card.style.background = '#f0fdf4';
-            const span = card.querySelector('.post-footer span:last-child');
-            if (span) {
-                const text = span.innerHTML.replace('⏳ pendente', '✅ sincronizado');
-                span.innerHTML = text;
-            }
-        }
-    });
-}
-
 // =============================================
-// EVENTOS DE CONEXÃO
-// =============================================
-
-window.addEventListener('online', function() {
-    console.log('📡 Internet voltou! Sincronizando...');
-    mostrarToast('📡 Conexão restabelecida! Sincronizando...', 'sucesso');
-    setTimeout(sincronizarApontamentos, 2000);
-    if (typeof atualizarStatusConexao === 'function') {
-        atualizarStatusConexao();
-    }
-});
-
-window.addEventListener('offline', function() {
-    console.log('📡 Internet caiu! Modo offline ativado.');
-    mostrarToast('⚠️ Modo offline. Dados serão salvos localmente.', 'aviso');
-    if (typeof atualizarStatusConexao === 'function') {
-        atualizarStatusConexao();
-    }
-});
-
-// Sincroniza a cada 60 segundos
-setInterval(() => {
-    if (navigator.onLine) {
-        sincronizarApontamentos();
-    }
-}, 60000);
-
-// Sincroniza ao carregar
-document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(() => {
-        if (navigator.onLine) {
-            sincronizarApontamentos();
-        }
-    }, 5000);
-});
-
-// =============================================
-// INDICADOR DE CONEXÃO (Atualiza o HTML)
+// INDICADOR DE CONEXÃO
 // =============================================
 
 function atualizarStatusConexao() {
@@ -1631,10 +1468,42 @@ function atualizarStatusConexao() {
     }
 }
 
-// Atualiza periodicamente
-setInterval(atualizarStatusConexao, 10000);
+// =============================================
+// EVENTOS DE CONEXÃO
+// =============================================
 
-// Atualiza ao carregar
-document.addEventListener('DOMContentLoaded', function() {
+window.addEventListener('online', function() {
+    console.log('📡 Internet voltou! Sincronizando...');
+    mostrarToast('📡 Conexão restabelecida! Sincronizando...', 'sucesso');
+    setTimeout(sincronizarApontamentos, 2000);
     setTimeout(atualizarStatusConexao, 1000);
 });
+
+window.addEventListener('offline', function() {
+    console.log('📡 Internet caiu! Modo offline ativado.');
+    mostrarToast('⚠️ Modo offline. Dados serão salvos localmente.', 'aviso');
+    setTimeout(atualizarStatusConexao, 500);
+});
+
+// Sincroniza a cada 30 segundos
+setInterval(() => {
+    if (navigator.onLine) {
+        sincronizarApontamentos();
+    }
+}, 30000);
+
+// Sincroniza ao carregar
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        if (navigator.onLine) {
+            sincronizarApontamentos();
+        }
+        atualizarStatusConexao();
+    }, 3000);
+});
+
+// Atualiza status a cada 10 segundos
+setInterval(atualizarStatusConexao, 10000);
+
+console.log('🔄 SIGA inicializado com sucesso!');
+console.log('📦 Banco de dados local:', db ? '✅ Disponível' : '❌ Indisponível');
