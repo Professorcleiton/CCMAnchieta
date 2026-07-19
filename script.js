@@ -645,24 +645,30 @@ async function salvarPost(setor) {
     };
 
     try {
-        // 1. SALVA LOCALMENTE
-        if (db) {
+        // VERIFICA SE O BANCO LOCAL EXISTE
+        if (typeof db !== 'undefined' && db) {
+            // 1. SALVA LOCALMENTE
             const apontamentoLocal = await db.salvarApontamento(dadosApontamento);
             console.log('✅ Apontamento salvo localmente:', apontamentoLocal);
+            
+            // 2. MOSTRA NA TELA
             mostrarApontamentoLocal(apontamentoLocal);
-            mostrarToast('✅ Apontamento salvo! (modo offline)', 'sucesso');
+            mostrarToast('✅ Apontamento salvo!', 'sucesso');
+            
+            // 3. LIMPA O CAMPO
+            textarea.value = '';
+            fecharCaixaTexto(setor);
+            
+            // 4. TENTA SINCRONIZAR (se tiver internet)
+            if (navigator.onLine) {
+                setTimeout(sincronizarApontamentos, 1000);
+            }
         } else {
-            // Fallback: salva direto no servidor
+            // FALLBACK: Salva direto no servidor (modo antigo)
             await salvarNoServidor(dadosApontamento);
             mostrarToast('✅ Apontamento salvo!', 'sucesso');
-        }
-        
-        textarea.value = '';
-        fecharCaixaTexto(setor);
-        
-        // Tenta sincronizar em segundo plano
-        if (navigator.onLine && db) {
-            setTimeout(sincronizarApontamentos, 1000);
+            textarea.value = '';
+            fecharCaixaTexto(setor);
         }
         
     } catch (error) {
@@ -1436,3 +1442,199 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 console.log('🔄 Sistema de sincronização inicializado!');
+// =============================================
+// FUNÇÕES AUXILIARES PARA O MODO OFFLINE
+// =============================================
+
+// Salva no servidor (fallback)
+async function salvarNoServidor(dados) {
+    const payload = {
+        operacao: "SALVAR",
+        aluno: dados.aluno,
+        setor: dados.setor,
+        texto: dados.texto,
+        funcionario: dados.funcionario,
+        dataAtual: dados.dataAtual
+    };
+    
+    const response = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify(payload)
+    });
+    
+    return await response.json();
+}
+
+// Mostra apontamento local na tela
+function mostrarApontamentoLocal(apontamento) {
+    const setorExibicao = apontamento.setor === 'professores' ? 'direcao' : apontamento.setor;
+    const feed = document.getElementById(`feed-${setorExibicao}`);
+    
+    if (feed) {
+        const card = document.createElement('div');
+        card.className = 'post-card post-card-local';
+        card.dataset.idLocal = apontamento.idLocal;
+        card.style.borderLeft = '4px solid #f59e0b';
+        card.style.background = '#fffbeb';
+        
+        card.innerHTML = `
+            <p class="post-text">${apontamento.texto}</p>
+            <div class="post-footer">
+                <span><i class="fa-solid fa-user"></i> ${apontamento.funcionario || 'SIGA'}</span>
+                <span><i class="fa-solid fa-clock"></i> ${apontamento.dataAtual} 
+                    <span style="font-size: 10px; color: #f59e0b; margin-left: 5px;">
+                        ⏳ pendente
+                    </span>
+                </span>
+            </div>
+        `;
+        feed.prepend(card);
+    }
+}
+
+// Sincroniza apontamentos pendentes
+let estaSincronizando = false;
+
+async function sincronizarApontamentos() {
+    if (!db || estaSincronizando || !navigator.onLine) return;
+    estaSincronizando = true;
+    
+    try {
+        const pendentes = await db.getApontamentosNaoSincronizados();
+        
+        if (pendentes.length === 0) {
+            estaSincronizando = false;
+            return;
+        }
+        
+        console.log(`📤 Sincronizando ${pendentes.length} apontamentos...`);
+        
+        let sincronizados = 0;
+        for (const apontamento of pendentes) {
+            try {
+                const result = await salvarNoServidor(apontamento);
+                if (result.status === 'success') {
+                    await db.marcarApontamentoSincronizado(apontamento.idLocal);
+                    sincronizados++;
+                    atualizarStatusApontamento(apontamento.idLocal, true);
+                }
+            } catch (error) {
+                console.error('❌ Erro ao sincronizar:', error);
+            }
+        }
+        
+        if (sincronizados > 0) {
+            mostrarToast(`📡 ${sincronizados} apontamento(s) sincronizado(s)!`, 'sucesso');
+        }
+        
+    } catch (error) {
+        console.error('❌ Erro na sincronização:', error);
+    } finally {
+        estaSincronizando = false;
+    }
+}
+
+function atualizarStatusApontamento(idLocal, sincronizado) {
+    const cards = document.querySelectorAll(`.post-card-local[data-id-local="${idLocal}"]`);
+    cards.forEach(card => {
+        if (sincronizado) {
+            card.style.borderLeft = '4px solid #22c55e';
+            card.style.background = '#f0fdf4';
+            const span = card.querySelector('.post-footer span:last-child');
+            if (span) {
+                const text = span.innerHTML.replace('⏳ pendente', '✅ sincronizado');
+                span.innerHTML = text;
+            }
+        }
+    });
+}
+
+// =============================================
+// EVENTOS DE CONEXÃO
+// =============================================
+
+window.addEventListener('online', function() {
+    console.log('📡 Internet voltou! Sincronizando...');
+    mostrarToast('📡 Conexão restabelecida! Sincronizando...', 'sucesso');
+    setTimeout(sincronizarApontamentos, 2000);
+    if (typeof atualizarStatusConexao === 'function') {
+        atualizarStatusConexao();
+    }
+});
+
+window.addEventListener('offline', function() {
+    console.log('📡 Internet caiu! Modo offline ativado.');
+    mostrarToast('⚠️ Modo offline. Dados serão salvos localmente.', 'aviso');
+    if (typeof atualizarStatusConexao === 'function') {
+        atualizarStatusConexao();
+    }
+});
+
+// Sincroniza a cada 60 segundos
+setInterval(() => {
+    if (navigator.onLine) {
+        sincronizarApontamentos();
+    }
+}, 60000);
+
+// Sincroniza ao carregar
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        if (navigator.onLine) {
+            sincronizarApontamentos();
+        }
+    }, 5000);
+});
+
+// =============================================
+// INDICADOR DE CONEXÃO (Atualiza o HTML)
+// =============================================
+
+function atualizarStatusConexao() {
+    const statusDiv = document.getElementById('status-conexao');
+    const statusTexto = document.getElementById('status-texto');
+    const statusIcone = document.getElementById('status-icone');
+    const statusPendentes = document.getElementById('status-pendentes');
+    
+    if (!statusDiv) return;
+    
+    if (navigator.onLine) {
+        statusDiv.style.display = 'block';
+        statusDiv.style.background = '#f0fdf4';
+        statusDiv.style.border = '1px solid #22c55e';
+        statusIcone.style.color = '#22c55e';
+        statusTexto.textContent = 'Online';
+        
+        // Verifica se tem pendentes
+        if (db && db.db) {
+            db.getApontamentosNaoSincronizados().then(pendentes => {
+                if (pendentes && pendentes.length > 0) {
+                    statusPendentes.style.display = 'inline';
+                    statusPendentes.textContent = `📤 ${pendentes.length} pendente(s)`;
+                } else {
+                    statusPendentes.style.display = 'none';
+                }
+            }).catch(() => {
+                statusPendentes.style.display = 'none';
+            });
+        } else {
+            statusPendentes.style.display = 'none';
+        }
+    } else {
+        statusDiv.style.display = 'block';
+        statusDiv.style.background = '#fef2f2';
+        statusDiv.style.border = '1px solid #dc2626';
+        statusIcone.style.color = '#dc2626';
+        statusTexto.textContent = 'Offline (salvando localmente)';
+        statusPendentes.style.display = 'none';
+    }
+}
+
+// Atualiza periodicamente
+setInterval(atualizarStatusConexao, 10000);
+
+// Atualiza ao carregar
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(atualizarStatusConexao, 1000);
+});
