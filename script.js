@@ -687,13 +687,29 @@ async function salvarNoServidor(dados) {
         dataAtual: dados.dataAtual
     };
     
-    const response = await fetch(APPS_SCRIPT_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify(payload)
-    });
+    console.log('📤 Enviando para o servidor:', payload);
     
-    return await response.json();
+    try {
+        const response = await fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify(payload)
+        });
+        
+        const resultado = await response.json();
+        console.log('📥 Resposta do servidor:', resultado);
+        
+        if (resultado.status === 'success') {
+            console.log('✅ Apontamento salvo no servidor!');
+        } else {
+            console.error('❌ Erro no servidor:', resultado);
+        }
+        
+        return resultado;
+    } catch (error) {
+        console.error('❌ Erro de rede:', error);
+        return { status: 'error', message: error.toString() };
+    }
 }
 
 async function excluirRegistroServidor(id) {
@@ -1368,54 +1384,52 @@ function atualizarStatusApontamento(idLocal, sincronizado) {
 
 let estaSincronizando = false;
 
+
 async function sincronizarApontamentos() {
     if (!db || !db.db || estaSincronizando || !navigator.onLine) {
-        console.log('ℹ️ Sincronização ignorada:', {
-            db: !!db,
-            dbDb: !!(db && db.db),
-            sincronizando: estaSincronizando,
-            online: navigator.onLine
-        });
+        console.log('ℹ️ Sincronização ignorada');
         return;
     }
     estaSincronizando = true;
     
     try {
         const pendentes = await db.getApontamentosNaoSincronizados();
+        console.log(`📤 ${pendentes.length} apontamentos pendentes`);
         
         if (!pendentes || pendentes.length === 0) {
             estaSincronizando = false;
             return;
         }
         
-        console.log(`📤 Sincronizando ${pendentes.length} apontamentos...`);
-        
-        let sincronizados = 0;
         for (const apontamento of pendentes) {
+            console.log(`🔄 Sincronizando:`, apontamento);
+            
             try {
                 const result = await salvarNoServidor(apontamento);
+                console.log(`📥 Resultado:`, result);
+                
                 if (result.status === 'success') {
                     await db.marcarApontamentoSincronizado(apontamento.idLocal);
-                    sincronizados++;
+                    console.log(`✅ Apontamento ${apontamento.idLocal} sincronizado!`);
                     atualizarStatusApontamento(apontamento.idLocal, true);
+                    
+                    // Recarrega os registros para mostrar o apontamento salvo
+                    await carregarRegistrosDoServidor();
+                } else {
+                    console.error(`❌ Falha ao sincronizar:`, result);
                 }
             } catch (error) {
-                console.error('❌ Erro ao sincronizar apontamento:', error);
+                console.error(`❌ Erro ao sincronizar apontamento:`, error);
             }
         }
         
-        if (sincronizados > 0) {
-            mostrarToast(`📡 ${sincronizados} apontamento(s) sincronizado(s)!`, 'sucesso');
-        }
+        mostrarToast('📡 Dados sincronizados!', 'sucesso');
         
     } catch (error) {
         console.error('❌ Erro na sincronização:', error);
     } finally {
         estaSincronizando = false;
-        // Atualiza o status de conexão
-        if (typeof atualizarStatusConexao === 'function') {
-            atualizarStatusConexao();
-        }
+        atualizarStatusConexao();
     }
 }
 
