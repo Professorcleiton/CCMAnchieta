@@ -1,4 +1,6 @@
 // ========== GLOBAIS ==========
+// let db = null;  ← REMOVA ESTA LINHA (db já está declarado no db.js)
+
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxEMx6NmZvQqPMmmxsrTaV1DrMHa-F16_ARFR1cjm_5v054lUtF80YWtW88g6MsyhajRg/exec';
 const APPS_SCRIPT_PAT_URL = APPS_SCRIPT_URL; 
 const SHEET_ID = '1UUiVcCaSb_9Lx7gdEpmBzeRQPlBwDZRouQC2pf1q8Vg';
@@ -19,7 +21,7 @@ try {
         console.log('✅ Banco de dados local disponível');
     } else {
         console.log('ℹ️ Banco de dados local não disponível - modo offline desativado');
-        // Cria um objeto fake para não quebrar o código
+        // Cria um objeto fake se não existir
         if (typeof db === 'undefined') {
             var db = null;
         }
