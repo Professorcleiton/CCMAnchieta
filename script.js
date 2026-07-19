@@ -16,19 +16,10 @@ const CACHE_TEMPO = 30000;
 // =============================================
 
 // db já está declarado no db.js - apenas verifica se está disponível
-try {
-    if (typeof db !== 'undefined' && db && db.db) {
-        console.log('✅ Banco de dados local disponível');
-    } else {
-        console.log('ℹ️ Banco de dados local não disponível - modo offline desativado');
-        // Cria um objeto fake se não existir
-        if (typeof db === 'undefined') {
-            var db = null;
-        }
-    }
-} catch (e) {
-    console.log('ℹ️ Banco de dados local não disponível');
-    var db = null;
+if (typeof db !== 'undefined' && db && db.db) {
+    console.log('✅ Banco de dados local disponível');
+} else {
+    console.log('ℹ️ Banco de dados local não disponível - modo offline desativado');
 }
 
 // ==== FUNÇÕES DE INICIALIZAÇÃO E SUPORTE ====
