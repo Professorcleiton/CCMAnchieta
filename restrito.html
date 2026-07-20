@@ -458,6 +458,218 @@
                 #patrimonio-interface .workspace { grid-template-columns: 1fr; }
                 #patrimonio-interface .main-content, #patrimonio-interface .table-wrapper { height: auto; overflow: visible; }
             }
+            /* =============================================
+   CORREÇÃO PARA TELAS MENORES (CELULAR)
+   ============================================= */
+
+/* Para tablets e celulares */
+@media (max-width: 768px) {
+    #patrimonio-interface {
+        flex-direction: column !important;
+        height: auto !important;
+        min-height: 100vh !important;
+    }
+    
+    #patrimonio-interface .sidebar {
+        width: 100% !important;
+        max-height: 200px !important;
+        min-height: 150px !important;
+        overflow-y: auto !important;
+        border-right: none !important;
+        border-bottom: 4px solid #eab308 !important;
+        flex-shrink: 0 !important;
+    }
+    
+    #patrimonio-interface .sidebar .room-list {
+        max-height: 100px !important;
+        overflow-y: auto !important;
+    }
+    
+    #patrimonio-interface .sidebar-header {
+        padding: 12px 15px !important;
+    }
+    
+    #patrimonio-interface .sidebar-logo {
+        width: 40px !important;
+        height: 40px !important;
+        min-width: 40px !important;
+    }
+    
+    #patrimonio-interface .sidebar-title h2 {
+        font-size: 14px !important;
+    }
+    
+    #patrimonio-interface .sidebar-title p {
+        font-size: 10px !important;
+    }
+    
+    #patrimonio-interface .room-list-title {
+        font-size: 10px !important;
+        padding: 10px 15px 3px 15px !important;
+    }
+    
+    #patrimonio-interface .room-item {
+        padding: 6px 12px !important;
+        font-size: 12px !important;
+    }
+    
+    #patrimonio-interface .main-content {
+        height: auto !important;
+        flex: 1 !important;
+        overflow-y: auto !important;
+        min-height: 50vh !important;
+    }
+    
+    #patrimonio-interface .top-bar {
+        flex-wrap: wrap !important;
+        height: auto !important;
+        min-height: auto !important;
+        padding: 10px 15px !important;
+        gap: 10px !important;
+    }
+    
+    #patrimonio-interface .top-bar h1 {
+        font-size: 15px !important;
+    }
+    
+    #patrimonio-interface .top-bar .search-box {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    
+    #patrimonio-interface .workspace {
+        grid-template-columns: 1fr !important;
+        padding: 15px !important;
+        gap: 15px !important;
+        overflow-y: visible !important;
+    }
+    
+    #patrimonio-interface .inventory-panel {
+        padding: 15px !important;
+    }
+    
+    #patrimonio-interface .inventory-panel h3 {
+        font-size: 13px !important;
+    }
+    
+    #patrimonio-interface .control-side-panel {
+        width: 100% !important;
+    }
+    
+    #patrimonio-interface .tab-menu-right {
+        grid-template-columns: 1fr 1fr 1fr !important;
+    }
+    
+    #patrimonio-interface .tab-nav-btn {
+        font-size: 10px !important;
+        padding: 8px 2px !important;
+    }
+    
+    #patrimonio-interface .action-card-panel {
+        padding: 15px !important;
+    }
+    
+    #patrimonio-interface .action-card-panel h3 {
+        font-size: 12px !important;
+    }
+    
+    #patrimonio-interface .form-group label {
+        font-size: 10px !important;
+    }
+    
+    #patrimonio-interface .form-group input,
+    #patrimonio-interface .form-group select {
+        font-size: 12px !important;
+        padding: 8px !important;
+    }
+    
+    #patrimonio-interface .btn-action-trigger {
+        font-size: 12px !important;
+        padding: 10px !important;
+    }
+    
+    #patrimonio-interface .btn-pendentes-top {
+        font-size: 11px !important;
+        padding: 6px 12px !important;
+    }
+    
+    #patrimonio-interface .sidebar-footer {
+        padding: 10px !important;
+    }
+    
+    #patrimonio-interface .btn-back {
+        font-size: 12px !important;
+        padding: 8px !important;
+    }
+    
+    table {
+        font-size: 11px !important;
+    }
+    
+    #patrimonio-interface th,
+    #patrimonio-interface td {
+        padding: 8px 10px !important;
+        font-size: 11px !important;
+    }
+}
+
+/* Para celulares muito pequenos */
+@media (max-width: 480px) {
+    #patrimonio-interface .sidebar {
+        max-height: 150px !important;
+        min-height: 120px !important;
+    }
+    
+    #patrimonio-interface .sidebar .room-list {
+        max-height: 70px !important;
+    }
+    
+    #patrimonio-interface .sidebar-header {
+        padding: 8px 12px !important;
+    }
+    
+    #patrimonio-interface .sidebar-logo {
+        width: 32px !important;
+        height: 32px !important;
+        min-width: 32px !important;
+    }
+    
+    #patrimonio-interface .sidebar-title h2 {
+        font-size: 12px !important;
+    }
+    
+    #patrimonio-interface .sidebar-title p {
+        font-size: 9px !important;
+    }
+    
+    #patrimonio-interface .room-item {
+        padding: 4px 10px !important;
+        font-size: 10px !important;
+    }
+    
+    #patrimonio-interface .top-bar h1 {
+        font-size: 13px !important;
+    }
+    
+    #patrimonio-interface .tab-nav-btn {
+        font-size: 8px !important;
+        padding: 6px 2px !important;
+    }
+    
+    #patrimonio-interface .action-card-panel {
+        padding: 12px !important;
+    }
+    
+    #patrimonio-interface .workspace {
+        padding: 10px !important;
+        gap: 10px !important;
+    }
+    
+    #patrimonio-interface .btn-pendentes-top {
+        font-size: 9px !important;
+        padding: 4px 8px !important;
+    }
+}
         </style>
 
         <aside class="sidebar">
