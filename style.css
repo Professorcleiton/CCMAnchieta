@@ -1657,3 +1657,9 @@ select#select-alunos {
     width: 220px !important;
     min-width: 150px !important;
 }
+@media (max-width: 768px) {
+    .dash-panel {
+        max-height: none !important;
+        overflow-y: visible !important;
+    }
+}
