@@ -353,18 +353,18 @@ async function cadastrar() {
                 });
             }
 
-            // Usa JSONP para salvar o token
-            fazerRequisicaoJSONP({
-                operacao: 'salvar_token_push',
-                email: emailResponsavel,
-                token: JSON.stringify(subscription)
-            }, function(result) {
-                if (result.status === 'success') {
-                    console.log('✅ Token push salvo com sucesso!');
-                } else {
-                    console.error('❌ Erro ao salvar token push:', result);
-                }
-            });
+ // Usa a função fazerRequisicao (já existente) para salvar o token
+fazerRequisicao({
+    operacao: 'salvar_token_push',
+    email: emailResponsavel,
+    token: JSON.stringify(subscription)
+}).then(function(result) {
+    if (result.status === 'success') {
+        console.log('✅ Token push salvo com sucesso!');
+    } else {
+        console.error('❌ Erro ao salvar token push:', result);
+    }
+});
 
         } catch (err) {
             console.error('Erro ao ativar push:', err);
