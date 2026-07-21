@@ -1,21 +1,27 @@
-const CACHE_NAME = 'siga-cache-v5';
+const CACHE_NAME = 'siga-cache-v6'; // Incremente para v7, v8... a cada nova alteração no site
+
 const urlsToCache = [
+    '/',
+    '/index.html',
     '/restrito.html',
     '/responsaveis.html',
     '/painel-responsavel.html',
     '/style.css',
     '/script.js',
+    '/db.js',
     '/img/SIGA.png',
     '/img/logoA.png'
 ];
 
+// Instala e faz cache dos arquivos essenciais
 self.addEventListener('install', event => {
     event.waitUntil(
         caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
     );
-    self.skipWaiting();
+    self.skipWaiting(); // Ativa o novo SW imediatamente
 });
 
+// Ativa: remove caches antigos
 self.addEventListener('activate', event => {
     event.waitUntil(
         caches.keys().then(cacheNames => {
@@ -24,32 +30,39 @@ self.addEventListener('activate', event => {
             );
         })
     );
-    self.clients.claim();
+    self.clients.claim(); // Assume o controle de todas as abas abertas
 });
 
-// NÃO intercepta chamadas para o Google Apps Script
+// Estratégia: Network First, cache apenas como fallback
 self.addEventListener('fetch', event => {
     const url = new URL(event.request.url);
+    // Ignora chamadas ao Google Apps Script
     if (url.hostname.includes('script.google.com')) return;
 
     event.respondWith(
         fetch(event.request)
             .then(response => {
+                // Atualiza o cache com a resposta nova (se for sucesso)
                 if (response && response.status === 200) {
                     const clone = response.clone();
                     caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
                 }
                 return response;
             })
-            .catch(() => caches.match(event.request))
+            .catch(() => {
+                // Se offline, serve do cache
+                return caches.match(event.request);
+            })
     );
 });
 
-// Push notification (mantenha o código já existente)
+// Push notification (mantido o código existente, apenas ajustado)
 self.addEventListener('push', event => {
     let data = {};
     if (event.data) {
-        try { data = event.data.json(); } catch (e) {
+        try {
+            data = event.data.json();
+        } catch (e) {
             data = { title: 'SIGA Anchieta', body: event.data.text() };
         }
     }
@@ -58,7 +71,7 @@ self.addEventListener('push', event => {
         icon: '/img/SIGA.png',
         badge: '/img/SIGA.png',
         vibrate: [200, 100, 200],
-        data: { url: data.url || 'https://www.ccmanchieta.com.br/responsaveis.html' },
+        data: { url: data.url || '/responsaveis.html' },
         actions: [{ action: 'open', title: 'Ver detalhes' }],
         requireInteraction: true
     };
@@ -69,11 +82,13 @@ self.addEventListener('push', event => {
 
 self.addEventListener('notificationclick', event => {
     event.notification.close();
-    const urlToOpen = event.notification.data?.url || 'https://www.ccmanchieta.com.br/responsaveis.html';
+    const urlToOpen = event.notification.data?.url || '/responsaveis.html';
     event.waitUntil(
         clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
             for (const client of windowClients) {
-                if (client.url.includes('responsaveis') && 'focus' in client) return client.focus();
+                if (client.url.includes('responsaveis') && 'focus' in client) {
+                    return client.focus();
+                }
             }
             if (clients.openWindow) return clients.openWindow(urlToOpen);
         })
