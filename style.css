@@ -348,3 +348,104 @@ select#select-alunos {
     width: 220px !important;
     min-width: 150px !important;
 }
+/* =============================================
+   FORÇA EXIBIÇÃO EM TODAS AS TELAS
+   ============================================= */
+
+/* 1. SIDEBAR PRINCIPAL (TURMAS) */
+#app-sidebar {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 290px !important;
+    min-width: 290px !important;
+}
+
+/* 2. LISTA DE TURMAS */
+#lista-turmas-sidebar {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    overflow-y: auto !important;
+    max-height: 70vh !important;
+}
+
+#lista-turmas-sidebar .turma-item {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    padding: 10px 15px !important;
+}
+
+/* 3. SIDEBAR DO PATRIMÔNIO */
+#patrimonio-interface .sidebar {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 290px !important;
+    min-width: 290px !important;
+    background-color: #005088 !important;
+    border-right: 4px solid #eab308 !important;
+}
+
+#patrimonio-interface .room-list {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    overflow-y: auto !important;
+    max-height: 300px !important;
+}
+
+#patrimonio-interface .room-item {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    padding: 10px 15px !important;
+}
+
+/* 4. CORREÇÃO PARA CELULAR */
+@media (max-width: 768px) {
+    /* Sidebar principal fica em cima */
+    #app-sidebar {
+        width: 100% !important;
+        min-width: 100% !important;
+        max-height: 200px !important;
+        overflow-y: auto !important;
+        border-right: none !important;
+        border-bottom: 4px solid #eab308 !important;
+    }
+    
+    #lista-turmas-sidebar {
+        max-height: 100px !important;
+    }
+    
+    /* Sidebar do patrimônio fica em cima */
+    #patrimonio-interface {
+        flex-direction: column !important;
+    }
+    
+    #patrimonio-interface .sidebar {
+        width: 100% !important;
+        min-width: 100% !important;
+        max-height: 200px !important;
+        min-height: 120px !important;
+        overflow-y: auto !important;
+        border-right: none !important;
+        border-bottom: 4px solid #eab308 !important;
+        flex-shrink: 0 !important;
+    }
+    
+    #patrimonio-interface .room-list {
+        max-height: 80px !important;
+    }
+    
+    #patrimonio-interface .main-content {
+        height: auto !important;
+        overflow-y: auto !important;
+    }
+    
+    #patrimonio-interface .workspace {
+        grid-template-columns: 1fr !important;
+        padding: 10px !important;
+    }
+}
