@@ -1068,14 +1068,6 @@ body {
     color: #eab308;
 }
 
-/* FORÇA EXIBIÇÃO EM TODAS AS TELAS */
-#app-sidebar {
-    display: flex !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    width: 290px !important;
-    min-width: 290px !important;
-}
 
 #lista-turmas-sidebar {
     display: block !important;
@@ -1138,22 +1130,22 @@ body {
     }
 
     /* Sidebar principal */
-    #app-sidebar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 280px !important;
-        min-width: 280px !important;
-        height: 100vh !important;
-        transform: translateX(-100%);
-        transition: transform 0.3s ease;
-        z-index: 9999;
-        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
-        border-right: 4px solid #eab308 !important;
-        overflow-y: auto !important;
-        max-height: 100vh !important;
-        border-bottom: none !important;
-    }
+  #app-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    min-width: 280px;
+    height: 100vh;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    z-index: 9999;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+    border-right: 4px solid #eab308;
+    overflow-y: auto;
+    max-height: 100vh;
+    border-bottom: none;
+}
 
     #app-sidebar.open {
         transform: translateX(0) !important;
@@ -1305,16 +1297,16 @@ body {
     }
 
     #patrimonio-interface .sidebar {
-        width: 100% !important;
-        min-width: 100% !important;
-        max-height: 200px !important;
-        min-height: 120px !important;
-        overflow-y: auto !important;
-        border-right: none !important;
-        border-bottom: 4px solid #eab308 !important;
-        flex-shrink: 0 !important;
-        position: relative !important;
-        transform: none !important;
+        width: 100%;
+        min-width: 100%;
+        max-height: 200px;
+        min-height: 120px;
+        overflow-y: auto;
+        border-right: none;
+        border-bottom: 4px solid #eab308;
+        flex-shrink: 0;
+        position: relative;
+        transform: none;
     }
 
     #patrimonio-interface .room-list {
@@ -1618,15 +1610,14 @@ body {
    FORÇA A EXIBIÇÃO DO SELETOR DE ALUNOS
    ============================================= */
 
-#aluno-selector-container,
+/* NOVO: seletor de alunos sempre visível, mas sem !important */
 .aluno-selector {
-    display: flex !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    height: auto !important;
-    max-height: none !important;
-    overflow: visible !important;
-    min-height: 60px !important;
+    display: flex;
+    visibility: visible;
+    opacity: 1;
+    height: auto;
+    overflow: visible;
+    min-height: 60px;
 }
 
 #aluno-selector-container select,
