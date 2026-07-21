@@ -613,7 +613,7 @@ function filtrarRegistrosPorAluno() {
     document.getElementById('dash-total-count').innerText = total;
     
     const atualizarContador = (idBar, label, cor, valor) => {
-        const bar = document.getElementById(idBar);
+        const bar = document.querySelector('.' + idBar);
         if (bar) bar.style.width = '0%';
         const container = document.querySelector('.mini-chart-bar-container');
         if (container) {
@@ -630,9 +630,9 @@ function filtrarRegistrosPorAluno() {
     atualizarContador('bar-pedag', 'PEDAG', '#0d9488', cp);
     atualizarContador('bar-adm', 'ADM', '#4f46e5', ca);
     atualizarContador('bar-profs', 'PROFS', '#b91c1c', cf);
-    atualizarContador('bar-profs', '📄 DOCS', '#8b5cf6', docs);
-    atualizarContador('bar-profs', '🚪 OCORR', '#f59e0b', ocorr);
-    atualizarContador('bar-profs', '📁 ATAS', '#dc2626', atas);
+    atualizarContador('docs-bar', '📄 DOCS', '#8b5cf6', docs);
+    atualizarContador('ocorr-bar', '🚪 OCORR', '#f59e0b', ocorr);
+    atualizarContador('atas-bar', '📁 ATAS', '#dc2626', atas);
 }
 
 function verificarTeclaEnter(e, setor) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); salvarPost(setor); } }
