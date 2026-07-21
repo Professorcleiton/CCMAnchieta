@@ -1283,19 +1283,6 @@ function forcarSidebarPatrimonio() {
 }
 
 // Executa ao abrir o módulo
-function abrirModuloPatrimonio() {
-    document.getElementById('app-interface').style.display = 'none';
-    document.getElementById('patrimonio-interface').style.display = 'flex';
-    
-    // Força a sidebar
-    setTimeout(forcarSidebarPatrimonio, 500);
-    
-    if (typeof patInicializar === 'function') patInicializar();
-    else {
-        var scriptContent = document.querySelector('#patrimonio-interface script');
-        if (scriptContent) { eval(scriptContent.textContent); patInicializar(); }
-    }
-}
 
 // Também força ao redimensionar a tela
 window.addEventListener('resize', function() {
