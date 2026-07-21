@@ -1284,20 +1284,45 @@
         </div>
     </div>
     <script>
-        function abrirModuloPatrimonio() {
-            document.getElementById('app-interface').style.display = 'none';
-            document.getElementById('patrimonio-interface').style.display = 'flex';
-            if (typeof patInicializar === 'function') patInicializar();
-            else {
-                var scriptContent = document.querySelector('#patrimonio-interface script');
-                if (scriptContent) { eval(scriptContent.textContent); patInicializar(); }
-            }
-        }
+// =============================================
+// FORÇA A EXIBIÇÃO DA SIDEBAR NO CELULAR
+// =============================================
 
-        function fecharModuloPatrimonio() {
-            document.getElementById('patrimonio-interface').style.display = 'none';
-            document.getElementById('app-interface').style.display = 'flex';
-        }
+function forcarSidebarPatrimonio() {
+    const sidebar = document.getElementById('patrimonio-sidebar');
+    if (sidebar) {
+        sidebar.style.display = 'flex !important';
+        sidebar.style.visibility = 'visible !important';
+        sidebar.style.opacity = '1 !important';
+        sidebar.style.width = '100% !important';
+        sidebar.style.maxHeight = '200px !important';
+        sidebar.style.minHeight = '100px !important';
+        sidebar.style.overflowY = 'auto !important';
+        console.log('✅ Sidebar do patrimônio FORÇADA a aparecer');
+    }
+}
+
+// Executa ao abrir o módulo
+function abrirModuloPatrimonio() {
+    document.getElementById('app-interface').style.display = 'none';
+    document.getElementById('patrimonio-interface').style.display = 'flex';
+    
+    // Força a sidebar
+    setTimeout(forcarSidebarPatrimonio, 500);
+    
+    if (typeof patInicializar === 'function') patInicializar();
+    else {
+        var scriptContent = document.querySelector('#patrimonio-interface script');
+        if (scriptContent) { eval(scriptContent.textContent); patInicializar(); }
+    }
+}
+
+// Também força ao redimensionar a tela
+window.addEventListener('resize', function() {
+    if (window.innerWidth <= 768) {
+        forcarSidebarPatrimonio();
+    }
+});
 
         // Função para abrir a página de comunicado SEED
 function abrirComunicadoSEED() {
