@@ -447,7 +447,7 @@ body {
 
 .dash-lower-grid {
     display: grid;
-    grid-template-columns: 1fr;        /* ← apenas uma coluna */
+    grid-template-columns: 2fr 1fr;        /* ← apenas uma coluna */
     gap: 20px;
 }
 .dash-panel {
@@ -1217,10 +1217,11 @@ body {
         font-size: 18px !important;
     }
 
-    .dash-lower-grid {
-        grid-template-columns: 1fr !important;
-        gap: 15px !important;
-    }
+   .dash-lower-grid {
+    display: grid;
+    grid-template-columns: 1fr;        /* ← apenas uma coluna */
+    gap: 20px;
+}
 
     .dash-panel {
         padding: 12px !important;
