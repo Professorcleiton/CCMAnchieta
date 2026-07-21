@@ -381,18 +381,19 @@ body {
 }
 .dash-cards-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 15px;
+    grid-template-columns: repeat(5, 1fr);   /* sempre 5 colunas em telas grandes */
+    gap: 10px;                               /* gap menor */
 }
 .dash-card {
     display: flex;
     align-items: center;
-    padding: 20px;
-    border-radius: 12px;
+    padding: 12px;               /* antes era 20px */
+    border-radius: 10px;
     background: white;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
     border-left: 5px solid #cbd5e1;
     transition: transform 0.2s;
+    min-width: 0;                /* permite encolher */
 }
 .dash-card:hover {
     transform: translateY(-3px);
@@ -414,9 +415,8 @@ body {
     border-left-color: #b91c1c;
 }
 .dash-card-icon {
-    font-size: 32px;
-    margin-right: 15px;
-    opacity: 0.8;
+    font-size: 24px;             /* antes 32px */
+    margin-right: 10px;
 }
 .dash-card.total .dash-card-icon {
     color: #475569;
@@ -438,17 +438,11 @@ body {
     flex-direction: column;
 }
 .dash-card-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: #64748b;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    font-size: 11px;             /* antes 13px */
 }
 .dash-card-value {
-    font-size: 28px;
-    font-weight: bold;
-    color: #1e293b;
-    margin-top: 5px;
+    font-size: 22px;             /* antes 28px */
+    margin-top: 3px;
 }
 
 /* Parte Inferior: Barras e Ações */
@@ -1660,5 +1654,19 @@ select#select-alunos {
     .dash-panel {
         max-height: none !important;
         overflow-y: visible !important;
+    }
+}
+@media (max-width: 900px) {
+    .dash-cards-grid {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    }
+    .dash-card {
+        padding: 10px;
+    }
+    .dash-card-icon {
+        font-size: 20px;
+    }
+    .dash-card-value {
+        font-size: 18px;
     }
 }
