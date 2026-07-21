@@ -309,7 +309,14 @@ function encontrarTurmaDoAluno(nome) {
     return 'Sem Turma';
 }
 
-function alternarMenuLateral() { document.getElementById('app-sidebar').classList.toggle('open'); }
+function alternarMenuLateral() {
+    const sidebar = document.getElementById('app-sidebar');
+    if (sidebar) {
+        sidebar.classList.toggle('open');
+    } else {
+        console.error('❌ Elemento #app-sidebar não encontrado!');
+    }
+}
 
 function alternarAbaMobile(setor, btn) {
     document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
@@ -321,9 +328,31 @@ function alternarAbaMobile(setor, btn) {
 
 function renderizarSidebarTurmas() {
     const ul = document.getElementById('lista-turmas-sidebar');
+    
+    // VERIFICA SE O ELEMENTO EXISTE
+    if (!ul) {
+        console.error('❌ Elemento #lista-turmas-sidebar não encontrado!');
+        // Tenta criar o elemento se não existir
+        const sidebarTop = document.querySelector('#app-sidebar .sidebar-top');
+        if (sidebarTop) {
+            const newUl = document.createElement('ul');
+            newUl.className = 'turmas-lista';
+            newUl.id = 'lista-turmas-sidebar';
+            newUl.innerHTML = '<li class="turma-item">Nenhuma turma</li>';
+            sidebarTop.appendChild(newUl);
+            console.log('✅ Elemento #lista-turmas-sidebar recriado!');
+            // Tenta novamente
+            setTimeout(renderizarSidebarTurmas, 100);
+        }
+        return;
+    }
+    
     ul.innerHTML = '';
     const turmas = Object.keys(cacheAlunosPorTurma).sort();
-    if (!turmas.length) { ul.innerHTML = '<li class="turma-item">Nenhuma turma</li>'; return; }
+    if (!turmas.length) { 
+        ul.innerHTML = '<li class="turma-item">Nenhuma turma</li>'; 
+        return; 
+    }
     turmas.forEach((turma, idx) => {
         const li = document.createElement('li');
         li.className = 'turma-item';
@@ -334,10 +363,12 @@ function renderizarSidebarTurmas() {
             selecionarTurma(turma);
         };
         ul.appendChild(li);
-        if (idx === 0 && !turmaSelecionadaAtiva) { li.classList.add('active'); selecionarTurma(turma); }
+        if (idx === 0 && !turmaSelecionadaAtiva) { 
+            li.classList.add('active'); 
+            selecionarTurma(turma); 
+        }
     });
 }
-
 function selecionarTurma(turma) {
     turmaSelecionadaAtiva = turma;
     const select = document.getElementById('select-alunos');
