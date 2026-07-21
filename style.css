@@ -241,14 +241,15 @@ body {
 }
 .top-bar-app {
     background-color: white;
-    padding: 10px 20px;       /* padding horizontal um pouco menor */
+    padding: 10px 20px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     display: flex;
-    flex-wrap: wrap;          /* quebra linha se não couber */
+    flex-wrap: wrap;
     align-items: center;
+    width: 100%; /* ADICIONADO: Força a barra a ocupar a tela inteira */
     min-height: 65px;
-    height: auto !important;  /* altura automática, sobrescreve qualquer fixo */
-    gap: 10px;                /* espaço entre os itens */
+    height: auto !important;
+    gap: 10px;
 }
 .aluno-selector {
     display: flex;
@@ -296,6 +297,7 @@ body {
     display: flex;
     align-items: center;
     gap: 15px;
+    margin-left: auto; /* ADICIONADO: Empurra o bloco inteiro para a direita */
 }
 .right-nre-logo {
     height: 40px;
