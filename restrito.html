@@ -45,7 +45,24 @@
 
     <!-- INTERFACE PRINCIPAL -->
     <div id="app-interface">
-
+    <aside class="sidebar" id="app-sidebar">
+    <div class="sidebar-top">
+        <div class="sidebar-header">
+            <img src="img/SIGA.png" alt="Logo" class="sidebar-logo">
+            <div class="sidebar-title-container">
+                <h2>SIGA</h2>
+                <span class="sidebar-meaning">Sistema Integrado de Gestão Anchieta</span>
+                <span class="sidebar-subtitle">CCM Anchieta</span>
+            </div>
+        </div>
+        <ul class="turmas-lista" id="lista-turmas-sidebar">
+            <li class="turma-item"><i class="fa-solid fa-spinner"></i> Lendo...</li>
+        </ul>
+    </div>
+    <div class="sidebar-footer">
+        <button class="btn-logout" onclick="fazerLogout()"><i class="fa-solid fa-right-from-bracket"></i> Sair</button>
+    </div>
+</aside>
         <main class="main-content">
             <header class="top-bar-app" style="display: flex; flex-direction: column; gap: 15px; padding: 15px; height: auto;">
                 <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
