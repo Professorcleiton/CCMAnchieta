@@ -445,10 +445,9 @@ body {
     margin-top: 3px;
 }
 
-/* Parte Inferior: Barras e Ações */
 .dash-lower-grid {
     display: grid;
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: 1fr;        /* ← apenas uma coluna */
     gap: 20px;
 }
 .dash-panel {
