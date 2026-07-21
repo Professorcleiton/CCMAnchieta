@@ -9,7 +9,7 @@ body {
     display: flex;
     height: 100vh;
     color: #1e293b;
-    overflow: hidden;
+    overflow: hidden; /* mantém sem rolagem no body */
 }
 
 /* TELA DE LOGIN */
@@ -237,27 +237,26 @@ body {
     display: flex;
     flex-direction: column;
     height: 100vh;
-    overflow: hidden;
-    position: relative;
+    overflow-y: auto; /* rolagem apenas no conteúdo principal se precisar */
 }
 .top-bar-app {
     background-color: white;
-    padding: 0 30px;
+    padding: 10px 30px; /* antes era padding: 0 30px; */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     display: flex;
     justify-content: space-between;
     align-items: center;
     min-height: 65px;
-    height: 65px;
+    height: auto; /* antes era height: 65px; */
+    flex-wrap: wrap; /* permite que o conteúdo se reorganize */
 }
 .aluno-selector {
-    font-size: 18px;
-    font-weight: bold;
-    color: #005088;
     display: flex;
     align-items: center;
     gap: 10px;
     flex-wrap: wrap;
+    min-height: 60px; /* altura mínima */
+    /* remova qualquer height fixo que existir */
 }
 .btn-pdf {
     padding: 6px 14px;
