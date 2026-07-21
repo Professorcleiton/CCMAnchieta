@@ -237,26 +237,26 @@ body {
     display: flex;
     flex-direction: column;
     height: 100vh;
-    overflow-y: auto; /* rolagem apenas no conteúdo principal se precisar */
+    overflow-y: auto;         /* rolagem só na vertical se necessário */
 }
 .top-bar-app {
     background-color: white;
-    padding: 10px 30px; /* antes era padding: 0 30px; */
+    padding: 10px 20px;       /* padding horizontal um pouco menor */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     display: flex;
-    justify-content: space-between;
+    flex-wrap: wrap;          /* quebra linha se não couber */
     align-items: center;
     min-height: 65px;
-    height: auto; /* antes era height: 65px; */
-    flex-wrap: wrap; /* permite que o conteúdo se reorganize */
+    height: auto !important;  /* altura automática, sobrescreve qualquer fixo */
+    gap: 10px;                /* espaço entre os itens */
 }
 .aluno-selector {
     display: flex;
     align-items: center;
     gap: 10px;
     flex-wrap: wrap;
-    min-height: 60px; /* altura mínima */
-    /* remova qualquer height fixo que existir */
+    min-width: 0;             /* importante para não quebrar layout */
+    flex-shrink: 0;           /* não permite encolher */
 }
 .btn-pdf {
     padding: 6px 14px;
