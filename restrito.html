@@ -16,6 +16,10 @@
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
+    <script>
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxEMx6NmZvQqPMmmxsrTaV1DrMHa-F16_ARFR1cjm_5v054lUtF80YWtW88g6MsyhajRg/exec';
+    const APPS_SCRIPT_PAT_URL = APPS_SCRIPT_URL;
+</script>
 </head>
 <body>
 
@@ -122,9 +126,9 @@
                         <span class="mini-label-chart">PEDAG</span><div class="visual-bar-fill" id="bar-pedag" style="background-color:#0d9488;"></div>
                         <span class="mini-label-chart">ADM</span><div class="visual-bar-fill" id="bar-adm" style="background-color:#4f46e5;"></div>
                         <span class="mini-label-chart">PROFS</span><div class="visual-bar-fill" id="bar-profs" style="background-color:#b91c1c;"></div>
-                        <span class="mini-label-chart">📄 DOCS</span><div class="visual-bar-fill" id="bar-profs" style="background-color:#8b5cf6;"></div>
-                        <span class="mini-label-chart">🚪 OCORR</span><div class="visual-bar-fill" id="bar-profs" style="background-color:#f59e0b;"></div>
-                        <span class="mini-label-chart">📁 ATAS</span><div class="visual-bar-fill" id="bar-profs" style="background-color:#dc2626;"></div>
+                        <span class="mini-label-chart">📄 DOCS</span><div class="visual-bar-fill docs-bar" style="background-color:#8b5cf6;"></div>
+                        <span class="mini-label-chart">🚪 OCORR</span><div class="visual-bar-fill ocorr-bar" style="background-color:#f59e0b;"></div>
+                        <span class="mini-label-chart">📁 ATAS</span><div class="visual-bar-fill atas-bar" style="background-color:#dc2626;"></div>
                     </div>
                 </div>
 
@@ -1281,32 +1285,7 @@
         </div>
     </div>
     <script>
-// =============================================
-// FORÇA A EXIBIÇÃO DA SIDEBAR NO CELULAR
-// =============================================
 
-function forcarSidebarPatrimonio() {
-    const sidebar = document.getElementById('patrimonio-sidebar');
-    if (sidebar) {
-        sidebar.style.display = 'flex !important';
-        sidebar.style.visibility = 'visible !important';
-        sidebar.style.opacity = '1 !important';
-        sidebar.style.width = '100% !important';
-        sidebar.style.maxHeight = '200px !important';
-        sidebar.style.minHeight = '100px !important';
-        sidebar.style.overflowY = 'auto !important';
-        console.log('✅ Sidebar do patrimônio FORÇADA a aparecer');
-    }
-}
-
-// Executa ao abrir o módulo
-
-// Também força ao redimensionar a tela
-window.addEventListener('resize', function() {
-    if (window.innerWidth <= 768) {
-        forcarSidebarPatrimonio();
-    }
-});
 
         // Função para abrir a página de comunicado SEED
 function abrirComunicadoSEED() {
@@ -1327,35 +1306,6 @@ function verificarBotaoComunicado() {
     }
 }
 
-            // Força a exibição do seletor de alunos
-    document.addEventListener('DOMContentLoaded', function() {
-        const container = document.getElementById('aluno-selector-container');
-        if (container) {
-            container.style.display = 'flex !important';
-            container.style.visibility = 'visible';
-            container.style.opacity = '1';
-            container.style.height = 'auto';
-            container.style.overflow = 'visible';
-            container.style.minHeight = '60px';
-            console.log('✅ Seletor de alunos FORÇADO a aparecer');
-        }
-        
-        // Verifica se o select tem opções
-        const select = document.getElementById('select-alunos');
-        if (select) {
-            console.log('📊 Select encontrado, opções:', select.options.length);
-            if (select.options.length <= 1) {
-                console.log('⚠️ Select vazio, tentando popular...');
-                // Tenta popular com as turmas
-                if (typeof cacheAlunosPorTurma !== 'undefined' && Object.keys(cacheAlunosPorTurma).length > 0) {
-                    const turmas = Object.keys(cacheAlunosPorTurma);
-                    if (turmas.length > 0 && typeof selecionarTurma === 'function') {
-                        selecionarTurma(turmas[0]);
-                    }
-                }
-            }
-        }
-    });
     </script>
     <script src="db.js"></script>
 <script src="script.js"></script>
