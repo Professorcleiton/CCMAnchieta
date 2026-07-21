@@ -384,6 +384,13 @@ function selecionarTurma(turma) {
     
     select.value = '';
     filtrarRegistrosPorAluno();
+    
+    // TORNA O BOTÃO DO PRÉ-CONSELHO VISÍVEL ASSIM QUE UMA TURMA É SELECIONADA
+    const btnPreConselho = document.getElementById('btn-gerar-pdf-pre-conselho');
+    if (btnPreConselho) {
+        btnPreConselho.style.display = 'inline-flex';
+    }
+
     document.getElementById('app-sidebar').classList.remove('open');
 }
 
