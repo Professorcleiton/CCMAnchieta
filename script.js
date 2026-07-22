@@ -836,8 +836,14 @@ function gerarFichaIndividualConselho() {
         </table>
         <h4 style="font-size:13px;color:#005088;margin-top:15px;">Histórico de Apontamentos</h4>`;
         
-    ['meivs','pedagogico','adm','direcao'].forEach(setor => {
-        const registros = todosOsRegistros.filter(r => r.aluno === aluno && (r.setor === setor || (setor === 'direcao' && (r.setor === 'professores' || r.setor === 'direcao'))));
+    // Normaliza o nome do aluno (ignora acentos e maiúsculas/minúsculas)
+const alunoNormalizado = aluno.trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+['meivs','pedagogico','adm','direcao'].forEach(setor => {
+    const registros = todosOsRegistros.filter(r => {
+        const nomeRegistro = (r.aluno || '').trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+        return nomeRegistro === alunoNormalizado && (r.setor === setor || (setor === 'direcao' && (r.setor === 'professores' || r.setor === 'direcao')));
+    });
         if (registros.length) {
             html += `<div style="margin-top:10px;background:#f1f5f9;padding:5px 10px;border-radius:4px;font-weight:bold;border-left:5px solid #005088;">${setor.toUpperCase()}</div>`;
             registros.forEach(p => html += `<div style="margin:8px 0;padding:8px 12px;background:#fff;border-bottom:1px solid #e2e8f0;"><div>${p.texto}</div><div style="font-size:10px;color:#64748b;text-align:right;">${p.funcionario} | ${formatarDataEHora(p.dataAtual)}</div></div>`);
