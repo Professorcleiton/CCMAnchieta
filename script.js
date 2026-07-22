@@ -538,7 +538,6 @@ function formatarDataEHora(s) {
 
 function filtrarRegistrosPorAluno() {
     const select = document.getElementById('select-alunos');
-    console.log("👉 EVENTO DISPARADO! Valor do select:", select ? select.value : "Elemento select não existe");
     const mural = document.getElementById('welcome-dashboard-mural');
     const mini = document.getElementById('student-mini-dash');
     const grid = document.getElementById('siga-columns-grid'); 
@@ -558,11 +557,14 @@ function filtrarRegistrosPorAluno() {
         return;
     }
 
+    // Normaliza o nome do aluno selecionado (remove acentos e espaços, converte para minúsculas)
+    const alunoNormalizado = aluno.trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
     // 2. Exibição segura dos elementos da tela
     if (mural) mural.style.display = 'none';
     if (mini) mini.style.display = 'flex';
     if (grid) grid.style.display = 'grid';
-    if (pdf) pdf.style.display = 'inline-flex'; // <--- EXIBE O BOTÃO
+    if (pdf) pdf.style.display = 'inline-flex';
     if (tabs) tabs.style.display = 'flex'; 
 
     // 3. Verificação segura do setor do usuário
@@ -594,7 +596,10 @@ function filtrarRegistrosPorAluno() {
     // 5. Filtro e renderização dos cards
     if (typeof todosOsRegistros !== 'undefined' && Array.isArray(todosOsRegistros)) {
         todosOsRegistros.forEach(r => {
-            if (r.aluno && r.aluno.trim() === aluno) {
+            // Normaliza o nome do registro para comparação
+            const nomeRegistro = (r.aluno || '').trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+            
+            if (nomeRegistro === alunoNormalizado) {
                 if (r.tipo === 'documento') {
                     docs++;
                 } else if (r.tipo === 'ocorrencia') {
