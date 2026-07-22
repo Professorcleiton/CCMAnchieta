@@ -100,7 +100,7 @@
 <!-- ========================================== -->
 <div id="aba-apontamentos" style="display: block; width: 100%;">
     
-    <!-- 1. Barra de Resumo (Aparece ao selecionar aluno) -->
+    <!-- Barra de Resumo (aparece ao selecionar aluno) -->
     <div class="summary-dashboard-bar" id="student-mini-dash" style="display: none;">
         <div class="metric-mini-card"><i class="fa-solid fa-chart-line"></i> Apontamentos: <span class="count-number" id="dash-total-count">0</span></div>
         <div class="mini-chart-bar-container">
@@ -114,7 +114,7 @@
         </div>
     </div>
 
-    <!-- 2. Cabeçalho para Impressão PDF -->
+    <!-- Cabeçalho para Impressão PDF -->
     <div id="pdf-header" style="display:none; text-align:center; margin-bottom: 30px; color: #000; padding: 20px; font-family: Arial, sans-serif;">
         <h2 style="margin: 0; font-size: 20px;">Colégio Cívico Militar Anchieta</h2>
         <p style="margin: 5px 0; font-size: 14px;">Cruzeiro do Oeste - PR</p>
@@ -123,7 +123,7 @@
         <h3 style="margin-top: 15px; font-size: 18px;">Relatório de Apontamentos</h3>
     </div>
 
-    <!-- 3. SELETOR ÚNICO E FIXO NO TOPO -->
+    <!-- Seletor Único -->
     <div class="aluno-selector-wrapper" style="margin-bottom: 15px; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
         <div class="aluno-selector" id="aluno-selector-container" style="display: flex; justify-content: space-between; align-items: center; gap: 15px; flex-wrap: wrap; width: 100%;">
             
@@ -138,16 +138,14 @@
                 <button id="btn-gerar-pdf-oficial" onclick="gerarFichaIndividualConselho()" style="display: none; background-color: #2563eb; color: white; padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2); align-items: center; gap: 8px;">
                     <i class="fa-solid fa-file-pdf"></i> Imprimir Ficha Individual
                 </button>
-
                 <button id="btn-gerar-pdf-pre-conselho" onclick="abrirModalTurmasPreConselho()" style="display: inline-flex; background-color: #8b5cf6; color: white; padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; box-shadow: 0 2px 4px rgba(139, 92, 246, 0.2); align-items: center; gap: 8px;">
                     <i class="fa-solid fa-users-gear"></i> Relatório Pré-Conselho
                 </button>
             </div>
-
         </div>
     </div>
 
-    <!-- 4. MURAL DA DASHBOARD (Cards com métricas da turma/geral) -->
+    <!-- Cards de Métricas -->
     <div class="dash-container" id="welcome-dashboard-mural" style="overflow-y: auto;">
         <div class="dash-cards-grid">
             <div class="dash-card total" style="cursor: pointer;" onclick="abrirModalRelatorio('geral')">
@@ -188,88 +186,61 @@
         </div>
     </div>
 
-</div>
-<div class="dash-lower-grid">
-    <!-- Wrapper do seletor de alunos -->
-    <div class="aluno-selector-wrapper" style="grid-column: 1 / -1; margin-bottom: 10px; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
-        <div class="aluno-selector" id="aluno-selector-container" style="display: flex; justify-content: space-between; align-items: center; gap: 15px; flex-wrap: wrap; width: 100%;">
+    <!-- Painéis de Distribuição e Ações (empilhados) -->
+    <div class="dash-lower-grid">
+        <div class="dash-panel">
+            <div class="dash-panel-title"><i class="fa-solid fa-chart-column"></i> Distribuição de Apontamentos</div>
+            <div class="dash-bar-item">
+                <div class="dash-bar-header"><span>MEIV'S</span><span id="dash-pct-meivs">0%</span></div>
+                <div class="dash-bar-track"><div class="dash-bar-fill" id="dash-bar-meivs" style="background-color: #0284c7; width: 0%;"></div></div>
+            </div>
+            <div class="dash-bar-item">
+                <div class="dash-bar-header"><span>Pedagógico</span><span id="dash-pct-pedagogico">0%</span></div>
+                <div class="dash-bar-track"><div class="dash-bar-fill" id="dash-bar-pedagogico" style="background-color: #0d9488; width: 0%;"></div></div>
+            </div>
+            <div class="dash-bar-item">
+                <div class="dash-bar-header"><span>ADM</span><span id="dash-pct-adm">0%</span></div>
+                <div class="dash-bar-track"><div class="dash-bar-fill" id="dash-bar-adm" style="background-color: #4f46e5; width: 0%;"></div></div>
+            </div>
+            <div class="dash-bar-item">
+                <div class="dash-bar-header"><span>Professores</span><span id="dash-pct-professores">0%</span></div>
+                <div class="dash-bar-track"><div class="dash-bar-fill" id="dash-bar-professores" style="background-color: #b91c1c; width: 0%;"></div></div>
+            </div>
+        </div>
+
+        <div class="dash-panel" style="display: flex; flex-direction: column; gap: 15px; max-height: calc(100vh - 220px); overflow-y: auto; padding-right: 8px;">
+            <div class="dash-panel-title"><i class="fa-solid fa-bolt"></i> Ações Rápidas</div>
+            <p style="font-size: 13px; color: #64748b; margin-bottom: 5px;">Acesse as ferramentas gerenciais e relatórios pedagógicos.</p>
+
+            <button id="btn-aba-secretaria" class="btn-salvar" onclick="mostrarTab('documentos')" style="display: none; background-color: #64748b; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(100, 116, 139, 0.2); margin-bottom: 5px;">
+                <i class="fa-solid fa-folder-open" style="font-size: 18px;"></i> Secretaria / Docs
+            </button>
             
-            <!-- Seleção do Aluno -->
-            <div style="display: flex; align-items: center; gap: 8px;">
-                <label style="font-weight: bold; color: #0f172a;"><i class="fa-solid fa-user-graduate"></i> Aluno:</label>
-                <select id="select-alunos" onchange="filtrarRegistrosPorAluno()" style="padding: 8px 12px; border: 1px solid #94a3b8; border-radius: 6px; font-size: 14px; width: 220px; outline: none;">
-                    <option value="">Selecione uma turma...</option>
-                </select>
-            </div>
+            <button class="btn-salvar" style="background-color: #0d9488; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(13, 148, 136, 0.2); margin-bottom: 5px;" onclick="abrirPreConselho()">
+                <i class="fa-solid fa-clipboard-check" style="font-size: 18px;"></i> Preencher Pré-Conselho
+            </button>
+            
+            <button class="btn-salvar" style="background-color: #f59e0b; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(245, 158, 11, 0.2); margin-bottom: 5px;" onclick="abrirModalSaida()">
+                <i class="fa-solid fa-sign-out" style="font-size: 18px;"></i> Registrar Saída Antecipada
+            </button>
 
-            <!-- Grupo de Botões de Ação -->
-            <div style="display: flex; gap: 10px;">
-                <!-- Botão de Ficha Individual (Surgirá ao selecionar o aluno) -->
-                <button id="btn-gerar-pdf-oficial" onclick="gerarFichaIndividualConselho()" style="background-color: #2563eb; color: white; padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2); display: inline-flex; align-items: center; gap: 8px;">
-    <i class="fa-solid fa-file-pdf"></i> Imprimir Ficha Individual
-</button>
+            <a href="patrimonio.html" class="btn-salvar" style="background-color: #005088; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(0, 80, 136, 0.2); margin-bottom: 5px;">
+                <i class="fa-solid fa-boxes-stacked" style="font-size: 18px;"></i> Módulo Patrimônio
+            </a>
 
-                <!-- Botão de Relatório Pré-Conselho -->
-                <button id="btn-gerar-pdf-pre-conselho" onclick="abrirModalTurmasPreConselho()" style="display: none; background-color: #8b5cf6; color: white; padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; box-shadow: 0 2px 4px rgba(139, 92, 246, 0.2); align-items: center; gap: 8px;">
-                    <i class="fa-solid fa-users-gear"></i> Relatório Pré-Conselho
-                </button>
-            </div>
-
+            <button id="btn-comunicado-seed" class="btn-salvar" style="background-color: #8b5cf6; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: none; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(139, 92, 246, 0.2); margin-bottom: 5px;" onclick="abrirComunicadoSEED()">
+                <i class="fa-solid fa-file-lines" style="font-size: 18px;"></i> Comunicado SEED
+            </button>
         </div>
     </div>
-</div>
-                        <div class="dash-panel">
-                            <div class="dash-panel-title"><i class="fa-solid fa-chart-column"></i> Distribuição de Apontamentos</div>
-                            <div class="dash-bar-item">
-                                <div class="dash-bar-header"><span>MEIV'S</span><span id="dash-pct-meivs">0%</span></div>
-                                <div class="dash-bar-track"><div class="dash-bar-fill" id="dash-bar-meivs" style="background-color: #0284c7; width: 0%;"></div></div>
-                            </div>
-                            <div class="dash-bar-item">
-                                <div class="dash-bar-header"><span>Pedagógico</span><span id="dash-pct-pedagogico">0%</span></div>
-                                <div class="dash-bar-track"><div class="dash-bar-fill" id="dash-bar-pedagogico" style="background-color: #0d9488; width: 0%;"></div></div>
-                            </div>
-                            <div class="dash-bar-item">
-                                <div class="dash-bar-header"><span>ADM</span><span id="dash-pct-adm">0%</span></div>
-                                <div class="dash-bar-track"><div class="dash-bar-fill" id="dash-bar-adm" style="background-color: #4f46e5; width: 0%;"></div></div>
-                            </div>
-                            <div class="dash-bar-item">
-                                <div class="dash-bar-header"><span>Professores</span><span id="dash-pct-professores">0%</span></div>
-                                <div class="dash-bar-track"><div class="dash-bar-fill" id="dash-bar-professores" style="background-color: #b91c1c; width: 0%;"></div></div>
-                            </div>
-                        </div>
-                        <div class="dash-panel" style="display: flex; flex-direction: column; gap: 15px; max-height: calc(100vh - 220px); overflow-y: auto; padding-right: 8px;">
-                            <div class="dash-panel-title"><i class="fa-solid fa-bolt"></i> Ações Rápidas</div>
-                            <p style="font-size: 13px; color: #64748b; margin-bottom: 5px;">Acesse as ferramentas gerenciais e relatórios pedagógicos.</p>
 
-                            <button id="btn-aba-secretaria" class="btn-salvar" onclick="mostrarTab('documentos')" style="display: none; background-color: #64748b; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(100, 116, 139, 0.2); margin-bottom: 5px;">
-                                <i class="fa-solid fa-folder-open" style="font-size: 18px;"></i> Secretaria / Docs
-                            </button>
-                            
-                            <button class="btn-salvar" style="background-color: #0d9488; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(13, 148, 136, 0.2); margin-bottom: 5px;" onclick="abrirPreConselho()">
-                                <i class="fa-solid fa-clipboard-check" style="font-size: 18px;"></i> Preencher Pré-Conselho
-                            </button>
-                            
-                            <button class="btn-salvar" style="background-color: #f59e0b; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(245, 158, 11, 0.2); margin-bottom: 5px;" onclick="abrirModalSaida()">
-                                <i class="fa-solid fa-sign-out" style="font-size: 18px;"></i> Registrar Saída Antecipada
-                            </button>
-
-                            <a href="patrimonio.html" class="btn-salvar" style="background-color: #005088; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(0, 80, 136, 0.2); margin-bottom: 5px;">
-                                <i class="fa-solid fa-boxes-stacked" style="font-size: 18px;"></i> Módulo Patrimônio
-                                    </a>
-                            <!-- NOVO BOTÃO - COMUNICADO SEED -->
-                            <button id="btn-comunicado-seed" class="btn-salvar" style="background-color: #8b5cf6; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: none; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(139, 92, 246, 0.2); margin-bottom: 5px;" onclick="abrirComunicadoSEED()">
-                                <i class="fa-solid fa-file-lines" style="font-size: 18px;"></i> Comunicado SEED
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="mobile-tabs-container">
-                    <button class="tab-button active" onclick="alternarAbaMobile('meivs', this)">MEIV'S</button>
-                    <button class="tab-button" onclick="alternarAbaMobile('pedagogico', this)">PEDAG.</button>
-                    <button class="tab-button" onclick="alternarAbaMobile('adm', this)">ADM</button>
-                    <button class="tab-button" onclick="alternarAbaMobile('direcao', this)">PROFS.</button>
-                </div>
+    <!-- Abas mobile -->
+    <div id="mobile-tabs-container">
+        <button class="tab-button active" onclick="alternarAbaMobile('meivs', this)">MEIV'S</button>
+        <button class="tab-button" onclick="alternarAbaMobile('pedagogico', this)">PEDAG.</button>
+        <button class="tab-button" onclick="alternarAbaMobile('adm', this)">ADM</button>
+        <button class="tab-button" onclick="alternarAbaMobile('direcao', this)">PROFS.</button>
+    </div>
 
                 <div class="board-container" id="siga-columns-grid">
                     <section class="sector-column active" id="col-meivs">
