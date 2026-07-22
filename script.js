@@ -544,22 +544,29 @@ function filtrarRegistrosPorAluno() {
     const pdf = document.getElementById('btn-gerar-pdf-oficial');
     const tabs = document.getElementById('mobile-tabs-container');
 
-    if (!select || !select.value || select.value === "Selecione uma turma...") {
-        mural.style.display = 'flex';
-        mini.style.display = 'none';
-        grid.style.display = 'none'; 
-        pdf.style.display = 'none';
-        tabs.style.display = 'none';
+    // 1. Validação segura da seleção de aluno
+    const aluno = select ? select.value : '';
+    const valorInvalido = !aluno || aluno === "" || aluno === "Selecione uma turma..." || aluno === "Selecione um aluno...";
+
+    if (valorInvalido) {
+        if (mural) mural.style.display = 'flex';
+        if (mini) mini.style.display = 'none';
+        if (grid) grid.style.display = 'none'; 
+        if (pdf) pdf.style.display = 'none';
+        if (tabs) tabs.style.display = 'none';
         return;
     }
 
-    mural.style.display = 'none';
-    mini.style.display = 'flex';
-    grid.style.display = 'block';
-    pdf.style.display = 'inline-flex';
-    tabs.style.display = 'flex'; 
+    // 2. Exibição segura dos elementos da tela
+    if (mural) mural.style.display = 'none';
+    if (mini) mini.style.display = 'flex';
+    if (grid) grid.style.display = 'block';
+    if (pdf) pdf.style.display = 'inline-flex'; // <--- EXIBE O BOTÃO
+    if (tabs) tabs.style.display = 'flex'; 
 
-    let abaPadrao = usuarioLogado.setor === 'professores' ? 'direcao' : usuarioLogado.setor;
+    // 3. Verificação segura do setor do usuário
+    const setorUser = (typeof usuarioLogado !== 'undefined' && usuarioLogado && usuarioLogado.setor) ? usuarioLogado.setor : 'meivs';
+    let abaPadrao = setorUser === 'professores' ? 'direcao' : setorUser;
     if (!['meivs', 'pedagogico', 'adm', 'direcao'].includes(abaPadrao)) abaPadrao = 'meivs';
 
     const colAtiva = document.getElementById(`col-${abaPadrao}`);
@@ -574,8 +581,7 @@ function filtrarRegistrosPorAluno() {
         btnAtivo.classList.add('active');
     }
 
-    const aluno = select.value;
-    
+    // 4. Limpeza dos feeds por setor
     ['meivs','pedagogico','adm','direcao'].forEach(s => {
         const feed = document.getElementById(`feed-${s}`);
         if (feed) feed.innerHTML = '';
@@ -584,40 +590,49 @@ function filtrarRegistrosPorAluno() {
     let cm = 0, cp = 0, ca = 0, cf = 0;
     let docs = 0, ocorr = 0, atas = 0;
 
-    todosOsRegistros.forEach(r => {
-        if (r.aluno && r.aluno.trim() === aluno) {
-            if (r.tipo === 'documento') {
-                docs++;
-            } else if (r.tipo === 'ocorrencia') {
-                ocorr++;
-            } else if (r.tipo === 'ata') {
-                atas++;
-            } else {
-                let setor = r.setor;
-                if (setor === 'meivs') cm++;
-                else if (setor === 'pedagogico') cp++;
-                else if (setor === 'adm') ca++;
-                else if (setor === 'professores' || setor === 'direcao') cf++;
-            }
-            
-            let setorExibicao = r.setor;
-            if (setorExibicao === 'professores') setorExibicao = 'direcao';
-            
-            const feed = document.getElementById(`feed-${setorExibicao}`);
-            if (feed) {
-                const card = document.createElement('div'); 
-                card.className = 'post-card';
-                const botoes = (usuarioLogado && usuarioLogado.nivel >= 3) ? 
-                    `<div class="card-actions"><button class="btn-action-card btn-edit-card" onclick="editarRegistroServidor(${r.idLinha}, '${r.setor}')"><i class="fa-solid fa-pen-to-square"></i> Editar</button><button class="btn-action-card btn-delete-card" onclick="excluirRegistroServidor(${r.idLinha})"><i class="fa-solid fa-trash-can"></i> Apagar</button></div>` : '';
+    // 5. Filtro e renderização dos cards
+    if (typeof todosOsRegistros !== 'undefined' && Array.isArray(todosOsRegistros)) {
+        todosOsRegistros.forEach(r => {
+            if (r.aluno && r.aluno.trim() === aluno) {
+                if (r.tipo === 'documento') {
+                    docs++;
+                } else if (r.tipo === 'ocorrencia') {
+                    ocorr++;
+                } else if (r.tipo === 'ata') {
+                    atas++;
+                } else {
+                    let setor = r.setor;
+                    if (setor === 'meivs') cm++;
+                    else if (setor === 'pedagogico') cp++;
+                    else if (setor === 'adm') ca++;
+                    else if (setor === 'professores' || setor === 'direcao') cf++;
+                }
                 
-                card.innerHTML = `<p class="post-text" id="text-card-${r.idLinha}">${r.texto}</p><div class="post-footer"><span><i class="fa-solid fa-user"></i>${r.funcionario || 'SIGA'}</span><span><i class="fa-solid fa-clock"></i>${formatarDataEHora(r.dataAtual)}</span></div>${botoes}`;
-                feed.appendChild(card);
-            }
-        }
-    });
+                let setorExibicao = r.setor;
+                if (setorExibicao === 'professores') setorExibicao = 'direcao';
+                
+                const feed = document.getElementById(`feed-${setorExibicao}`);
+                if (feed) {
+                    const card = document.createElement('div'); 
+                    card.className = 'post-card';
+                    
+                    const nivelUser = (typeof usuarioLogado !== 'undefined' && usuarioLogado) ? usuarioLogado.nivel : 0;
+                    const botoes = (nivelUser >= 3) ? 
+                        `<div class="card-actions"><button class="btn-action-card btn-edit-card" onclick="editarRegistroServidor(${r.idLinha}, '${r.setor}')"><i class="fa-solid fa-pen-to-square"></i> Editar</button><button class="btn-action-card btn-delete-card" onclick="excluirRegistroServidor(${r.idLinha})"><i class="fa-solid fa-trash-can"></i> Apagar</button></div>` : '';
+                    
+                    const dataStr = (typeof formatarDataEHora === 'function') ? formatarDataEHora(r.dataAtual) : r.dataAtual;
 
+                    card.innerHTML = `<p class="post-text" id="text-card-${r.idLinha}">${r.texto}</p><div class="post-footer"><span><i class="fa-solid fa-user"></i>${r.funcionario || 'SIGA'}</span><span><i class="fa-solid fa-clock"></i>${dataStr}</span></div>${botoes}`;
+                    feed.appendChild(card);
+                }
+            }
+        });
+    }
+
+    // 6. Atualização de contadores e barras com verificação de elemento
     const total = cm + cp + ca + cf + docs + ocorr + atas;
-    document.getElementById('dash-total-count').innerText = total;
+    const elTotal = document.getElementById('dash-total-count');
+    if (elTotal) elTotal.innerText = total;
     
     const atualizarContador = (idBar, label, cor, valor) => {
         const bar = document.querySelector('.' + idBar);
@@ -637,9 +652,9 @@ function filtrarRegistrosPorAluno() {
     atualizarContador('bar-pedag', 'PEDAG', '#0d9488', cp);
     atualizarContador('bar-adm', 'ADM', '#4f46e5', ca);
     atualizarContador('bar-profs', 'PROFS', '#b91c1c', cf);
-    atualizarContador('docs-bar', '📄 DOCS', '#8b5cf6', docs);
-    atualizarContador('ocorr-bar', '🚪 OCORR', '#f59e0b', ocorr);
-    atualizarContador('atas-bar', '📁 ATAS', '#dc2626', atas);
+    atualizarContador('docs-bar', 'DOCS', '#8b5cf6', docs);
+    atualizarContador('ocorr-bar', 'OCORR', '#f59e0b', ocorr);
+    atualizarContador('atas-bar', 'ATAS', '#dc2626', atas);
 }
 
 function verificarTeclaEnter(e, setor) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); salvarPost(setor); } }
