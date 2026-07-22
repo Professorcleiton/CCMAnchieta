@@ -538,6 +538,7 @@ function formatarDataEHora(s) {
 
 function filtrarRegistrosPorAluno() {
     const select = document.getElementById('select-alunos');
+    console.log("👉 EVENTO DISPARADO! Valor do select:", select ? select.value : "Elemento select não existe");
     const mural = document.getElementById('welcome-dashboard-mural');
     const mini = document.getElementById('student-mini-dash');
     const grid = document.getElementById('siga-columns-grid'); 
