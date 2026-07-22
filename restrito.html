@@ -95,70 +95,103 @@
     <span id="status-texto">Online</span>
     <span id="status-pendentes" style="margin-left: 8px; font-size: 10px; color: #64748b; display: none;"></span>
 </div>
-            <!-- ========================================== -->
-            <!-- CAIXA PRINCIPAL DOS APONTAMENTOS -->
-            <!-- ========================================== -->
-            <div id="aba-apontamentos" style="display: block; width: 100%;">
-                
-                <div class="summary-dashboard-bar" id="student-mini-dash">
-                    <div class="metric-mini-card"><i class="fa-solid fa-chart-line"></i> Apontamentos: <span class="count-number" id="dash-total-count">0</span></div>
-                    <div class="mini-chart-bar-container">
-                        <span class="mini-label-chart">MEIVS</span><div class="visual-bar-fill" id="bar-meivs" style="background-color:#0284c7;"></div>
-                        <span class="mini-label-chart">PEDAG</span><div class="visual-bar-fill" id="bar-pedag" style="background-color:#0d9488;"></div>
-                        <span class="mini-label-chart">ADM</span><div class="visual-bar-fill" id="bar-adm" style="background-color:#4f46e5;"></div>
-                        <span class="mini-label-chart">PROFS</span><div class="visual-bar-fill" id="bar-profs" style="background-color:#b91c1c;"></div>
-                        <span class="mini-label-chart">📄 DOCS</span><div class="visual-bar-fill docs-bar" style="background-color:#8b5cf6;"></div>
-                        <span class="mini-label-chart">🚪 OCORR</span><div class="visual-bar-fill ocorr-bar" style="background-color:#f59e0b;"></div>
-                        <span class="mini-label-chart">📁 ATAS</span><div class="visual-bar-fill atas-bar" style="background-color:#dc2626;"></div>
-                    </div>
-                </div>
+<!-- ========================================== -->
+<!-- CAIXA PRINCIPAL DOS APONTAMENTOS -->
+<!-- ========================================== -->
+<div id="aba-apontamentos" style="display: block; width: 100%;">
+    
+    <!-- Barra de Resumo e Gráficos do Aluno -->
+    <div class="summary-dashboard-bar" id="student-mini-dash">
+        <div class="metric-mini-card"><i class="fa-solid fa-chart-line"></i> Apontamentos: <span class="count-number" id="dash-total-count">0</span></div>
+        <div class="mini-chart-bar-container">
+            <span class="mini-label-chart">MEIVS</span><div class="visual-bar-fill" id="bar-meivs" style="background-color:#0284c7;"></div>
+            <span class="mini-label-chart">PEDAG</span><div class="visual-bar-fill" id="bar-pedag" style="background-color:#0d9488;"></div>
+            <span class="mini-label-chart">ADM</span><div class="visual-bar-fill" id="bar-adm" style="background-color:#4f46e5;"></div>
+            <span class="mini-label-chart">PROFS</span><div class="visual-bar-fill" id="bar-profs" style="background-color:#b91c1c;"></div>
+            <span class="mini-label-chart">DOCS</span><div class="visual-bar-fill docs-bar" style="background-color:#8b5cf6;"></div>
+            <span class="mini-label-chart">OCORR</span><div class="visual-bar-fill ocorr-bar" style="background-color:#f59e0b;"></div>
+            <span class="mini-label-chart">ATAS</span><div class="visual-bar-fill atas-bar" style="background-color:#dc2626;"></div>
+        </div>
+    </div>
 
-                <div id="pdf-header" style="display:none; text-align:center; margin-bottom: 30px; color: #000; padding: 20px; font-family: Arial, sans-serif;">
-                    <h2 style="margin: 0; font-size: 20px;">Colégio Cívico Militar Anchieta</h2>
-                    <p style="margin: 5px 0; font-size: 14px;">Cruzeiro do Oeste - PR</p>
-                    <p style="margin: 5px 0; font-size: 14px;">Direção e Secretaria Escolar</p>
-                    <hr style="border: 1px solid #000; margin-top: 15px;">
-                    <h3 style="margin-top: 15px; font-size: 18px;">Relatório de Apontamentos</h3>
-                </div>
+    <!-- Cabeçalho para Impressão PDF -->
+    <div id="pdf-header" style="display:none; text-align:center; margin-bottom: 30px; color: #000; padding: 20px; font-family: Arial, sans-serif;">
+        <h2 style="margin: 0; font-size: 20px;">Colégio Cívico Militar Anchieta</h2>
+        <p style="margin: 5px 0; font-size: 14px;">Cruzeiro do Oeste - PR</p>
+        <p style="margin: 5px 0; font-size: 14px;">Direção e Secretaria Escolar</p>
+        <hr style="border: 1px solid #000; margin-top: 15px;">
+        <h3 style="margin-top: 15px; font-size: 18px;">Relatório de Apontamentos</h3>
+    </div>
 
-                <div class="dash-container" id="welcome-dashboard-mural" style="overflow-y: auto;">
-                    <div class="dash-cards-grid">
-                        <div class="dash-card total" style="cursor: pointer;" onclick="abrirModalRelatorio('geral')">
-                            <div class="dash-card-icon"><i class="fa-solid fa-chart-pie"></i></div>
-                            <div class="dash-card-info">
-                                <span class="dash-card-title">Total Registros</span>
-                                <span class="dash-card-value" id="dash-val-total">0</span>
-                            </div>
-                        </div>
-                        <div class="dash-card meivs" style="cursor: pointer;" onclick="abrirModalRelatorio('meivs')">
-                            <div class="dash-card-icon"><i class="fa-solid fa-shield-halved"></i></div>
-                            <div class="dash-card-info">
-                                <span class="dash-card-title">MEIV'S</span>
-                                <span class="dash-card-value" id="dash-val-meivs">0</span>
-                            </div>
-                        </div>
-                        <div class="dash-card pedagogico" style="cursor: pointer;" onclick="abrirModalRelatorio('pedagogico')">
-                            <div class="dash-card-icon"><i class="fa-solid fa-book-open"></i></div>
-                            <div class="dash-card-info">
-                                <span class="dash-card-title">Pedagógico</span>
-                                <span class="dash-card-value" id="dash-val-pedagogico">0</span>
-                            </div>
-                        </div>
-                        <div class="dash-card adm" style="cursor: pointer;" onclick="abrirModalRelatorio('adm')">
-                            <div class="dash-card-icon"><i class="fa-solid fa-folder-open"></i></div>
-                            <div class="dash-card-info">
-                                <span class="dash-card-title">ADM</span>
-                                <span class="dash-card-value" id="dash-val-adm">0</span>
-                            </div>
-                        </div>
-                        <div class="dash-card professores" style="cursor: pointer;" onclick="abrirModalRelatorio('direcao')">
-                            <div class="dash-card-icon"><i class="fa-solid fa-chalkboard-user"></i></div>
-                            <div class="dash-card-info">
-                                <span class="dash-card-title">Professores</span>
-                                <span class="dash-card-value" id="dash-val-professores">0</span>
-                            </div>
-                        </div>
-                    </div>
+    <!-- ✅ WRAPPER DO SELETOR FIXO (FORA DO MURAL PARA NUNCA SER ESCONDIDO) -->
+    <div class="aluno-selector-wrapper" style="margin-bottom: 15px; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+        <div class="aluno-selector" id="aluno-selector-container" style="display: flex; justify-content: space-between; align-items: center; gap: 15px; flex-wrap: wrap; width: 100%;">
+            
+            <!-- Seleção do Aluno -->
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <label style="font-weight: bold; color: #0f172a;"><i class="fa-solid fa-user-graduate"></i> Aluno:</label>
+                <select id="select-alunos" onchange="filtrarRegistrosPorAluno()" style="padding: 8px 12px; border: 1px solid #94a3b8; border-radius: 6px; font-size: 14px; width: 220px; outline: none;">
+                    <option value="">Selecione uma turma...</option>
+                </select>
+            </div>
+
+            <!-- Grupo de Botões de Ação -->
+            <div style="display: flex; gap: 10px;">
+                <!-- Botão de Ficha Individual -->
+                <button id="btn-gerar-pdf-oficial" onclick="gerarFichaIndividualConselho()" style="background-color: #2563eb; color: white; padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2); display: none; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-file-pdf"></i> Imprimir Ficha Individual
+                </button>
+
+                <!-- Botão de Relatório Pré-Conselho -->
+                <button id="btn-gerar-pdf-pre-conselho" onclick="abrirModalTurmasPreConselho()" style="display: none; background-color: #8b5cf6; color: white; padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; box-shadow: 0 2px 4px rgba(139, 92, 246, 0.2); align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-users-gear"></i> Relatório Pré-Conselho
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- MURAL DA DASHBOARD (ESTE CONTAINER É OCULTADO AO SELECIONAR UM ALUNO) -->
+    <div class="dash-container" id="welcome-dashboard-mural" style="overflow-y: auto;">
+        <div class="dash-cards-grid">
+            <div class="dash-card total" style="cursor: pointer;" onclick="abrirModalRelatorio('geral')">
+                <div class="dash-card-icon"><i class="fa-solid fa-chart-pie"></i></div>
+                <div class="dash-card-info">
+                    <span class="dash-card-title">Total Registros</span>
+                    <span class="dash-card-value" id="dash-val-total">0</span>
+                </div>
+            </div>
+            <div class="dash-card meivs" style="cursor: pointer;" onclick="abrirModalRelatorio('meivs')">
+                <div class="dash-card-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                <div class="dash-card-info">
+                    <span class="dash-card-title">MEIV'S</span>
+                    <span class="dash-card-value" id="dash-val-meivs">0</span>
+                </div>
+            </div>
+            <div class="dash-card pedagogico" style="cursor: pointer;" onclick="abrirModalRelatorio('pedagogico')">
+                <div class="dash-card-icon"><i class="fa-solid fa-book-open"></i></div>
+                <div class="dash-card-info">
+                    <span class="dash-card-title">Pedagógico</span>
+                    <span class="dash-card-value" id="dash-val-pedagogico">0</span>
+                </div>
+            </div>
+            <div class="dash-card adm" style="cursor: pointer;" onclick="abrirModalRelatorio('adm')">
+                <div class="dash-card-icon"><i class="fa-solid fa-folder-open"></i></div>
+                <div class="dash-card-info">
+                    <span class="dash-card-title">ADM</span>
+                    <span class="dash-card-value" id="dash-val-adm">0</span>
+                </div>
+            </div>
+            <div class="dash-card professores" style="cursor: pointer;" onclick="abrirModalRelatorio('direcao')">
+                <div class="dash-card-icon"><i class="fa-solid fa-chalkboard-user"></i></div>
+                <div class="dash-card-info">
+                    <span class="dash-card-title">Professores</span>
+                    <span class="dash-card-value" id="dash-val-professores">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <div class="dash-lower-grid">
     <!-- Wrapper do seletor de alunos -->
