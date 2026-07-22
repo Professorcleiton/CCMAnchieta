@@ -100,8 +100,8 @@
 <!-- ========================================== -->
 <div id="aba-apontamentos" style="display: block; width: 100%;">
     
-    <!-- Barra de Resumo e Gráficos do Aluno -->
-    <div class="summary-dashboard-bar" id="student-mini-dash">
+    <!-- 1. Barra de Resumo e Gráficos do Aluno (Aparece ao selecionar um aluno) -->
+    <div class="summary-dashboard-bar" id="student-mini-dash" style="display: none;">
         <div class="metric-mini-card"><i class="fa-solid fa-chart-line"></i> Apontamentos: <span class="count-number" id="dash-total-count">0</span></div>
         <div class="mini-chart-bar-container">
             <span class="mini-label-chart">MEIVS</span><div class="visual-bar-fill" id="bar-meivs" style="background-color:#0284c7;"></div>
@@ -114,7 +114,7 @@
         </div>
     </div>
 
-    <!-- Cabeçalho para Impressão PDF -->
+    <!-- 2. Cabeçalho para Impressão PDF -->
     <div id="pdf-header" style="display:none; text-align:center; margin-bottom: 30px; color: #000; padding: 20px; font-family: Arial, sans-serif;">
         <h2 style="margin: 0; font-size: 20px;">Colégio Cívico Militar Anchieta</h2>
         <p style="margin: 5px 0; font-size: 14px;">Cruzeiro do Oeste - PR</p>
@@ -123,11 +123,11 @@
         <h3 style="margin-top: 15px; font-size: 18px;">Relatório de Apontamentos</h3>
     </div>
 
-    <!-- ✅ WRAPPER DO SELETOR FIXO (FORA DO MURAL PARA NUNCA SER ESCONDIDO) -->
+    <!-- 3. SELETOR ÚNICO E FIXO NO TOPO -->
     <div class="aluno-selector-wrapper" style="margin-bottom: 15px; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
         <div class="aluno-selector" id="aluno-selector-container" style="display: flex; justify-content: space-between; align-items: center; gap: 15px; flex-wrap: wrap; width: 100%;">
             
-            <!-- Seleção do Aluno -->
+            <!-- Campo de seleção do aluno -->
             <div style="display: flex; align-items: center; gap: 8px;">
                 <label style="font-weight: bold; color: #0f172a;"><i class="fa-solid fa-user-graduate"></i> Aluno:</label>
                 <select id="select-alunos" onchange="filtrarRegistrosPorAluno()" style="padding: 8px 12px; border: 1px solid #94a3b8; border-radius: 6px; font-size: 14px; width: 220px; outline: none;">
@@ -135,14 +135,12 @@
                 </select>
             </div>
 
-            <!-- Grupo de Botões de Ação -->
+            <!-- Botões de Ação -->
             <div style="display: flex; gap: 10px;">
-                <!-- Botão de Ficha Individual -->
-                <button id="btn-gerar-pdf-oficial" onclick="gerarFichaIndividualConselho()" style="background-color: #2563eb; color: white; padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2); display: none; align-items: center; gap: 8px;">
+                <button id="btn-gerar-pdf-oficial" onclick="gerarFichaIndividualConselho()" style="display: none; background-color: #2563eb; color: white; padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2); align-items: center; gap: 8px;">
                     <i class="fa-solid fa-file-pdf"></i> Imprimir Ficha Individual
                 </button>
 
-                <!-- Botão de Relatório Pré-Conselho -->
                 <button id="btn-gerar-pdf-pre-conselho" onclick="abrirModalTurmasPreConselho()" style="display: none; background-color: #8b5cf6; color: white; padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; box-shadow: 0 2px 4px rgba(139, 92, 246, 0.2); align-items: center; gap: 8px;">
                     <i class="fa-solid fa-users-gear"></i> Relatório Pré-Conselho
                 </button>
@@ -151,7 +149,7 @@
         </div>
     </div>
 
-    <!-- MURAL DA DASHBOARD (ESTE CONTAINER É OCULTADO AO SELECIONAR UM ALUNO) -->
+    <!-- 4. MURAL GERAL (Visível apenas quando NENHUM aluno estiver selecionado) -->
     <div class="dash-container" id="welcome-dashboard-mural" style="overflow-y: auto;">
         <div class="dash-cards-grid">
             <div class="dash-card total" style="cursor: pointer;" onclick="abrirModalRelatorio('geral')">
@@ -191,6 +189,7 @@
             </div>
         </div>
     </div>
+
 </div>
 
 <div class="dash-lower-grid">
