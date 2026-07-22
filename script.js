@@ -561,7 +561,7 @@ function filtrarRegistrosPorAluno() {
     // 2. Exibição segura dos elementos da tela
     if (mural) mural.style.display = 'none';
     if (mini) mini.style.display = 'flex';
-    if (grid) grid.style.display = 'block';
+    if (grid) grid.style.display = 'grid';
     if (pdf) pdf.style.display = 'inline-flex'; // <--- EXIBE O BOTÃO
     if (tabs) tabs.style.display = 'flex'; 
 
