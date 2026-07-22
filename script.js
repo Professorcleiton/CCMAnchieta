@@ -552,7 +552,7 @@ function filtrarRegistrosPorAluno() {
     if (valorInvalido) {
         if (mural) mural.style.display = 'flex';
         if (mini) mini.style.display = 'none';
-        if (grid) grid.style.display = 'none'; 
+        if (grid) grid.style.display = ''; 
         if (pdf) pdf.style.display = 'none';
         if (tabs) tabs.style.display = 'none';
         return;
