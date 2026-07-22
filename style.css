@@ -1678,3 +1678,11 @@ select#select-alunos {
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.02);
 }
+#app-interface {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+.main-content {
+    flex: 1;
+}
