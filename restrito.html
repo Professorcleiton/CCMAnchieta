@@ -212,6 +212,11 @@
                         <div class="dash-panel" style="display: flex; flex-direction: column; gap: 15px; max-height: calc(100vh - 220px); overflow-y: auto; padding-right: 8px;">
                             <div class="dash-panel-title"><i class="fa-solid fa-bolt"></i> Ações Rápidas</div>
 
+                            <!-- BOTÃO - AGENDA DO LABORATÓRIO -->
+                            <button class="btn-salvar" style="background-color: #0f172a; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(15, 23, 42, 0.2); margin-bottom: 5px;" onclick="abrirAgendaLab()">
+                                <i class="fa-solid fa-desktop" style="font-size: 18px; color: #eab308;"></i> Agenda do Laboratório
+                            </button>
+                            
                             <button id="btn-aba-secretaria" class="btn-salvar" onclick="mostrarTab('documentos')" style="display: none; background-color: #64748b; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(100, 116, 139, 0.2); margin-bottom: 5px;">
                                 <i class="fa-solid fa-folder-open" style="font-size: 18px;"></i> Secretaria / Docs
                             </button>
@@ -651,6 +656,10 @@ function verificarBotaoComunicado() {
 }
     function abrirMeusHorarios() {
     window.open('meus-horarios.html', '_blank');
+}
+        
+function abrirAgendaLab() {
+    window.open('agenda-laboratorio.html', '_blank');
 }
     </script>
   
