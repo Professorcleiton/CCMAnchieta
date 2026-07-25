@@ -637,6 +637,65 @@
             </div>
         </div>
     </div>
+
+        <!-- ========================================== -->
+<!-- MODAL DE HORÁRIOS DO PROFESSOR -->
+<!-- ========================================== -->
+<div class="modal-overlay" id="modal-meus-horarios" onclick="fecharModalHorarios(event)">
+    <div class="modal-content" style="max-width: 1000px; height: 85vh; display: flex; flex-direction: column;">
+        <div class="modal-header" style="background-color: #6366f1;">
+            <h3><i class="fa-solid fa-clock"></i> Meus Horários</h3>
+            <button onclick="document.getElementById('modal-meus-horarios').style.display='none'" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;">&times;</button>
+        </div>
+        <div class="modal-body" id="conteudo-horarios" style="padding: 20px; overflow-y: auto; flex: 1;">
+            <div style="text-align:center;padding:40px;color:#64748b;">
+                <i class="fa-solid fa-spinner fa-spin" style="font-size:40px;display:block;margin-bottom:15px;"></i>
+                Carregando seus horários...
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL DA AGENDA DO LABORATÓRIO -->
+<!-- ========================================== -->
+<div class="modal-overlay" id="modal-agenda-lab" onclick="fecharModalLab(event)">
+    <div class="modal-content" style="max-width: 1100px; height: 85vh; display: flex; flex-direction: column;">
+        <div class="modal-header" style="background-color: #0f172a;">
+            <h3><i class="fa-solid fa-desktop"></i> Agenda do Laboratório</h3>
+            <div style="display:flex;gap:10px;">
+                <button onclick="filtrarTurnoModal('Manhã')" id="btn-modal-manha" style="background:#eab308;color:#0f172a;border:none;padding:8px 16px;border-radius:6px;font-weight:bold;cursor:pointer;">Manhã</button>
+                <button onclick="filtrarTurnoModal('Tarde')" id="btn-modal-tarde" style="background:white;color:#0f172a;border:none;padding:8px 16px;border-radius:6px;font-weight:bold;cursor:pointer;">Tarde</button>
+                <button onclick="document.getElementById('modal-agenda-lab').style.display='none'" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;">&times;</button>
+            </div>
+        </div>
+        <div class="modal-body" id="conteudo-lab" style="padding: 20px; overflow-y: auto; flex: 1;">
+            <div style="text-align:center;padding:40px;color:#64748b;">
+                <i class="fa-solid fa-spinner fa-spin" style="font-size:40px;display:block;margin-bottom:15px;"></i>
+                Carregando agenda do laboratório...
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL DA CENTRAL DE ALERTAS -->
+<!-- ========================================== -->
+<div class="modal-overlay" id="modal-alertas" onclick="fecharModalAlertas(event)">
+    <div class="modal-content" style="max-width: 1100px; height: 85vh; display: flex; flex-direction: column;">
+        <div class="modal-header" style="background-color: #991b1b;">
+            <h3><i class="fa-solid fa-triangle-exclamation"></i> Central de Alertas</h3>
+            <button onclick="document.getElementById('modal-alertas').style.display='none'" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;">&times;</button>
+        </div>
+        <div class="modal-body" id="conteudo-alertas" style="padding: 20px; overflow-y: auto; flex: 1;">
+            <div style="text-align:center;padding:40px;color:#64748b;">
+                <i class="fa-solid fa-spinner fa-spin" style="font-size:40px;display:block;margin-bottom:15px;"></i>
+                Analisando dados dos alunos...
+            </div>
+        </div>
+    </div>
+</div>
+    
           <script src="db.js"></script>
         <script src="script.js"></script>
     <script>
@@ -659,16 +718,258 @@ function verificarBotaoComunicado() {
         btn.style.display = 'flex';
     }
 }
-    function abrirMeusHorarios() {
-    window.open('meus-horarios.html', '_blank');
-}
-        
-function abrirAgendaLab() {
-    window.open('agenda-laboratorio.html', '_blank');
+// =============================================
+// FUNÇÕES PARA ABRIR MODAIS
+// =============================================
+
+// Horários do Professor
+function abrirMeusHorarios() {
+    document.getElementById('modal-meus-horarios').style.display = 'flex';
+    carregarHorariosProfessor();
 }
 
-        function abrirCentralAlertas() {
-    window.open('alertas.html', '_blank');
+async function carregarHorariosProfessor() {
+    const container = document.getElementById('conteudo-horarios');
+    try {
+        const nomeProfessor = usuarioLogado ? usuarioLogado.nome : '';
+        
+        // Busca como titular
+        let url = APPS_SCRIPT_URL + '?aba=horarios&professor=' + encodeURIComponent(nomeProfessor);
+        let response = await fetch(url);
+        let data = await response.json();
+        let horarios = data.horarios || [];
+        
+        // Busca como apoio
+        url = APPS_SCRIPT_URL + '?aba=horarios&professor_apoio=' + encodeURIComponent(nomeProfessor);
+        response = await fetch(url);
+        data = await response.json();
+        if (data.horarios) {
+            data.horarios.forEach(h => h.como_apoio = true);
+            horarios = horarios.concat(data.horarios);
+        }
+        
+        if (horarios.length === 0) {
+            container.innerHTML = '<div style="text-align:center;padding:40px;color:#94a3b8;">Nenhum horário encontrado.</div>';
+            return;
+        }
+        
+        renderizarHorariosNoModal(horarios, container);
+    } catch (e) {
+        container.innerHTML = '<div style="text-align:center;color:red;">Erro ao carregar.</div>';
+    }
+}
+
+function renderizarHorariosNoModal(horarios, container) {
+    const dias = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'];
+    let html = '';
+    
+    // Resumo
+    const turmas = [...new Set(horarios.map(h => h.turma))];
+    html += '<div style="display:flex;gap:15px;margin-bottom:20px;flex-wrap:wrap;">';
+    html += '<div style="background:#f8fafc;padding:15px;border-radius:8px;text-align:center;min-width:120px;"><strong style="font-size:24px;">' + horarios.length + '</strong><br><small>Aulas/Semana</small></div>';
+    html += '<div style="background:#f8fafc;padding:15px;border-radius:8px;text-align:center;min-width:120px;"><strong style="font-size:24px;">' + turmas.length + '</strong><br><small>Turmas</small></div>';
+    html += '</div>';
+    
+    dias.forEach(dia => {
+        const aulas = horarios.filter(h => h.dia === dia);
+        if (aulas.length === 0) return;
+        
+        html += '<div style="background:white;border-radius:8px;margin-bottom:10px;overflow:hidden;border:1px solid #e2e8f0;">';
+        html += '<div style="padding:10px 15px;font-weight:bold;color:white;background:#6366f1;">' + dia.toUpperCase() + '-FEIRA</div>';
+        html += '<table style="width:100%;border-collapse:collapse;font-size:13px;">';
+        html += '<thead><tr style="background:#f8fafc;"><th style="padding:8px;">Aula</th><th style="padding:8px;">Horário</th><th style="padding:8px;">Turma</th><th style="padding:8px;">Disciplina</th><th style="padding:8px;">Local</th></tr></thead><tbody>';
+        
+        aulas.forEach(a => {
+            const isApoio = a.como_apoio ? ' <span style="background:#fef3c7;color:#92400e;padding:2px 6px;border-radius:10px;font-size:10px;">Apoio</span>' : '';
+            const isLab = a.local && a.local.toLowerCase().includes('lab') ? ' 🖥️' : '';
+            html += '<tr><td style="padding:8px;">' + a.aula + '</td><td style="padding:8px;">' + a.horario + '</td><td style="padding:8px;">' + a.turma + '</td><td style="padding:8px;">' + (a.disciplina || '—') + isApoio + isLab + '</td><td style="padding:8px;">' + (a.local || '—') + '</td></tr>';
+            if (a.aula === '3ª') {
+                const intervalo = a.turno === 'Manhã' ? '09:30 - 09:40' : '15:30 - 15:40';
+                html += '<tr style="background:#fef3c7;"><td colspan="5" style="text-align:center;padding:8px;font-weight:bold;">☕ INTERVALO — ' + intervalo + '</td></tr>';
+            }
+        });
+        
+        html += '</tbody></table></div>';
+    });
+    
+    container.innerHTML = html;
+}
+
+// Agenda do Laboratório
+function abrirAgendaLab() {
+    document.getElementById('modal-agenda-lab').style.display = 'flex';
+    turnoLabModal = 'Manhã';
+    document.getElementById('btn-modal-manha').style.background = '#eab308';
+    document.getElementById('btn-modal-tarde').style.background = 'white';
+    carregarAgendaLabModal();
+}
+
+let turnoLabModal = 'Manhã';
+let todosHorariosLab = [];
+
+async function carregarAgendaLabModal() {
+    const container = document.getElementById('conteudo-lab');
+    try {
+        if (todosHorariosLab.length === 0) {
+            const resp = await fetch(APPS_SCRIPT_URL + '?aba=horarios');
+            const data = await resp.json();
+            todosHorariosLab = data.horarios || [];
+        }
+        renderizarGradeLabModal(container);
+    } catch (e) {
+        container.innerHTML = '<div style="text-align:center;color:red;">Erro ao carregar.</div>';
+    }
+}
+
+function filtrarTurnoModal(turno) {
+    turnoLabModal = turno;
+    document.getElementById('btn-modal-manha').style.background = turno === 'Manhã' ? '#eab308' : 'white';
+    document.getElementById('btn-modal-tarde').style.background = turno === 'Tarde' ? '#eab308' : 'white';
+    carregarAgendaLabModal();
+}
+
+function renderizarGradeLabModal(container) {
+    const dias = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'];
+    const aulas = ['1ª', '2ª', '3ª', '4ª', '5ª', '6ª'];
+    const horarios = turnoLabModal === 'Manhã' 
+        ? ['06:55-07:45', '07:45-08:35', '08:35-09:30', '09:40-10:30', '10:30-11:20', '11:20-12:10']
+        : ['12:55-13:45', '13:45-14:35', '14:35-15:30', '15:40-16:30', '16:30-17:20', '17:20-18:10'];
+    
+    const horariosTurno = todosHorariosLab.filter(h => h.turno === turnoLabModal);
+    
+    let html = '<div style="display:flex;gap:10px;margin-bottom:15px;">';
+    html += '<span style="background:#dcfce7;padding:5px 10px;border-radius:5px;font-size:12px;">🟢 Livre</span>';
+    html += '<span style="background:#fef3c7;padding:5px 10px;border-radius:5px;font-size:12px;">🟡 Ocupado</span>';
+    html += '<span style="background:#dbeafe;padding:5px 10px;border-radius:5px;font-size:12px;">🔵 Lab. Info</span>';
+    html += '</div>';
+    
+    html += '<table style="width:100%;border-collapse:collapse;font-size:12px;background:white;border-radius:8px;overflow:hidden;">';
+    html += '<thead><tr style="background:#0f172a;color:#eab308;"><th style="padding:10px;">Horário</th>';
+    dias.forEach(d => html += '<th style="padding:10px;">' + d + '</th>');
+    html += '</tr></thead><tbody>';
+    
+    aulas.forEach((aula, i) => {
+        html += '<tr>';
+        html += '<td style="padding:8px;background:#f8fafc;font-weight:bold;text-align:center;">' + aula + '<br><small>' + horarios[i] + '</small></td>';
+        
+        dias.forEach(dia => {
+            const ocupadas = horariosTurno.filter(h => h.dia === dia && h.aula === aula);
+            if (ocupadas.length === 0) {
+                html += '<td style="text-align:center;background:#dcfce7;color:#166534;font-size:11px;">Livre</td>';
+            } else {
+                const lab = ocupadas.find(h => h.local && h.local.toLowerCase().includes('lab'));
+                if (lab) {
+                    html += '<td style="background:#dbeafe;font-size:11px;"><strong>' + lab.turma + '</strong><br>' + (lab.disciplina || '') + '<br><small>' + lab.professor + '</small></td>';
+                } else {
+                    html += '<td style="background:#fef3c7;font-size:11px;">';
+                    ocupadas.forEach(o => {
+                        html += '<strong>' + o.turma + '</strong> ' + (o.disciplina || '') + '<br>';
+                    });
+                    html += '</td>';
+                }
+            }
+        });
+        
+        html += '</tr>';
+        if (aula === '3ª') {
+            const intervalo = turnoLabModal === 'Manhã' ? '09:30-09:40' : '15:30-15:40';
+            html += '<tr style="background:#fef3c7;"><td colspan="6" style="text-align:center;font-weight:bold;padding:8px;">☕ INTERVALO — ' + intervalo + '</td></tr>';
+        }
+    });
+    
+    html += '</tbody></table>';
+    container.innerHTML = html;
+}
+
+// Central de Alertas
+function abrirCentralAlertas() {
+    document.getElementById('modal-alertas').style.display = 'flex';
+    carregarAlertasModal();
+}
+
+async function carregarAlertasModal() {
+    const container = document.getElementById('conteudo-alertas');
+    try {
+        const resp = await fetch(APPS_SCRIPT_URL + '?aba=todos_os_dados');
+        const data = await resp.json();
+        
+        // Análise simplificada
+        const hoje = new Date();
+        const limite = new Date(hoje); limite.setDate(limite.getDate() - 30);
+        
+        const mapa = {};
+        function reg(nome) {
+            if (!mapa[nome]) mapa[nome] = { nome, atas: 0, fatosNeg: 0, docsPend: 0, apon: 0 };
+        }
+        
+        (data.atas || []).forEach(a => { const d = parseDataModal(a.data); if (d && d >= limite) { reg(a.aluno); mapa[a.aluno].atas++; } });
+        (data.fatos_seed || []).forEach(f => { const d = parseDataModal(f.data); if (d && d >= limite) { reg(f.aluno); if (f.tipo && f.tipo.toLowerCase().includes('negativo')) mapa[f.aluno].fatosNeg++; } });
+        (data.documentos || []).forEach(d => { if (d.status && d.status.toLowerCase() === 'pendente') { reg(d.aluno); mapa[d.aluno].docsPend++; } });
+        (data.apontamentos || []).forEach(a => { const d = parseDataModal(a.dataAtual); if (d && d >= limite) { reg(a.aluno); mapa[a.aluno].apon++; } });
+        
+        const alertas = [];
+        Object.values(mapa).forEach(a => {
+            let nivel = 'ok', motivos = [];
+            if (a.atas >= 3) { nivel = 'critico'; motivos.push(a.atas + ' atas'); }
+            if (a.fatosNeg >= 3) { nivel = 'critico'; motivos.push(a.fatosNeg + ' comunicados negativos'); }
+            if (a.docsPend >= 2) { if (nivel === 'ok') nivel = 'atencao'; motivos.push(a.docsPend + ' docs pendentes'); }
+            if (a.apon >= 5) { if (nivel === 'ok') nivel = 'atencao'; motivos.push(a.apon + ' apontamentos'); }
+            if (nivel !== 'ok') alertas.push({ ...a, nivel, motivos });
+        });
+        
+        alertas.sort((a, b) => a.nivel === 'critico' && b.nivel !== 'critico' ? -1 : 1);
+        
+        if (alertas.length === 0) {
+            container.innerHTML = '<div style="text-align:center;padding:40px;color:#22c55e;"><i class="fa-solid fa-circle-check" style="font-size:48px;"></i><p>Nenhum aluno em alerta.</p></div>';
+            return;
+        }
+        
+        let html = '';
+        alertas.forEach(a => {
+            const cor = a.nivel === 'critico' ? '#dc2626' : '#f59e0b';
+            html += '<div style="background:white;border-left:5px solid ' + cor + ';padding:15px;margin-bottom:10px;border-radius:8px;">';
+            html += '<strong>' + a.nome + '</strong> — <span style="background:' + cor + ';color:white;padding:3px 10px;border-radius:12px;font-size:12px;">' + a.nivel.toUpperCase() + '</span>';
+            html += '<div style="display:flex;gap:15px;margin-top:10px;flex-wrap:wrap;">';
+            html += '<span>📁 Atas: ' + a.atas + '</span>';
+            html += '<span>⚠️ Negativos: ' + a.fatosNeg + '</span>';
+            html += '<span>📄 Docs Pend: ' + a.docsPend + '</span>';
+            html += '<span>📝 Apontamentos: ' + a.apon + '</span>';
+            html += '</div>';
+            html += '<div style="font-size:12px;color:#64748b;margin-top:5px;">' + a.motivos.join(', ') + '</div>';
+            html += '</div>';
+        });
+        
+        container.innerHTML = html;
+    } catch (e) {
+        container.innerHTML = '<div style="text-align:center;color:red;">Erro ao carregar.</div>';
+    }
+}
+
+function parseDataModal(str) {
+    if (!str) return null;
+    try {
+        const partes = str.toString().trim().split(' ')[0].split('/');
+        if (partes.length === 3) return new Date(parseInt(partes[2]), parseInt(partes[1]) - 1, parseInt(partes[0]));
+        const d = new Date(str);
+        return isNaN(d.getTime()) ? null : d;
+    } catch (e) { return null; }
+}
+
+// Funções para fechar modais
+function fecharModalHorarios(e) {
+    if (e.target.id === 'modal-meus-horarios') {
+        document.getElementById('modal-meus-horarios').style.display = 'none';
+    }
+}
+function fecharModalLab(e) {
+    if (e.target.id === 'modal-agenda-lab') {
+        document.getElementById('modal-agenda-lab').style.display = 'none';
+    }
+}
+function fecharModalAlertas(e) {
+    if (e.target.id === 'modal-alertas') {
+        document.getElementById('modal-alertas').style.display = 'none';
+    }
 }
     </script>
   
