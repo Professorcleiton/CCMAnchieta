@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Central de Alertas - SIGA Anchieta</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f1f5f9;
+            min-height: 100vh;
+            color: #1e293b;
+        }
+        
+        .top-bar {
+            background: #991b1b;
+            color: white;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        .top-bar h1 { font-size: 20px; display: flex; align-items: center; gap: 10px; }
+        .top-bar h1 i { color: #fca5a5; animation: pulse 2s infinite; }
+        .btn-voltar {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            padding: 10px 18px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .btn-voltar:hover { background: rgba(255,255,255,0.25); }
+        
+        .container { max-width: 1100px; margin: 20px auto; padding: 0 15px; }
+        
+        .resumo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .resumo-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border-left: 5px solid #cbd5e1;
+        }
+        .resumo-card.critico { border-left-color: #dc2626; }
+        .resumo-card.atencao { border-left-color: #f59e0b; }
+        .resumo-card.normal { border-left-color: #22c55e; }
+        .resumo-card .numero { font-size: 36px; font-weight: 700; }
+        .resumo-card.critico .numero { color: #dc2626; }
+        .resumo-card.atencao .numero { color: #f59e0b; }
+        .resumo-card.normal .numero { color: #22c55e; }
+        .resumo-card .label { font-size: 13px; color: #64748b; margin-top: 5px; }
+        
+        .alerta-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border-left: 5px solid #dc2626;
+        }
+        .alerta-card.atencao { border-left-color: #f59e0b; }
+        .alerta-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .alerta-header .nome-aluno {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        .alerta-header .turma-badge {
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .alerta-header .nivel-badge {
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+        .nivel-critico { background: #fee2e2; color: #dc2626; }
+        .nivel-atencao { background: #fef3c7; color: #92400e; }
+        
+        .indicadores {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 10px;
+        }
+        .indicador {
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+        }
+        .indicador.alerta { background: #fee2e2; }
+        .indicador .valor {
+            font-weight: 700;
+            font-size: 16px;
+        }
+        .indicador.alerta .valor { color: #dc2626; }
+        
+        .msg-vazia {
+            text-align: center;
+            padding: 50px;
+            color: #22c55e;
+            font-size: 18px;
+            background: white;
+            border-radius: 12px;
+        }
+        .msg-vazia i { font-size: 48px; display: block; margin-bottom: 15px; }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        @media (max-width: 600px) {
+            .top-bar h1 { font-size: 16px; }
+            .indicadores { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <h1><i class="fa-solid fa-triangle-exclamation"></i> Central de Alertas</h1>
+        <a href="restrito.html" class="btn-voltar"><i class="fa-solid fa-arrow-left"></i> Voltar ao SIGA</a>
+    </div>
+
+    <div class="container">
+        <div class="resumo-grid" id="resumo" style="display:none;">
+            <div class="resumo-card critico">
+                <div class="numero" id="total-criticos">0</div>
+                <div class="label">🔴 Alunos Críticos</div>
+            </div>
+            <div class="resumo-card atencao">
+                <div class="numero" id="total-atencao">0</div>
+                <div class="label">🟡 Em Atenção</div>
+            </div>
+            <div class="resumo-card normal">
+                <div class="numero" id="total-ok">0</div>
+                <div class="label">🟢 Sem Alertas</div>
+            </div>
+        </div>
+
+        <div id="area-alertas">
+            <div style="text-align:center;padding:50px;color:#64748b;">
+                <i class="fa-solid fa-spinner fa-spin" style="font-size:40px;display:block;margin-bottom:15px;"></i>
+                Analisando dados dos alunos...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
+        const DIAS_ANALISE = 30; // Últimos 30 dias
+
+        window.addEventListener('DOMContentLoaded', function() {
+            carregarDados();
+        });
+
+        async function carregarDados() {
+            try {
+                const url = APPS_SCRIPT_URL + '?aba=todos_os_dados';
+                const response = await fetch(url);
+                const data = await response.json();
+
+                const alertas = analisarAlertas(data);
+                renderizarAlertas(alertas);
+            } catch (error) {
+                console.error('Erro:', error);
+                document.getElementById('area-alertas').innerHTML = 
+                    '<div class="msg-vazia" style="color:#ef4444;">Erro ao carregar dados.</div>';
+            }
+        }
+
+        function analisarAlertas(data) {
+            const hoje = new Date();
+            const dataLimite = new Date(hoje);
+            dataLimite.setDate(dataLimite.getDate() - DIAS_ANALISE);
+
+            // Mapeamento aluno -> contadores
+            const mapaAlunos = {};
+
+            function registrarAluno(nome, turma) {
+                if (!mapaAlunos[nome]) {
+                    mapaAlunos[nome] = {
+                        nome: nome,
+                        turma: turma || 'Sem turma',
+                        atas: 0,
+                        fatosNegativos: 0,
+                        documentosPendentes: 0,
+                        apontamentos: 0,
+                        totalFatos: 0
+                    };
+                }
+            }
+
+            // Conta atas disciplinares
+            if (data.atas) {
+                data.atas.forEach(ata => {
+                    const dataAta = parseData(ata.data);
+                    if (dataAta && dataAta >= dataLimite) {
+                        registrarAluno(ata.aluno);
+                        mapaAlunos[ata.aluno].atas++;
+                    }
+                });
+            }
+
+            // Conta fatos negativos
+            if (data.fatos_seed) {
+                data.fatos_seed.forEach(fato => {
+                    const dataFato = parseData(fato.data);
+                    if (dataFato && dataFato >= dataLimite) {
+                        registrarAluno(fato.aluno);
+                        mapaAlunos[fato.aluno].totalFatos++;
+                        if (fato.tipo && fato.tipo.toLowerCase().includes('negativo')) {
+                            mapaAlunos[fato.aluno].fatosNegativos++;
+                        }
+                    }
+                });
+            }
+
+            // Conta documentos pendentes
+            if (data.documentos) {
+                data.documentos.forEach(doc => {
+                    if (doc.status && doc.status.toLowerCase() === 'pendente') {
+                        registrarAluno(doc.aluno, doc.turma);
+                        mapaAlunos[doc.aluno].documentosPendentes++;
+                    }
+                });
+            }
+
+            // Conta apontamentos
+            if (data.apontamentos) {
+                data.apontamentos.forEach(ap => {
+                    const dataAp = parseData(ap.dataAtual);
+                    if (dataAp && dataAp >= dataLimite) {
+                        registrarAluno(ap.aluno);
+                        mapaAlunos[ap.aluno].apontamentos++;
+                    }
+                });
+            }
+
+            // Classifica os alunos
+            const alertas = [];
+            Object.values(mapaAlunos).forEach(aluno => {
+                let nivel = 'ok';
+                const motivos = [];
+
+                if (aluno.atas >= 3) {
+                    nivel = 'critico';
+                    motivos.push(aluno.atas + ' atas disciplinares');
+                }
+                if (aluno.fatosNegativos >= 3) {
+                    nivel = 'critico';
+                    motivos.push(aluno.fatosNegativos + ' comunicados negativos');
+                }
+                if (aluno.documentosPendentes >= 2) {
+                    if (nivel === 'ok') nivel = 'atencao';
+                    motivos.push(aluno.documentosPendentes + ' documentos pendentes');
+                }
+                if (aluno.apontamentos >= 5) {
+                    if (nivel === 'ok') nivel = 'atencao';
+                    motivos.push(aluno.apontamentos + ' apontamentos');
+                }
+
+                if (nivel !== 'ok') {
+                    alertas.push({
+                        ...aluno,
+                        nivel: nivel,
+                        motivos: motivos
+                    });
+                }
+            });
+
+            // Ordena: críticos primeiro, depois atenção
+            alertas.sort((a, b) => {
+                if (a.nivel === 'critico' && b.nivel !== 'critico') return -1;
+                if (a.nivel !== 'critico' && b.nivel === 'critico') return 1;
+                return b.apontamentos - a.apontamentos;
+            });
+
+            return alertas;
+        }
+
+        function parseData(dataStr) {
+            if (!dataStr) return null;
+            try {
+                // Formatos: "dd/mm/yyyy", "dd/mm/yyyy hh:mm", timestamp
+                const partes = dataStr.toString().trim().split(' ')[0].split('/');
+                if (partes.length === 3) {
+                    return new Date(parseInt(partes[2]), parseInt(partes[1]) - 1, parseInt(partes[0]));
+                }
+                const d = new Date(dataStr);
+                return isNaN(d.getTime()) ? null : d;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function renderizarAlertas(alertas) {
+            const area = document.getElementById('area-alertas');
+            const resumo = document.getElementById('resumo');
+
+            const criticos = alertas.filter(a => a.nivel === 'critico').length;
+            const atencao = alertas.filter(a => a.nivel === 'atencao').length;
+            const ok = Object.keys(alertas).length === 0 ? 1 : 0; // Estimativa
+
+            document.getElementById('total-criticos').textContent = criticos;
+            document.getElementById('total-atencao').textContent = atencao;
+            document.getElementById('total-ok').textContent = '—';
+            resumo.style.display = 'grid';
+
+            if (alertas.length === 0) {
+                area.innerHTML = '<div class="msg-vazia"><i class="fa-solid fa-circle-check"></i><p>Nenhum aluno em situação de alerta no momento.</p></div>';
+                return;
+            }
+
+            let html = '';
+            alertas.forEach(aluno => {
+                const classeNivel = aluno.nivel === 'critico' ? 'nivel-critico' : 'nivel-atencao';
+                const labelNivel = aluno.nivel === 'critico' ? '🔴 CRÍTICO' : '🟡 ATENÇÃO';
+                const classeCard = aluno.nivel === 'critico' ? '' : 'atencao';
+
+                html += '<div class="alerta-card ' + classeCard + '">';
+                html += '<div class="alerta-header">';
+                html += '<div>';
+                html += '<div class="nome-aluno">' + aluno.nome + '</div>';
+                html += '<span class="turma-badge">🎒 ' + aluno.turma + '</span>';
+                html += '</div>';
+                html += '<span class="nivel-badge ' + classeNivel + '">' + labelNivel + '</span>';
+                html += '</div>';
+
+                html += '<div class="indicadores">';
+                html += '<div class="indicador' + (aluno.atas >= 3 ? ' alerta' : '') + '">';
+                html += '<span>📁 Atas Disciplinares</span>';
+                html += '<span class="valor">' + aluno.atas + '</span>';
+                html += '</div>';
+                html += '<div class="indicador' + (aluno.fatosNegativos >= 3 ? ' alerta' : '') + '">';
+                html += '<span>⚠️ Comunicados Negativos</span>';
+                html += '<span class="valor">' + aluno.fatosNegativos + '</span>';
+                html += '</div>';
+                html += '<div class="indicador' + (aluno.documentosPendentes >= 2 ? ' alerta' : '') + '">';
+                html += '<span>📄 Documentos Pendentes</span>';
+                html += '<span class="valor">' + aluno.documentosPendentes + '</span>';
+                html += '</div>';
+                html += '<div class="indicador' + (aluno.apontamentos >= 5 ? ' alerta' : '') + '">';
+                html += '<span>📝 Apontamentos (30 dias)</span>';
+                html += '<span class="valor">' + aluno.apontamentos + '</span>';
+                html += '</div>';
+                html += '</div>';
+
+                html += '<div style="margin-top:10px;font-size:13px;color:#64748b;">';
+                html += '<strong>Motivo:</strong> ' + aluno.motivos.join(', ') + '.';
+                html += '</div>';
+
+                html += '</div>';
+            });
+
+            area.innerHTML = html;
+        }
+    </script>
+</body>
+</html>
