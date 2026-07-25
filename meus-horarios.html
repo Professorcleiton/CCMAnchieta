@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meus Horários - SIGA Anchieta</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f1f5f9;
+            min-height: 100vh;
+            color: #1e293b;
+        }
+        
+        /* Barra superior */
+        .top-bar {
+            background: #005088;
+            color: white;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        .top-bar h1 {
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .top-bar .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .top-bar .btn-voltar {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+        .top-bar .btn-voltar:hover {
+            background: rgba(255,255,255,0.25);
+        }
+        
+        /* Container */
+        .container {
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+        
+        /* Card de resumo */
+        .resumo-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .resumo-item {
+            flex: 1;
+            min-width: 150px;
+            text-align: center;
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+        .resumo-item .numero {
+            font-size: 32px;
+            font-weight: 700;
+            color: #005088;
+        }
+        .resumo-item .label {
+            font-size: 13px;
+            color: #64748b;
+            margin-top: 5px;
+        }
+        
+        /* Cards de dia */
+        .dia-card {
+            background: white;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .dia-header {
+            padding: 15px 20px;
+            font-weight: 700;
+            font-size: 16px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .dia-header.segunda { background: #0284c7; }
+        .dia-header.terca   { background: #0d9488; }
+        .dia-header.quarta  { background: #4f46e5; }
+        .dia-header.quinta  { background: #b91c1c; }
+        .dia-header.sexta   { background: #f59e0b; color: #1e293b; }
+        
+        /* Tabela de aulas */
+        .aulas-tabela {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .aulas-tabela th {
+            background: #f8fafc;
+            padding: 10px 12px;
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #64748b;
+            font-weight: 600;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .aulas-tabela td {
+            padding: 12px;
+            font-size: 14px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+        .aulas-tabela tr:hover {
+            background: #f8fafc;
+        }
+        
+        /* Aula atual */
+        .aula-atual {
+            background: #dbeafe !important;
+            border-left: 4px solid #2563eb;
+        }
+        .aula-atual td:first-child::before {
+            content: "⚡ ";
+            animation: pulse 1.5s infinite;
+        }
+        
+        /* Badges */
+        .badge-lab {
+            display: inline-block;
+            background: #0f172a;
+            color: #eab308;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-left: 6px;
+        }
+        .badge-apoio {
+            display: inline-block;
+            background: #fef3c7;
+            color: #92400e;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 6px;
+        }
+        
+        /* Intervalo */
+        .intervalo {
+            background: #fef3c7;
+            text-align: center;
+            font-weight: 600;
+            color: #92400e;
+            font-size: 13px;
+        }
+        
+        /* Mensagens */
+        .msg-vazia {
+            text-align: center;
+            padding: 50px;
+            color: #94a3b8;
+            font-size: 16px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .msg-vazia i {
+            font-size: 48px;
+            display: block;
+            margin-bottom: 15px;
+        }
+        
+        /* Turma em destaque */
+        .turma-tag {
+            display: inline-block;
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        @media (max-width: 600px) {
+            .aulas-tabela th, .aulas-tabela td {
+                padding: 8px;
+                font-size: 12px;
+            }
+            .top-bar h1 { font-size: 16px; }
+            .resumo-item .numero { font-size: 24px; }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Barra superior -->
+    <div class="top-bar">
+        <h1><i class="fa-solid fa-chalkboard-teacher"></i> Meus Horários</h1>
+        <div class="user-info">
+            <span id="nome-professor" style="font-weight:600;">Carregando...</span>
+            <a href="restrito.html" class="btn-voltar">
+                <i class="fa-solid fa-arrow-left"></i> Voltar ao SIGA
+            </a>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Cards de resumo -->
+        <div class="resumo-card" id="resumo" style="display:none;">
+            <div class="resumo-item">
+                <div class="numero" id="total-aulas">0</div>
+                <div class="label">Total de Aulas/Semana</div>
+            </div>
+            <div class="resumo-item">
+                <div class="numero" id="total-turmas">0</div>
+                <div class="label">Turmas Diferentes</div>
+            </div>
+            <div class="resumo-item">
+                <div class="numero" id="total-disciplinas">0</div>
+                <div class="label">Disciplinas</div>
+            </div>
+        </div>
+
+        <!-- Área dos horários -->
+        <div id="area-horarios">
+            <div class="msg-vazia">
+                <i class="fa-solid fa-spinner fa-spin"></i>
+                <p>Carregando seus horários...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
+        let usuarioLogado = null;
+        let todosHorarios = [];
+
+        // Inicialização
+        window.addEventListener('DOMContentLoaded', function() {
+            const sessao = localStorage.getItem('sgi_ccma_session');
+            if (!sessao) {
+                window.location.href = 'restrito.html';
+                return;
+            }
+            
+            usuarioLogado = JSON.parse(sessao);
+            document.getElementById('nome-professor').innerHTML = 
+                '<i class="fa-solid fa-user-check"></i> ' + usuarioLogado.nome;
+            
+            carregarMeusHorarios();
+        });
+
+        async function carregarMeusHorarios() {
+            const area = document.getElementById('area-horarios');
+            
+            try {
+                // Busca horários do professor (titular)
+                const url = APPS_SCRIPT_URL + '?aba=horarios&professor=' + encodeURIComponent(usuarioLogado.nome);
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.status !== 'success' || !data.horarios || data.horarios.length === 0) {
+                    // Tenta buscar como professor de apoio
+                    await carregarComoApoio();
+                    return;
+                }
+
+                todosHorarios = data.horarios;
+                
+                // Também busca horários como professor de apoio
+                const urlApoio = APPS_SCRIPT_URL + '?aba=horarios&professor_apoio=' + encodeURIComponent(usuarioLogado.nome);
+                const responseApoio = await fetch(urlApoio);
+                const dataApoio = await responseApoio.json();
+                
+                if (dataApoio.status === 'success' && dataApoio.horarios && dataApoio.horarios.length > 0) {
+                    // Marca os horários de apoio
+                    dataApoio.horarios.forEach(function(h) {
+                        h.como_apoio = true;
+                    });
+                    todosHorarios = todosHorarios.concat(dataApoio.horarios);
+                }
+
+                renderizarHorarios(todosHorarios);
+            } catch (error) {
+                console.error('Erro ao carregar horários:', error);
+                area.innerHTML = '<div class="msg-vazia"><i class="fa-solid fa-circle-exclamation"></i><p>Erro ao carregar os horários.</p></div>';
+            }
+        }
+
+        async function carregarComoApoio() {
+            const area = document.getElementById('area-horarios');
+            
+            try {
+                const url = APPS_SCRIPT_URL + '?aba=horarios&professor_apoio=' + encodeURIComponent(usuarioLogado.nome);
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.status === 'success' && data.horarios && data.horarios.length > 0) {
+                    data.horarios.forEach(function(h) {
+                        h.como_apoio = true;
+                    });
+                    todosHorarios = data.horarios;
+                    renderizarHorarios(todosHorarios);
+                } else {
+                    area.innerHTML = '<div class="msg-vazia"><i class="fa-solid fa-calendar-xmark"></i><p>Nenhum horário encontrado para você.</p></div>';
+                }
+            } catch (error) {
+                area.innerHTML = '<div class="msg-vazia"><i class="fa-solid fa-circle-exclamation"></i><p>Erro ao carregar os horários.</p></div>';
+            }
+        }
+
+        function renderizarHorarios(horarios) {
+            const area = document.getElementById('area-horarios');
+            const resumo = document.getElementById('resumo');
+            
+            const dias = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'];
+            const classesDia = {
+                'Segunda': 'segunda',
+                'Terça': 'terca',
+                'Quarta': 'quarta',
+                'Quinta': 'quinta',
+                'Sexta': 'sexta'
+            };
+
+            // Hora atual
+            const agora = new Date();
+            const horaAtual = agora.getHours() * 60 + agora.getMinutes();
+            const diaSemana = agora.getDay();
+            const diaAtual = diaSemana >= 1 && diaSemana <= 5 ? dias[diaSemana - 1] : null;
+
+            // Estatísticas
+            const turmasUnicas = [...new Set(horarios.map(h => h.turma))];
+            const disciplinasUnicas = [...new Set(horarios.map(h => h.disciplina).filter(Boolean))];
+            
+            document.getElementById('total-aulas').textContent = horarios.length;
+            document.getElementById('total-turmas').textContent = turmasUnicas.length;
+            document.getElementById('total-disciplinas').textContent = disciplinasUnicas.length;
+            resumo.style.display = 'flex';
+
+            let html = '';
+            let temAulas = false;
+
+            dias.forEach(function(dia) {
+                const aulasDoDia = horarios.filter(function(h) { return h.dia === dia; });
+                if (aulasDoDia.length === 0) return;
+                
+                // Ordena por horário
+                aulasDoDia.sort(function(a, b) {
+                    const getMinutos = function(horario) {
+                        if (!horario) return 0;
+                        const partes = horario.split('-')[0].trim().split(':');
+                        return parseInt(partes[0]) * 60 + parseInt(partes[1]);
+                    };
+                    return getMinutos(a.horario) - getMinutos(b.horario);
+                });
+                
+                temAulas = true;
+
+                html += '<div class="dia-card">';
+                html += '<div class="dia-header ' + classesDia[dia] + '">';
+                html += '<i class="fa-solid fa-calendar-check"></i> ' + dia.toUpperCase() + '-FEIRA';
+                html += '<span style="font-size:12px;opacity:0.9;margin-left:auto;">' + aulasDoDia.length + ' aula(s)</span>';
+                html += '</div>';
+                html += '<table class="aulas-tabela">';
+                html += '<thead><tr><th>Aula</th><th>Horário</th><th>Turma</th><th>Disciplina</th><th>Local</th></tr></thead>';
+                html += '<tbody>';
+
+                aulasDoDia.forEach(function(aula) {
+                    // Aula atual
+                    let isAulaAtual = false;
+                    if (aula.horario && dia === diaAtual) {
+                        const partes = aula.horario.split('-');
+                        if (partes.length === 2) {
+                            const [hInicio, mInicio] = partes[0].trim().split(':').map(Number);
+                            const [hFim, mFim] = partes[1].trim().split(':').map(Number);
+                            const minInicio = hInicio * 60 + mInicio;
+                            const minFim = hFim * 60 + mFim;
+                            isAulaAtual = horaAtual >= minInicio && horaAtual < minFim;
+                        }
+                    }
+                    
+                    const isLab = aula.local && aula.local.toLowerCase().includes('lab');
+                    const isTablet = aula.local && aula.local.toLowerCase().includes('tablet');
+                    const isApoio = aula.como_apoio;
+
+                    html += '<tr class="' + (isAulaAtual ? 'aula-atual' : '') + '">';
+                    html += '<td><strong>' + aula.aula + '</strong></td>';
+                    html += '<td>' + (aula.horario || '—') + '</td>';
+                    html += '<td><span class="turma-tag">' + aula.turma + '</span></td>';
+                    html += '<td><strong>' + (aula.disciplina || '—') + '</strong>';
+                    if (isApoio) html += ' <span class="badge-apoio">🤝 Apoio</span>';
+                    if (isLab) html += ' <span class="badge-lab">🖥️ LAB</span>';
+                    if (isTablet) html += ' <span class="badge-lab">📱 TAB</span>';
+                    html += '</td>';
+                    html += '<td>' + (aula.local || '—') + '</td>';
+                    html += '</tr>';
+
+                    // Intervalo após 3ª aula
+                    if (aula.aula === '3ª') {
+                        const horarioIntervalo = aula.turno === 'Manhã' ? '09:30 - 09:40' : '15:30 - 15:40';
+                        html += '<tr class="intervalo"><td colspan="5">☕ INTERVALO — ' + horarioIntervalo + '</td></tr>';
+                    }
+                });
+
+                html += '</tbody></table></div>';
+            });
+
+            if (!temAulas) {
+                html = '<div class="msg-vazia"><i class="fa-solid fa-calendar-xmark"></i><p>Nenhuma aula encontrada para você.</p></div>';
+            }
+
+            area.innerHTML = html;
+        }
+    </script>
+</body>
+</html>
