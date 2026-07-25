@@ -718,8 +718,6 @@ function verificarBotaoComunicado() {
         btn.style.display = 'flex';
     }
 }
-        // URL alternativa para horários e alunos
-const APPS_SCRIPT_HORARIOS = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
 // =============================================
 // FUNÇÕES CORRIGIDAS PARA MODAIS
 // =============================================
@@ -744,13 +742,13 @@ async function carregarHorariosProfessor() {
         let nomeProfessor = usuarioLogado.nome;
         
         // Tenta buscar os horários (ignora diferenças de maiúsculas/minúsculas)
-       let url = APPS_SCRIPT_HORARIOS + '?aba=horarios&professor=' + encodeURIComponent(nomeProfessor);
+       let url = APPS_SCRIPT_URL + '?aba=horarios&professor=' + encodeURIComponent(nomeProfessor);
         let response = await fetch(url);
         let data = await response.json();
         let horarios = (data.status === 'success' && data.horarios) ? data.horarios : [];
         
         // Busca como apoio
-   let url = APPS_SCRIPT_HORARIOS + '?aba=horarios&professor_apoio=' + encodeURIComponent(nomeProfessor);
+   let url = APPS_SCRIPT_URL + '?aba=horarios&professor_apoio=' + encodeURIComponent(nomeProfessor);
         response = await fetch(url);
         data = await response.json();
         if (data.status === 'success' && data.horarios) {
@@ -841,7 +839,7 @@ async function carregarAgendaLabModal() {
     const container = document.getElementById('conteudo-lab');
     try {
         if (todosHorariosLab.length === 0) {
-            const resp = await fetch(APPS_SCRIPT_HORARIOS + '?aba=horarios');
+            const resp = await fetch(APPS_SCRIPT_URL + '?aba=horarios');
             const data = await resp.json();
             todosHorariosLab = (data.status === 'success' && data.horarios) ? data.horarios : [];
         }
@@ -953,8 +951,8 @@ async function carregarAlertasModal() {
     try {
         // Busca os dados principais
         const [respDados, respAlunos] = await Promise.all([
-            fetch(APPS_SCRIPT_HORARIOS + '?aba=todos_os_dados'),
-            fetch(APPS_SCRIPT_HORARIOS + '?aba=alunos')
+            fetch(APPS_SCRIPT_URL + '?aba=todos_os_dados'),
+            fetch(APPS_SCRIPT_URL + '?aba=alunos')
         ]);
         
         const data = await respDados.json();
