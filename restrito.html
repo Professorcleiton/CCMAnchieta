@@ -662,13 +662,19 @@
 <div class="modal-overlay" id="modal-agenda-lab" onclick="fecharModalLab(event)">
     <div class="modal-content" style="max-width: 1100px; height: 85vh; display: flex; flex-direction: column;">
         <div class="modal-header" style="background-color: #0f172a;">
-            <h3><i class="fa-solid fa-desktop"></i> Agenda do Laboratório</h3>
-            <div style="display:flex;gap:10px;">
-                <button onclick="filtrarTurnoModal('Manhã')" id="btn-modal-manha" style="background:#eab308;color:#0f172a;border:none;padding:8px 16px;border-radius:6px;font-weight:bold;cursor:pointer;">Manhã</button>
-                <button onclick="filtrarTurnoModal('Tarde')" id="btn-modal-tarde" style="background:white;color:#0f172a;border:none;padding:8px 16px;border-radius:6px;font-weight:bold;cursor:pointer;">Tarde</button>
-                <button onclick="document.getElementById('modal-agenda-lab').style.display='none'" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;">&times;</button>
-            </div>
-        </div>
+    <h3><i class="fa-solid fa-desktop"></i> Agenda de Equipamentos</h3>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <!-- Botões de equipamento -->
+        <button onclick="filtrarEquipamentoModal('Lab. Informática')" id="btn-modal-lab" style="background:#2563eb;color:white;border:none;padding:8px 16px;border-radius:6px;font-weight:bold;cursor:pointer;">🖥️ Lab</button>
+        <button onclick="filtrarEquipamentoModal('Tablet')" id="btn-modal-tablet" style="background:white;color:#0f172a;border:none;padding:8px 16px;border-radius:6px;font-weight:bold;cursor:pointer;">📱 Tablets</button>
+        <!-- Separador -->
+        <span style="color:#64748b;margin:0 5px;">|</span>
+        <!-- Botões de turno -->
+        <button onclick="filtrarTurnoModal('Manhã')" id="btn-modal-manha" style="background:#eab308;color:#0f172a;border:none;padding:8px 16px;border-radius:6px;font-weight:bold;cursor:pointer;">Manhã</button>
+        <button onclick="filtrarTurnoModal('Tarde')" id="btn-modal-tarde" style="background:white;color:#0f172a;border:none;padding:8px 16px;border-radius:6px;font-weight:bold;cursor:pointer;">Tarde</button>
+        <button onclick="document.getElementById('modal-agenda-lab').style.display='none'" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;">&times;</button>
+    </div>
+</div>
         <div class="modal-body" id="conteudo-lab" style="padding: 20px; overflow-y: auto; flex: 1;">
             <div style="text-align:center;padding:40px;color:#64748b;">
                 <i class="fa-solid fa-spinner fa-spin" style="font-size:40px;display:block;margin-bottom:15px;"></i>
@@ -698,12 +704,11 @@
     
           <script src="db.js"></script>
         <script src="script.js"></script>
-    <script>
+<script>
 
-        // Função para abrir a página de comunicado SEED
+    // Função para abrir a página de comunicado SEED
 function abrirComunicadoSEED() {
     if (!usuarioLogado || !usuarioLogado.email) return;
-    // Codifica email, nivel e setor em base64 (token simples)
     const token = btoa(usuarioLogado.email + ':' + usuarioLogado.nivel + ':' + usuarioLogado.setor);
     window.open('imprimir-comunicado.html?token=' + encodeURIComponent(token), '_blank');
 }
@@ -713,15 +718,16 @@ function verificarBotaoComunicado() {
     const btn = document.getElementById('btn-comunicado-seed');
     if (!btn || !usuarioLogado) return;
     
-    // Mostrar apenas para MEIVS ou nível 4+
     if (usuarioLogado.setor === 'meivs' || (usuarioLogado.nivel && usuarioLogado.nivel >= 4)) {
         btn.style.display = 'flex';
     }
 }
-        // URL secundária para horários e dados de alunos
+
+// URL secundária para horários e dados de alunos
 const APPS_SCRIPT_V2 = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
+
 // =============================================
-// FUNÇÕES CORRIGIDAS PARA MODAIS
+// FUNÇÕES PARA MODAIS
 // =============================================
 
 // ========== HORÁRIOS DO PROFESSOR ==========
@@ -748,7 +754,7 @@ async function carregarHorariosProfessor() {
         let data = await response.json();
         let horarios = (data.status === 'success' && data.horarios) ? data.horarios : [];
         
-        // Busca como apoio (SEM o "let" na segunda vez)
+        // Busca como apoio
         url = APPS_SCRIPT_V2 + '?aba=horarios&professor_apoio=' + encodeURIComponent(nomeProfessor);
         response = await fetch(url);
         data = await response.json();
@@ -779,6 +785,7 @@ async function carregarHorariosProfessor() {
         container.innerHTML = '<p style="text-align:center;color:red;">Erro ao carregar horários.</p>';
     }
 }
+
 function renderizarHorariosNoModal(horarios, container) {
     const dias = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'];
     const coresDia = { 'Segunda': '#0284c7', 'Terça': '#0d9488', 'Quarta': '#4f46e5', 'Quinta': '#b91c1c', 'Sexta': '#f59e0b' };
@@ -819,21 +826,45 @@ function renderizarHorariosNoModal(horarios, container) {
     container.innerHTML = html;
 }
 
-// ========== AGENDA DO LABORATÓRIO (CORRIGIDA) ==========
+// ========== AGENDA DO LABORATÓRIO/TABLETS (CORRIGIDA) ==========
+let turnoLabModal = 'Manhã';
+let todosHorariosLab = [];
+let equipamentoModal = 'Lab. Informática';
+
 function abrirAgendaLab() {
     document.getElementById('modal-agenda-lab').style.display = 'flex';
     document.getElementById('conteudo-lab').innerHTML = 
         '<div style="text-align:center;padding:40px;"><i class="fa-solid fa-spinner fa-spin" style="font-size:40px;"></i><p>Carregando agenda...</p></div>';
     turnoLabModal = 'Manhã';
-    document.getElementById('btn-modal-manha').style.background = '#eab308';
-    document.getElementById('btn-modal-manha').style.color = '#0f172a';
-    document.getElementById('btn-modal-tarde').style.background = 'white';
-    document.getElementById('btn-modal-tarde').style.color = '#0f172a';
+    equipamentoModal = 'Lab. Informática';
+    atualizarBotoesAgenda();
     carregarAgendaLabModal();
 }
 
-let turnoLabModal = 'Manhã';
-let todosHorariosLab = [];
+function atualizarBotoesAgenda() {
+    // Botões de equipamento
+    const btnLab = document.getElementById('btn-modal-lab');
+    const btnTab = document.getElementById('btn-modal-tablet');
+    if (btnLab) {
+        btnLab.style.background = equipamentoModal === 'Lab. Informática' ? '#2563eb' : 'white';
+        btnLab.style.color = equipamentoModal === 'Lab. Informática' ? 'white' : '#0f172a';
+    }
+    if (btnTab) {
+        btnTab.style.background = equipamentoModal === 'Tablet' ? '#db2777' : 'white';
+        btnTab.style.color = equipamentoModal === 'Tablet' ? 'white' : '#0f172a';
+    }
+    // Botões de turno
+    const btnManha = document.getElementById('btn-modal-manha');
+    const btnTarde = document.getElementById('btn-modal-tarde');
+    if (btnManha) {
+        btnManha.style.background = turnoLabModal === 'Manhã' ? '#eab308' : 'white';
+        btnManha.style.color = '#0f172a';
+    }
+    if (btnTarde) {
+        btnTarde.style.background = turnoLabModal === 'Tarde' ? '#eab308' : 'white';
+        btnTarde.style.color = '#0f172a';
+    }
+}
 
 async function carregarAgendaLabModal() {
     const container = document.getElementById('conteudo-lab');
@@ -852,10 +883,15 @@ async function carregarAgendaLabModal() {
 
 function filtrarTurnoModal(turno) {
     turnoLabModal = turno;
-    document.getElementById('btn-modal-manha').style.background = turno === 'Manhã' ? '#eab308' : 'white';
-    document.getElementById('btn-modal-manha').style.color = '#0f172a';
-    document.getElementById('btn-modal-tarde').style.background = turno === 'Tarde' ? '#eab308' : 'white';
-    document.getElementById('btn-modal-tarde').style.color = '#0f172a';
+    atualizarBotoesAgenda();
+    document.getElementById('conteudo-lab').innerHTML = 
+        '<div style="text-align:center;padding:40px;"><i class="fa-solid fa-spinner fa-spin" style="font-size:40px;"></i></div>';
+    renderizarGradeLabModal(document.getElementById('conteudo-lab'));
+}
+
+function filtrarEquipamentoModal(equip) {
+    equipamentoModal = equip;
+    atualizarBotoesAgenda();
     document.getElementById('conteudo-lab').innerHTML = 
         '<div style="text-align:center;padding:40px;"><i class="fa-solid fa-spinner fa-spin" style="font-size:40px;"></i></div>';
     renderizarGradeLabModal(document.getElementById('conteudo-lab'));
@@ -870,8 +906,19 @@ function renderizarGradeLabModal(container) {
     
     const horariosTurno = todosHorariosLab.filter(h => h.turno === turnoLabModal);
     
-    // DEBUG: mostra quantos horários foram carregados
-    console.log('Turno:', turnoLabModal, '| Total horários:', todosHorariosLab.length, '| Filtrados:', horariosTurno.length);
+    // 🔧 CORREÇÃO: Filtra por equipamento E USA na renderização
+    const horariosEquip = horariosTurno.filter(h => {
+        if (!h.local) return false;
+        const localLower = h.local.toLowerCase();
+        if (equipamentoModal === 'Lab. Informática') {
+            return localLower.includes('lab') || localLower.includes('informática');
+        } else if (equipamentoModal === 'Tablet') {
+            return localLower.includes('tablet');
+        }
+        return false;
+    });
+    
+    console.log('Equipamento:', equipamentoModal, '| Turno:', turnoLabModal, '| Aulas:', horariosEquip.length);
     
     let html = '<div style="display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap;">';
     html += '<span style="background:#dcfce7;padding:5px 10px;border-radius:5px;font-size:12px;">🟢 Livre</span>';
@@ -891,14 +938,13 @@ function renderizarGradeLabModal(container) {
         html += '<td style="padding:8px;background:#f8fafc;font-weight:bold;text-align:center;font-size:11px;">' + aula + '<br><small>' + horarios[i] + '</small></td>';
         
         dias.forEach(dia => {
-            const ocupadas = horariosTurno.filter(h => h.dia === dia && h.aula === aula);
+            // 🔧 CORREÇÃO: Usa horariosEquip em vez de horariosTurno
+            const ocupadas = horariosEquip.filter(h => h.dia === dia && h.aula === aula);
             
             if (ocupadas.length === 0) {
                 html += '<td style="text-align:center;background:#dcfce7;color:#166534;font-size:11px;padding:8px;">🟢<br>Livre</td>';
             } else {
-                // Verifica se tem laboratório
                 const lab = ocupadas.find(h => h.local && (h.local.toLowerCase().includes('lab') || h.local.toLowerCase().includes('informática')));
-                // Verifica se tem tablet
                 const tablet = ocupadas.find(h => h.local && h.local.toLowerCase().includes('tablet'));
                 
                 if (lab) {
@@ -927,7 +973,6 @@ function renderizarGradeLabModal(container) {
         
         html += '</tr>';
         
-        // Intervalo após a 3ª aula
         if (aula === '3ª') {
             const intervalo = turnoLabModal === 'Manhã' ? '09:30 - 09:40' : '15:30 - 15:40';
             html += '<tr style="background:#fef3c7;"><td colspan="6" style="text-align:center;font-weight:bold;padding:8px;font-size:12px;">☕ INTERVALO — ' + intervalo + '</td></tr>';
@@ -938,7 +983,7 @@ function renderizarGradeLabModal(container) {
     container.innerHTML = html;
 }
 
-// ========== CENTRAL DE ALERTAS (CORRIGIDA COM TURMA) ==========
+// ========== CENTRAL DE ALERTAS ==========
 function abrirCentralAlertas() {
     document.getElementById('modal-alertas').style.display = 'flex';
     document.getElementById('conteudo-alertas').innerHTML = 
@@ -949,7 +994,6 @@ function abrirCentralAlertas() {
 async function carregarAlertasModal() {
     const container = document.getElementById('conteudo-alertas');
     try {
-        // Busca os dados principais
         const [respDados, respAlunos] = await Promise.all([
             fetch(APPS_SCRIPT_V2 + '?aba=todos_os_dados'),
             fetch(APPS_SCRIPT_V2 + '?aba=alunos')
@@ -958,7 +1002,6 @@ async function carregarAlertasModal() {
         const data = await respDados.json();
         const alunosList = await respAlunos.json();
         
-        // Cria mapa de nome -> turma
         const mapaTurmas = {};
         if (Array.isArray(alunosList)) {
             alunosList.forEach(a => {
@@ -975,7 +1018,6 @@ async function carregarAlertasModal() {
             return mapaTurmas[nomeNorm] || '—';
         }
         
-        // Análise
         const hoje = new Date();
         const limite = new Date(hoje); limite.setDate(limite.getDate() - 30);
         
@@ -1001,10 +1043,9 @@ async function carregarAlertasModal() {
         
         alertas.sort((a, b) => a.nivel === 'critico' && b.nivel !== 'critico' ? -1 : 1);
         
-// Resumo (apenas para log, já que o modal não tem esses elementos)
-const criticos = alertas.filter(a => a.nivel === 'critico').length;
-const atencao = alertas.filter(a => a.nivel === 'atencao').length;
-console.log('Alertas:', criticos, 'críticos,', atencao, 'atenção');
+        const criticos = alertas.filter(a => a.nivel === 'critico').length;
+        const atencao = alertas.filter(a => a.nivel === 'atencao').length;
+        console.log('Alertas:', criticos, 'críticos,', atencao, 'atenção');
         
         if (alertas.length === 0) {
             container.innerHTML = '<div style="text-align:center;padding:40px;color:#22c55e;"><i class="fa-solid fa-circle-check" style="font-size:48px;"></i><p>Nenhum aluno em situação de alerta.</p></div>';
@@ -1052,7 +1093,8 @@ function parseDataModal(str) {
 function fecharModalHorarios(e) { if (e.target.id === 'modal-meus-horarios') document.getElementById('modal-meus-horarios').style.display = 'none'; }
 function fecharModalLab(e) { if (e.target.id === 'modal-agenda-lab') document.getElementById('modal-agenda-lab').style.display = 'none'; }
 function fecharModalAlertas(e) { if (e.target.id === 'modal-alertas') document.getElementById('modal-alertas').style.display = 'none'; }
-    </script>
+
+</script>
   
 </body>
 </html>
