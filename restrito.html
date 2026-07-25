@@ -1001,11 +1001,10 @@ async function carregarAlertasModal() {
         
         alertas.sort((a, b) => a.nivel === 'critico' && b.nivel !== 'critico' ? -1 : 1);
         
-        // Resumo
-        document.getElementById('total-criticos').textContent = alertas.filter(a => a.nivel === 'critico').length;
-        document.getElementById('total-atencao').textContent = alertas.filter(a => a.nivel === 'atencao').length;
-        document.getElementById('total-ok').textContent = '—';
-        document.getElementById('resumo').style.display = 'grid';
+// Resumo (apenas para log, já que o modal não tem esses elementos)
+const criticos = alertas.filter(a => a.nivel === 'critico').length;
+const atencao = alertas.filter(a => a.nivel === 'atencao').length;
+console.log('Alertas:', criticos, 'críticos,', atencao, 'atenção');
         
         if (alertas.length === 0) {
             container.innerHTML = '<div style="text-align:center;padding:40px;color:#22c55e;"><i class="fa-solid fa-circle-check" style="font-size:48px;"></i><p>Nenhum aluno em situação de alerta.</p></div>';
