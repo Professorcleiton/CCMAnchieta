@@ -175,340 +175,234 @@
         </div>
     </div>
 
-    <script>
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
-        const DIAS_ANALISE = 30; // Últimos 30 dias
+   <script>
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
+    const DIAS_ANALISE = 30;
 
-        window.addEventListener('DOMContentLoaded', function() {
-            carregarDados();
-        });
-
-  async function carregarDados() {
-    try {
-        const url = APPS_SCRIPT_URL + '?aba=todos_os_dados';
-        const response = await fetch(url);
-        const data = await response.json();
-
-        const alertas = await analisarAlertas(data); // 🆕 adicionado await
-        renderizarAlertas(alertas);
-    } catch (error) {
-        console.error('Erro:', error);
-        document.getElementById('area-alertas').innerHTML = 
-            '<div class="msg-vazia" style="color:#ef4444;">Erro ao carregar dados.</div>';
-    }
-}
-
-       async function analisarAlertas(data) {
-    const hoje = new Date();
-    const dataLimite = new Date(hoje);
-    dataLimite.setDate(dataLimite.getDate() - DIAS_ANALISE);
-
-    // 🆕 Busca a lista de alunos com suas turmas
-    let mapaTurmas = {};
-    try {
-        const resp = await fetch(APPS_SCRIPT_URL + '?aba=alunos');
-        const alunos = await resp.json();
-        alunos.forEach(a => {
-            if (a.nome && a.turma_codigo) {
-                // Normaliza o nome para usar como chave
-                const nomeNormalizado = a.nome.trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-                mapaTurmas[nomeNormalizado] = a.turma_codigo || a.turma_ref || 'Sem turma';
-            }
-        });
-    } catch (e) {
-        console.error('Erro ao buscar turmas:', e);
-    }
-
-    function getTurma(nomeAluno) {
-        if (!nomeAluno) return 'Sem turma';
-        const nomeNormalizado = nomeAluno.trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-        return mapaTurmas[nomeNormalizado] || 'Sem turma';
-    }
-
-    // Mapeamento aluno -> contadores
-    const mapaAlunos = {};
-
-    function registrarAluno(nome, turma) {
-        const turmaFinal = turma || getTurma(nome);
-        if (!mapaAlunos[nome]) {
-            mapaAlunos[nome] = {
-                nome: nome,
-                turma: turmaFinal,
-                atas: 0,
-                fatosNegativos: 0,
-                documentosPendentes: 0,
-                apontamentos: 0,
-                totalFatos: 0
-            };
-        }
-    }
-
-    // Conta atas disciplinares
-    if (data.atas) {
-        data.atas.forEach(ata => {
-            const dataAta = parseData(ata.data);
-            if (dataAta && dataAta >= dataLimite) {
-                registrarAluno(ata.aluno);
-                mapaAlunos[ata.aluno].atas++;
-            }
-        });
-    }
-
-    // Conta fatos negativos
-    if (data.fatos_seed) {
-        data.fatos_seed.forEach(fato => {
-            const dataFato = parseData(fato.data);
-            if (dataFato && dataFato >= dataLimite) {
-                registrarAluno(fato.aluno);
-                mapaAlunos[fato.aluno].totalFatos++;
-                if (fato.tipo && fato.tipo.toLowerCase().includes('negativo')) {
-                    mapaAlunos[fato.aluno].fatosNegativos++;
-                }
-            }
-        });
-    }
-
-    // Conta documentos pendentes
-    if (data.documentos) {
-        data.documentos.forEach(doc => {
-            if (doc.status && doc.status.toLowerCase() === 'pendente') {
-                registrarAluno(doc.aluno, doc.turma);
-                mapaAlunos[doc.aluno].documentosPendentes++;
-            }
-        });
-    }
-
-    // Conta apontamentos
-    if (data.apontamentos) {
-        data.apontamentos.forEach(ap => {
-            const dataAp = parseData(ap.dataAtual);
-            if (dataAp && dataAp >= dataLimite) {
-                registrarAluno(ap.aluno);
-                mapaAlunos[ap.aluno].apontamentos++;
-            }
-        });
-    }
-
-    // Classifica os alunos
-    const alertas = [];
-    Object.values(mapaAlunos).forEach(aluno => {
-        let nivel = 'ok';
-        const motivos = [];
-
-        if (aluno.atas >= 3) {
-            nivel = 'critico';
-            motivos.push(aluno.atas + ' atas disciplinares');
-        }
-        if (aluno.fatosNegativos >= 3) {
-            nivel = 'critico';
-            motivos.push(aluno.fatosNegativos + ' comunicados negativos');
-        }
-        if (aluno.documentosPendentes >= 2) {
-            if (nivel === 'ok') nivel = 'atencao';
-            motivos.push(aluno.documentosPendentes + ' documentos pendentes');
-        }
-        if (aluno.apontamentos >= 5) {
-            if (nivel === 'ok') nivel = 'atencao';
-            motivos.push(aluno.apontamentos + ' apontamentos');
-        }
-
-        if (nivel !== 'ok') {
-            alertas.push({
-                ...aluno,
-                nivel: nivel,
-                motivos: motivos
-            });
-        }
+    window.addEventListener('DOMContentLoaded', function() {
+        carregarDados();
     });
 
-    // Ordena: críticos primeiro, depois atenção
-    alertas.sort((a, b) => {
-        if (a.nivel === 'critico' && b.nivel !== 'critico') return -1;
-        if (a.nivel !== 'critico' && b.nivel === 'critico') return 1;
-        return b.apontamentos - a.apontamentos;
-    });
+    async function carregarDados() {
+        try {
+            const url = APPS_SCRIPT_URL + '?aba=todos_os_dados';
+            const response = await fetch(url);
+            const data = await response.json();
 
-    return alertas;
-}
+            const alertas = await analisarAlertas(data);
+            renderizarAlertas(alertas);
+        } catch (error) {
+            console.error('Erro:', error);
+            document.getElementById('area-alertas').innerHTML = 
+                '<div class="msg-vazia" style="color:#ef4444;">Erro ao carregar dados.</div>';
+        }
+    }
 
-            function registrarAluno(nome, turma) {
-                if (!mapaAlunos[nome]) {
-                    mapaAlunos[nome] = {
-                        nome: nome,
-                        turma: turma || 'Sem turma',
-                        atas: 0,
-                        fatosNegativos: 0,
-                        documentosPendentes: 0,
-                        apontamentos: 0,
-                        totalFatos: 0
-                    };
-                }
-            }
+    async function analisarAlertas(data) {
+        const hoje = new Date();
+        const dataLimite = new Date(hoje);
+        dataLimite.setDate(dataLimite.getDate() - DIAS_ANALISE);
 
-            // Conta atas disciplinares
-            if (data.atas) {
-                data.atas.forEach(ata => {
-                    const dataAta = parseData(ata.data);
-                    if (dataAta && dataAta >= dataLimite) {
-                        registrarAluno(ata.aluno);
-                        mapaAlunos[ata.aluno].atas++;
-                    }
-                });
-            }
-
-            // Conta fatos negativos
-            if (data.fatos_seed) {
-                data.fatos_seed.forEach(fato => {
-                    const dataFato = parseData(fato.data);
-                    if (dataFato && dataFato >= dataLimite) {
-                        registrarAluno(fato.aluno);
-                        mapaAlunos[fato.aluno].totalFatos++;
-                        if (fato.tipo && fato.tipo.toLowerCase().includes('negativo')) {
-                            mapaAlunos[fato.aluno].fatosNegativos++;
-                        }
-                    }
-                });
-            }
-
-            // Conta documentos pendentes
-            if (data.documentos) {
-                data.documentos.forEach(doc => {
-                    if (doc.status && doc.status.toLowerCase() === 'pendente') {
-                        registrarAluno(doc.aluno, doc.turma);
-                        mapaAlunos[doc.aluno].documentosPendentes++;
-                    }
-                });
-            }
-
-            // Conta apontamentos
-            if (data.apontamentos) {
-                data.apontamentos.forEach(ap => {
-                    const dataAp = parseData(ap.dataAtual);
-                    if (dataAp && dataAp >= dataLimite) {
-                        registrarAluno(ap.aluno);
-                        mapaAlunos[ap.aluno].apontamentos++;
-                    }
-                });
-            }
-
-            // Classifica os alunos
-            const alertas = [];
-            Object.values(mapaAlunos).forEach(aluno => {
-                let nivel = 'ok';
-                const motivos = [];
-
-                if (aluno.atas >= 3) {
-                    nivel = 'critico';
-                    motivos.push(aluno.atas + ' atas disciplinares');
-                }
-                if (aluno.fatosNegativos >= 3) {
-                    nivel = 'critico';
-                    motivos.push(aluno.fatosNegativos + ' comunicados negativos');
-                }
-                if (aluno.documentosPendentes >= 2) {
-                    if (nivel === 'ok') nivel = 'atencao';
-                    motivos.push(aluno.documentosPendentes + ' documentos pendentes');
-                }
-                if (aluno.apontamentos >= 5) {
-                    if (nivel === 'ok') nivel = 'atencao';
-                    motivos.push(aluno.apontamentos + ' apontamentos');
-                }
-
-                if (nivel !== 'ok') {
-                    alertas.push({
-                        ...aluno,
-                        nivel: nivel,
-                        motivos: motivos
-                    });
+        // Busca a lista de alunos com suas turmas
+        let mapaTurmas = {};
+        try {
+            const resp = await fetch(APPS_SCRIPT_URL + '?aba=alunos');
+            const alunos = await resp.json();
+            alunos.forEach(a => {
+                if (a.nome && a.turma_codigo) {
+                    const nomeNormalizado = a.nome.trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+                    mapaTurmas[nomeNormalizado] = a.turma_codigo || a.turma_ref || 'Sem turma';
                 }
             });
-
-            // Ordena: críticos primeiro, depois atenção
-            alertas.sort((a, b) => {
-                if (a.nivel === 'critico' && b.nivel !== 'critico') return -1;
-                if (a.nivel !== 'critico' && b.nivel === 'critico') return 1;
-                return b.apontamentos - a.apontamentos;
-            });
-
-            return alertas;
+        } catch (e) {
+            console.error('Erro ao buscar turmas:', e);
         }
 
-        function parseData(dataStr) {
-            if (!dataStr) return null;
-            try {
-                // Formatos: "dd/mm/yyyy", "dd/mm/yyyy hh:mm", timestamp
-                const partes = dataStr.toString().trim().split(' ')[0].split('/');
-                if (partes.length === 3) {
-                    return new Date(parseInt(partes[2]), parseInt(partes[1]) - 1, parseInt(partes[0]));
-                }
-                const d = new Date(dataStr);
-                return isNaN(d.getTime()) ? null : d;
-            } catch (e) {
-                return null;
+        function getTurma(nomeAluno) {
+            if (!nomeAluno) return 'Sem turma';
+            const nomeNormalizado = nomeAluno.trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+            return mapaTurmas[nomeNormalizado] || 'Sem turma';
+        }
+
+        const mapaAlunos = {};
+
+        function registrarAluno(nome, turma) {
+            const turmaFinal = turma || getTurma(nome);
+            if (!mapaAlunos[nome]) {
+                mapaAlunos[nome] = {
+                    nome: nome,
+                    turma: turmaFinal,
+                    atas: 0,
+                    fatosNegativos: 0,
+                    documentosPendentes: 0,
+                    apontamentos: 0,
+                    totalFatos: 0
+                };
             }
         }
 
-        function renderizarAlertas(alertas) {
-            const area = document.getElementById('area-alertas');
-            const resumo = document.getElementById('resumo');
+        // Conta atas disciplinares
+        if (data.atas) {
+            data.atas.forEach(ata => {
+                const dataAta = parseData(ata.data);
+                if (dataAta && dataAta >= dataLimite) {
+                    registrarAluno(ata.aluno);
+                    mapaAlunos[ata.aluno].atas++;
+                }
+            });
+        }
 
-            const criticos = alertas.filter(a => a.nivel === 'critico').length;
-            const atencao = alertas.filter(a => a.nivel === 'atencao').length;
-            const ok = Object.keys(alertas).length === 0 ? 1 : 0; // Estimativa
+        // Conta fatos negativos
+        if (data.fatos_seed) {
+            data.fatos_seed.forEach(fato => {
+                const dataFato = parseData(fato.data);
+                if (dataFato && dataFato >= dataLimite) {
+                    registrarAluno(fato.aluno);
+                    mapaAlunos[fato.aluno].totalFatos++;
+                    if (fato.tipo && fato.tipo.toLowerCase().includes('negativo')) {
+                        mapaAlunos[fato.aluno].fatosNegativos++;
+                    }
+                }
+            });
+        }
 
-            document.getElementById('total-criticos').textContent = criticos;
-            document.getElementById('total-atencao').textContent = atencao;
-            document.getElementById('total-ok').textContent = '—';
-            resumo.style.display = 'grid';
+        // Conta documentos pendentes
+        if (data.documentos) {
+            data.documentos.forEach(doc => {
+                if (doc.status && doc.status.toLowerCase() === 'pendente') {
+                    registrarAluno(doc.aluno, doc.turma);
+                    mapaAlunos[doc.aluno].documentosPendentes++;
+                }
+            });
+        }
 
-            if (alertas.length === 0) {
-                area.innerHTML = '<div class="msg-vazia"><i class="fa-solid fa-circle-check"></i><p>Nenhum aluno em situação de alerta no momento.</p></div>';
-                return;
+        // Conta apontamentos
+        if (data.apontamentos) {
+            data.apontamentos.forEach(ap => {
+                const dataAp = parseData(ap.dataAtual);
+                if (dataAp && dataAp >= dataLimite) {
+                    registrarAluno(ap.aluno);
+                    mapaAlunos[ap.aluno].apontamentos++;
+                }
+            });
+        }
+
+        // Classifica os alunos
+        const alertas = [];
+        Object.values(mapaAlunos).forEach(aluno => {
+            let nivel = 'ok';
+            const motivos = [];
+
+            if (aluno.atas >= 3) {
+                nivel = 'critico';
+                motivos.push(aluno.atas + ' atas disciplinares');
+            }
+            if (aluno.fatosNegativos >= 3) {
+                nivel = 'critico';
+                motivos.push(aluno.fatosNegativos + ' comunicados negativos');
+            }
+            if (aluno.documentosPendentes >= 2) {
+                if (nivel === 'ok') nivel = 'atencao';
+                motivos.push(aluno.documentosPendentes + ' documentos pendentes');
+            }
+            if (aluno.apontamentos >= 5) {
+                if (nivel === 'ok') nivel = 'atencao';
+                motivos.push(aluno.apontamentos + ' apontamentos');
             }
 
-            let html = '';
-            alertas.forEach(aluno => {
-                const classeNivel = aluno.nivel === 'critico' ? 'nivel-critico' : 'nivel-atencao';
-                const labelNivel = aluno.nivel === 'critico' ? '🔴 CRÍTICO' : '🟡 ATENÇÃO';
-                const classeCard = aluno.nivel === 'critico' ? '' : 'atencao';
+            if (nivel !== 'ok') {
+                alertas.push({
+                    ...aluno,
+                    nivel: nivel,
+                    motivos: motivos
+                });
+            }
+        });
 
-                html += '<div class="alerta-card ' + classeCard + '">';
-                html += '<div class="alerta-header">';
-                html += '<div>';
-                html += '<div class="nome-aluno">' + aluno.nome + '</div>';
-                html += '<span class="turma-badge">🎒 ' + aluno.turma + '</span>';
-                html += '</div>';
-                html += '<span class="nivel-badge ' + classeNivel + '">' + labelNivel + '</span>';
-                html += '</div>';
+        // Ordena: críticos primeiro, depois atenção
+        alertas.sort((a, b) => {
+            if (a.nivel === 'critico' && b.nivel !== 'critico') return -1;
+            if (a.nivel !== 'critico' && b.nivel === 'critico') return 1;
+            return b.apontamentos - a.apontamentos;
+        });
 
-                html += '<div class="indicadores">';
-                html += '<div class="indicador' + (aluno.atas >= 3 ? ' alerta' : '') + '">';
-                html += '<span>📁 Atas Disciplinares</span>';
-                html += '<span class="valor">' + aluno.atas + '</span>';
-                html += '</div>';
-                html += '<div class="indicador' + (aluno.fatosNegativos >= 3 ? ' alerta' : '') + '">';
-                html += '<span>⚠️ Comunicados Negativos</span>';
-                html += '<span class="valor">' + aluno.fatosNegativos + '</span>';
-                html += '</div>';
-                html += '<div class="indicador' + (aluno.documentosPendentes >= 2 ? ' alerta' : '') + '">';
-                html += '<span>📄 Documentos Pendentes</span>';
-                html += '<span class="valor">' + aluno.documentosPendentes + '</span>';
-                html += '</div>';
-                html += '<div class="indicador' + (aluno.apontamentos >= 5 ? ' alerta' : '') + '">';
-                html += '<span>📝 Apontamentos (30 dias)</span>';
-                html += '<span class="valor">' + aluno.apontamentos + '</span>';
-                html += '</div>';
-                html += '</div>';
+        return alertas;
+    }
 
-                html += '<div style="margin-top:10px;font-size:13px;color:#64748b;">';
-                html += '<strong>Motivo:</strong> ' + aluno.motivos.join(', ') + '.';
-                html += '</div>';
-
-                html += '</div>';
-            });
-
-            area.innerHTML = html;
+    function parseData(dataStr) {
+        if (!dataStr) return null;
+        try {
+            const partes = dataStr.toString().trim().split(' ')[0].split('/');
+            if (partes.length === 3) {
+                return new Date(parseInt(partes[2]), parseInt(partes[1]) - 1, parseInt(partes[0]));
+            }
+            const d = new Date(dataStr);
+            return isNaN(d.getTime()) ? null : d;
+        } catch (e) {
+            return null;
         }
-    </script>
+    }
+
+    function renderizarAlertas(alertas) {
+        const area = document.getElementById('area-alertas');
+        const resumo = document.getElementById('resumo');
+
+        const criticos = alertas.filter(a => a.nivel === 'critico').length;
+        const atencao = alertas.filter(a => a.nivel === 'atencao').length;
+
+        document.getElementById('total-criticos').textContent = criticos;
+        document.getElementById('total-atencao').textContent = atencao;
+        document.getElementById('total-ok').textContent = '—';
+        resumo.style.display = 'grid';
+
+        if (alertas.length === 0) {
+            area.innerHTML = '<div class="msg-vazia"><i class="fa-solid fa-circle-check"></i><p>Nenhum aluno em situação de alerta no momento.</p></div>';
+            return;
+        }
+
+        let html = '';
+        alertas.forEach(aluno => {
+            const classeNivel = aluno.nivel === 'critico' ? 'nivel-critico' : 'nivel-atencao';
+            const labelNivel = aluno.nivel === 'critico' ? '🔴 CRÍTICO' : '🟡 ATENÇÃO';
+            const classeCard = aluno.nivel === 'critico' ? '' : 'atencao';
+
+            html += '<div class="alerta-card ' + classeCard + '">';
+            html += '<div class="alerta-header">';
+            html += '<div>';
+            html += '<div class="nome-aluno">' + aluno.nome + '</div>';
+            html += '<span class="turma-badge">🎒 ' + aluno.turma + '</span>';
+            html += '</div>';
+            html += '<span class="nivel-badge ' + classeNivel + '">' + labelNivel + '</span>';
+            html += '</div>';
+
+            html += '<div class="indicadores">';
+            html += '<div class="indicador' + (aluno.atas >= 3 ? ' alerta' : '') + '">';
+            html += '<span>📁 Atas Disciplinares</span>';
+            html += '<span class="valor">' + aluno.atas + '</span>';
+            html += '</div>';
+            html += '<div class="indicador' + (aluno.fatosNegativos >= 3 ? ' alerta' : '') + '">';
+            html += '<span>⚠️ Comunicados Negativos</span>';
+            html += '<span class="valor">' + aluno.fatosNegativos + '</span>';
+            html += '</div>';
+            html += '<div class="indicador' + (aluno.documentosPendentes >= 2 ? ' alerta' : '') + '">';
+            html += '<span>📄 Documentos Pendentes</span>';
+            html += '<span class="valor">' + aluno.documentosPendentes + '</span>';
+            html += '</div>';
+            html += '<div class="indicador' + (aluno.apontamentos >= 5 ? ' alerta' : '') + '">';
+            html += '<span>📝 Apontamentos (30 dias)</span>';
+            html += '<span class="valor">' + aluno.apontamentos + '</span>';
+            html += '</div>';
+            html += '</div>';
+
+            html += '<div style="margin-top:10px;font-size:13px;color:#64748b;">';
+            html += '<strong>Motivo:</strong> ' + aluno.motivos.join(', ') + '.';
+            html += '</div>';
+
+            html += '</div>';
+        });
+
+        area.innerHTML = html;
+    }
+</script>
 </body>
 </html>
