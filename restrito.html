@@ -738,17 +738,16 @@ async function carregarHorariosProfessor() {
             return;
         }
         
-        // Busca o nome exato do professor na planilha de usuários
         let nomeProfessor = usuarioLogado.nome;
         
-        // Tenta buscar os horários (ignora diferenças de maiúsculas/minúsculas)
-       let url = APPS_SCRIPT_URL + '?aba=horarios&professor=' + encodeURIComponent(nomeProfessor);
+        // Busca como titular
+        let url = APPS_SCRIPT_URL + '?aba=horarios&professor=' + encodeURIComponent(nomeProfessor);
         let response = await fetch(url);
         let data = await response.json();
         let horarios = (data.status === 'success' && data.horarios) ? data.horarios : [];
         
-        // Busca como apoio
-   let url = APPS_SCRIPT_URL + '?aba=horarios&professor_apoio=' + encodeURIComponent(nomeProfessor);
+        // Busca como apoio (SEM o "let" na segunda vez)
+        url = APPS_SCRIPT_URL + '?aba=horarios&professor_apoio=' + encodeURIComponent(nomeProfessor);
         response = await fetch(url);
         data = await response.json();
         if (data.status === 'success' && data.horarios) {
@@ -756,7 +755,7 @@ async function carregarHorariosProfessor() {
             horarios = horarios.concat(data.horarios);
         }
         
-        // Remove duplicados (mesma turma, dia, aula)
+        // Remove duplicados
         const unicos = [];
         const chaves = new Set();
         horarios.forEach(h => {
@@ -778,7 +777,6 @@ async function carregarHorariosProfessor() {
         container.innerHTML = '<p style="text-align:center;color:red;">Erro ao carregar horários.</p>';
     }
 }
-
 function renderizarHorariosNoModal(horarios, container) {
     const dias = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'];
     const coresDia = { 'Segunda': '#0284c7', 'Terça': '#0d9488', 'Quarta': '#4f46e5', 'Quinta': '#b91c1c', 'Sexta': '#f59e0b' };
