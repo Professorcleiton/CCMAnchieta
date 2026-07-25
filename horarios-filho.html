@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horário Escolar - SIGA Anchieta</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f1f5f9;
+            min-height: 100vh;
+            color: #1e293b;
+        }
+        
+        /* Cabeçalho */
+        .header {
+            background: #2e7d32;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .header h1 { font-size: 22px; margin-bottom: 5px; }
+        .header p { font-size: 14px; opacity: 0.9; }
+        
+        /* Container principal */
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+        
+        /* Seletor de filho */
+        .seletor-box {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .seletor-box label {
+            font-weight: 600;
+            font-size: 15px;
+            color: #334155;
+            white-space: nowrap;
+        }
+        .seletor-box select {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px;
+            border: 2px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 15px;
+            outline: none;
+            transition: border 0.2s;
+        }
+        .seletor-box select:focus {
+            border-color: #2e7d32;
+        }
+        
+        /* Cards de dia */
+        .dia-card {
+            background: white;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .dia-header {
+            padding: 15px 20px;
+            font-weight: 700;
+            font-size: 16px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .dia-header.segunda { background: #0284c7; }
+        .dia-header.terca   { background: #0d9488; }
+        .dia-header.quarta  { background: #4f46e5; }
+        .dia-header.quinta  { background: #b91c1c; }
+        .dia-header.sexta   { background: #f59e0b; color: #1e293b; }
+        
+        /* Tabela de aulas */
+        .aulas-tabela {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .aulas-tabela th {
+            background: #f8fafc;
+            padding: 10px 12px;
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #64748b;
+            font-weight: 600;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .aulas-tabela td {
+            padding: 12px;
+            font-size: 14px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+        .aulas-tabela tr:hover {
+            background: #f8fafc;
+        }
+        
+        /* Aula atual em destaque */
+        .aula-atual {
+            background: #dbeafe !important;
+            border-left: 4px solid #2563eb;
+        }
+        .aula-atual td:first-child::before {
+            content: "⚡ ";
+            animation: pulse 1.5s infinite;
+        }
+        
+        /* Badge de laboratório */
+        .badge-lab {
+            display: inline-block;
+            background: #0f172a;
+            color: #eab308;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-left: 6px;
+        }
+        
+        /* Professor de apoio */
+        .apoio {
+            font-size: 11px;
+            color: #64748b;
+            display: block;
+            margin-top: 2px;
+        }
+        
+        /* Intervalo */
+        .intervalo {
+            background: #fef3c7;
+            text-align: center;
+            font-weight: 600;
+            color: #92400e;
+            font-size: 13px;
+        }
+        
+        /* Mensagens */
+        .msg-vazia {
+            text-align: center;
+            padding: 40px;
+            color: #94a3b8;
+            font-size: 16px;
+        }
+        .msg-vazia i {
+            font-size: 40px;
+            display: block;
+            margin-bottom: 10px;
+        }
+        
+        /* Botão voltar */
+        .btn-voltar {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #2e7d32;
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        .btn-voltar:hover { text-decoration: underline; }
+        
+        /* Responsivo */
+        @media (max-width: 600px) {
+            .aulas-tabela th, .aulas-tabela td {
+                padding: 8px;
+                font-size: 12px;
+            }
+            .header h1 { font-size: 18px; }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>📚 Horário Escolar</h1>
+        <p>Colégio Cívico Militar Anchieta</p>
+    </div>
+
+    <div class="container">
+        <a href="painel-responsavel.html" class="btn-voltar">
+            <i class="fa-solid fa-arrow-left"></i> Voltar ao painel
+        </a>
+
+        <!-- Seletor de filho -->
+        <div class="seletor-box">
+            <label><i class="fa-solid fa-user-graduate"></i> Filho(a):</label>
+            <select id="select-filho" onchange="carregarHorario()">
+                <option value="">-- Selecione o aluno --</option>
+            </select>
+        </div>
+
+        <!-- Área dos horários -->
+        <div id="area-horarios">
+            <div class="msg-vazia">
+                <i class="fa-solid fa-calendar-days"></i>
+                <p>Selecione um aluno para ver o horário escolar.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
+        let dadosResponsavel = null;
+        let todosHorarios = [];
+
+        // Inicialização
+        window.addEventListener('DOMContentLoaded', function() {
+            const sessao = sessionStorage.getItem('resp_logado');
+            if (!sessao) {
+                window.location.href = 'responsaveis.html';
+                return;
+            }
+            
+            dadosResponsavel = JSON.parse(sessao);
+            
+            // Popula o select com os filhos
+            const select = document.getElementById('select-filho');
+            if (dadosResponsavel.alunos && dadosResponsavel.alunos.length > 0) {
+                dadosResponsavel.alunos.forEach(function(aluno) {
+                    const opt = document.createElement('option');
+                    opt.value = aluno;
+                    opt.textContent = aluno;
+                    select.appendChild(opt);
+                });
+            }
+        });
+
+        async function carregarHorario() {
+            const aluno = document.getElementById('select-filho').value;
+            if (!aluno) return;
+
+            const area = document.getElementById('area-horarios');
+            area.innerHTML = '<div class="msg-vazia"><i class="fa-solid fa-spinner fa-spin"></i><p>Carregando horário...</p></div>';
+
+            try {
+                // Primeiro, encontra a turma do aluno
+                const turma = await encontrarTurmaDoAluno(aluno);
+                if (!turma) {
+                    area.innerHTML = '<div class="msg-vazia"><i class="fa-solid fa-triangle-exclamation"></i><p>Não foi possível encontrar a turma deste aluno.</p></div>';
+                    return;
+                }
+
+                // Busca os horários da turma
+                const url = APPS_SCRIPT_URL + '?aba=horarios&turma=' + encodeURIComponent(turma);
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.status !== 'success' || !data.horarios || data.horarios.length === 0) {
+                    area.innerHTML = '<div class="msg-vazia"><i class="fa-solid fa-calendar-xmark"></i><p>Nenhum horário cadastrado para esta turma.</p></div>';
+                    return;
+                }
+
+                renderizarHorarios(data.horarios, turma);
+            } catch (error) {
+                console.error('Erro ao carregar horários:', error);
+                area.innerHTML = '<div class="msg-vazia"><i class="fa-solid fa-circle-exclamation"></i><p>Erro ao carregar os horários. Tente novamente.</p></div>';
+            }
+        }
+
+    async function encontrarTurmaDoAluno(nomeAluno) {
+    try {
+        const response = await fetch(APPS_SCRIPT_URL + '?aba=alunos');
+        const alunos = await response.json();
+        
+        // Normaliza o nome para comparação
+        const nomeBusca = nomeAluno.trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+        
+        for (let i = 0; i < alunos.length; i++) {
+            const nomeOficial = alunos[i].nome.trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+            if (nomeOficial === nomeBusca) {
+                // Retorna o código da turma (ex.: "6A")
+                return alunos[i].turma_codigo || alunos[i].turma;
+            }
+        }
+        return null;
+    } catch (e) {
+        console.error('Erro ao buscar turma:', e);
+        return null;
+    }
+}
+
+        function renderizarHorarios(horarios, turma) {
+            const area = document.getElementById('area-horarios');
+            
+            // Agrupa por dia
+            const dias = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'];
+            const classesDia = {
+                'Segunda': 'segunda',
+                'Terça': 'terca',
+                'Quarta': 'quarta',
+                'Quinta': 'quinta',
+                'Sexta': 'sexta'
+            };
+            const iconesDia = {
+                'Segunda': 'fa-calendar-check',
+                'Terça': 'fa-calendar-check',
+                'Quarta': 'fa-calendar-check',
+                'Quinta': 'fa-calendar-check',
+                'Sexta': 'fa-calendar-star'
+            };
+
+            // Hora atual para destacar aula atual
+            const agora = new Date();
+            const horaAtual = agora.getHours() * 60 + agora.getMinutes();
+            const diaAtual = dias[agora.getDay() - 1]; // 0=Domingo, 1=Segunda...
+
+            let html = '';
+            
+            // Título com a turma
+            html += '<div style="background:white;padding:15px 20px;border-radius:12px;margin-bottom:15px;box-shadow:0 2px 8px rgba(0,0,0,0.05);">';
+            html += '<strong style="color:#2e7d32;font-size:16px;">🎒 Turma: ' + turma + '</strong>';
+            html += '</div>';
+
+            dias.forEach(function(dia) {
+                const aulasDoDia = horarios.filter(function(h) { return h.dia === dia; });
+                if (aulasDoDia.length === 0) return;
+
+                html += '<div class="dia-card">';
+                html += '<div class="dia-header ' + classesDia[dia] + '">';
+                html += '<i class="fa-solid ' + iconesDia[dia] + '"></i> ' + dia.toUpperCase() + '-FEIRA';
+                html += '</div>';
+                html += '<table class="aulas-tabela">';
+                html += '<thead><tr><th>Aula</th><th>Horário</th><th>Disciplina</th><th>Professor</th><th>Local</th></tr></thead>';
+                html += '<tbody>';
+
+                aulasDoDia.forEach(function(aula, index) {
+                    // Verifica se é a aula atual
+                    const [hInicio, hFim] = aula.horario.split('-').map(function(t) {
+                        const [h, m] = t.trim().split(':').map(Number);
+                        return h * 60 + m;
+                    });
+                    const isAulaAtual = dia === diaAtual && horaAtual >= hInicio && horaAtual < hFim;
+                    
+                    // Verifica se tem professor de apoio
+                    const temApoio = aula.professor_apoio && aula.professor_apoio.trim() !== '';
+                    
+                    // Verifica se é laboratório
+                    const isLab = aula.local && aula.local.toLowerCase().includes('lab');
+                    const isTablet = aula.local && aula.local.toLowerCase().includes('tablet');
+
+                    html += '<tr class="' + (isAulaAtual ? 'aula-atual' : '') + '">';
+                    html += '<td><strong>' + aula.aula + '</strong></td>';
+                    html += '<td>' + aula.horario + '</td>';
+                    html += '<td><strong>' + (aula.disciplina || '—') + '</strong>';
+                    if (isLab) html += '<span class="badge-lab">🖥️ LAB</span>';
+                    if (isTablet) html += '<span class="badge-lab">📱 TAB</span>';
+                    html += '</td>';
+                    html += '<td>' + (aula.professor || '—');
+                    if (temApoio) html += '<span class="apoio">+ ' + aula.professor_apoio + ' (apoio)</span>';
+                    html += '</td>';
+                    html += '<td>' + (aula.local || '—') + '</td>';
+                    html += '</tr>';
+
+                    // Insere intervalo após a 3ª aula
+                    if (aula.aula === '3ª') {
+                        const horarioIntervalo = aula.turno === 'Manhã' ? '09:30 - 09:40' : '15:30 - 15:40';
+                        html += '<tr class="intervalo">';
+                        html += '<td colspan="5">☕ INTERVALO — ' + horarioIntervalo + '</td>';
+                        html += '</tr>';
+                    }
+                });
+
+                html += '</tbody></table></div>';
+            });
+
+            area.innerHTML = html;
+        }
+    </script>
+</body>
+</html>
