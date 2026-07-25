@@ -238,7 +238,7 @@
                                 <i class="fa-solid fa-boxes-stacked" style="font-size: 18px;"></i> Módulo Patrimônio
                             </a>
 
-                            <button id="btn-comunicado-seed" class="btn-salvar" style="background-color: #8b5cf6; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: none; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(139, 92, 246, 0.2); margin-bottom: 5px;" onclick="abrirComunicadoSEED()">
+                            <button id="btn-comunicado-seed" class="btn-salvar" style="background-color: #8b5cf6; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: none; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(139, 92, 246, 0.2); margin-bottom: 5px;" onclick="abrirModalComunicadoSEED()">
                                 <i class="fa-solid fa-file-lines" style="font-size: 18px;"></i> Comunicado SEED
                             </button>
 
@@ -655,7 +655,88 @@
         </div>
     </div>
 </div>
+<!-- ========================================== -->
+<!-- MODAL DE COMUNICADO SEED -->
+<!-- ========================================== -->
+<div class="modal-overlay" id="modal-comunicado-seed" onclick="fecharModalComunicado(event)">
+    <div class="modal-content" style="max-width: 1100px; height: 85vh; display: flex; flex-direction: column;">
+        <div class="modal-header" style="background-color: #8b5cf6;">
+            <h3><i class="fa-solid fa-file-lines"></i> Comunicado de Fato Observado – SEED</h3>
+            <div style="display:flex;gap:10px;align-items:center;">
+                <button id="btn-modal-emitir" onclick="emitirEImprimirModal()" style="background:#22c55e;color:white;border:none;padding:8px 16px;border-radius:6px;font-weight:bold;cursor:pointer;display:none;">✅ Emitir e Imprimir</button>
+                <button onclick="document.getElementById('modal-comunicado-seed').style.display='none'" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;">&times;</button>
+            </div>
+        </div>
+        <div class="modal-body" style="padding: 20px; overflow-y: auto; flex: 1;">
+            <!-- Seção de busca -->
+            <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px;">
+                <div style="flex: 1; min-width: 250px;">
+                    <label style="font-weight:bold;display:block;margin-bottom:5px;">Aluno 1:</label>
+                    <input list="listaAlunosModal1" id="alunoModal1" placeholder="Digite o nome..." style="width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:6px;" oninput="preencherDatalistModal()">
+                    <datalist id="listaAlunosModal1"></datalist>
+                    <button onclick="carregarFatosModal(1)" style="margin-top:8px;background:#8b5cf6;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:bold;">🔍 Buscar fatos</button>
+                    <div id="msgErroModal1" style="font-size:12px;color:red;margin-top:5px;"></div>
+                </div>
+                <div style="flex: 1; min-width: 250px;">
+                    <label style="font-weight:bold;display:block;margin-bottom:5px;">Aluno 2 (opcional):</label>
+                    <input list="listaAlunosModal2" id="alunoModal2" placeholder="Digite o nome..." style="width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:6px;" oninput="preencherDatalistModal()">
+                    <datalist id="listaAlunosModal2"></datalist>
+                    <button onclick="carregarFatosModal(2)" style="margin-top:8px;background:#8b5cf6;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:bold;">🔍 Buscar fatos</button>
+                    <div id="msgErroModal2" style="font-size:12px;color:red;margin-top:5px;"></div>
+                </div>
+            </div>
+            
+            <!-- Botão de novo fato -->
+            <button onclick="abrirModalNovoFato()" style="background:#f59e0b;color:white;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-weight:bold;margin-bottom:20px;">✍️ Registrar Novo Fato</button>
+            
+            <!-- Área dos comunicados -->
+            <div id="conteudo-comunicados" style="display:flex;flex-wrap:wrap;gap:20px;justify-content:center;">
+                <div style="text-align:center;padding:40px;color:#64748b;width:100%;">
+                    <i class="fa-solid fa-search" style="font-size:48px;display:block;margin-bottom:15px;"></i>
+                    <p>Busque um aluno para visualizar os fatos pendentes.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
+<!-- ========================================== -->
+<!-- MODAL DE NOVO FATO (sub-modal) -->
+<!-- ========================================== -->
+<div class="modal-overlay" id="modal-novo-fato-seed" onclick="fecharModalNovoFatoEvent(event)" style="z-index:10001;">
+    <div class="modal-content" style="max-width:500px;">
+        <div class="modal-header" style="background-color:#f59e0b;">
+            <h3>✍️ Registrar Novo Fato</h3>
+            <button onclick="document.getElementById('modal-novo-fato-seed').style.display='none'" style="background:none;border:none;color:white;font-size:20px;cursor:pointer;">&times;</button>
+        </div>
+        <div class="modal-body" style="padding:20px;">
+            <div style="margin-bottom:15px;">
+                <label>Aluno:</label>
+                <input list="listaAlunosFatoModal" id="fato-aluno-modal" placeholder="Digite o nome..." style="width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:6px;">
+                <datalist id="listaAlunosFatoModal"></datalist>
+            </div>
+            <div style="margin-bottom:15px;">
+                <label>Tipo:</label>
+                <select id="fato-tipo-modal" style="width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:6px;">
+                    <option value="Positivo">Positivo</option>
+                    <option value="Negativo">Negativo</option>
+                </select>
+            </div>
+            <div style="margin-bottom:15px;">
+                <label>Descrição:</label>
+                <textarea id="fato-descricao-modal" rows="3" style="width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:6px;"></textarea>
+            </div>
+            <div style="margin-bottom:15px;">
+                <label>Data do Fato:</label>
+                <input type="date" id="fato-data-modal" style="width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:6px;">
+            </div>
+            <div style="display:flex;gap:10px;justify-content:flex-end;">
+                <button onclick="document.getElementById('modal-novo-fato-seed').style.display='none'" style="padding:10px 20px;border:none;border-radius:6px;background:#ccc;cursor:pointer;">Cancelar</button>
+                <button onclick="salvarNovoFatoModal()" style="padding:10px 20px;border:none;border-radius:6px;background:#22c55e;color:white;cursor:pointer;font-weight:bold;">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
 <!-- ========================================== -->
 <!-- MODAL DA AGENDA DO LABORATÓRIO -->
 <!-- ========================================== -->
@@ -706,21 +787,182 @@
         <script src="script.js"></script>
 <script>
 
-    // Função para abrir a página de comunicado SEED
-function abrirComunicadoSEED() {
-    if (!usuarioLogado || !usuarioLogado.email) return;
-    const token = btoa(usuarioLogado.email + ':' + usuarioLogado.nivel + ':' + usuarioLogado.setor);
-    window.open('imprimir-comunicado.html?token=' + encodeURIComponent(token), '_blank');
+// ========== COMUNICADO SEED (MODAL INTEGRADO) ==========
+let comunicadosModal = [];
+let listaAlunosCache = [];
+
+function abrirModalComunicadoSEED() {
+    document.getElementById('modal-comunicado-seed').style.display = 'flex';
+    document.getElementById('alunoModal1').value = '';
+    document.getElementById('alunoModal2').value = '';
+    document.getElementById('msgErroModal1').innerText = '';
+    document.getElementById('msgErroModal2').innerText = '';
+    document.getElementById('btn-modal-emitir').style.display = 'none';
+    document.getElementById('conteudo-comunicados').innerHTML = 
+        '<div style="text-align:center;padding:40px;color:#64748b;width:100%;"><i class="fa-solid fa-search" style="font-size:48px;display:block;margin-bottom:15px;"></i><p>Busque um aluno para visualizar os fatos pendentes.</p></div>';
+    comunicadosModal = [];
+    preencherDatalistModal();
 }
 
-// Função para controlar a visibilidade do botão (baseada no perfil)
 function verificarBotaoComunicado() {
     const btn = document.getElementById('btn-comunicado-seed');
     if (!btn || !usuarioLogado) return;
-    
     if (usuarioLogado.setor === 'meivs' || (usuarioLogado.nivel && usuarioLogado.nivel >= 4)) {
         btn.style.display = 'flex';
     }
+}
+
+async function preencherDatalistModal() {
+    if (listaAlunosCache.length === 0) {
+        try {
+            const resp = await fetch(APPS_SCRIPT_V2 + '?aba=alunos');
+            const data = await resp.json();
+            listaAlunosCache = data.map(a => a.nome).sort();
+        } catch (e) {
+            console.error('Erro ao carregar alunos:', e);
+        }
+    }
+    
+    ['listaAlunosModal1', 'listaAlunosModal2', 'listaAlunosFatoModal'].forEach(id => {
+        const dl = document.getElementById(id);
+        if (dl) {
+            dl.innerHTML = '';
+            listaAlunosCache.forEach(nome => {
+                const opt = document.createElement('option');
+                opt.value = nome;
+                dl.appendChild(opt);
+            });
+        }
+    });
+}
+
+async function carregarFatosModal(numero) {
+    const campoAluno = document.getElementById('alunoModal' + numero);
+    const msgErro = document.getElementById('msgErroModal' + numero);
+    const aluno = campoAluno.value.trim();
+    
+    if (!aluno) { msgErro.innerText = 'Selecione um aluno.'; return; }
+    msgErro.innerText = 'Buscando...';
+    
+    try {
+        const resp = await fetch(APPS_SCRIPT_V2 + '?aba=fatos_aluno&aluno=' + encodeURIComponent(aluno));
+        const data = await resp.json();
+        
+        if (data.error) { msgErro.innerText = data.error; return; }
+        if (!data.fatos || data.fatos.length === 0) { msgErro.innerText = 'Nenhum fato pendente.'; return; }
+        
+        const novos = data.fatos.map(f => ({ aluno: data.aluno, turma: data.turma || '—', fato: f }));
+        comunicadosModal = comunicadosModal.filter(c => c.aluno !== data.aluno).concat(novos);
+        
+        atualizarVisualizacaoModal();
+        msgErro.innerText = '✅ ' + data.fatos.length + ' fato(s)';
+    } catch (e) {
+        msgErro.innerText = 'Erro ao buscar.';
+    }
+}
+
+function atualizarVisualizacaoModal() {
+    const container = document.getElementById('conteudo-comunicados');
+    const btnEmitir = document.getElementById('btn-modal-emitir');
+    
+    if (comunicadosModal.length === 0) {
+        container.innerHTML = '<div style="text-align:center;padding:40px;color:#64748b;width:100%;">Nenhum comunicado.</div>';
+        btnEmitir.style.display = 'none';
+        return;
+    }
+    
+    container.innerHTML = '';
+    btnEmitir.style.display = 'inline-block';
+    
+    comunicadosModal.forEach(com => {
+        const f = com.fato;
+        const cor = f.tipo && f.tipo.toLowerCase() === 'positivo' ? '#16a34a' : '#dc2626';
+        const div = document.createElement('div');
+        div.style.cssText = 'background:white;padding:25px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1);width:45%;min-width:350px;';
+        div.innerHTML = `
+            <div style="border-bottom:2px solid ${cor};padding-bottom:10px;margin-bottom:15px;"><strong>📋 Comunicado F.O.</strong></div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:10px;"><span><strong>Aluno:</strong> ${com.aluno}</span><span><strong>Turma:</strong> ${com.turma}</span></div>
+            <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:15px;">
+                <tr style="background:#f8fafc;"><td style="padding:8px;">Data</td><td style="padding:8px;">${f.data||'—'}</td></tr>
+                <tr><td style="padding:8px;">Tipo</td><td style="padding:8px;color:${cor};font-weight:bold;">${f.tipo||'—'}</td></tr>
+                <tr style="background:#f8fafc;"><td style="padding:8px;">Descrição</td><td style="padding:8px;">${f.descricao||'—'}</td></tr>
+                ${f.protocolo?`<tr><td style="padding:8px;">Protocolo</td><td style="padding:8px;">${f.protocolo}</td></tr>`:''}
+            </table>
+            <div style="font-size:11px;color:#64748b;">Emissão: ${new Date().toLocaleDateString('pt-BR')}</div>`;
+        container.appendChild(div);
+    });
+}
+
+async function emitirEImprimirModal() {
+    const ids = comunicadosModal.map(c => c.fato.idLinha);
+    if (ids.length === 0) return;
+    
+    const btn = document.getElementById('btn-modal-emitir');
+    btn.disabled = true; btn.innerText = '⏳ Emitindo...';
+    
+    try {
+        const resp = await fetch(APPS_SCRIPT_V2, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify({ operacao: "marcar_fatos_emitidos", aluno: comunicadosModal[0].aluno, emailOperador: usuarioLogado?.email || 'sistema', ids: ids })
+        });
+        const result = await resp.json();
+        
+        if (result.status === 'success') {
+            if (result.protocolos) result.protocolos.forEach(p => { const c = comunicadosModal.find(x => x.fato.idLinha === p.idLinha); if (c) c.fato.protocolo = p.protocolo; });
+            atualizarVisualizacaoModal();
+            btn.innerText = '✅ Emitido!';
+            setTimeout(() => { btn.style.display = 'none'; window.print(); }, 500);
+        } else {
+            alert('Erro: ' + (result.message || 'Tente novamente.'));
+            btn.disabled = false; btn.innerText = '✅ Emitir e Imprimir';
+        }
+    } catch (e) {
+        alert('Erro de conexão.');
+        btn.disabled = false; btn.innerText = '✅ Emitir e Imprimir';
+    }
+}
+
+function abrirModalNovoFato() {
+    document.getElementById('fato-data-modal').value = new Date().toISOString().split('T')[0];
+    document.getElementById('fato-aluno-modal').value = '';
+    document.getElementById('fato-descricao-modal').value = '';
+    document.getElementById('modal-novo-fato-seed').style.display = 'flex';
+    preencherDatalistModal();
+}
+
+function fecharModalNovoFatoEvent(e) {
+    if (e.target.id === 'modal-novo-fato-seed') document.getElementById('modal-novo-fato-seed').style.display = 'none';
+}
+
+async function salvarNovoFatoModal() {
+    const aluno = document.getElementById('fato-aluno-modal').value.trim();
+    const tipo = document.getElementById('fato-tipo-modal').value;
+    const descricao = document.getElementById('fato-descricao-modal').value.trim();
+    const data = document.getElementById('fato-data-modal').value;
+    
+    if (!aluno || !descricao || !data) { alert('Preencha todos os campos.'); return; }
+    
+    try {
+        const resp = await fetch(APPS_SCRIPT_V2, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify({ operacao: "SALVAR_FATO_SEED", aluno, tipo, descricao, data, funcionario: usuarioLogado?.email || 'Sistema', emailOperador: usuarioLogado?.email || 'sistema' })
+        });
+        const result = await resp.json();
+        if (result.status === 'success') {
+            alert('✅ Fato registrado!');
+            document.getElementById('modal-novo-fato-seed').style.display = 'none';
+        } else {
+            alert('❌ ' + (result.message || 'Erro.'));
+        }
+    } catch (e) {
+        alert('Erro de conexão.');
+    }
+}
+
+function fecharModalComunicado(e) {
+    if (e.target.id === 'modal-comunicado-seed') document.getElementById('modal-comunicado-seed').style.display = 'none';
 }
 
 // URL secundária para horários e dados de alunos
