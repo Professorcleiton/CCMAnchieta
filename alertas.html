@@ -183,28 +183,153 @@
             carregarDados();
         });
 
-        async function carregarDados() {
-            try {
-                const url = APPS_SCRIPT_URL + '?aba=todos_os_dados';
-                const response = await fetch(url);
-                const data = await response.json();
+  async function carregarDados() {
+    try {
+        const url = APPS_SCRIPT_URL + '?aba=todos_os_dados';
+        const response = await fetch(url);
+        const data = await response.json();
 
-                const alertas = analisarAlertas(data);
-                renderizarAlertas(alertas);
-            } catch (error) {
-                console.error('Erro:', error);
-                document.getElementById('area-alertas').innerHTML = 
-                    '<div class="msg-vazia" style="color:#ef4444;">Erro ao carregar dados.</div>';
+        const alertas = await analisarAlertas(data); // 🆕 adicionado await
+        renderizarAlertas(alertas);
+    } catch (error) {
+        console.error('Erro:', error);
+        document.getElementById('area-alertas').innerHTML = 
+            '<div class="msg-vazia" style="color:#ef4444;">Erro ao carregar dados.</div>';
+    }
+}
+
+       async function analisarAlertas(data) {
+    const hoje = new Date();
+    const dataLimite = new Date(hoje);
+    dataLimite.setDate(dataLimite.getDate() - DIAS_ANALISE);
+
+    // 🆕 Busca a lista de alunos com suas turmas
+    let mapaTurmas = {};
+    try {
+        const resp = await fetch(APPS_SCRIPT_URL + '?aba=alunos');
+        const alunos = await resp.json();
+        alunos.forEach(a => {
+            if (a.nome && a.turma_codigo) {
+                // Normaliza o nome para usar como chave
+                const nomeNormalizado = a.nome.trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+                mapaTurmas[nomeNormalizado] = a.turma_codigo || a.turma_ref || 'Sem turma';
             }
+        });
+    } catch (e) {
+        console.error('Erro ao buscar turmas:', e);
+    }
+
+    function getTurma(nomeAluno) {
+        if (!nomeAluno) return 'Sem turma';
+        const nomeNormalizado = nomeAluno.trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+        return mapaTurmas[nomeNormalizado] || 'Sem turma';
+    }
+
+    // Mapeamento aluno -> contadores
+    const mapaAlunos = {};
+
+    function registrarAluno(nome, turma) {
+        const turmaFinal = turma || getTurma(nome);
+        if (!mapaAlunos[nome]) {
+            mapaAlunos[nome] = {
+                nome: nome,
+                turma: turmaFinal,
+                atas: 0,
+                fatosNegativos: 0,
+                documentosPendentes: 0,
+                apontamentos: 0,
+                totalFatos: 0
+            };
+        }
+    }
+
+    // Conta atas disciplinares
+    if (data.atas) {
+        data.atas.forEach(ata => {
+            const dataAta = parseData(ata.data);
+            if (dataAta && dataAta >= dataLimite) {
+                registrarAluno(ata.aluno);
+                mapaAlunos[ata.aluno].atas++;
+            }
+        });
+    }
+
+    // Conta fatos negativos
+    if (data.fatos_seed) {
+        data.fatos_seed.forEach(fato => {
+            const dataFato = parseData(fato.data);
+            if (dataFato && dataFato >= dataLimite) {
+                registrarAluno(fato.aluno);
+                mapaAlunos[fato.aluno].totalFatos++;
+                if (fato.tipo && fato.tipo.toLowerCase().includes('negativo')) {
+                    mapaAlunos[fato.aluno].fatosNegativos++;
+                }
+            }
+        });
+    }
+
+    // Conta documentos pendentes
+    if (data.documentos) {
+        data.documentos.forEach(doc => {
+            if (doc.status && doc.status.toLowerCase() === 'pendente') {
+                registrarAluno(doc.aluno, doc.turma);
+                mapaAlunos[doc.aluno].documentosPendentes++;
+            }
+        });
+    }
+
+    // Conta apontamentos
+    if (data.apontamentos) {
+        data.apontamentos.forEach(ap => {
+            const dataAp = parseData(ap.dataAtual);
+            if (dataAp && dataAp >= dataLimite) {
+                registrarAluno(ap.aluno);
+                mapaAlunos[ap.aluno].apontamentos++;
+            }
+        });
+    }
+
+    // Classifica os alunos
+    const alertas = [];
+    Object.values(mapaAlunos).forEach(aluno => {
+        let nivel = 'ok';
+        const motivos = [];
+
+        if (aluno.atas >= 3) {
+            nivel = 'critico';
+            motivos.push(aluno.atas + ' atas disciplinares');
+        }
+        if (aluno.fatosNegativos >= 3) {
+            nivel = 'critico';
+            motivos.push(aluno.fatosNegativos + ' comunicados negativos');
+        }
+        if (aluno.documentosPendentes >= 2) {
+            if (nivel === 'ok') nivel = 'atencao';
+            motivos.push(aluno.documentosPendentes + ' documentos pendentes');
+        }
+        if (aluno.apontamentos >= 5) {
+            if (nivel === 'ok') nivel = 'atencao';
+            motivos.push(aluno.apontamentos + ' apontamentos');
         }
 
-        function analisarAlertas(data) {
-            const hoje = new Date();
-            const dataLimite = new Date(hoje);
-            dataLimite.setDate(dataLimite.getDate() - DIAS_ANALISE);
+        if (nivel !== 'ok') {
+            alertas.push({
+                ...aluno,
+                nivel: nivel,
+                motivos: motivos
+            });
+        }
+    });
 
-            // Mapeamento aluno -> contadores
-            const mapaAlunos = {};
+    // Ordena: críticos primeiro, depois atenção
+    alertas.sort((a, b) => {
+        if (a.nivel === 'critico' && b.nivel !== 'critico') return -1;
+        if (a.nivel !== 'critico' && b.nivel === 'critico') return 1;
+        return b.apontamentos - a.apontamentos;
+    });
+
+    return alertas;
+}
 
             function registrarAluno(nome, turma) {
                 if (!mapaAlunos[nome]) {
