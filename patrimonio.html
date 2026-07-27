@@ -388,12 +388,15 @@
 
         <main class="main-content">
             <header class="top-bar">
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <h1 id="pat-panel-title">Almoxarifado Geral do Colégio</h1>
-                    <button id="btn-filtro-pendentes" class="btn-pendentes-top" onclick="alternarFiltroPendentes()">
-                        <i class="fa-solid fa-clock"></i> Pendentes
-                    </button>
-                </div>
+    <div style="display: flex; align-items: center; gap: 8px;">
+        <button class="btn-menu-pat" onclick="alternarSidebarPat()" style="display:none;">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+        <h1 id="pat-panel-title">Almoxarifado Geral do Colégio</h1>
+        <button id="btn-filtro-pendentes" class="btn-pendentes-top" onclick="alternarFiltroPendentes()">
+            <i class="fa-solid fa-clock"></i> Pendentes
+        </button>
+    </div>
                 <div class="search-box">
                     <i class="fa-solid fa-barcode" style="color: #64748b;"></i>
                     <input type="text" id="pat-search-input" placeholder="Pesquisar código, item ou pai..." oninput="filtrarTabelaPorBusca()">
@@ -483,7 +486,9 @@
         </main>
 
     </div><!-- fim #patrimonio-interface -->
-
+    
+    <div class="sidebar-overlay" id="sidebar-overlay-pat" onclick="alternarSidebarPat()"></div>
+    
     <script>
         // =============================================
         // MÓDULO DE PATRIMÔNIO (com URL corrigida)
@@ -858,6 +863,22 @@ async function patExcluirItem() {
     } catch(e) { alert("Erro ao excluir item: " + e.message); } 
     finally { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-trash-can"></i> Excluir Patrimônio'; }
 }
+        // Alternar sidebar no mobile
+function alternarSidebarPat() {
+    const sidebar = document.querySelector('#patrimonio-interface .sidebar');
+    const overlay = document.getElementById('sidebar-overlay-pat');
+    sidebar.classList.toggle('open');
+    if (overlay) overlay.classList.toggle('active');
+}
+
+// Mostrar botão hambúrguer apenas no mobile
+function verificarMobilePat() {
+    const btn = document.querySelector('.btn-menu-pat');
+    if (btn) btn.style.display = window.innerWidth <= 768 ? 'inline-flex' : 'none';
+}
+
+window.addEventListener('resize', verificarMobilePat);
+window.addEventListener('DOMContentLoaded', verificarMobilePat);
     </script>
 </body>
 </html>
