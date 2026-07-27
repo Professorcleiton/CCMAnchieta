@@ -346,17 +346,12 @@
                     <h3 id="pat-table-subtitle">Todos os Itens Registrados</h3>
                     <div class="table-wrapper">
                         <table>
-                            <thead>
-                                <tr>
-                                    <th style="width: 150px;">Código Real</th>
-                                    <th style="width: 180px;">Item / Descrição</th>
-                                    <th>Categoria</th>
-                                    <th>Localização Atual</th>
-                                    <th>Responsável</th>
-                                    <th>Última Movimentação</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
+                     <thead>
+    <tr>
+        <th style="width: 150px;">Código Real</th>
+        <th>Item / Descrição</th>
+    </tr>
+</thead>
                             <tbody id="pat-table-body">
                                 <tr><td colspan="7" style="text-align: center; padding: 30px; color: #64748b;"><i class="fa-solid fa-spinner fa-spin"></i> Carregando inventário...</td></tr>
                             </tbody>
@@ -549,76 +544,62 @@
                 patTodos = await response.json();
                 patRenderizarTabela();
             } catch (error) {
-                document.getElementById('pat-table-body').innerHTML = `<tr><td colspan="7" style="text-align: center; color: red;">Erro ao processar dados da planilha.</td></tr>`;
+                document.getElementById('pat-table-body').innerHTML = `<tr><td colspan="2" style="text-align: center; color: red;">Erro ao processar dados da planilha.</td></tr>`;
             }
         }
 
-        function patRenderizarTabela() {
-            const tbody = document.getElementById('pat-table-body');
-            tbody.innerHTML = '';
-            let itensFiltrados;
-            if (patSalaFiltro === 'TODOS') {
-                itensFiltrados = patTodos;
-            } else if (patSalaFiltro === 'PENDENTES') {
-                itensFiltrados = patTodos.filter(item => item.localizacao === 'Almoxarifado');
-            } else {
-                itensFiltrados = patTodos.filter(item => item.localizacao === patSalaFiltro);
-            }
-            if (itensFiltrados.length === 0) {
-                const msg = patSalaFiltro === 'PENDENTES' ? 'Nenhum item pendente de conferência.' : 'Nenhum item neste local.';
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #64748b; padding: 20px;">${msg}</td></tr>`;
-                return;
-            }
-            itensFiltrados.forEach(item => {
-                let statusLimpo = item.status.toLowerCase();
-                let badgeClass = statusLimpo.includes('manuten') ? 'status-manutencao' : statusLimpo.includes('danific') || statusLimpo.includes('quebr') ? 'status-danificado' : statusLimpo.includes('inserv') ? 'status-inservivel' : statusLimpo.includes('localiz') ? 'status-naolocalizado' : 'status-bom';
-                let labelVinculoPai = "";
-                if (item.itemPai) {
-                    const paiObjeto = patTodos.find(p => p.codigo === item.itemPai);
-                    let nomePai = paiObjeto ? `(${paiObjeto.item})` : '';
-                    labelVinculoPai = `<br><span class="item-tag-vinculo"><i class="fa-solid fa-paperclip"></i> Acoplado ao Pai: ${item.itemPai} ${nomePai}</span>`;
-                }
-                let tr = document.createElement('tr');
-                tr.style.cursor = 'pointer';
-                tr.onclick = () => { patAlternarAba('MOVER'); patCarregarMovimentacao(item.codigo); };
-                tr.innerHTML = `
-                    <td style="color:#005088; font-weight:bold; letter-spacing:0.5px;">${item.codigo}</td>
-                    <td><strong>${item.item}</strong>${labelVinculoPai}</td>
-                    <td style="color:#64748b;">${item.categoria}</td>
-                    <td><i class="fa-solid fa-location-dot" style="color:#eab308; margin-right:5px;"></i>${item.localizacao}</td>
-                    <td>${item.responsavel || '-'}</td>
-                    <td style="font-size:11px; color:#64748b;">${item.dataAtualizacao || '-'}</td>
-                    <td><span class="status-badge ${badgeClass}">${item.status}</span></td>
-                `;
-                tbody.appendChild(tr);
-            });
+function patRenderizarTabela() {
+    const tbody = document.getElementById('pat-table-body');
+    tbody.innerHTML = '';
+    let itensFiltrados;
+    if (patSalaFiltro === 'TODOS') {
+        itensFiltrados = patTodos;
+    } else if (patSalaFiltro === 'PENDENTES') {
+        itensFiltrados = patTodos.filter(item => item.localizacao === 'Almoxarifado');
+    } else {
+        itensFiltrados = patTodos.filter(item => item.localizacao === patSalaFiltro);
+    }
+    if (itensFiltrados.length === 0) {
+        const msg = patSalaFiltro === 'PENDENTES' ? 'Nenhum item pendente de conferência.' : 'Nenhum item neste local.';
+        tbody.innerHTML = `<tr><td colspan="2" style="text-align: center; color: #64748b; padding: 20px;">${msg}</td></tr>`;
+        return;
+    }
+    itensFiltrados.forEach(item => {
+        let labelVinculoPai = "";
+        if (item.itemPai) {
+            const paiObjeto = patTodos.find(p => p.codigo === item.itemPai);
+            let nomePai = paiObjeto ? `(${paiObjeto.item})` : '';
+            labelVinculoPai = `<br><span class="item-tag-vinculo"><i class="fa-solid fa-paperclip"></i> Acoplado ao Pai: ${item.itemPai} ${nomePai}</span>`;
         }
+        let tr = document.createElement('tr');
+        tr.style.cursor = 'pointer';
+        tr.onclick = () => { patAlternarAba('MOVER'); patCarregarMovimentacao(item.codigo); };
+        tr.innerHTML = `
+            <td style="color:#005088; font-weight:bold; letter-spacing:0.5px; width:150px;">${item.codigo}</td>
+            <td><strong>${item.item}</strong>${labelVinculoPai}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
 
-        function filtrarTabelaPorBusca() {
-            const termo = document.getElementById('pat-search-input').value.trim().toLowerCase();
-            if (termo === "") { patRenderizarTabela(); return; }
-            const tbody = document.getElementById('pat-table-body');
-            tbody.innerHTML = '';
-            let correspondencias = patTodos.filter(item => item.codigo.toLowerCase().includes(termo) || item.item.toLowerCase().includes(termo) || item.itemPai.toLowerCase().includes(termo) || item.categoria.toLowerCase().includes(termo));
-            correspondencias.forEach(item => {
-                let statusLimpo = item.status.toLowerCase();
-                let badgeClass = statusLimpo.includes('manuten') ? 'status-manutencao' : statusLimpo.includes('danific') || statusLimpo.includes('quebr') ? 'status-danificado' : statusLimpo.includes('inserv') ? 'status-inservivel' : statusLimpo.includes('localiz') ? 'status-naolocalizado' : 'status-bom';
-                let labelVinculoPai = item.itemPai ? `<br><span class="item-tag-vinculo">Pai: ${item.itemPai}</span>` : '';
-                let tr = document.createElement('tr');
-                tr.style.cursor = 'pointer';
-                tr.onclick = () => { patAlternarAba('MOVER'); patCarregarMovimentacao(item.codigo); };
-                tr.innerHTML = `
-                    <td style="color:#005088; font-weight:bold;">${item.codigo}</td>
-                    <td><strong>${item.item}</strong>${labelVinculoPai}</td>
-                    <td>${item.categoria}</td>
-                    <td><i class="fa-solid fa-location-dot" style="color:#eab308; margin-right:5px;"></i>${item.localizacao}</td>
-                    <td>${item.responsavel || '-'}</td>
-                    <td style="font-size:11px; color:#64748b;">${item.dataAtualizacao || '-'}</td>
-                    <td><span class="status-badge ${badgeClass}">${item.status}</span></td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
+       function filtrarTabelaPorBusca() {
+    const termo = document.getElementById('pat-search-input').value.trim().toLowerCase();
+    if (termo === "") { patRenderizarTabela(); return; }
+    const tbody = document.getElementById('pat-table-body');
+    tbody.innerHTML = '';
+    let correspondencias = patTodos.filter(item => item.codigo.toLowerCase().includes(termo) || item.item.toLowerCase().includes(termo) || item.itemPai.toLowerCase().includes(termo) || item.categoria.toLowerCase().includes(termo));
+    correspondencias.forEach(item => {
+        let labelVinculoPai = item.itemPai ? `<br><span class="item-tag-vinculo">Pai: ${item.itemPai}</span>` : '';
+        let tr = document.createElement('tr');
+        tr.style.cursor = 'pointer';
+        tr.onclick = () => { patAlternarAba('MOVER'); patCarregarMovimentacao(item.codigo); };
+        tr.innerHTML = `
+            <td style="color:#005088; font-weight:bold;">${item.codigo}</td>
+            <td><strong>${item.item}</strong>${labelVinculoPai}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
 
         function patFiltrarSala(sala, elementoBotao) {
             patSalaFiltro = sala;
