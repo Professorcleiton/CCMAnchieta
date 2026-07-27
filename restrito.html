@@ -216,7 +216,11 @@
                             <button class="btn-salvar" style="background-color: #dc2626; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(220, 38, 38, 0.2); margin-bottom: 5px;" onclick="abrirCentralAlertas()">
                                 <i class="fa-solid fa-triangle-exclamation" style="font-size: 18px;"></i> Central de Alertas
                             </button>
-
+                            <!-- BOTÃO - PROGRESSÃO DE TURMAS -->
+<button class="btn-salvar" style="background-color: #059669; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(5, 150, 105, 0.2); margin-bottom: 5px;" onclick="abrirProgressao()">
+    <i class="fa-solid fa-arrow-right-arrow-left" style="font-size: 18px;"></i> Progressão de Turmas
+</button>
+                            
                             <!-- BOTÃO - AGENDA DO LABORATÓRIO -->
                             <button class="btn-salvar" style="background-color: #0f172a; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(15, 23, 42, 0.2); margin-bottom: 5px;" onclick="abrirAgendaLab()">
                                 <i class="fa-solid fa-desktop" style="font-size: 18px; color: #eab308;"></i> Agenda do Laboratório
@@ -438,7 +442,28 @@
             </div>
         </footer>
     </div> <!-- fecha #app-interface -->
-
+<!-- ========================================== -->
+<!-- MODAL DE PROGRESSÃO DE TURMAS -->
+<!-- ========================================== -->
+<div class="modal-overlay" id="modal-progressao" onclick="fecharModalProgressao(event)">
+    <div class="modal-content" style="max-width: 1000px; height: 85vh; display: flex; flex-direction: column;">
+        <div class="modal-header" style="background-color: #059669;">
+            <h3><i class="fa-solid fa-arrow-right-arrow-left"></i> Progressão de Turmas</h3>
+            <button onclick="document.getElementById('modal-progressao').style.display='none'" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;">&times;</button>
+        </div>
+        <div class="modal-body" id="conteudo-progressao" style="padding: 20px; overflow-y: auto; flex: 1;">
+            <div style="text-align:center;padding:40px;color:#64748b;">
+                <i class="fa-solid fa-spinner fa-spin" style="font-size:40px;display:block;margin-bottom:15px;"></i>
+                <p>Carregando dados das turmas...</p>
+            </div>
+        </div>
+        <div style="padding: 15px 20px; background: white; border-top: 1px solid #e2e8f0; text-align: right;">
+            <button onclick="executarProgressao()" id="btn-executar-progressao" style="background:#059669;color:white;border:none;padding:12px 24px;border-radius:6px;font-weight:bold;cursor:pointer;display:none;">
+                <i class="fa-solid fa-check"></i> Confirmar Progressão
+            </button>
+        </div>
+    </div>
+</div>
     <!-- MODAL DE OCORRÊNCIAS (SAÍDA ANTECIPADA / ENTRADA ATRASADA) -->
     <div id="modal-saida" class="modal-overlay" style="display:none; z-index:10000;" onclick="fecharModalSaidaEvent(event)">
         <div class="modal-content" style="max-width: 500px;">
@@ -1336,6 +1361,226 @@ function fecharModalHorarios(e) { if (e.target.id === 'modal-meus-horarios') doc
 function fecharModalLab(e) { if (e.target.id === 'modal-agenda-lab') document.getElementById('modal-agenda-lab').style.display = 'none'; }
 function fecharModalAlertas(e) { if (e.target.id === 'modal-alertas') document.getElementById('modal-alertas').style.display = 'none'; }
 
+// =============================================
+// PROGRESSÃO DE TURMAS
+// =============================================
+let dadosProgressao = { automaticas: [], comEscolha: [], alunosNonoAno: [] };
+
+function abrirProgressao() {
+    document.getElementById('modal-progressao').style.display = 'flex';
+    document.getElementById('btn-executar-progressao').style.display = 'none';
+    document.getElementById('conteudo-progressao').innerHTML = 
+        '<div style="text-align:center;padding:40px;"><i class="fa-solid fa-spinner fa-spin" style="font-size:40px;"></i><p>Carregando...</p></div>';
+    carregarDadosProgressao();
+}
+
+async function carregarDadosProgressao() {
+    try {
+        // Busca lista de alunos com turmas
+        const resp = await fetch(APPS_SCRIPT_V2 + '?aba=alunos');
+        const alunos = await resp.json();
+        
+        // Agrupa alunos por turma
+        const turmas = {};
+        alunos.forEach(a => {
+            if (!a.turma_codigo) return;
+            if (!turmas[a.turma_codigo]) turmas[a.turma_codigo] = [];
+            turmas[a.turma_codigo].push(a.nome);
+        });
+        
+        // Regras de progressão
+        dadosProgressao.automaticas = [];
+        dadosProgressao.comEscolha = [];
+        
+        // Turmas automáticas
+        const regrasAuto = {
+            '6A': '7A', '6B': '7B', '6C': '7C',
+            '7A': '8A', '7B': '8B', '7C': '8C', '7D': '8D',
+            '8A': '9A', '8B': '9B', '8C': '9C', '8D': '9D',
+            '1NEM': '2NEM', '2NEM': '3ANEM',
+            '1FD': '2FD', '2FD': '3FD',
+            '1AGRO': '2AGRO'
+        };
+        
+        Object.keys(regrasAuto).forEach(origem => {
+            const destino = regrasAuto[origem];
+            if (turmas[origem] && turmas[origem].length > 0) {
+                dadosProgressao.automaticas.push({
+                    origem: origem,
+                    destino: destino,
+                    alunos: turmas[origem].length,
+                    nomes: turmas[origem]
+                });
+            }
+        });
+        
+        // Turmas do 9º ano (precisam de escolha)
+        ['9A', '9B', '9C'].forEach(turma => {
+            if (turmas[turma] && turmas[turma].length > 0) {
+                dadosProgressao.comEscolha.push({
+                    origem: turma,
+                    alunos: turmas[turma].map(nome => ({ nome, destino: '1NEM' }))
+                });
+            }
+        });
+        
+        // Concluintes (3º EM, 3º FD)
+        ['3ANEM', '3BNEM', '3FD'].forEach(turma => {
+            if (turmas[turma] && turmas[turma].length > 0) {
+                dadosProgressao.automaticas.push({
+                    origem: turma,
+                    destino: '🎓 EGRESSOS',
+                    alunos: turmas[turma].length,
+                    nomes: turmas[turma],
+                    egresso: true
+                });
+            }
+        });
+        
+        renderizarProgressao();
+    } catch (e) {
+        console.error(e);
+        document.getElementById('conteudo-progressao').innerHTML = 
+            '<p style="text-align:center;color:red;">Erro ao carregar dados.</p>';
+    }
+}
+
+function renderizarProgressao() {
+    const container = document.getElementById('conteudo-progressao');
+    let html = '';
+    
+    // Seção: Progressão Automática
+    if (dadosProgressao.automaticas.length > 0) {
+        html += '<h4 style="color:#059669;margin-bottom:15px;">✅ Progressão Automática</h4>';
+        html += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px;margin-bottom:25px;">';
+        
+        dadosProgressao.automaticas.forEach(item => {
+            const isEgresso = item.egresso;
+            html += '<div style="background:' + (isEgresso ? '#fef3c7' : '#dcfce7') + ';padding:15px;border-radius:8px;border-left:4px solid ' + (isEgresso ? '#f59e0b' : '#059669') + ';">';
+            html += '<div style="display:flex;justify-content:space-between;align-items:center;">';
+            html += '<strong>' + item.origem + ' ➡️ ' + item.destino + '</strong>';
+            html += '<span style="background:white;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:bold;">' + item.alunos + ' alunos</span>';
+            html += '</div>';
+            html += '</div>';
+        });
+        
+        html += '</div>';
+    }
+    
+    // Seção: 9º Ano com Escolha
+    if (dadosProgressao.comEscolha.length > 0) {
+        html += '<h4 style="color:#d97706;margin-bottom:15px;">🎓 9º Ano — Escolha o Destino</h4>';
+        
+        dadosProgressao.comEscolha.forEach(turma => {
+            html += '<div style="background:white;border:1px solid #e2e8f0;border-radius:8px;padding:15px;margin-bottom:15px;">';
+            html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">';
+            html += '<strong style="font-size:16px;">📚 ' + turma.origem + '</strong>';
+            html += '<span style="background:#fef3c7;padding:3px 10px;border-radius:12px;font-size:12px;">' + turma.alunos.length + ' alunos</span>';
+            html += '</div>';
+            
+            // Botões de ação em lote
+            html += '<div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">';
+            html += '<button onclick="moverTodosPara(\'' + turma.origem + '\', \'1NEM\')" style="background:#e0f2fe;color:#0369a1;border:none;padding:6px 12px;border-radius:15px;cursor:pointer;font-size:12px;font-weight:bold;">Todos → 1NEM</button>';
+            html += '<button onclick="moverTodosPara(\'' + turma.origem + '\', \'1FD\')" style="background:#fce7f3;color:#9d174d;border:none;padding:6px 12px;border-radius:15px;cursor:pointer;font-size:12px;font-weight:bold;">Todos → 1FD</button>';
+            html += '<button onclick="moverTodosPara(\'' + turma.origem + '\', \'1AGRO\')" style="background:#fef3c7;color:#92400e;border:none;padding:6px 12px;border-radius:15px;cursor:pointer;font-size:12px;font-weight:bold;">Todos → 1AGRO</button>';
+            html += '</div>';
+            
+            // Lista de alunos com dropdown
+            html += '<div style="max-height:200px;overflow-y:auto;">';
+            turma.alunos.forEach((aluno, idx) => {
+                const corDestino = aluno.destino === '1NEM' ? '#e0f2fe' : aluno.destino === '1FD' ? '#fce7f3' : '#fef3c7';
+                html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f1f5f9;">';
+                html += '<span style="font-size:13px;">' + aluno.nome + '</span>';
+                html += '<select onchange="mudarDestino(\'' + turma.origem + '\', ' + idx + ', this.value)" style="padding:4px 8px;border-radius:4px;border:1px solid #cbd5e1;font-size:12px;background:' + corDestino + ';">';
+                html += '<option value="1NEM" ' + (aluno.destino === '1NEM' ? 'selected' : '') + '>1º NEM</option>';
+                html += '<option value="1FD" ' + (aluno.destino === '1FD' ? 'selected' : '') + '>1º FD</option>';
+                html += '<option value="1AGRO" ' + (aluno.destino === '1AGRO' ? 'selected' : '') + '>1º Agro</option>';
+                html += '</select>';
+                html += '</div>';
+            });
+            html += '</div>';
+            
+            // Resumo da turma
+            const contagem = { '1NEM': 0, '1FD': 0, '1AGRO': 0 };
+            turma.alunos.forEach(a => contagem[a.destino]++);
+            html += '<div style="display:flex;gap:10px;margin-top:8px;font-size:11px;color:#64748b;">';
+            html += '<span>📘 1NEM: ' + contagem['1NEM'] + '</span>';
+            html += '<span>📙 1FD: ' + contagem['1FD'] + '</span>';
+            html += '<span>📗 1AGRO: ' + contagem['1AGRO'] + '</span>';
+            html += '</div>';
+            
+            html += '</div>';
+        });
+    }
+    
+    container.innerHTML = html;
+    document.getElementById('btn-executar-progressao').style.display = 'inline-block';
+}
+
+function moverTodosPara(turmaOrigem, destino) {
+    const turma = dadosProgressao.comEscolha.find(t => t.origem === turmaOrigem);
+    if (turma) {
+        turma.alunos.forEach(a => a.destino = destino);
+        renderizarProgressao();
+    }
+}
+
+function mudarDestino(turmaOrigem, idx, destino) {
+    const turma = dadosProgressao.comEscolha.find(t => t.origem === turmaOrigem);
+    if (turma && turma.alunos[idx]) {
+        turma.alunos[idx].destino = destino;
+        renderizarProgressao();
+    }
+}
+
+async function executarProgressao() {
+    if (!confirm('⚠️ ATENÇÃO! Esta ação vai mover TODOS os alunos para as novas turmas. Deseja continuar?')) return;
+    if (!confirm('🔴 CONFIRMAÇÃO FINAL: Tem certeza absoluta? Faça backup da planilha antes de prosseguir.')) return;
+    
+    const btn = document.getElementById('btn-executar-progressao');
+    btn.disabled = true;
+    btn.innerText = '⏳ Processando...';
+    
+    try {
+        // Envia dados para o Apps Script processar
+        const payload = {
+            operacao: "PROGRESSAO_TURMAS",
+            emailOperador: usuarioLogado.email,
+            automaticas: dadosProgressao.automaticas,
+            comEscolha: dadosProgressao.comEscolha
+        };
+        
+        const resp = await fetch(APPS_SCRIPT_V2, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify(payload)
+        });
+        
+        const result = await resp.json();
+        
+        if (result.status === 'success') {
+            alert('✅ Progressão concluída com sucesso!\n\n' + 
+                  'Turmas automáticas: ' + (result.automaticas || 0) + '\n' +
+                  'Alunos do 9º ano: ' + (result.nonoAno || 0) + '\n' +
+                  'Egressos: ' + (result.egressos || 0));
+            document.getElementById('modal-progressao').style.display = 'none';
+        } else {
+            alert('❌ Erro: ' + (result.message || 'Falha ao processar.'));
+        }
+    } catch (e) {
+        alert('❌ Erro de conexão.');
+    } finally {
+        btn.disabled = false;
+        btn.innerText = '✅ Confirmar Progressão';
+    }
+}
+
+function fecharModalProgressao(e) {
+    if (e.target.id === 'modal-progressao') {
+        document.getElementById('modal-progressao').style.display = 'none';
+    }
+}
+    
 </script>
   
 </body>
