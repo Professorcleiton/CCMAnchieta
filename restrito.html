@@ -220,6 +220,11 @@
 <button class="btn-salvar" style="background-color: #059669; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(5, 150, 105, 0.2); margin-bottom: 5px;" onclick="abrirProgressao()">
     <i class="fa-solid fa-arrow-right-arrow-left" style="font-size: 18px;"></i> Progressão de Turmas
 </button>
+
+                            <!-- BOTÃO - GESTÃO DE HORÁRIOS -->
+<button class="btn-salvar" style="background-color: #7c3aed; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(124, 58, 237, 0.2); margin-bottom: 5px;" onclick="abrirGestaoHorarios()">
+    <i class="fa-solid fa-table" style="font-size: 18px;"></i> Gestão de Horários
+</button>
                             
                             <!-- BOTÃO - AGENDA DO LABORATÓRIO -->
                             <button class="btn-salvar" style="background-color: #0f172a; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(15, 23, 42, 0.2); margin-bottom: 5px;" onclick="abrirAgendaLab()">
@@ -442,6 +447,53 @@
             </div>
         </footer>
     </div> <!-- fecha #app-interface -->
+    <!-- ========================================== -->
+<!-- MODAL DE GESTÃO DE HORÁRIOS -->
+<!-- ========================================== -->
+<div class="modal-overlay" id="modal-gestao-horarios" onclick="fecharModalGestaoHorarios(event)">
+    <div class="modal-content" style="max-width: 1100px; height: 90vh; display: flex; flex-direction: column;">
+        <div class="modal-header" style="background-color: #7c3aed;">
+            <h3><i class="fa-solid fa-table"></i> Gestão de Horários</h3>
+            <div style="display:flex;gap:10px;align-items:center;">
+                <button onclick="salvarGradeAtual()" id="btn-salvar-grade" style="background:#22c55e;color:white;border:none;padding:8px 16px;border-radius:6px;font-weight:bold;cursor:pointer;">💾 Salvar</button>
+                <button onclick="document.getElementById('modal-gestao-horarios').style.display='none'" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;">&times;</button>
+            </div>
+        </div>
+        <div class="modal-body" style="padding: 15px; overflow-y: auto; flex: 1;">
+            
+            <!-- Seletor de turma e turno -->
+            <div style="display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap;align-items:center;">
+                <label style="font-weight:bold;">Turma:</label>
+                <select id="gestao-turma" onchange="carregarGradeEdicao()" style="padding:8px 12px;border:1px solid #cbd5e1;border-radius:6px;font-size:14px;">
+                    <option value="">Selecione...</option>
+                </select>
+                <label style="font-weight:bold;margin-left:10px;">Turno:</label>
+                <select id="gestao-turno" onchange="carregarGradeEdicao()" style="padding:8px 12px;border:1px solid #cbd5e1;border-radius:6px;font-size:14px;">
+                    <option value="Manhã">Manhã</option>
+                    <option value="Tarde">Tarde</option>
+                </select>
+                <button onclick="autoPreencherGrade()" style="background:#f59e0b;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:bold;margin-left:auto;">⚡ Auto-Preencher</button>
+                <button onclick="limparGrade()" style="background:#ef4444;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:bold;">🗑️ Limpar</button>
+            </div>
+            
+            <!-- Legenda de conflitos -->
+            <div style="display:flex;gap:15px;margin-bottom:10px;font-size:12px;">
+                <span style="color:#22c55e;">🟢 Sem conflitos</span>
+                <span style="color:#ef4444;">🔴 Conflito detectado</span>
+                <span style="color:#f59e0b;">🟡 Alerta</span>
+            </div>
+            
+            <!-- Grade editável -->
+            <div style="overflow-x:auto;" id="container-grade">
+                <div style="text-align:center;padding:40px;color:#64748b;">
+                    <i class="fa-solid fa-hand-pointer" style="font-size:48px;display:block;margin-bottom:15px;"></i>
+                    <p>Selecione uma turma para começar a editar os horários.</p>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</div>
 <!-- ========================================== -->
 <!-- MODAL DE PROGRESSÃO DE TURMAS -->
 <!-- ========================================== -->
@@ -1580,7 +1632,246 @@ function fecharModalProgressao(e) {
         document.getElementById('modal-progressao').style.display = 'none';
     }
 }
+    // =============================================
+// GESTÃO DE HORÁRIOS
+// =============================================
+let gradeAtual = {}; // { 'Segunda': { '1ª': 'MAT', '2ª': 'PORT', ... }, 'Terça': {...} }
+let disciplinasDisponiveis = [];
+let turmaEditando = '';
+let turnoEditando = 'Manhã';
+
+const HORARIOS_FIXOS = {
+    'Manhã': ['06:55-07:45', '07:45-08:35', '08:35-09:30', '09:40-10:30', '10:30-11:20', '11:20-12:10'],
+    'Tarde': ['12:55-13:45', '13:45-14:35', '14:35-15:30', '15:40-16:30', '16:30-17:20', '17:20-18:10']
+};
+const AULAS = ['1ª', '2ª', '3ª', '4ª', '5ª', '6ª'];
+const DIAS = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'];
+
+function abrirGestaoHorarios() {
+    document.getElementById('modal-gestao-horarios').style.display = 'flex';
+    carregarTurmasGestao();
+}
+
+async function carregarTurmasGestao() {
+    try {
+        const resp = await fetch(APPS_SCRIPT_V2 + '?aba=alunos');
+        const alunos = await resp.json();
+        
+        // Extrai turmas únicas
+        const turmas = [...new Set(alunos.map(a => a.turma_codigo).filter(Boolean))].sort();
+        
+        const select = document.getElementById('gestao-turma');
+        select.innerHTML = '<option value="">Selecione uma turma...</option>';
+        turmas.forEach(t => {
+            select.innerHTML += '<option value="' + t + '">' + t + '</option>';
+        });
+        
+        // Carrega disciplinas disponíveis
+        await carregarDisciplinas();
+    } catch (e) {
+        console.error('Erro ao carregar turmas:', e);
+    }
+}
+
+async function carregarDisciplinas() {
+    try {
+        const resp = await fetch(APPS_SCRIPT_V2 + '?aba=horarios&turno=' + turnoEditando);
+        const data = await resp.json();
+        
+        if (data.status === 'success' && data.horarios) {
+            // Extrai disciplinas únicas com seus professores
+            const mapa = {};
+            data.horarios.forEach(h => {
+                if (h.disciplina && !mapa[h.disciplina]) {
+                    mapa[h.disciplina] = h.professor || '';
+                }
+            });
+            disciplinasDisponiveis = Object.keys(mapa).map(d => ({
+                nome: d,
+                professor: mapa[d]
+            }));
+        }
+    } catch (e) {
+        console.error('Erro ao carregar disciplinas:', e);
+    }
+}
+
+async function carregarGradeEdicao() {
+    turmaEditando = document.getElementById('gestao-turma').value;
+    turnoEditando = document.getElementById('gestao-turno').value;
     
+    if (!turmaEditando) {
+        document.getElementById('container-grade').innerHTML = 
+            '<div style="text-align:center;padding:40px;color:#64748b;">Selecione uma turma.</div>';
+        return;
+    }
+    
+    // Inicializa grade vazia
+    gradeAtual = {};
+    DIAS.forEach(dia => {
+        gradeAtual[dia] = {};
+        AULAS.forEach(aula => {
+            gradeAtual[dia][aula] = { disciplina: '', professor: '', local: '' };
+        });
+    });
+    
+    // Carrega dados existentes
+    try {
+        const resp = await fetch(APPS_SCRIPT_V2 + '?aba=horarios&turma=' + turmaEditando + '&turno=' + turnoEditando);
+        const data = await resp.json();
+        
+        if (data.status === 'success' && data.horarios) {
+            data.horarios.forEach(h => {
+                if (gradeAtual[h.dia] && gradeAtual[h.dia][h.aula]) {
+                    gradeAtual[h.dia][h.aula] = {
+                        disciplina: h.disciplina || '',
+                        professor: h.professor || '',
+                        local: h.local || ''
+                    };
+                }
+            });
+        }
+    } catch (e) {
+        console.error('Erro ao carregar grade:', e);
+    }
+    
+    await carregarDisciplinas();
+    renderizarGrade();
+}
+
+function renderizarGrade() {
+    const container = document.getElementById('container-grade');
+    
+    let html = '<table style="width:100%;border-collapse:collapse;font-size:12px;background:white;border-radius:8px;overflow:hidden;">';
+    html += '<thead><tr style="background:#7c3aed;color:white;">';
+    html += '<th style="padding:10px;">Aula</th><th style="padding:10px;">Horário</th>';
+    DIAS.forEach(d => html += '<th style="padding:10px;">' + d + '</th>');
+    html += '</tr></thead><tbody>';
+    
+    AULAS.forEach((aula, i) => {
+        html += '<tr>';
+        html += '<td style="padding:8px;background:#f8fafc;font-weight:bold;text-align:center;">' + aula + '</td>';
+        html += '<td style="padding:8px;background:#f8fafc;font-size:10px;text-align:center;">' + HORARIOS_FIXOS[turnoEditando][i] + '</td>';
+        
+        DIAS.forEach(dia => {
+            const celula = gradeAtual[dia] ? gradeAtual[dia][aula] : { disciplina: '', professor: '', local: '' };
+            const temConflito = verificarConflito(dia, aula, celula.disciplina, celula.professor);
+            const bgColor = !celula.disciplina ? '#dcfce7' : (temConflito ? '#fee2e2' : '#f8fafc');
+            
+            html += '<td style="padding:4px;background:' + bgColor + ';border:1px solid #e2e8f0;min-width:120px;">';
+            html += '<select onchange="atualizarCelula(\'' + dia + '\', \'' + aula + '\', this.value)" style="width:100%;padding:4px;border:1px solid #cbd5e1;border-radius:4px;font-size:11px;">';
+            html += '<option value="">— Vazio —</option>';
+            disciplinasDisponiveis.forEach(d => {
+                const selected = celula.disciplina === d.nome ? 'selected' : '';
+                html += '<option value="' + d.nome + '" ' + selected + '>' + d.nome + ' (' + d.professor + ')</option>';
+            });
+            html += '</select>';
+            if (celula.disciplina) {
+                html += '<div style="font-size:10px;color:#64748b;margin-top:2px;">👨‍🏫 ' + celula.professor + '</div>';
+            }
+            if (temConflito) {
+                html += '<div style="font-size:10px;color:#ef4444;margin-top:2px;">⚠️ Conflito</div>';
+            }
+            html += '</td>';
+        });
+        
+        html += '</tr>';
+        
+        // Intervalo após 3ª aula
+        if (aula === '3ª') {
+            const intervalo = turnoEditando === 'Manhã' ? '09:30-09:40' : '15:30-15:40';
+            html += '<tr style="background:#fef3c7;"><td colspan="7" style="text-align:center;font-weight:bold;padding:6px;">☕ INTERVALO — ' + intervalo + '</td></tr>';
+        }
+    });
+    
+    html += '</tbody></table>';
+    container.innerHTML = html;
+}
+
+function atualizarCelula(dia, aula, disciplinaNome) {
+    if (!gradeAtual[dia]) gradeAtual[dia] = {};
+    if (!gradeAtual[dia][aula]) gradeAtual[dia][aula] = { disciplina: '', professor: '', local: '' };
+    
+    const disc = disciplinasDisponiveis.find(d => d.nome === disciplinaNome);
+    gradeAtual[dia][aula] = {
+        disciplina: disciplinaNome,
+        professor: disc ? disc.professor : '',
+        local: ''
+    };
+    
+    renderizarGrade();
+}
+
+function verificarConflito(dia, aula, disciplina, professor) {
+    if (!disciplina || !professor) return false;
+    
+    // Verifica se o professor já está em outra turma no mesmo dia/horário
+    // (Simulação - na versão completa, verifica no banco de dados)
+    return false;
+}
+
+async function salvarGradeAtual() {
+    if (!turmaEditando) {
+        alert('Selecione uma turma primeiro.');
+        return;
+    }
+    
+    const btn = document.getElementById('btn-salvar-grade');
+    btn.disabled = true;
+    btn.innerText = '⏳ Salvando...';
+    
+    const payload = {
+        operacao: "SALVAR_GRADE",
+        turma: turmaEditando,
+        turno: turnoEditando,
+        grade: gradeAtual,
+        emailOperador: usuarioLogado.email
+    };
+    
+    try {
+        const resp = await fetch(APPS_SCRIPT_V2, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify(payload)
+        });
+        
+        const result = await resp.json();
+        
+        if (result.status === 'success') {
+            alert('✅ Grade salva com sucesso!');
+        } else {
+            alert('❌ Erro: ' + (result.message || 'Falha ao salvar.'));
+        }
+    } catch (e) {
+        alert('❌ Erro de conexão.');
+    } finally {
+        btn.disabled = false;
+        btn.innerText = '💾 Salvar';
+    }
+}
+
+function autoPreencherGrade() {
+    alert('🛠️ Funcionalidade em desenvolvimento!\n\nEm breve, o sistema preencherá a grade automaticamente respeitando:\n- Carga horária de cada disciplina\n- Disponibilidade dos professores\n- Regras de laboratório e tablet');
+}
+
+function limparGrade() {
+    if (!confirm('Tem certeza que deseja limpar TODA a grade desta turma?')) return;
+    
+    DIAS.forEach(dia => {
+        gradeAtual[dia] = {};
+        AULAS.forEach(aula => {
+            gradeAtual[dia][aula] = { disciplina: '', professor: '', local: '' };
+        });
+    });
+    
+    renderizarGrade();
+}
+
+function fecharModalGestaoHorarios(e) {
+    if (e.target.id === 'modal-gestao-horarios') {
+        document.getElementById('modal-gestao-horarios').style.display = 'none';
+    }
+}
 </script>
   
 </body>
