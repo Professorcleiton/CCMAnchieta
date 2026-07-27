@@ -184,137 +184,183 @@
         #patrimonio-interface .main-content, #patrimonio-interface .table-wrapper { height: auto; overflow: visible; }
     }
 
-    @media (max-width: 768px) {
-        body {
-            overflow-y: auto;
-            height: auto;
-        }
-        #patrimonio-interface {
-            flex-direction: column;
-            height: auto;
-            min-height: 100vh;
-        }
-
-        /* Sidebar compacta no topo como pílulas */
-        #patrimonio-interface .sidebar {
-            width: 100%;
-            max-height: none;
-            min-height: auto;
-            overflow-y: visible;
-            border-right: none;
-            border-bottom: 2px solid #eab308;
-            flex-shrink: 0;
-            padding: 6px 8px;
-        }
-        #patrimonio-interface .sidebar-header {
-            display: none;
-        }
-        #patrimonio-interface .room-list-title {
-            display: none;
-        }
-        #patrimonio-interface .room-list {
-            max-height: none;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 4px;
-            padding: 0;
-        }
-        #patrimonio-interface .room-item {
-            padding: 5px 10px;
-            font-size: 11px;
-            margin-bottom: 0;
-            white-space: nowrap;
-            border-radius: 15px;
-        }
-        #patrimonio-interface .sidebar-footer {
-            display: none;
-        }
-
-        /* Conteúdo principal */
-        #patrimonio-interface .main-content {
-            height: auto;
-            overflow-y: visible;
-            flex: 1;
-        }
-
-        /* Barra superior */
-        #patrimonio-interface .top-bar {
-            flex-wrap: wrap;
-            height: auto;
-            min-height: auto;
-            padding: 8px;
-            gap: 6px;
-        }
-        #patrimonio-interface .top-bar h1 { font-size: 13px; }
-        #patrimonio-interface .search-box {
-            width: 100%;
-            max-width: 100%;
-        }
-        #patrimonio-interface .btn-pendentes-top {
-            font-size: 10px;
-            padding: 5px 8px;
-        }
-
-        /* Workspace: painel de ações PRIMEIRO, tabela DEPOIS */
-        #patrimonio-interface .workspace {
-            display: flex;
-            flex-direction: column;
-            grid-template-columns: none;
-            padding: 8px;
-            gap: 8px;
-            overflow-y: visible;
-        }
-
-        /* Painel de controle (mover/cadastrar/ambientes) no topo */
-        #patrimonio-interface .control-side-panel {
-            order: 1;
-            width: 100%;
-        }
-
-        /* Tabela de itens abaixo */
-        #patrimonio-interface .inventory-panel {
-            order: 2;
-            padding: 8px;
-        }
-        #patrimonio-interface .inventory-panel h3 { font-size: 12px; margin-bottom: 8px; }
-        #patrimonio-interface .table-wrapper {
-            overflow-x: auto;
-            max-height: 300px;
-        }
-        #patrimonio-interface table {
-            font-size: 11px;
-            min-width: 400px;
-        }
-        #patrimonio-interface th, #patrimonio-interface td {
-            padding: 6px 8px;
-            font-size: 11px;
-        }
-
-        /* Abas */
-        #patrimonio-interface .tab-menu-right {
-            grid-template-columns: 1fr 1fr 1fr;
-        }
-        #patrimonio-interface .tab-nav-btn {
-            font-size: 9px;
-            padding: 8px 2px;
-        }
-
-        /* Painéis de ação */
-        #patrimonio-interface .action-card-panel {
-            padding: 10px;
-        }
-        #patrimonio-interface .action-card-panel h3 { font-size: 12px; }
-        #patrimonio-interface .form-group label { font-size: 10px; }
-        #patrimonio-interface .form-group input,
-        #patrimonio-interface .form-group select {
-            font-size: 12px;
-            padding: 8px;
-        }
-        #patrimonio-interface .btn-action-trigger {
-            font-size: 12px;
-            padding: 10px;
-        }
+@media (max-width: 768px) {
+    body {
+        overflow-y: auto;
+        height: auto;
     }
+    #patrimonio-interface {
+        flex-direction: column;
+        height: auto;
+        min-height: 100vh;
+    }
+
+    /* Sidebar - menu lateral deslizante (igual ao sistema) */
+    #patrimonio-interface .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 260px;
+        height: 100vh;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        z-index: 9999;
+        box-shadow: 2px 0 10px rgba(0,0,0,0.3);
+        border-right: 4px solid #eab308;
+        border-bottom: none;
+        overflow-y: auto;
+    }
+    #patrimonio-interface .sidebar.open {
+        transform: translateX(0);
+    }
+    #patrimonio-interface .sidebar-header {
+        display: flex;
+        padding: 15px;
+    }
+    #patrimonio-interface .sidebar-logo {
+        width: 50px; height: 50px; min-width: 50px;
+    }
+    #patrimonio-interface .sidebar-title h2 { font-size: 16px; }
+    #patrimonio-interface .sidebar-title p { font-size: 10px; }
+    #patrimonio-interface .room-list-title {
+        display: block;
+        font-size: 10px;
+        padding: 10px 15px 5px;
+    }
+    #patrimonio-interface .room-list {
+        display: block;
+        max-height: none;
+        padding: 0 10px;
+    }
+    #patrimonio-interface .room-item {
+        padding: 12px 15px;
+        margin-bottom: 5px;
+        font-size: 13px;
+        border-radius: 6px;
+        white-space: normal;
+    }
+    #patrimonio-interface .sidebar-footer {
+        display: block;
+        padding: 15px;
+    }
+    #patrimonio-interface .btn-back {
+        font-size: 13px;
+        padding: 10px;
+    }
+
+    /* Overlay escuro ao abrir sidebar */
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 9998;
+    }
+    .sidebar-overlay.active {
+        display: block;
+    }
+
+    /* Botão hambúrguer */
+    .btn-menu-pat {
+        display: inline-flex;
+        background: #005088;
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 18px;
+        cursor: pointer;
+        margin-right: 8px;
+    }
+
+    /* Conteúdo principal */
+    #patrimonio-interface .main-content {
+        height: auto;
+        overflow-y: visible;
+        flex: 1;
+    }
+
+    /* Barra superior */
+    #patrimonio-interface .top-bar {
+        flex-wrap: wrap;
+        height: auto;
+        min-height: auto;
+        padding: 8px;
+        gap: 6px;
+    }
+    #patrimonio-interface .top-bar h1 { font-size: 13px; }
+    #patrimonio-interface .search-box {
+        width: 100%;
+        max-width: 100%;
+    }
+    #patrimonio-interface .btn-pendentes-top {
+        font-size: 10px;
+        padding: 5px 8px;
+    }
+
+    /* Workspace: painel de ações PRIMEIRO, tabela DEPOIS */
+    #patrimonio-interface .workspace {
+        display: flex;
+        flex-direction: column;
+        grid-template-columns: none;
+        padding: 8px;
+        gap: 8px;
+        overflow-y: visible;
+    }
+
+    /* Painel de controle no topo */
+    #patrimonio-interface .control-side-panel {
+        order: 1;
+        width: 100%;
+    }
+
+    /* Tabela abaixo */
+    #patrimonio-interface .inventory-panel {
+        order: 2;
+        padding: 8px;
+    }
+    #patrimonio-interface .inventory-panel h3 { font-size: 12px; margin-bottom: 8px; }
+    #patrimonio-interface .table-wrapper {
+        overflow-x: auto;
+        max-height: 300px;
+    }
+    #patrimonio-interface table {
+        font-size: 11px;
+        min-width: 400px;
+    }
+    #patrimonio-interface th, #patrimonio-interface td {
+        padding: 6px 8px;
+        font-size: 11px;
+    }
+
+    /* Abas */
+    #patrimonio-interface .tab-menu-right {
+        grid-template-columns: 1fr 1fr 1fr;
+    }
+    #patrimonio-interface .tab-nav-btn {
+        font-size: 9px;
+        padding: 8px 2px;
+    }
+
+    /* Painéis de ação */
+    #patrimonio-interface .action-card-panel {
+        padding: 10px;
+    }
+    #patrimonio-interface .action-card-panel h3 { font-size: 12px; }
+    #patrimonio-interface .form-group label { font-size: 10px; }
+    #patrimonio-interface .form-group input,
+    #patrimonio-interface .form-group select {
+        font-size: 12px;
+        padding: 8px;
+    }
+    #patrimonio-interface .btn-action-trigger {
+        font-size: 12px;
+        padding: 10px;
+    }
+}
 </style>
 </head>
 <body>
