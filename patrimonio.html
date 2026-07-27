@@ -722,60 +722,102 @@
         }
 
         async function patExecutarTransferencia() {
-            const codigo = document.getElementById('pat-trans-code').value.trim();
-            const novaSala = document.getElementById('pat-trans-room').value;
-            const responsavel = document.getElementById('pat-trans-resp').value.trim();
-            const novoStatus = document.getElementById('pat-trans-status').value;
-            const btn = document.getElementById('pat-btn-mover');
-            if (!codigo || !novaSala || !responsavel) { alert("Preencha o Destino e o Responsável."); return; }
-            btn.disabled = true; btn.innerText = "Processando...";
-            try {
-                const r = await fetch(APPS_SCRIPT_PAT_URL, { method: 'POST', body: JSON.stringify({ operacao: "PAT_TRANSFERIR", codigo: codigo, novaLocalizacao: novaSala, responsavel: responsavel, status: novoStatus || null }) });
-                const res = await r.json();
-                if (res.status === "success") {
-                    document.getElementById('pat-trans-code').value = ''; document.getElementById('pat-item-preview').style.display = "none";
-                    alert("Movimentação concluída!"); await patCarregarItens();
-                }
-            } catch (e) { alert("Erro de comunicação."); } finally { btn.disabled = false; btn.innerText = "Confirmar Movimentação"; }
+    const codigo = document.getElementById('pat-trans-code').value.trim();
+    const novaSala = document.getElementById('pat-trans-room').value;
+    const responsavel = document.getElementById('pat-trans-resp').value.trim();
+    const novoStatus = document.getElementById('pat-trans-status').value;
+    const btn = document.getElementById('pat-btn-mover');
+    if (!codigo || !novaSala || !responsavel) { alert("Preencha o Destino e o Responsável."); return; }
+    btn.disabled = true; btn.innerText = "Processando...";
+    try {
+        const r = await fetch(APPS_SCRIPT_PAT_URL, { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify({ 
+                operacao: "PAT_TRANSFERIR", 
+                codigo: codigo, 
+                novaLocalizacao: novaSala, 
+                responsavel: responsavel, 
+                status: novoStatus || null,
+                emailOperador: usuarioLogadoPat.email  // 🆕 ADICIONADO
+            }) 
+        });
+        const res = await r.json();
+        if (res.status === "success") {
+            document.getElementById('pat-trans-code').value = ''; 
+            document.getElementById('pat-item-preview').style.display = "none";
+            alert("Movimentação concluída!"); 
+            await patCarregarItens();
+        } else {
+            alert("Erro: " + (res.message || "Não autorizado."));
         }
+    } catch (e) { alert("Erro de comunicação: " + e.message); } 
+    finally { btn.disabled = false; btn.innerText = "Confirmar Movimentação"; }
+}
 
-        async function patExecutarCadastro() {
-            const codigo = document.getElementById('pat-reg-code').value.trim();
-            const item = document.getElementById('pat-reg-item').value.trim();
-            const category = document.getElementById('pat-reg-cat').value;
-            const sala = document.getElementById('pat-reg-room').value;
-            const funcionario = document.getElementById('pat-reg-resp').value.trim();
-            const status = document.getElementById('pat-reg-status').value;
-            const itemPai = document.getElementById('pat-reg-parent').value.trim();
-            const btn = document.getElementById('pat-btn-cadastrar');
-            if(!codigo || !item || !funcionario || !sala) { alert("Preencha os campos obrigatórios."); return; }
-            btn.disabled = true;
-            const payload = { operacao: "PAT_CADASTRAR", codigo: codigo, item: item, categoria: category, localizacao: sala, responsavel: funcionario, status: status, itemPai: itemPai };
-            try {
-                const r = await fetch(APPS_SCRIPT_PAT_URL, { method: 'POST', body: JSON.stringify(payload) });
-                const res = await r.json();
-                if(res.status === "success" || res.status === "updated") {
-                    alert(res.status === "updated" ? "Patrimônio atualizado!" : "Novo item gravado!");
-                    patResetarCadastro(); await patCarregarItens();
-                }
-            } catch (e) { alert("Erro ao salvar."); } finally { btn.disabled = false; }
+async function patExecutarCadastro() {
+    const codigo = document.getElementById('pat-reg-code').value.trim();
+    const item = document.getElementById('pat-reg-item').value.trim();
+    const category = document.getElementById('pat-reg-cat').value;
+    const sala = document.getElementById('pat-reg-room').value;
+    const funcionario = document.getElementById('pat-reg-resp').value.trim();
+    const status = document.getElementById('pat-reg-status').value;
+    const itemPai = document.getElementById('pat-reg-parent').value.trim();
+    const btn = document.getElementById('pat-btn-cadastrar');
+    if(!codigo || !item || !funcionario || !sala) { alert("Preencha os campos obrigatórios."); return; }
+    btn.disabled = true;
+    const payload = { 
+        operacao: "PAT_CADASTRAR", 
+        codigo: codigo, 
+        item: item, 
+        categoria: category, 
+        localizacao: sala, 
+        responsavel: funcionario, 
+        status: status, 
+        itemPai: itemPai,
+        emailOperador: usuarioLogadoPat.email  // 🆕 ADICIONADO
+    };
+    try {
+        const r = await fetch(APPS_SCRIPT_PAT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
+        const res = await r.json();
+        if(res.status === "success" || res.status === "updated") {
+            alert(res.status === "updated" ? "Patrimônio atualizado!" : "Novo item gravado!");
+            patResetarCadastro(); 
+            await patCarregarItens();
+        } else {
+            alert("Erro: " + (res.message || "Não autorizado."));
         }
+    } catch (e) { alert("Erro ao salvar: " + e.message); } 
+    finally { btn.disabled = false; }
+}
 
-        async function patExcluirItem() {
-            const codigo = document.getElementById('pat-reg-code').value.trim();
-            if(!codigo) return;
-            if(!confirm(`Atenção Direção: Deseja EXCLUIR DEFINITIVAMENTE o patrimônio ${codigo}? Esta ação não pode ser desfeita.`)) return;
-            const btn = document.getElementById('pat-btn-excluir');
-            btn.disabled = true; btn.innerText = "Excluindo...";
-            try {
-                const r = await fetch(APPS_SCRIPT_PAT_URL, { method: 'POST', body: JSON.stringify({ operacao: "PAT_EXCLUIR", codigo: codigo }) });
-                const res = await r.json();
-                if(res.status === "success") {
-                    alert("Patrimônio apagado do banco de dados!");
-                    patResetarCadastro(); await patCarregarItens();
-                }
-            } catch(e) { alert("Erro ao excluir item."); } finally { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-trash-can"></i> Excluir Patrimônio'; }
+async function patExcluirItem() {
+    const codigo = document.getElementById('pat-reg-code').value.trim();
+    if(!codigo) return;
+    if(!confirm(`Atenção Direção: Deseja EXCLUIR DEFINITIVAMENTE o patrimônio ${codigo}? Esta ação não pode ser desfeita.`)) return;
+    const btn = document.getElementById('pat-btn-excluir');
+    btn.disabled = true; btn.innerText = "Excluindo...";
+    try {
+        const r = await fetch(APPS_SCRIPT_PAT_URL, { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify({ 
+                operacao: "PAT_EXCLUIR", 
+                codigo: codigo,
+                emailOperador: usuarioLogadoPat.email  // 🆕 ADICIONADO
+            }) 
+        });
+        const res = await r.json();
+        if(res.status === "success") {
+            alert("Patrimônio apagado do banco de dados!");
+            patResetarCadastro(); 
+            await patCarregarItens();
+        } else {
+            alert("Erro: " + (res.message || "Não autorizado."));
         }
+    } catch(e) { alert("Erro ao excluir item: " + e.message); } 
+    finally { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-trash-can"></i> Excluir Patrimônio'; }
+}
     </script>
 </body>
 </html>
