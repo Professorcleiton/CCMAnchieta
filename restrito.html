@@ -141,19 +141,42 @@
 <button id="btn-voltar-seletor" onclick="fecharSelecaoMultipla()" style="background:#64748b;color:white;border:none;padding:8px 12px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:bold;display:none;">
     <i class="fa-solid fa-arrow-left"></i> Voltar
 </button>
-                            <div id="selecao-multipla" style="display:none;background:white;padding:15px;border-radius:8px;margin-top:10px;border:1px solid #e2e8f0;">
+    <div id="selecao-multipla" style="display:none;background:white;padding:15px;border-radius:8px;margin-top:10px;border:1px solid #e2e8f0;">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
         <label style="font-weight:bold;cursor:pointer;">
             <input type="checkbox" id="check-todos" onchange="marcarTodos(this.checked)"> Selecionar Todos
         </label>
         <span id="contador-selecionados" style="font-size:12px;color:#64748b;">0 selecionados</span>
     </div>
-    <div id="lista-checkboxes" style="max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:5px;">
+    <div id="lista-checkboxes" style="max-height:150px;overflow-y:auto;display:flex;flex-direction:column;gap:5px;margin-bottom:10px;">
         <!-- Checkboxes preenchidos dinamicamente -->
     </div>
-    <button onclick="confirmarSelecaoMultipla()" style="margin-top:10px;background:#005088;color:white;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-weight:bold;">
-        ✅ Confirmar Seleção
-    </button>
+    
+    <!-- 🆕 Campo de apontamento DENTRO da seleção múltipla -->
+    <div style="margin-bottom:10px;">
+        <label style="font-weight:bold;display:block;margin-bottom:5px;">📝 Apontamento:</label>
+        <textarea id="texto-apontamento-multiplo" placeholder="Descreva o apontamento para todos os alunos selecionados..." style="width:100%;height:80px;padding:10px;border:1px solid #cbd5e1;border-radius:6px;resize:vertical;font-size:14px;"></textarea>
+    </div>
+    
+    <!-- 🆕 Seletor de setor -->
+    <div style="margin-bottom:10px;">
+        <label style="font-weight:bold;display:block;margin-bottom:5px;">Setor:</label>
+        <select id="setor-apontamento-multiplo" style="width:100%;padding:8px;border:1px solid #cbd5e1;border-radius:6px;">
+            <option value="meivs">MEIV'S</option>
+            <option value="pedagogico">Pedagógico</option>
+            <option value="adm">ADM</option>
+            <option value="direcao">Professores</option>
+        </select>
+    </div>
+    
+    <div style="display:flex;gap:10px;">
+        <button onclick="salvarApontamentoMultiplo()" style="background:#005088;color:white;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-weight:bold;flex:1;">
+            💾 Salvar Apontamento
+        </button>
+        <button onclick="fecharSelecaoMultipla()" style="background:#94a3b8;color:white;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-weight:bold;">
+            ↩️ Voltar
+        </button>
+    </div>
 </div>
                             <div style="display: flex; gap: 10px;">
                                 <button id="btn-gerar-pdf-oficial" onclick="gerarFichaIndividualConselho()" style="display: none; background-color: #2563eb; color: white; padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2); align-items: center; gap: 8px;">
@@ -2115,6 +2138,60 @@ function confirmarSelecaoMultipla() {
     document.getElementById('select-alunos').value = alunosSelecionados[0];
     filtrarRegistrosPorAluno();
 }
+
+    async function salvarApontamentoMultiplo() {
+    const texto = document.getElementById('texto-apontamento-multiplo').value.trim();
+    const setor = document.getElementById('setor-apontamento-multiplo').value;
+    
+    alunosSelecionados = Array.from(document.querySelectorAll('.check-aluno:checked')).map(cb => cb.value);
+    
+    if (alunosSelecionados.length === 0) {
+        alert('Selecione pelo menos um aluno.');
+        return;
+    }
+    
+    if (!texto) {
+        alert('Digite o apontamento.');
+        return;
+    }
+    
+    const agora = new Date();
+    const data = agora.toLocaleDateString('pt-BR') + ' ' + 
+                 agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    
+    let salvos = 0;
+    
+    for (const aluno of alunosSelecionados) {
+        const dadosApontamento = {
+            aluno: aluno,
+            setor: setor === 'direcao' ? 'professores' : setor,
+            texto: texto,
+            funcionario: usuarioLogado.nome,
+            dataAtual: data
+        };
+
+        try {
+            if (navigator.onLine) {
+                const result = await salvarNoServidor(dadosApontamento);
+                if (result.status === 'success') salvos++;
+            }
+        } catch (error) {
+            console.error('Erro ao salvar para ' + aluno, error);
+        }
+    }
+    
+    if (salvos > 0) {
+        mostrarToast('✅ Apontamento salvo para ' + salvos + ' aluno(s)!', 'sucesso');
+        document.getElementById('texto-apontamento-multiplo').value = '';
+        alunosSelecionados = [];
+        fecharSelecaoMultipla();
+        await carregarRegistrosDoServidor();
+        filtrarRegistrosPorAluno();
+    } else {
+        mostrarToast('❌ Erro ao salvar.', 'erro');
+    }
+}
+    
 </script>
   
 </body>
