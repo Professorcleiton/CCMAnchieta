@@ -239,7 +239,8 @@ function inicializarPainel() {
     verificarBotaoComunicado();
     carregarAlunosETurmas(); 
     carregarRegistrosDoServidor();
-    
+    // 🆕 Aplicar controle de acesso
+    aplicarControleAcesso();
     // Inicializa o status de conexão
     setTimeout(atualizarStatusConexao, 2000);
 }
