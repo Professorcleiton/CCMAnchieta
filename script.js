@@ -1032,12 +1032,17 @@ async function salvarUsuarioAdmin() {
 
     const payload = {
         operacao: 'USER_SALVAR',
-        emailOperador: usuarioLogado.email, 
+        emailOperador: usuarioLogado.email,
         email: email,
         nome: nome,
         setor: setor,
         nivel: nivel,
-        senha: senha
+        senha: senha,
+        // 🆕 Preferências
+        turno_pref: document.getElementById('admin-pref-turno')?.value || 'Ambos',
+        max_aulas: document.getElementById('admin-pref-max-aulas')?.value || 5,
+        geminadas: document.getElementById('admin-pref-geminadas')?.value || 'Não',
+        restricoes: document.getElementById('admin-pref-restricoes')?.value || ''
     };
 
     try {
@@ -1049,6 +1054,11 @@ async function salvarUsuarioAdmin() {
             document.getElementById('admin-user-email').value = '';
             document.getElementById('admin-user-nome').value = '';
             document.getElementById('admin-user-senha').value = '';
+            if (document.getElementById('admin-pref-restricoes')) document.getElementById('admin-pref-restricoes').value = '';
+            if (document.getElementById('admin-pref-turno')) document.getElementById('admin-pref-turno').value = 'Ambos';
+            if (document.getElementById('admin-pref-max-aulas')) document.getElementById('admin-pref-max-aulas').value = 5;
+            if (document.getElementById('admin-pref-geminadas')) document.getElementById('admin-pref-geminadas').value = 'Não';
+            document.getElementById('preferencias-professor').style.display = 'none';
         } else {
             mostrarToast('Você não tem permissão para esta ação.', 'erro');
         }
