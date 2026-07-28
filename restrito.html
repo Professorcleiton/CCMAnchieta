@@ -1911,6 +1911,14 @@ function fecharModalGestaoHorarios(e) {
         document.getElementById('modal-gestao-horarios').style.display = 'none';
     }
 }
+    window.addEventListener('DOMContentLoaded', function() {
+    // Espera um pouco para garantir que o login foi processado
+    setTimeout(function() {
+        if (usuarioLogado && usuarioLogado.nivel) {
+            aplicarControleAcesso();
+        }
+    }, 500);
+});
 </script>
   
 </body>
