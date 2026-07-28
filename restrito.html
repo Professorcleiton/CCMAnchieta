@@ -135,6 +135,26 @@
                                 </select>
                             </div>
 
+                            <button id="btn-selecionar-varios" onclick="abrirSelecaoMultipla()" style="background:#f59e0b;color:white;border:none;padding:8px 12px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:bold;display:none;">
+    <i class="fa-solid fa-users"></i> Selecionar Vários
+</button>
+<button id="btn-voltar-seletor" onclick="fecharSelecaoMultipla()" style="background:#64748b;color:white;border:none;padding:8px 12px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:bold;display:none;">
+    <i class="fa-solid fa-arrow-left"></i> Voltar
+</button>
+                            <div id="selecao-multipla" style="display:none;background:white;padding:15px;border-radius:8px;margin-top:10px;border:1px solid #e2e8f0;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <label style="font-weight:bold;cursor:pointer;">
+            <input type="checkbox" id="check-todos" onchange="marcarTodos(this.checked)"> Selecionar Todos
+        </label>
+        <span id="contador-selecionados" style="font-size:12px;color:#64748b;">0 selecionados</span>
+    </div>
+    <div id="lista-checkboxes" style="max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:5px;">
+        <!-- Checkboxes preenchidos dinamicamente -->
+    </div>
+    <button onclick="confirmarSelecaoMultipla()" style="margin-top:10px;background:#005088;color:white;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-weight:bold;">
+        ✅ Confirmar Seleção
+    </button>
+</div>
                             <div style="display: flex; gap: 10px;">
                                 <button id="btn-gerar-pdf-oficial" onclick="gerarFichaIndividualConselho()" style="display: none; background-color: #2563eb; color: white; padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2); align-items: center; gap: 8px;">
                                     <i class="fa-solid fa-file-pdf"></i> Imprimir Ficha Individual
@@ -1919,6 +1939,74 @@ function fecharModalGestaoHorarios(e) {
         }
     }, 500);
 });
+
+    let alunosSelecionados = [];
+
+function abrirSelecaoMultipla() {
+    if (!turmaSelecionadaAtiva) {
+        alert('Selecione uma turma primeiro na barra lateral.');
+        return;
+    }
+    
+    document.getElementById('select-alunos').style.display = 'none';
+    document.getElementById('btn-selecionar-varios').style.display = 'none';
+    document.getElementById('btn-voltar-seletor').style.display = 'inline-flex';
+    document.getElementById('selecao-multipla').style.display = 'block';
+    document.getElementById('btn-gerar-pdf-oficial').style.display = 'none';
+    
+    const alunos = cacheAlunosPorTurma[turmaSelecionadaAtiva] || [];
+    const container = document.getElementById('lista-checkboxes');
+    container.innerHTML = '';
+    
+    alunos.sort().forEach(aluno => {
+        container.innerHTML += `
+            <label style="display:flex;align-items:center;gap:8px;padding:6px;cursor:pointer;border-bottom:1px solid #f1f5f9;">
+                <input type="checkbox" class="check-aluno" value="${aluno}" onchange="atualizarContador()">
+                <span>${aluno}</span>
+            </label>`;
+    });
+    
+    alunosSelecionados = [];
+    document.getElementById('check-todos').checked = false;
+    document.getElementById('contador-selecionados').innerText = '0 selecionados';
+}
+
+function fecharSelecaoMultipla() {
+    document.getElementById('select-alunos').style.display = 'inline-block';
+    document.getElementById('btn-selecionar-varios').style.display = 'inline-flex';
+    document.getElementById('btn-voltar-seletor').style.display = 'none';
+    document.getElementById('selecao-multipla').style.display = 'none';
+    document.getElementById('btn-gerar-pdf-oficial').style.display = 'inline-flex';
+    alunosSelecionados = [];
+}
+
+function marcarTodos(checked) {
+    document.querySelectorAll('.check-aluno').forEach(cb => {
+        cb.checked = checked;
+    });
+    atualizarContador();
+}
+
+function atualizarContador() {
+    alunosSelecionados = Array.from(document.querySelectorAll('.check-aluno:checked')).map(cb => cb.value);
+    document.getElementById('contador-selecionados').innerText = alunosSelecionados.length + ' selecionados';
+}
+
+function confirmarSelecaoMultipla() {
+    alunosSelecionados = Array.from(document.querySelectorAll('.check-aluno:checked')).map(cb => cb.value);
+    
+    if (alunosSelecionados.length === 0) {
+        alert('Selecione pelo menos um aluno.');
+        return;
+    }
+    
+    alert(alunosSelecionados.length + ' aluno(s) selecionado(s).\nAgora escreva o apontamento e clique em Salvar.');
+    fecharSelecaoMultipla();
+    
+    // Atualiza o seletor normal com o primeiro aluno (para compatibilidade)
+    document.getElementById('select-alunos').value = alunosSelecionados[0];
+    filtrarRegistrosPorAluno();
+}
 </script>
   
 </body>
