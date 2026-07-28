@@ -1104,6 +1104,66 @@ function fecharModalComunicado(e) {
 // URL secundária para horários e dados de alunos
 const APPS_SCRIPT_V2 = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
 
+// Verificar se o email já existe e carregar dados para edição
+document.addEventListener('DOMContentLoaded', function() {
+    const emailInput = document.getElementById('admin-user-email');
+    if (emailInput) {
+        emailInput.addEventListener('blur', function() {
+            checarSeUsuarioExisteParaEditar();
+        });
+    }
+});
+
+function checarSeUsuarioExisteParaEditar() {
+    const emailDigitado = document.getElementById('admin-user-email').value.trim().toLowerCase();
+    if (!emailDigitado || !emailDigitado.includes('@')) return;
+    
+    // Busca o usuário na lista
+    fetch(APPS_SCRIPT_V2 + '?aba=usuarios')
+        .then(r => r.json())
+        .then(usuarios => {
+            const usuarioEncontrado = usuarios.find(u => u.email === emailDigitado);
+            
+            const btnSave = document.getElementById('btn-save-user');
+            const btnDel = document.getElementById('btn-del-user');
+            const divPref = document.getElementById('preferencias-professor');
+            const tituloGestao = document.querySelector('#modal-admin h4:first-of-type');
+            
+            if (usuarioEncontrado) {
+                // Modo Edição
+                document.getElementById('admin-user-nome').value = usuarioEncontrado.nome || '';
+                document.getElementById('admin-user-setor').value = usuarioEncontrado.setor || 'professores';
+                document.getElementById('admin-user-nivel').value = usuarioEncontrado.nivel || 1;
+                btnSave.innerText = 'Atualizar Usuário';
+                btnSave.style.background = '#eab308';
+                if (btnDel) btnDel.style.display = 'inline-block';
+                
+                // Carregar preferências
+                if (usuarioEncontrado.setor === 'professores') {
+                    if (divPref) divPref.style.display = 'block';
+                    const turnoEl = document.getElementById('admin-pref-turno');
+                    const maxAulasEl = document.getElementById('admin-pref-max-aulas');
+                    const geminadasEl = document.getElementById('admin-pref-geminadas');
+                    const restricoesEl = document.getElementById('admin-pref-restricoes');
+                    
+                    if (turnoEl) turnoEl.value = usuarioEncontrado.turno_pref || 'Ambos';
+                    if (maxAulasEl) maxAulasEl.value = usuarioEncontrado.max_aulas || 5;
+                    if (geminadasEl) geminadasEl.value = usuarioEncontrado.geminadas || 'Não';
+                    if (restricoesEl) restricoesEl.value = usuarioEncontrado.restricoes || '';
+                } else {
+                    if (divPref) divPref.style.display = 'none';
+                }
+            } else {
+                // Novo usuário
+                btnSave.innerText = 'Salvar Usuário';
+                btnSave.style.background = '#059669';
+                if (btnDel) btnDel.style.display = 'none';
+                if (divPref) divPref.style.display = 'none';
+            }
+        })
+        .catch(e => console.error('Erro ao buscar usuários:', e));
+}
+    
 function togglePreferenciasProfessor() {
     const setor = document.getElementById('admin-user-setor').value;
     const divPref = document.getElementById('preferencias-professor');
