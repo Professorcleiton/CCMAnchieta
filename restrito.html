@@ -1067,22 +1067,32 @@ async function carregarHorariosProfessor() {
         
         let nomeProfessor = usuarioLogado.nome;
         
-        // Busca como titular
-        let url = APPS_SCRIPT_V2 + '?aba=horarios&professor=' + encodeURIComponent(nomeProfessor);
+        // 🆕 Busca TODOS os horários e filtra localmente (mais flexível)
+        let url = APPS_SCRIPT_V2 + '?aba=horarios';
         let response = await fetch(url);
         let data = await response.json();
-        let horarios = (data.status === 'success' && data.horarios) ? data.horarios : [];
+        let todos = (data.status === 'success' && data.horarios) ? data.horarios : [];
         
-        // Busca como apoio
-        url = APPS_SCRIPT_V2 + '?aba=horarios&professor_apoio=' + encodeURIComponent(nomeProfessor);
-        response = await fetch(url);
-        data = await response.json();
-        if (data.status === 'success' && data.horarios) {
-            data.horarios.forEach(h => h.como_apoio = true);
-            horarios = horarios.concat(data.horarios);
-        }
+        // Normaliza o nome do professor logado
+        const nomeLogadoNorm = nomeProfessor.trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
         
-        // Remove duplicados
+        // Filtra localmente (ignora maiúsculas/minúsculas, acentos, espaços)
+        let horarios = todos.filter(h => {
+            const nomeProf = (h.professor || '').trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+            const nomeApoio = (h.professor_apoio || '').trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+            
+            if (nomeProf === nomeLogadoNorm) {
+                h.como_apoio = false;
+                return true;
+            }
+            if (nomeApoio === nomeLogadoNorm) {
+                h.como_apoio = true;
+                return true;
+            }
+            return false;
+        });
+        
+        // Remove duplicados (mesma turma, dia, aula)
         const unicos = [];
         const chaves = new Set();
         horarios.forEach(h => {
