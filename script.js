@@ -390,6 +390,21 @@ function selecionarTurma(turma) {
         btnPreConselho.style.display = 'inline-flex';
     }
 
+    // 🆕 Mostrar botão de seleção múltipla
+    const btnMultiplo = document.getElementById('btn-selecionar-varios');
+    if (btnMultiplo) btnMultiplo.style.display = 'inline-flex';
+    
+    // 🆕 Esconder botão de voltar (se estiver visível)
+    const btnVoltar = document.getElementById('btn-voltar-seletor');
+    if (btnVoltar) btnVoltar.style.display = 'none';
+    
+    // 🆕 Esconder área de checkboxes (se estiver visível)
+    const areaMultipla = document.getElementById('selecao-multipla');
+    if (areaMultipla) areaMultipla.style.display = 'none';
+    
+    // 🆕 Mostrar seletor normal
+    if (select) select.style.display = 'inline-block';
+
     document.getElementById('app-sidebar').classList.remove('open');
 }
 
@@ -671,11 +686,20 @@ function verificarTeclaEnter(e, setor) { if (e.key === 'Enter' && !e.shiftKey) {
 async function salvarPost(setor) {
     const textarea = document.getElementById(`text-${setor}`);
     const texto = textarea.value.trim();
-    const aluno = document.getElementById('select-alunos').value;
     const btn = document.getElementById(`btn-${setor}`);
 
-    if (!texto || !aluno) {
-        mostrarToast('Selecione um aluno e digite algo antes de salvar.', 'aviso');
+    if (!texto) {
+        mostrarToast('Digite algo antes de salvar.', 'aviso');
+        return;
+    }
+
+    // 🆕 Verifica se há múltiplos alunos selecionados
+    const listaAlunos = (typeof alunosSelecionados !== 'undefined' && alunosSelecionados.length > 0)
+        ? alunosSelecionados
+        : [document.getElementById('select-alunos').value];
+
+    if (!listaAlunos[0] || listaAlunos[0].includes('Selecione')) {
+        mostrarToast('Selecione pelo menos um aluno.', 'aviso');
         return;
     }
 
@@ -685,59 +709,46 @@ async function salvarPost(setor) {
     const data = agora.toLocaleDateString('pt-BR') + ' ' + 
                  agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
     
-    const dadosApontamento = {
-        aluno: aluno,
-        setor: setor === 'direcao' ? 'professores' : setor,
-        texto: texto,
-        funcionario: usuarioLogado.nome,
-        dataAtual: data
-    };
+    let salvos = 0;
+    
+    for (const aluno of listaAlunos) {
+        const dadosApontamento = {
+            aluno: aluno,
+            setor: setor === 'direcao' ? 'professores' : setor,
+            texto: texto,
+            funcionario: usuarioLogado.nome,
+            dataAtual: data
+        };
 
-    try {
-        // VERIFICA SE ESTÁ ONLINE
-        if (navigator.onLine) {
-            // ONLINE: Salva direto no servidor
-            console.log('📡 Online - salvando no servidor...');
-            const result = await salvarNoServidor(dadosApontamento);
-            
-            if (result.status === 'success') {
-                mostrarToast('✅ Apontamento salvo!', 'sucesso');
-                textarea.value = '';
-                fecharCaixaTexto(setor);
-                // Recarrega os dados para mostrar o novo apontamento
-                await carregarRegistrosDoServidor();
-                // Filtra para o aluno atual
-                if (document.getElementById('select-alunos').value) {
-                    filtrarRegistrosPorAluno();
+        try {
+            if (navigator.onLine) {
+                const result = await salvarNoServidor(dadosApontamento);
+                if (result.status === 'success') salvos++;
+            } else {
+                if (db && db.db) {
+                    await db.salvarApontamento(dadosApontamento);
+                    salvos++;
                 }
-            } else {
-                mostrarToast('❌ Erro ao salvar. Tente novamente.', 'erro');
             }
-        } else {
-            // OFFLINE: Salva localmente
-            console.log('📡 Offline - salvando localmente...');
-            
-            if (db && db.db) {
-                const apontamentoLocal = await db.salvarApontamento(dadosApontamento);
-                console.log('✅ Apontamento salvo localmente:', apontamentoLocal);
-                
-                // Mostra na tela com indicação de pendente
-                mostrarApontamentoLocal(apontamentoLocal);
-                mostrarToast('✅ Apontamento salvo localmente! (será sincronizado quando a internet voltar)', 'sucesso');
-                
-                textarea.value = '';
-                fecharCaixaTexto(setor);
-            } else {
-                mostrarToast('❌ Banco de dados local não disponível.', 'erro');
-            }
+        } catch (error) {
+            console.error('Erro ao salvar para ' + aluno, error);
         }
-        
-    } catch (error) {
-        console.error('❌ Erro ao salvar apontamento:', error);
-        mostrarToast('❌ Erro ao salvar. Tente novamente.', 'erro');
-    } finally {
-        btn.disabled = false;
     }
+    
+    if (salvos > 0) {
+        mostrarToast('✅ Apontamento salvo para ' + salvos + ' aluno(s)!', 'sucesso');
+        textarea.value = '';
+        fecharCaixaTexto(setor);
+        alunosSelecionados = []; // Limpa a seleção múltipla
+        await carregarRegistrosDoServidor();
+        if (document.getElementById('select-alunos').value) {
+            filtrarRegistrosPorAluno();
+        }
+    } else {
+        mostrarToast('❌ Erro ao salvar. Tente novamente.', 'erro');
+    }
+    
+    btn.disabled = false;
 }
 async function salvarNoServidor(dados) {
     const payload = {
