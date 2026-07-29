@@ -501,6 +501,8 @@ async function carregarRegistrosDoServidor() {
         }
 
         atualizarGraficosMural();
+        // 🆕 Atualiza o painel de ranking/gráfico
+        setTimeout(atualizarPainelRanking, 500);
         if (document.getElementById('select-alunos').value) filtrarRegistrosPorAluno();
 
     } catch (e) { 
@@ -568,6 +570,8 @@ function filtrarRegistrosPorAluno() {
         if (grid) grid.style.display = ''; 
         if (pdf) pdf.style.display = 'none';
         if (tabs) tabs.style.display = 'none';
+        // 🆕 Atualiza painel de ranking geral
+        atualizarPainelRanking();
         return;
     }
 
@@ -675,6 +679,9 @@ function filtrarRegistrosPorAluno() {
     atualizarContador('docs-bar', 'DOCS', '#8b5cf6', docs);
     atualizarContador('ocorr-bar', 'OCORR', '#f59e0b', ocorr);
     atualizarContador('atas-bar', 'ATAS', '#dc2626', atas);
+    
+    // 🆕 Atualiza painel de ranking/gráfico
+    atualizarPainelRanking();
 }
 
 function verificarTeclaEnter(e, setor) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); salvarPost(setor); } }
