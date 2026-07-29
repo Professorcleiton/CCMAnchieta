@@ -589,8 +589,15 @@ function filtrarRegistrosPorAluno() {
         if (grid) grid.style.display = ''; 
         if (pdf) pdf.style.display = 'none';
         if (tabs) tabs.style.display = 'none';
-        // 🆕 Atualiza painel de ranking geral
-        atualizarPainelRanking();
+        // 🆕 Força a atualização do painel
+setTimeout(() => {
+    if (document.getElementById('select-alunos').value && 
+        !document.getElementById('select-alunos').value.includes('Selecione')) {
+        mostrarGraficoTurma();
+    } else {
+        mostrarRankingGeral();
+    }
+}, 300);
         return;
     }
 
