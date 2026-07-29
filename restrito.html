@@ -2188,9 +2188,13 @@ function confirmarSelecaoMultipla() {
 let turmaSelecionadaGrafico = null;
 
 function atualizarPainelRanking() {
-    // Se uma turma está selecionada no seletor de alunos, mostra gráfico da turma
     const selectAluno = document.getElementById('select-alunos');
-    if (selectAluno && selectAluno.value && !selectAluno.value.includes('Selecione')) {
+    
+    // Verifica se há um aluno selecionado
+    if (selectAluno && selectAluno.value && 
+        !selectAluno.value.includes('Selecione') && 
+        !selectAluno.value.includes('Escolha') &&
+        selectAluno.value.trim() !== '') {
         // Modo 2: Gráfico da turma
         mostrarGraficoTurma();
     } else {
