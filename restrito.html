@@ -124,6 +124,28 @@
                         <h3 style="margin-top: 15px; font-size: 18px;">Relatório de Apontamentos</h3>
                     </div>
 
+                    <!-- 🆕 Filtro de Período -->
+<div id="filtro-periodo" style="margin-bottom: 10px; background: white; padding: 12px 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+    <span style="font-weight: bold; color: #0f172a; font-size: 13px;">
+        <i class="fa-solid fa-calendar"></i> Período:
+    </span>
+    <span id="label-periodo" style="font-size: 13px; color: #005088; font-weight: 600;">Hoje</span>
+    
+    <input type="date" id="filtro-data-inicio" style="padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; display: none;" onchange="aplicarFiltroPeriodo()">
+    <span id="separador-ate" style="display: none; font-size: 12px; color: #64748b;">até</span>
+    <input type="date" id="filtro-data-fim" style="padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; display: none;" onchange="aplicarFiltroPeriodo()">
+    
+    <button onclick="filtrarHoje()" style="background: #005088; color: white; border: none; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 11px; font-weight: bold;">Hoje</button>
+    <button onclick="filtrarSemana()" style="background: #e2e8f0; color: #475569; border: none; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 11px;">Esta Semana</button>
+    <button onclick="filtrarMes()" style="background: #e2e8f0; color: #475569; border: none; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 11px;">Este Mês</button>
+    <button onclick="mostrarSeletorPeriodo()" style="background: #e2e8f0; color: #475569; border: none; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 11px;">
+        <i class="fa-solid fa-calendar-days"></i> Personalizado
+    </button>
+    <button onclick="limparFiltro()" style="background: #fee2e2; color: #dc2626; border: none; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 11px; display: none;" id="btn-limpar-filtro">
+        <i class="fa-solid fa-xmark"></i> Limpar
+    </button>
+</div>
+                    
                     <!-- Seletor Único -->
                     <div class="aluno-selector-wrapper" style="margin-bottom: 15px; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
                         <div class="aluno-selector" id="aluno-selector-container" style="display: flex; justify-content: space-between; align-items: center; gap: 15px; flex-wrap: wrap; width: 100%;">
@@ -2349,6 +2371,157 @@ setInterval(() => {
         atualizarPainelRanking();
     }
 }, 30000);
+
+// =============================================
+// 🆕 FILTRO DE PERÍODO
+// =============================================
+let filtroDataInicio = null;
+let filtroDataFim = null;
+
+function getDataAtual() {
+    const hoje = new Date();
+    return hoje.toLocaleDateString('pt-BR'); // dd/mm/yyyy
+}
+
+function parseDataBR(dataStr) {
+    if (!dataStr) return null;
+    const partes = dataStr.split('/');
+    if (partes.length === 3) {
+        return new Date(parseInt(partes[2]), parseInt(partes[1]) - 1, parseInt(partes[0]));
+    }
+    return null;
+}
+
+function filtrarHoje() {
+    const hoje = getDataAtual();
+    filtroDataInicio = hoje;
+    filtroDataFim = hoje;
+    atualizarUIFiltro('Hoje');
+    atualizarCardsMetricas();
+    if (document.getElementById('select-alunos').value) filtrarRegistrosPorAluno();
+}
+
+function filtrarSemana() {
+    const hoje = new Date();
+    const domingo = new Date(hoje);
+    domingo.setDate(hoje.getDate() - hoje.getDay()); // Domingo
+    const sabado = new Date(domingo);
+    sabado.setDate(domingo.getDate() + 6); // Sábado
+    
+    filtroDataInicio = domingo.toLocaleDateString('pt-BR');
+    filtroDataFim = sabado.toLocaleDateString('pt-BR');
+    atualizarUIFiltro('Esta Semana');
+    atualizarCardsMetricas();
+    if (document.getElementById('select-alunos').value) filtrarRegistrosPorAluno();
+}
+
+function filtrarMes() {
+    const hoje = new Date();
+    const primeiroDia = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+    const ultimoDia = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
+    
+    filtroDataInicio = primeiroDia.toLocaleDateString('pt-BR');
+    filtroDataFim = ultimoDia.toLocaleDateString('pt-BR');
+    atualizarUIFiltro('Este Mês');
+    atualizarCardsMetricas();
+    if (document.getElementById('select-alunos').value) filtrarRegistrosPorAluno();
+}
+
+function mostrarSeletorPeriodo() {
+    document.getElementById('filtro-data-inicio').style.display = 'inline-block';
+    document.getElementById('separador-ate').style.display = 'inline';
+    document.getElementById('filtro-data-fim').style.display = 'inline-block';
+    document.getElementById('btn-limpar-filtro').style.display = 'inline-block';
+    
+    const hoje = new Date();
+    document.getElementById('filtro-data-inicio').value = hoje.toISOString().split('T')[0];
+    document.getElementById('filtro-data-fim').value = hoje.toISOString().split('T')[0];
+}
+
+function aplicarFiltroPeriodo() {
+    const inicio = document.getElementById('filtro-data-inicio').value;
+    const fim = document.getElementById('filtro-data-fim').value;
+    
+    if (inicio && fim) {
+        const partesInicio = inicio.split('-');
+        const partesFim = fim.split('-');
+        filtroDataInicio = partesInicio[2] + '/' + partesInicio[1] + '/' + partesInicio[0];
+        filtroDataFim = partesFim[2] + '/' + partesFim[1] + '/' + partesFim[0];
+        document.getElementById('label-periodo').innerText = filtroDataInicio + ' a ' + filtroDataFim;
+        document.getElementById('btn-limpar-filtro').style.display = 'inline-block';
+        atualizarCardsMetricas();
+        if (document.getElementById('select-alunos').value) filtrarRegistrosPorAluno();
+    }
+}
+
+function limparFiltro() {
+    filtroDataInicio = null;
+    filtroDataFim = null;
+    atualizarUIFiltro('Ano 2026');
+    document.getElementById('filtro-data-inicio').style.display = 'none';
+    document.getElementById('separador-ate').style.display = 'none';
+    document.getElementById('filtro-data-fim').style.display = 'none';
+    document.getElementById('btn-limpar-filtro').style.display = 'none';
+    atualizarCardsMetricas();
+    if (document.getElementById('select-alunos').value) filtrarRegistrosPorAluno();
+}
+
+function atualizarUIFiltro(texto) {
+    document.getElementById('label-periodo').innerText = texto;
+    document.getElementById('filtro-data-inicio').style.display = 'none';
+    document.getElementById('separador-ate').style.display = 'none';
+    document.getElementById('filtro-data-fim').style.display = 'none';
+    if (texto === 'Hoje' || texto === 'Esta Semana' || texto === 'Este Mês') {
+        document.getElementById('btn-limpar-filtro').style.display = 'inline-block';
+    }
+}
+
+function registroEstaNoPeriodo(dataStr) {
+    if (!filtroDataInicio && !filtroDataFim) return true; // Sem filtro = mostra tudo
+    
+    if (!dataStr) return false;
+    
+    const dataRegistro = parseDataBR(dataStr.split(' ')[0]); // Pega só a data, ignora hora
+    
+    if (!dataRegistro) return false;
+    
+    const inicio = filtroDataInicio ? parseDataBR(filtroDataInicio) : null;
+    const fim = filtroDataFim ? parseDataBR(filtroDataFim) : null;
+    
+    if (inicio && dataRegistro < inicio) return false;
+    if (fim) {
+        // Ajusta fim para o final do dia
+        fim.setHours(23, 59, 59, 999);
+        if (dataRegistro > fim) return false;
+    }
+    
+    return true;
+}
+
+// 🆕 Atualiza os cards de métricas com base no período
+function atualizarCardsMetricas() {
+    const registrosFiltrados = filtroDataInicio 
+        ? todosOsRegistros.filter(r => registroEstaNoPeriodo(r.dataAtual))
+        : todosOsRegistros;
+    
+    const total = registrosFiltrados.length;
+    const meivs = registrosFiltrados.filter(r => r.setor.toLowerCase() === 'meivs').length;
+    const pedagogico = registrosFiltrados.filter(r => r.setor.toLowerCase() === 'pedagogico').length;
+    const adm = registrosFiltrados.filter(r => r.setor.toLowerCase() === 'adm').length;
+    const professores = registrosFiltrados.filter(r => r.setor.toLowerCase() === 'professores' || r.setor.toLowerCase() === 'direcao').length;
+    
+    const valTotal = document.getElementById('dash-val-total');
+    const valMeivs = document.getElementById('dash-val-meivs');
+    const valPedagogico = document.getElementById('dash-val-pedagogico');
+    const valAdm = document.getElementById('dash-val-adm');
+    const valProfessores = document.getElementById('dash-val-professores');
+    
+    if (valTotal) valTotal.innerText = total;
+    if (valMeivs) valMeivs.innerText = meivs;
+    if (valPedagogico) valPedagogico.innerText = pedagogico;
+    if (valAdm) valAdm.innerText = adm;
+    if (valProfessores) valProfessores.innerText = professores;
+}
     
 </script>
   
