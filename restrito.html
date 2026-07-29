@@ -2190,15 +2190,12 @@ let turmaSelecionadaGrafico = null;
 function atualizarPainelRanking() {
     const selectAluno = document.getElementById('select-alunos');
     
-    // Verifica se há um aluno selecionado
     if (selectAluno && selectAluno.value && 
         !selectAluno.value.includes('Selecione') && 
         !selectAluno.value.includes('Escolha') &&
         selectAluno.value.trim() !== '') {
-        // Modo 2: Gráfico da turma
         mostrarGraficoTurma();
     } else {
-        // Modo 1: Ranking geral
         mostrarRankingGeral();
     }
 }
