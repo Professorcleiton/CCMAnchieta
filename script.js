@@ -511,11 +511,16 @@ async function carregarRegistrosDoServidor() {
 }
 
 function atualizarGraficosMural() {
-    const total = todosOsRegistros.length;
-    const meivs = todosOsRegistros.filter(r => r.setor.toLowerCase() === 'meivs').length;
-    const pedagogico = todosOsRegistros.filter(r => r.setor.toLowerCase() === 'pedagogico').length;
-    const adm = todosOsRegistros.filter(r => r.setor.toLowerCase() === 'adm').length;
-    const professores = todosOsRegistros.filter(r => r.setor.toLowerCase() === 'professores' || r.setor.toLowerCase() === 'direcao').length;
+    // 🆕 Usa registros filtrados por período (se houver filtro ativo)
+    const registros = (typeof filtroDataInicio !== 'undefined' && filtroDataInicio)
+        ? todosOsRegistros.filter(r => registroEstaNoPeriodo(r.dataAtual))
+        : todosOsRegistros;
+    
+    const total = registros.length;
+    const meivs = registros.filter(r => r.setor.toLowerCase() === 'meivs').length;
+    const pedagogico = registros.filter(r => r.setor.toLowerCase() === 'pedagogico').length;
+    const adm = registros.filter(r => r.setor.toLowerCase() === 'adm').length;
+    const professores = registros.filter(r => r.setor.toLowerCase() === 'professores' || r.setor.toLowerCase() === 'direcao').length;
 
     // Verifica se os elementos existem antes de acessar
     const valTotal = document.getElementById('dash-val-total');
@@ -637,13 +642,17 @@ setTimeout(() => {
     let cm = 0, cp = 0, ca = 0, cf = 0;
     let docs = 0, ocorr = 0, atas = 0;
 
-    // 5. Filtro e renderização dos cards
-    if (typeof todosOsRegistros !== 'undefined' && Array.isArray(todosOsRegistros)) {
-        todosOsRegistros.forEach(r => {
-            // Normaliza o nome do registro para comparação
-            const nomeRegistro = (r.aluno || '').trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-            
-            if (nomeRegistro === alunoNormalizado) {
+ // 5. Filtro e renderização dos cards
+if (typeof todosOsRegistros !== 'undefined' && Array.isArray(todosOsRegistros)) {
+    todosOsRegistros.forEach(r => {
+        // Normaliza o nome do registro para comparação
+        const nomeRegistro = (r.aluno || '').trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+        
+        // 🆕 Respeita o filtro de período
+        if (filtroDataInicio && !registroEstaNoPeriodo(r.dataAtual)) return;
+        
+        if (nomeRegistro === alunoNormalizado) {
+            // ... resto do código existente ...
                 if (r.tipo === 'documento') {
                     docs++;
                 } else if (r.tipo === 'ocorrencia') {
