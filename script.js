@@ -517,25 +517,44 @@ function atualizarGraficosMural() {
     const adm = todosOsRegistros.filter(r => r.setor.toLowerCase() === 'adm').length;
     const professores = todosOsRegistros.filter(r => r.setor.toLowerCase() === 'professores' || r.setor.toLowerCase() === 'direcao').length;
 
-    document.getElementById('dash-val-total').innerText = total;
-    document.getElementById('dash-val-meivs').innerText = meivs;
-    document.getElementById('dash-val-pedagogico').innerText = pedagogico;
-    document.getElementById('dash-val-adm').innerText = adm;
-    document.getElementById('dash-val-professores').innerText = professores;
+    // Verifica se os elementos existem antes de acessar
+    const valTotal = document.getElementById('dash-val-total');
+    const valMeivs = document.getElementById('dash-val-meivs');
+    const valPedagogico = document.getElementById('dash-val-pedagogico');
+    const valAdm = document.getElementById('dash-val-adm');
+    const valProfessores = document.getElementById('dash-val-professores');
+
+    if (valTotal) valTotal.innerText = total;
+    if (valMeivs) valMeivs.innerText = meivs;
+    if (valPedagogico) valPedagogico.innerText = pedagogico;
+    if (valAdm) valAdm.innerText = adm;
+    if (valProfessores) valProfessores.innerText = professores;
 
     const pctMeivs = total === 0 ? 0 : Math.round((meivs / total) * 100);
     const pctPed = total === 0 ? 0 : Math.round((pedagogico / total) * 100);
     const pctAdm = total === 0 ? 0 : Math.round((adm / total) * 100);
     const pctProf = total === 0 ? 0 : Math.round((professores / total) * 100);
 
-    document.getElementById('dash-bar-meivs').style.width = pctMeivs + '%';
-    document.getElementById('dash-pct-meivs').innerText = pctMeivs + '%';
-    document.getElementById('dash-bar-pedagogico').style.width = pctPed + '%';
-    document.getElementById('dash-pct-pedagogico').innerText = pctPed + '%';
-    document.getElementById('dash-bar-adm').style.width = pctAdm + '%';
-    document.getElementById('dash-pct-adm').innerText = pctAdm + '%';
-    document.getElementById('dash-bar-professores').style.width = pctProf + '%';
-    document.getElementById('dash-pct-professores').innerText = pctProf + '%';
+    // Barras do gráfico antigo (podem não existir mais)
+    const barMeivs = document.getElementById('dash-bar-meivs');
+    const barPedagogico = document.getElementById('dash-bar-pedagogico');
+    const barAdm = document.getElementById('dash-bar-adm');
+    const barProfessores = document.getElementById('dash-bar-professores');
+    
+    const pctMeivsEl = document.getElementById('dash-pct-meivs');
+    const pctPedEl = document.getElementById('dash-pct-pedagogico');
+    const pctAdmEl = document.getElementById('dash-pct-adm');
+    const pctProfEl = document.getElementById('dash-pct-professores');
+
+    if (barMeivs) barMeivs.style.width = pctMeivs + '%';
+    if (barPedagogico) barPedagogico.style.width = pctPed + '%';
+    if (barAdm) barAdm.style.width = pctAdm + '%';
+    if (barProfessores) barProfessores.style.width = pctProf + '%';
+
+    if (pctMeivsEl) pctMeivsEl.innerText = pctMeivs + '%';
+    if (pctPedEl) pctPedEl.innerText = pctPed + '%';
+    if (pctAdmEl) pctAdmEl.innerText = pctAdm + '%';
+    if (pctProfEl) pctProfEl.innerText = pctProf + '%';
 }
 
 function formatarDataEHora(s) {
