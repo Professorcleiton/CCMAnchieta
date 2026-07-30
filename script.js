@@ -466,7 +466,19 @@ async function carregarRegistrosDoServidor() {
         }
 
         if (data.atas) {
+            // 🆕 Remove duplicatas antes de exibir
+            const atasUnicas = [];
+            const chavesAtas = new Set();
+            
             data.atas.forEach(ata => {
+                const chave = ata.aluno + '|' + ata.numero + '|' + ata.data;
+                if (!chavesAtas.has(chave)) {
+                    chavesAtas.add(chave);
+                    atasUnicas.push(ata);
+                }
+            });
+            
+            atasUnicas.forEach(ata => {
                 var linkHtml = (usuarioLogado && usuarioLogado.nivel >= 3) ?
                     ' <a href="' + ata.link + '" target="_blank" style="color:#4f46e5;text-decoration:underline;">📎 Ver Ata</a>' : '';
                 todosOsRegistros.push({
