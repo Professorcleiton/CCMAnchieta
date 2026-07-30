@@ -576,6 +576,7 @@ function formatarDataEHora(s) {
     return s;
 }
 
+
 function filtrarRegistrosPorAluno() {
     const select = document.getElementById('select-alunos');
     const mural = document.getElementById('welcome-dashboard-mural');
@@ -595,14 +596,14 @@ function filtrarRegistrosPorAluno() {
         if (pdf) pdf.style.display = 'none';
         if (tabs) tabs.style.display = 'none';
         // 🆕 Força a atualização do painel
-setTimeout(() => {
-    if (document.getElementById('select-alunos').value && 
-        !document.getElementById('select-alunos').value.includes('Selecione')) {
-        mostrarGraficoTurma();
-    } else {
-        mostrarRankingGeral();
-    }
-}, 300);
+        setTimeout(() => {
+            if (document.getElementById('select-alunos').value && 
+                !document.getElementById('select-alunos').value.includes('Selecione')) {
+                mostrarGraficoTurma();
+            } else {
+                mostrarRankingGeral();
+            }
+        }, 300);
         return;
     }
 
@@ -642,17 +643,16 @@ setTimeout(() => {
     let cm = 0, cp = 0, ca = 0, cf = 0;
     let docs = 0, ocorr = 0, atas = 0;
 
- // 5. Filtro e renderização dos cards
-if (typeof todosOsRegistros !== 'undefined' && Array.isArray(todosOsRegistros)) {
-    todosOsRegistros.forEach(r => {
-        // Normaliza o nome do registro para comparação
-        const nomeRegistro = (r.aluno || '').trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-        
-        // 🆕 Respeita o filtro de período
-        if (filtroDataInicio && !registroEstaNoPeriodo(r.dataAtual)) return;
-        
-        if (nomeRegistro === alunoNormalizado) {
-            // ... resto do código existente ...
+    // 5. Filtro e renderização dos cards
+    if (typeof todosOsRegistros !== 'undefined' && Array.isArray(todosOsRegistros)) {
+        todosOsRegistros.forEach(r => {
+            // Normaliza o nome do registro para comparação
+            const nomeRegistro = (r.aluno || '').trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+            
+            // 🆕 Respeita o filtro de período
+            if (typeof filtroDataInicio !== 'undefined' && filtroDataInicio && !registroEstaNoPeriodo(r.dataAtual)) return;
+            
+            if (nomeRegistro === alunoNormalizado) {
                 if (r.tipo === 'documento') {
                     docs++;
                 } else if (r.tipo === 'ocorrencia') {
@@ -962,10 +962,21 @@ function aplicarBloqueioSetores(setor, nivel) {
 
 // ==== MODAL RELATÓRIO ====
 function abrirModalRelatorio(setorFiltrado) {
-    modalSetorAtivo = setorFiltrado; modalItensExibidos = 50;
+    modalSetorAtivo = setorFiltrado; 
+    modalItensExibidos = 50;
     document.getElementById('modal-relatorio-setor').style.display = 'flex';
     document.getElementById('modal-relatorio-titulo').innerHTML = setorFiltrado === 'geral' ? 'Relatório Geral' : setorFiltrado.toUpperCase();
-    let registros = setorFiltrado === 'geral' ? todosOsRegistros : todosOsRegistros.filter(r => r.setor === setorFiltrado || (setorFiltrado === 'direcao' && (r.setor === 'professores' || r.setor === 'direcao')));
+    
+    // 🆕 Filtra por período primeiro
+    let registrosBase = (typeof filtroDataInicio !== 'undefined' && filtroDataInicio)
+        ? todosOsRegistros.filter(r => registroEstaNoPeriodo(r.dataAtual))
+        : todosOsRegistros;
+    
+    // Depois filtra por setor
+    let registros = setorFiltrado === 'geral' 
+        ? registrosBase 
+        : registrosBase.filter(r => r.setor === setorFiltrado || (setorFiltrado === 'direcao' && (r.setor === 'professores' || r.setor === 'direcao')));
+    
     modalRegistrosFiltrados = [...registros].reverse();
     const container = document.getElementById('modal-relatorio-lista');
     container.innerHTML = `<div style="padding:10px;"><input type="text" id="busca-modal" placeholder="Filtrar..." oninput="filtrarBuscaModal(false)" style="width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:6px;"></div><div id="modal-lista-itens-scroll" style="max-height:420px;overflow-y:auto;"></div><div id="modal-container-botao-mais" style="text-align:center;padding:15px;"></div>`;
