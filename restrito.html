@@ -1132,11 +1132,13 @@ function checarSeUsuarioExisteParaEditar() {
                     const maxAulasEl = document.getElementById('admin-pref-max-aulas');
                     const geminadasEl = document.getElementById('admin-pref-geminadas');
                     const restricoesEl = document.getElementById('admin-pref-restricoes');
+                    const dataNascEl = document.getElementById('admin-data-nasc'); // 🆕
                     
                     if (turnoEl) turnoEl.value = usuarioEncontrado.turno_pref || 'Ambos';
                     if (maxAulasEl) maxAulasEl.value = usuarioEncontrado.max_aulas || 5;
                     if (geminadasEl) geminadasEl.value = usuarioEncontrado.geminadas || 'Não';
                     if (restricoesEl) restricoesEl.value = usuarioEncontrado.restricoes || '';
+                    if (dataNascEl) dataNascEl.value = usuarioEncontrado.data_nasc || ''; // 🆕
                 } else {
                     if (divPref) divPref.style.display = 'none';
                 }
@@ -1146,6 +1148,9 @@ function checarSeUsuarioExisteParaEditar() {
                 btnSave.style.background = '#059669';
                 if (btnDel) btnDel.style.display = 'none';
                 if (divPref) divPref.style.display = 'none';
+                // 🆕 Limpar data de nascimento
+                const dataNascEl = document.getElementById('admin-data-nasc');
+                if (dataNascEl) dataNascEl.value = '';
             }
         })
         .catch(e => console.error('Erro ao buscar usuários:', e));
