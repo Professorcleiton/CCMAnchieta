@@ -89,6 +89,12 @@
                     </div>
                 </header>
 
+                <!-- 🆕 Banner de Aniversariantes -->
+                <div id="banner-aniversario" style="display:none; background: linear-gradient(135deg, #fef3c7, #fde68a); padding: 10px 20px; text-align: center; font-size: 14px; font-weight: 600; color: #92400e; border-bottom: 3px solid #f59e0b; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap;">
+                    <span id="texto-banner-aniversario">🎂 Hoje é aniversário de: </span>
+                    <button onclick="fecharBannerAniversario()" style="background:#92400e;color:white;border:none;padding:4px 12px;border-radius:15px;cursor:pointer;font-size:12px;font-weight:bold;">OK 🎉</button>
+                </div>
+
                 <!-- Indicador de Status de Conexão -->
                 <div id="status-conexao" style="position: fixed; bottom: 20px; left: 20px; z-index: 9999; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: bold; display: none; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.15); border: 1px solid #e2e8f0;">
                     <i class="fa-solid fa-circle" id="status-icone" style="color: #22c55e; margin-right: 6px;"></i>
@@ -125,26 +131,26 @@
                     </div>
 
                     <!-- 🆕 Filtro de Período -->
-<div id="filtro-periodo" style="margin-bottom: 10px; background: white; padding: 12px 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-    <span style="font-weight: bold; color: #0f172a; font-size: 13px;">
-        <i class="fa-solid fa-calendar"></i> Período:
-    </span>
-    <span id="label-periodo" style="font-size: 13px; color: #005088; font-weight: 600;">Hoje</span>
-    
-    <input type="date" id="filtro-data-inicio" style="padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; display: none;" onchange="aplicarFiltroPeriodo()">
-    <span id="separador-ate" style="display: none; font-size: 12px; color: #64748b;">até</span>
-    <input type="date" id="filtro-data-fim" style="padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; display: none;" onchange="aplicarFiltroPeriodo()">
-    
-    <button onclick="filtrarHoje()" style="background: #005088; color: white; border: none; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 11px; font-weight: bold;">Hoje</button>
-    <button onclick="filtrarSemana()" style="background: #e2e8f0; color: #475569; border: none; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 11px;">Esta Semana</button>
-    <button onclick="filtrarMes()" style="background: #e2e8f0; color: #475569; border: none; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 11px;">Este Mês</button>
-    <button onclick="mostrarSeletorPeriodo()" style="background: #e2e8f0; color: #475569; border: none; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 11px;">
-        <i class="fa-solid fa-calendar-days"></i> Personalizado
-    </button>
-    <button onclick="limparFiltro()" style="background: #fee2e2; color: #dc2626; border: none; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 11px; display: none;" id="btn-limpar-filtro">
-        <i class="fa-solid fa-xmark"></i> Limpar
-    </button>
-</div>
+                    <div id="filtro-periodo" style="margin-bottom: 10px; background: white; padding: 12px 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                        <span style="font-weight: bold; color: #0f172a; font-size: 13px;">
+                            <i class="fa-solid fa-calendar"></i> Período:
+                        </span>
+                        <span id="label-periodo" style="font-size: 13px; color: #005088; font-weight: 600;">Hoje</span>
+                        
+                        <input type="date" id="filtro-data-inicio" style="padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; display: none;" onchange="aplicarFiltroPeriodo()">
+                        <span id="separador-ate" style="display: none; font-size: 12px; color: #64748b;">até</span>
+                        <input type="date" id="filtro-data-fim" style="padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; display: none;" onchange="aplicarFiltroPeriodo()">
+                        
+                        <button onclick="filtrarHoje()" style="background: #005088; color: white; border: none; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 11px; font-weight: bold;">Hoje</button>
+                        <button onclick="filtrarSemana()" style="background: #e2e8f0; color: #475569; border: none; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 11px;">Esta Semana</button>
+                        <button onclick="filtrarMes()" style="background: #e2e8f0; color: #475569; border: none; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 11px;">Este Mês</button>
+                        <button onclick="mostrarSeletorPeriodo()" style="background: #e2e8f0; color: #475569; border: none; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 11px;">
+                            <i class="fa-solid fa-calendar-days"></i> Personalizado
+                        </button>
+                        <button onclick="limparFiltro()" style="background: #fee2e2; color: #dc2626; border: none; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 11px; display: none;" id="btn-limpar-filtro">
+                            <i class="fa-solid fa-xmark"></i> Limpar
+                        </button>
+                    </div>
                     
                     <!-- Seletor Único -->
                     <div class="aluno-selector-wrapper" style="margin-bottom: 15px; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
@@ -158,48 +164,47 @@
                             </div>
 
                             <button id="btn-selecionar-varios" onclick="abrirSelecaoMultipla()" style="background:#f59e0b;color:white;border:none;padding:8px 12px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:bold;display:none;">
-    <i class="fa-solid fa-users"></i> Selecionar Vários
-</button>
-<button id="btn-voltar-seletor" onclick="fecharSelecaoMultipla()" style="background:#64748b;color:white;border:none;padding:8px 12px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:bold;display:none;">
-    <i class="fa-solid fa-arrow-left"></i> Voltar
-</button>
-    <div id="selecao-multipla" style="display:none;background:white;padding:15px;border-radius:8px;margin-top:10px;border:1px solid #e2e8f0;">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-        <label style="font-weight:bold;cursor:pointer;">
-            <input type="checkbox" id="check-todos" onchange="marcarTodos(this.checked)"> Selecionar Todos
-        </label>
-        <span id="contador-selecionados" style="font-size:12px;color:#64748b;">0 selecionados</span>
-    </div>
-    <div id="lista-checkboxes" style="max-height:150px;overflow-y:auto;display:flex;flex-direction:column;gap:5px;margin-bottom:10px;">
-        <!-- Checkboxes preenchidos dinamicamente -->
-    </div>
-    
-    <!-- 🆕 Campo de apontamento DENTRO da seleção múltipla -->
-    <div style="margin-bottom:10px;">
-        <label style="font-weight:bold;display:block;margin-bottom:5px;">📝 Apontamento:</label>
-        <textarea id="texto-apontamento-multiplo" placeholder="Descreva o apontamento para todos os alunos selecionados..." style="width:100%;height:80px;padding:10px;border:1px solid #cbd5e1;border-radius:6px;resize:vertical;font-size:14px;"></textarea>
-    </div>
-    
-    <!-- 🆕 Seletor de setor -->
-    <div style="margin-bottom:10px;">
-        <label style="font-weight:bold;display:block;margin-bottom:5px;">Setor:</label>
-        <select id="setor-apontamento-multiplo" style="width:100%;padding:8px;border:1px solid #cbd5e1;border-radius:6px;">
-            <option value="meivs">MEIV'S</option>
-            <option value="pedagogico">Pedagógico</option>
-            <option value="adm">ADM</option>
-            <option value="direcao">Professores</option>
-        </select>
-    </div>
-    
-    <div style="display:flex;gap:10px;">
-        <button onclick="salvarApontamentoMultiplo()" style="background:#005088;color:white;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-weight:bold;flex:1;">
-            💾 Salvar Apontamento
-        </button>
-        <button onclick="fecharSelecaoMultipla()" style="background:#94a3b8;color:white;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-weight:bold;">
-            ↩️ Voltar
-        </button>
-    </div>
-</div>
+                                <i class="fa-solid fa-users"></i> Selecionar Vários
+                            </button>
+                            <button id="btn-voltar-seletor" onclick="fecharSelecaoMultipla()" style="background:#64748b;color:white;border:none;padding:8px 12px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:bold;display:none;">
+                                <i class="fa-solid fa-arrow-left"></i> Voltar
+                            </button>
+                            <div id="selecao-multipla" style="display:none;background:white;padding:15px;border-radius:8px;margin-top:10px;border:1px solid #e2e8f0;">
+                                <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+                                    <label style="font-weight:bold;cursor:pointer;">
+                                        <input type="checkbox" id="check-todos" onchange="marcarTodos(this.checked)"> Selecionar Todos
+                                    </label>
+                                    <span id="contador-selecionados" style="font-size:12px;color:#64748b;">0 selecionados</span>
+                                </div>
+                                <div id="lista-checkboxes" style="max-height:150px;overflow-y:auto;display:flex;flex-direction:column;gap:5px;margin-bottom:10px;">
+                                    <!-- Checkboxes preenchidos dinamicamente -->
+                                </div>
+                                
+                                <div style="margin-bottom:10px;">
+                                    <label style="font-weight:bold;display:block;margin-bottom:5px;">📝 Apontamento:</label>
+                                    <textarea id="texto-apontamento-multiplo" placeholder="Descreva o apontamento para todos os alunos selecionados..." style="width:100%;height:80px;padding:10px;border:1px solid #cbd5e1;border-radius:6px;resize:vertical;font-size:14px;"></textarea>
+                                </div>
+                                
+                                <div style="margin-bottom:10px;">
+                                    <label style="font-weight:bold;display:block;margin-bottom:5px;">Setor:</label>
+                                    <select id="setor-apontamento-multiplo" style="width:100%;padding:8px;border:1px solid #cbd5e1;border-radius:6px;">
+                                        <option value="meivs">MEIV'S</option>
+                                        <option value="pedagogico">Pedagógico</option>
+                                        <option value="adm">ADM</option>
+                                        <option value="direcao">Professores</option>
+                                    </select>
+                                </div>
+                                
+                                <div style="display:flex;gap:10px;">
+                                    <button onclick="salvarApontamentoMultiplo()" style="background:#005088;color:white;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-weight:bold;flex:1;">
+                                        💾 Salvar Apontamento
+                                    </button>
+                                    <button onclick="fecharSelecaoMultipla()" style="background:#94a3b8;color:white;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-weight:bold;">
+                                        ↩️ Voltar
+                                    </button>
+                                </div>
+                            </div>
+                            
                             <div style="display: flex; gap: 10px;">
                                 <button id="btn-gerar-pdf-oficial" onclick="gerarFichaIndividualConselho()" style="display: none; background-color: #2563eb; color: white; padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2); align-items: center; gap: 8px;">
                                     <i class="fa-solid fa-file-pdf"></i> Imprimir Ficha Individual
@@ -208,6 +213,18 @@
                                     <i class="fa-solid fa-users-gear"></i> Relatório Pré-Conselho
                                 </button>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- 🆕 Card de Aniversariantes -->
+                    <div id="card-aniversariantes" style="display:none; background: linear-gradient(135deg, #fef3c7, #fde68a); border-radius: 12px; padding: 20px; margin-bottom: 15px; border-left: 5px solid #f59e0b; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.2);">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
+                            <h3 style="color:#92400e;margin:0;font-size:16px;">
+                                🎉 Aniversariantes de Hoje — <span id="data-hoje-aniversario"></span>
+                            </h3>
+                        </div>
+                        <div id="lista-aniversariantes" style="display:flex;flex-direction:column;gap:15px;">
+                            <!-- Preenchido dinamicamente -->
                         </div>
                     </div>
 
@@ -255,36 +272,33 @@
                     <!-- Painéis de Distribuição e Ações (empilhados) -->
                     <div class="dash-lower-grid">
                         <div class="dash-panel" id="painel-ranking">
-    <div class="dash-panel-title" id="titulo-ranking">
-        <i class="fa-solid fa-trophy"></i> <span id="texto-titulo-ranking">Turmas com Mais Apontamentos</span>
-        <span style="font-size:11px;color:#64748b;margin-left:auto;" id="periodo-ranking">Ano 2026</span>
-    </div>
-    <div id="conteudo-ranking">
-        <div style="text-align:center;padding:20px;color:#64748b;">Carregando...</div>
-    </div>
-</div>
+                            <div class="dash-panel-title" id="titulo-ranking">
+                                <i class="fa-solid fa-trophy"></i> <span id="texto-titulo-ranking">Turmas com Mais Apontamentos</span>
+                                <span style="font-size:11px;color:#64748b;margin-left:auto;" id="periodo-ranking">Ano 2026</span>
+                            </div>
+                            <div id="conteudo-ranking">
+                                <div style="text-align:center;padding:20px;color:#64748b;">Carregando...</div>
+                            </div>
+                        </div>
 
                         <div class="dash-panel" style="display: flex; flex-direction: column; gap: 15px; max-height: calc(100vh - 220px); overflow-y: auto; padding-right: 8px;">
                             <div class="dash-panel-title"><i class="fa-solid fa-bolt"></i> Ações Rápidas</div>
 
-                            <!-- BOTÃO - CENTRAL DE ALERTAS -->
-                           <button id="btn-central-alertas" class="btn-salvar" style="background-color: #dc2626; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: none; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(220, 38, 38, 0.2); margin-bottom: 5px;" onclick="abrirCentralAlertas()">
-    <i class="fa-solid fa-triangle-exclamation" style="font-size: 18px;"></i> Central de Alertas
-</button>
-                            <!-- BOTÃO - PROGRESSÃO DE TURMAS -->
-<button id="btn-progressao" class="btn-salvar" style="background-color: #059669; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: none; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(5, 150, 105, 0.2); margin-bottom: 5px;" onclick="abrirProgressao()">
-    <i class="fa-solid fa-arrow-right-arrow-left" style="font-size: 18px;"></i> Progressão de Turmas
-</button>
-
-                            <!-- BOTÃO - GESTÃO DE HORÁRIOS -->
-<button id="btn-gestao-horarios" class="btn-salvar" style="background-color: #7c3aed; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: none; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(124, 58, 237, 0.2); margin-bottom: 5px;" onclick="abrirGestaoHorarios()">
-    <i class="fa-solid fa-table" style="font-size: 18px;"></i> Gestão de Horários
-</button>
+                            <button id="btn-central-alertas" class="btn-salvar" style="background-color: #dc2626; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: none; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(220, 38, 38, 0.2); margin-bottom: 5px;" onclick="abrirCentralAlertas()">
+                                <i class="fa-solid fa-triangle-exclamation" style="font-size: 18px;"></i> Central de Alertas
+                            </button>
                             
-                            <!-- BOTÃO - AGENDA DO LABORATÓRIO -->
+                            <button id="btn-progressao" class="btn-salvar" style="background-color: #059669; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: none; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(5, 150, 105, 0.2); margin-bottom: 5px;" onclick="abrirProgressao()">
+                                <i class="fa-solid fa-arrow-right-arrow-left" style="font-size: 18px;"></i> Progressão de Turmas
+                            </button>
+
+                            <button id="btn-gestao-horarios" class="btn-salvar" style="background-color: #7c3aed; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: none; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(124, 58, 237, 0.2); margin-bottom: 5px;" onclick="abrirGestaoHorarios()">
+                                <i class="fa-solid fa-table" style="font-size: 18px;"></i> Gestão de Horários
+                            </button>
+                            
                             <button id="btn-agenda-lab" class="btn-salvar" style="background-color: #0f172a; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: none; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(15, 23, 42, 0.2); margin-bottom: 5px;" onclick="abrirAgendaLab()">
-    <i class="fa-solid fa-desktop" style="font-size: 18px; color: #eab308;"></i> Agenda do Laboratório
-</button>
+                                <i class="fa-solid fa-desktop" style="font-size: 18px; color: #eab308;"></i> Agenda do Laboratório
+                            </button>
                             
                             <button id="btn-aba-secretaria" class="btn-salvar" onclick="mostrarTab('documentos')" style="display: none; background-color: #64748b; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(100, 116, 139, 0.2); margin-bottom: 5px;">
                                 <i class="fa-solid fa-folder-open" style="font-size: 18px;"></i> Secretaria / Docs
@@ -299,17 +313,16 @@
                             </button>
 
                             <a id="btn-patrimonio" href="patrimonio.html" class="btn-salvar" style="background-color: #005088; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(0, 80, 136, 0.2); margin-bottom: 5px;">
-    <i class="fa-solid fa-boxes-stacked" style="font-size: 18px;"></i> Módulo Patrimônio
-</a>
+                                <i class="fa-solid fa-boxes-stacked" style="font-size: 18px;"></i> Módulo Patrimônio
+                            </a>
 
                             <button id="btn-comunicado-seed" class="btn-salvar" style="background-color: #8b5cf6; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: none; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(139, 92, 246, 0.2); margin-bottom: 5px;" onclick="abrirModalComunicadoSEED()">
                                 <i class="fa-solid fa-file-lines" style="font-size: 18px;"></i> Fatos Observados (F.O.)
                             </button>
 
-                            <!-- NOVO BOTÃO - MEUS HORÁRIOS -->
                             <button id="btn-meus-horarios" class="btn-salvar" style="background-color: #6366f1; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: none; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(99, 102, 241, 0.2); margin-bottom: 5px;" onclick="abrirMeusHorarios()">
-    <i class="fa-solid fa-clock" style="font-size: 18px;"></i> Meus Horários
-</button>
+                                <i class="fa-solid fa-clock" style="font-size: 18px;"></i> Meus Horários
+                            </button>
                             
                         </div>
                     </div>
@@ -2522,7 +2535,146 @@ function atualizarCardsMetricas() {
     if (valAdm) valAdm.innerText = adm;
     if (valProfessores) valProfessores.innerText = professores;
 }
+    // =============================================
+// 🎂 SISTEMA DE ANIVERSÁRIOS
+// =============================================
+let aniversariantesHoje = [];
+let recadosAniversario = {};
+
+async function verificarAniversariantes() {
+    try {
+        const hoje = new Date();
+        const dia = String(hoje.getDate()).padStart(2, '0');
+        const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+        const dataHoje = dia + '/' + mes;
+        
+        const elData = document.getElementById('data-hoje-aniversario');
+        if (elData) elData.innerText = dataHoje;
+        
+        const resp = await fetch(APPS_SCRIPT_V2 + '?aba=usuarios');
+        const usuarios = await resp.json();
+        
+        aniversariantesHoje = usuarios.filter(u => {
+            if (!u.data_nasc) return false;
+            return u.data_nasc.trim() === dataHoje;
+        });
+        
+        if (aniversariantesHoje.length > 0) {
+            exibirBannerAniversario();
+            exibirCardAniversariantes();
+            exibirToastAniversario();
+            carregarRecadosAniversario();
+        }
+    } catch (e) {
+        console.error('Erro ao verificar aniversários:', e);
+    }
+}
+
+function exibirBannerAniversario() {
+    const banner = document.getElementById('banner-aniversario');
+    const texto = document.getElementById('texto-banner-aniversario');
+    if (!banner || !texto) return;
     
+    const nomes = aniversariantesHoje.map(a => a.nome).join(', ');
+    texto.innerHTML = '🎂 Hoje é aniversário de: <strong>' + nomes + '</strong>';
+    banner.style.display = 'flex';
+}
+
+function fecharBannerAniversario() {
+    document.getElementById('banner-aniversario').style.display = 'none';
+    localStorage.setItem('banner_aniversario_fechado', new Date().toDateString());
+}
+
+function exibirCardAniversariantes() {
+    const card = document.getElementById('card-aniversariantes');
+    const lista = document.getElementById('lista-aniversariantes');
+    if (!card || !lista) return;
+    
+    card.style.display = 'block';
+    lista.innerHTML = '';
+    
+    aniversariantesHoje.forEach(aniv => {
+        const recados = recadosAniversario[aniv.nome] || [];
+        let htmlRecados = '';
+        recados.forEach(rec => {
+            htmlRecados += '<div style="background:white;padding:8px 12px;border-radius:6px;margin-top:5px;font-size:13px;">';
+            htmlRecados += '<em>"' + rec.mensagem + '"</em>';
+            htmlRecados += '<div style="font-size:11px;color:#64748b;text-align:right;">— ' + rec.autor + '</div>';
+            htmlRecados += '</div>';
+        });
+        
+        lista.innerHTML += `
+            <div style="background:white;padding:15px;border-radius:8px;border:1px solid #fde68a;">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+                    <span style="font-size:24px;">🎂</span>
+                    <div>
+                        <strong style="font-size:15px;">${aniv.nome}</strong>
+                        <span style="font-size:12px;color:#64748b;display:block;">${aniv.setor || 'Funcionário'}</span>
+                    </div>
+                </div>
+                ${htmlRecados}
+                <button onclick="abrirModalRecado('${aniv.nome}')" style="background:#f59e0b;color:white;border:none;padding:6px 14px;border-radius:15px;cursor:pointer;font-size:12px;margin-top:8px;">
+                    ✍️ Deixar recado
+                </button>
+            </div>`;
+    });
+}
+
+function exibirToastAniversario() {
+    const visto = localStorage.getItem('toast_aniversario_' + new Date().toDateString());
+    if (visto) return;
+    const nomes = aniversariantesHoje.map(a => a.nome).join(', ');
+    mostrarToast('🎂 Hoje é aniversário de: ' + nomes + '! 🎉', 'aviso');
+    localStorage.setItem('toast_aniversario_' + new Date().toDateString(), 'sim');
+}
+
+function abrirModalRecado(nome) {
+    document.getElementById('recado-aniversariante').value = nome;
+    document.getElementById('nome-aniversariante-recado').innerText = nome;
+    document.getElementById('texto-recado').value = '';
+    document.getElementById('modal-recado-aniversario').style.display = 'flex';
+}
+
+function fecharModalRecadoAniversario(e) {
+    if (e.target.id === 'modal-recado-aniversario') {
+        document.getElementById('modal-recado-aniversario').style.display = 'none';
+    }
+}
+
+async function enviarRecadoAniversario() {
+    const aniversariante = document.getElementById('recado-aniversariante').value;
+    const mensagem = document.getElementById('texto-recado').value.trim();
+    if (!mensagem) { alert('Escreva uma mensagem.'); return; }
+    
+    try {
+        await fetch(APPS_SCRIPT_V2, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify({
+                operacao: "SALVAR_RECADO_ANIVERSARIO",
+                aniversariante, autor: usuarioLogado.nome, mensagem
+            })
+        });
+        document.getElementById('modal-recado-aniversario').style.display = 'none';
+        mostrarToast('✅ Recado enviado!', 'sucesso');
+        await carregarRecadosAniversario();
+        exibirCardAniversariantes();
+    } catch (e) { alert('Erro ao enviar.'); }
+}
+
+async function carregarRecadosAniversario() {
+    try {
+        const hoje = new Date();
+        const dataHoje = String(hoje.getDate()).padStart(2, '0') + '/' + String(hoje.getMonth() + 1).padStart(2, '0');
+        const resp = await fetch(APPS_SCRIPT_V2 + '?aba=recados_aniversario&data=' + dataHoje);
+        const recados = await resp.json();
+        recadosAniversario = {};
+        recados.forEach(r => {
+            if (!recadosAniversario[r.aniversariante]) recadosAniversario[r.aniversariante] = [];
+            recadosAniversario[r.aniversariante].push(r);
+        });
+    } catch (e) { console.error('Erro ao carregar recados:', e); }
+}
 </script>
   
 </body>
