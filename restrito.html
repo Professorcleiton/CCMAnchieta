@@ -754,72 +754,11 @@
     
     <div id="toast-container"></div>
 
-<!-- MODAL ADMIN / GESTÃO -->
-<div class="modal-overlay" id="modal-admin" onclick="fecharModalAdminEvent(event)">
-    <div class="modal-content" style="max-width: 650px;">
-        <div class="modal-header" style="background-color: #475569;">
-            <h3><i class="fa-solid fa-gear"></i> Painel de Gestão SIGA</h3>
-            <button onclick="fecharModalAdmin()" style="background:none;border:none;color:white;font-size:20px;">&times;</button>
-        </div>
-        <div class="modal-body" style="padding: 25px; overflow-y: auto; max-height: 75vh;">
-            
-            <!-- Remanejar / Excluir Aluno -->
-            <h4 style="margin-bottom: 15px; color: #005088;"><i class="fa-solid fa-user-pen"></i> Remanejar / Excluir Aluno</h4>
-            <div class="input-group"><label>Buscar Aluno:</label><input type="text" id="admin-nome-aluno" list="lista-todos-alunos" placeholder="Digite o nome exato do aluno..."></div>
-            <div class="input-group"><label>Ação / Nova Turma:</label><select id="admin-nova-turma" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 16px;"></select></div>
-            <button class="btn-salvar" style="background-color: #475569; margin-top: 10px;" onclick="executarAcaoAluno()" id="btn-exec-admin">Confirmar Ação</button>
-            
-            <hr style="margin: 25px 0; border: 0; border-top: 1px solid #cbd5e1;">
-            
-            <!-- Gestão de Equipe (Usuários) -->
-            <h4 style="margin-bottom: 15px; color: #b45309;"><i class="fa-solid fa-users-gear"></i> Gestão de Equipe (Usuários)</h4>
-            <div class="input-group"><label>E-mail (Login / Chave de Busca):</label><input type="email" id="admin-user-email" placeholder="email@escola.pr.gov.br"></div>
-            <div class="input-group"><label>Nome Completo:</label><input type="text" id="admin-user-nome" placeholder="Nome do Servidor"></div>
-            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                <div style="flex: 1;"><label style="font-weight: bold; font-size: 14px; margin-bottom: 5px; display: block;">Setor:</label><select id="admin-user-setor" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;" onchange="togglePreferenciasProfessor()"><option value="professores">Professores</option><option value="meivs">MEIV'S</option><option value="pedagogico">Pedagógico</option><option value="adm">ADM</option><option value="direcao">Direção</option></select></div>
-                <div style="flex: 1;"><label style="font-weight: bold; font-size: 14px; margin-bottom: 5px; display: block;">Nível de Acesso:</label><select id="admin-user-nivel" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;"><option value="1">1 - Padrão</option><option value="2">2 - Intermediário</option><option value="3">3 - Administrador</option><option value="4">4 - Direção</option></select></div>
-            </div>
-            <div class="input-group"><label>Senha (Somente números - ex: RG):</label><input type="text" id="admin-user-senha" placeholder="Deixe em branco para manter a atual (na edição)"></div>
-            
-            <!-- 🆕 PREFERÊNCIAS DO PROFESSOR -->
-            <div id="preferencias-professor" style="display:none;">
-                <hr style="margin: 20px 0; border: 0; border-top: 2px dashed #7c3aed;">
-                <h4 style="margin-bottom: 15px; color: #7c3aed;"><i class="fa-solid fa-sliders"></i> Preferências do Professor</h4>
-                
-                <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
-                    <div style="flex: 1; min-width: 150px;">
-                        <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 5px;">Turno de Preferência:</label>
-                        <select id="admin-pref-turno" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;">
-                            <option value="Ambos">Ambos</option>
-                            <option value="Manhã">Manhã</option>
-                            <option value="Tarde">Tarde</option>
-                        </select>
-                    </div>
-                    <div style="flex: 1; min-width: 150px;">
-                        <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 5px;">Máx. Aulas por Dia:</label>
-                        <input type="number" id="admin-pref-max-aulas" value="5" min="1" max="6" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;">
-                    </div>
-                    <div style="flex: 1; min-width: 150px;">
-                        <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 5px;">Aulas Geminadas?</label>
-                        <select id="admin-pref-geminadas" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;">
-                            <option value="Não">Não</option>
-                            <option value="Sim">Sim</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div style="margin-bottom: 15px;">
-                    <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 5px;">Restrições Específicas:</label>
-                    <input type="text" id="admin-pref-restricoes" placeholder="Ex: Não pode 1ª aula, Não pode sexta-feira..." style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;">
-                </div>
-            </div>
-            
-            <div style="display: flex; gap: 10px; margin-top: 10px;">
-                <button class="btn-salvar" style="background-color: #059669; flex: 2;" onclick="salvarUsuarioAdmin()" id="btn-save-user">Salvar Usuário</button>
-                <button class="btn-salvar" style="background-color: #dc2626; flex: 1;" onclick="deletarUsuarioAdmin()" id="btn-del-user">Excluir</button>
-            </div>
-        </div>
-    </div>
+<!-- 🆕 DATA DE NASCIMENTO -->
+<div style="margin-bottom: 15px;">
+    <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 5px;">📅 Data de Nascimento:</label>
+    <input type="text" id="admin-data-nasc" placeholder="DD/MM" maxlength="5" style="width: 100px; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;">
+    <span style="font-size: 10px; color: #64748b; display: block; margin-top: 3px;">Apenas dia e mês (ex: 15/08)</span>
 </div>
 
         <!-- ========================================== -->
