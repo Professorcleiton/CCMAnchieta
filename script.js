@@ -241,6 +241,7 @@ function inicializarPainel() {
     carregarRegistrosDoServidor();
     aplicarControleAcesso();
     setTimeout(atualizarStatusConexao, 2000);
+    setTimeout(verificarAniversariantes, 1500);
 }
 
 // ==== ALERTA EM TEMPO REAL ====
@@ -1103,11 +1104,11 @@ async function salvarUsuarioAdmin() {
         setor: setor,
         nivel: nivel,
         senha: senha,
-        // 🆕 Preferências
         turno_pref: document.getElementById('admin-pref-turno')?.value || 'Ambos',
         max_aulas: document.getElementById('admin-pref-max-aulas')?.value || 5,
         geminadas: document.getElementById('admin-pref-geminadas')?.value || 'Não',
-        restricoes: document.getElementById('admin-pref-restricoes')?.value || ''
+        restricoes: document.getElementById('admin-pref-restricoes')?.value || '',
+        data_nasc: document.getElementById('admin-data-nasc')?.value || '' // 🆕
     };
 
     try {
@@ -1123,6 +1124,7 @@ async function salvarUsuarioAdmin() {
             if (document.getElementById('admin-pref-turno')) document.getElementById('admin-pref-turno').value = 'Ambos';
             if (document.getElementById('admin-pref-max-aulas')) document.getElementById('admin-pref-max-aulas').value = 5;
             if (document.getElementById('admin-pref-geminadas')) document.getElementById('admin-pref-geminadas').value = 'Não';
+            if (document.getElementById('admin-data-nasc')) document.getElementById('admin-data-nasc').value = ''; // 🆕
             document.getElementById('preferencias-professor').style.display = 'none';
         } else {
             mostrarToast('Você não tem permissão para esta ação.', 'erro');
