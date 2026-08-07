@@ -23,10 +23,9 @@
         height: 100vh;
     }
     
-    /* SIDEBAR - CORRIGIDA */
+    /* SIDEBAR */
     #patrimonio-interface .sidebar {
-        width: 280px;
-        min-width: 280px;
+        width: 290px;
         background-color: #005088;
         color: white;
         display: flex;
@@ -34,156 +33,59 @@
         border-right: 4px solid #eab308;
         justify-content: space-between;
         flex-shrink: 0;
-        height: 100vh;
-        overflow: hidden;
     }
-    #patrimonio-interface .sidebar-top { 
-        display: flex; 
-        flex-direction: column; 
-        flex: 1; 
-        min-height: 0;
-        overflow: hidden;
-    }
+    #patrimonio-interface .sidebar-top { display: flex; flex-direction: column; flex: 1; min-height: 0; }
     #patrimonio-interface .sidebar-header {
         padding: 20px 15px;
         border-bottom: 1px solid rgba(255,255,255,0.1);
-        display: flex; 
-        align-items: center; 
-        gap: 12px;
-        flex-shrink: 0;
+        display: flex; align-items: center; gap: 12px;
     }
     #patrimonio-interface .sidebar-logo {
-        width: 60px;
-        height: 60px;
-        min-width: 60px;
-        border-radius: 50%;
-        background-color: #eab308;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #005088;
-        font-size: 28px;
-        font-weight: bold;
-        border: 2px solid white;
+        width: 70px; height: 70px; min-width: 70px;
+        object-fit: cover; border-radius: 50%;
+        background-color: white; border: 2px solid white;
     }
-    #patrimonio-interface .sidebar-title h2 { 
-        font-size: 16px; 
-        font-weight: bold; 
-        line-height: 1.2;
-    }
-    #patrimonio-interface .sidebar-title p { 
-        font-size: 11px; 
-        color: #cbd5e1; 
-    }
+    #patrimonio-interface .sidebar-title h2 { font-size: 16px; font-weight: bold; }
+    #patrimonio-interface .sidebar-title p { font-size: 11px; color: #cbd5e1; }
     #patrimonio-interface .room-list-title {
-        font-size: 11px;
-        text-transform: uppercase;
-        color: #eab308;
-        padding: 15px 15px 5px;
-        font-weight: bold;
-        letter-spacing: 0.5px;
-        flex-shrink: 0;
+        font-size: 11px; text-transform: uppercase; color: #eab308;
+        padding: 15px 15px 5px; font-weight: bold; letter-spacing: 0.5px;
     }
-    #patrimonio-interface .room-list {
-        list-style: none;
-        padding: 0 10px;
-        overflow-y: auto;
-        flex: 1;
-        margin: 0;
-    }
+    #patrimonio-interface .room-list { list-style: none; padding: 0 10px; overflow-y: auto; flex: 1; }
     #patrimonio-interface .room-item {
-        padding: 10px 15px;
-        margin-bottom: 5px;
-        background-color: rgba(255,255,255,0.05);
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 13px;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 10px;
+        padding: 10px 15px; margin-bottom: 5px;
+        background-color: rgba(255,255,255,0.05); border-radius: 6px;
+        cursor: pointer; font-size: 13px; font-weight: 600;
+        display: flex; align-items: center; gap: 10px;
         transition: background 0.2s;
-        color: white;
     }
-    #patrimonio-interface .room-item:hover { 
-        background-color: rgba(234, 179, 8, 0.3);
-    }
-    #patrimonio-interface .room-item.active { 
-        background-color: #eab308;
-        color: #1e293b;
-    }
-    #patrimonio-interface .sidebar-footer { 
-        padding: 15px;
-        border-top: 1px solid rgba(255,255,255,0.1);
-        flex-shrink: 0;
-    }
+    #patrimonio-interface .room-item:hover, #patrimonio-interface .room-item.active { background-color: #eab308; color: #1e293b; }
+    #patrimonio-interface .sidebar-footer { padding: 15px; border-top: 1px solid rgba(255,255,255,0.1); }
     #patrimonio-interface .btn-back {
-        width: 100%;
-        padding: 10px;
-        background-color: rgba(255,255,255,0.1);
-        color: white;
-        border: none;
-        border-radius: 6px;
-        font-weight: bold;
-        font-size: 13px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        text-decoration: none;
-        transition: background 0.2s;
+        width: 100%; padding: 10px; background-color: rgba(255,255,255,0.1);
+        color: white; border: none; border-radius: 6px; font-weight: bold;
+        font-size: 13px; cursor: pointer; display: flex; align-items: center;
+        justify-content: center; gap: 8px; text-decoration: none;
     }
-    #patrimonio-interface .btn-back:hover { 
-        background-color: rgba(255,255,255,0.2);
-    }
+    #patrimonio-interface .btn-back:hover { background-color: rgba(255,255,255,0.2); }
     
-    /* MAIN - CORRIGIDO */
-    #patrimonio-interface .main-content { 
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        height: 100vh;
-        overflow: hidden;
-        min-width: 0;
-    }
+    /* MAIN */
+    #patrimonio-interface .main-content { flex: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
     
     /* TOP BAR */
     #patrimonio-interface .top-bar {
-        background-color: white;
-        padding: 12px 20px;
+        background-color: white; padding: 10px 20px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        min-height: 60px;
-        gap: 10px;
-        flex-wrap: wrap;
-        flex-shrink: 0;
+        display: flex; justify-content: space-between; align-items: center;
+        min-height: 60px; gap: 10px; flex-wrap: wrap;
     }
-    #patrimonio-interface .top-bar h1 { 
-        font-size: 18px;
-        color: #005088;
-        margin: 0;
-        white-space: nowrap;
-    }
-    #patrimonio-interface .top-actions {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-    }
+    #patrimonio-interface .top-bar h1 { font-size: 18px; color: #005088; }
+    #patrimonio-interface .top-actions { display: flex; gap: 8px; flex-wrap: wrap; }
     #patrimonio-interface .btn-top {
-        padding: 8px 14px;
-        border: none;
-        border-radius: 6px;
-        font-weight: bold;
-        font-size: 12px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 6px;
+        padding: 8px 14px; border: none; border-radius: 6px;
+        font-weight: bold; font-size: 12px; cursor: pointer;
+        display: flex; align-items: center; gap: 6px;
         transition: background 0.2s;
-        white-space: nowrap;
     }
     #patrimonio-interface .btn-primary { background: #005088; color: white; }
     #patrimonio-interface .btn-primary:hover { background: #0c4a6e; }
@@ -195,289 +97,89 @@
     #patrimonio-interface .btn-danger:hover { background: #dc2626; }
     
     .search-box {
-        display: flex;
-        align-items: center;
-        background: #f1f5f9;
-        padding: 6px 12px;
-        border-radius: 6px;
-        border: 1px solid #cbd5e1;
-        min-width: 200px;
-        flex: 1;
-        max-width: 300px;
+        display: flex; align-items: center; background: #f1f5f9;
+        padding: 6px 12px; border-radius: 6px; border: 1px solid #cbd5e1;
+        width: 280px;
     }
-    .search-box input {
-        background: none;
-        border: none;
-        outline: none;
-        width: 100%;
-        font-size: 14px;
-        margin-left: 8px;
-        padding: 4px 0;
-    }
+    .search-box input { background: none; border: none; outline: none; width: 100%; font-size: 14px; margin-left: 8px; }
     
     /* ABAS */
     .tab-nav {
-        display: flex;
-        background: white;
-        border-bottom: 2px solid #e2e8f0;
+        display: flex; background: white; border-bottom: 2px solid #e2e8f0;
         padding: 0 20px;
-        flex-shrink: 0;
-        overflow-x: auto;
     }
     .tab-btn {
-        padding: 12px 20px;
-        border: none;
-        background: none;
-        font-weight: 600;
-        font-size: 13px;
-        cursor: pointer;
-        color: #64748b;
-        border-bottom: 3px solid transparent;
-        transition: all 0.2s;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        white-space: nowrap;
+        padding: 12px 20px; border: none; background: none;
+        font-weight: 600; font-size: 13px; cursor: pointer;
+        color: #64748b; border-bottom: 3px solid transparent;
+        transition: all 0.2s; display: flex; align-items: center; gap: 8px;
     }
-    .tab-btn.active {
-        color: #005088;
-        border-bottom-color: #005088;
-    }
+    .tab-btn.active { color: #005088; border-bottom-color: #005088; }
     .tab-btn:hover { color: #005088; }
     
     /* CONTEÚDO DAS ABAS */
-    .tab-content {
-        flex: 1;
-        overflow-y: auto;
-        padding: 20px;
-        display: none;
-        background: #f1f5f9;
-    }
+    .tab-content { flex: 1; overflow-y: auto; padding: 20px; display: none; }
     .tab-content.active { display: block; }
     
     /* TABELA */
-    .table-wrapper {
-        overflow-x: auto;
-        overflow-y: auto;
-        max-height: calc(100vh - 280px);
-        background: white;
-        border-radius: 8px;
-        border: 1px solid #e2e8f0;
-    }
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 13px;
-        background: white;
-        border-radius: 8px;
-        overflow: hidden;
-    }
-    th {
-        position: sticky;
-        top: 0;
-        background: #f8fafc;
-        padding: 12px 14px;
-        font-weight: bold;
-        color: #64748b;
-        border-bottom: 2px solid #e2e8f0;
-        text-align: left;
-        z-index: 1;
-    }
-    td {
-        padding: 12px 14px;
-        border-bottom: 1px solid #e2e8f0;
-        vertical-align: middle;
-    }
+    .table-wrapper { overflow-x: auto; max-height: calc(100vh - 250px); }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; background: white; border-radius: 8px; overflow: hidden; }
+    th { position: sticky; top: 0; background: #f8fafc; padding: 10px 12px; font-weight: bold; color: #64748b; border-bottom: 2px solid #e2e8f0; text-align: left; }
+    td { padding: 10px 12px; border-bottom: 1px solid #e2e8f0; }
     tr:hover { background-color: #f8fafc; cursor: pointer; }
     
-    .foto-mini {
-        width: 45px;
-        height: 45px;
-        object-fit: cover;
-        border-radius: 4px;
-        border: 1px solid #e2e8f0;
-    }
-    .status-badge {
-        padding: 4px 12px;
-        border-radius: 12px;
-        font-size: 11px;
-        font-weight: bold;
-        white-space: nowrap;
-        display: inline-block;
-    }
+    .foto-mini { width: 40px; height: 40px; object-fit: cover; border-radius: 4px; border: 1px solid #e2e8f0; }
+    .status-badge { padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; white-space: nowrap; }
     .status-bom { background: #dcfce7; color: #166534; }
     .status-manutencao { background: #fef9c3; color: #854d0e; }
     .status-danificado { background: #fee2e2; color: #991b1b; }
     
     /* FORMULÁRIO */
     .form-card {
-        background: white;
-        border-radius: 8px;
-        padding: 25px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        border: 1px solid #e2e8f0;
+        background: white; border-radius: 8px; padding: 25px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02); border: 1px solid #e2e8f0;
         max-width: 600px;
-        margin: 0 auto;
     }
     .form-group { margin-bottom: 15px; }
-    .form-group label {
-        display: block;
-        font-weight: 600;
-        font-size: 13px;
-        margin-bottom: 5px;
-        color: #475569;
+    .form-group label { display: block; font-weight: 600; font-size: 13px; margin-bottom: 5px; color: #475569; }
+    .form-group input, .form-group select {
+        width: 100%; padding: 10px; border: 1px solid #cbd5e1;
+        border-radius: 6px; font-size: 14px; outline: none;
     }
-    .form-group input,
-    .form-group select {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid #cbd5e1;
-        border-radius: 6px;
-        font-size: 14px;
-        outline: none;
-        background: white;
-    }
-    .form-group input:focus,
-    .form-group select:focus {
-        border-color: #005088;
-        box-shadow: 0 0 0 3px rgba(0, 80, 136, 0.1);
-    }
+    .form-group input:focus, .form-group select:focus { border-color: #005088; }
     
     .foto-preview {
-        width: 200px;
-        height: 150px;
-        object-fit: cover;
-        border-radius: 8px;
-        border: 2px dashed #cbd5e1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #94a3b8;
-        font-size: 12px;
-        margin-top: 10px;
+        width: 200px; height: 150px; object-fit: cover;
+        border-radius: 8px; border: 2px dashed #cbd5e1;
+        display: flex; align-items: center; justify-content: center;
+        color: #94a3b8; font-size: 12px; margin-top: 10px;
     }
     
     .btn-carregar-mais {
-        display: block;
-        width: 100%;
-        padding: 12px;
-        background: #f1f5f9;
-        color: #475569;
-        border: 1px solid #e2e8f0;
-        border-radius: 6px;
-        cursor: pointer;
-        font-weight: bold;
-        margin-top: 10px;
-        text-align: center;
-        transition: background 0.2s;
+        display: block; width: 100%; padding: 12px;
+        background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;
+        border-radius: 6px; cursor: pointer; font-weight: bold;
+        margin-top: 10px; text-align: center;
     }
     .btn-carregar-mais:hover { background: #e2e8f0; }
     
     .contador-itens {
-        font-size: 13px;
-        color: #64748b;
-        margin-bottom: 10px;
-        padding: 0 4px;
-    }
-    
-    /* QR MODAL */
-    #qr-scanner-modal {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.8);
-        z-index: 9999;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-    }
-    #qr-scanner-modal > div {
-        background: white;
-        padding: 25px;
-        border-radius: 12px;
-        width: 90%;
-        max-width: 500px;
-    }
-    #qr-reader {
-        width: 100%;
-        min-height: 250px;
+        font-size: 12px; color: #64748b; margin-bottom: 10px;
     }
     
     @media (max-width: 768px) {
-        #patrimonio-interface {
-            flex-direction: column;
-            height: 100vh;
-        }
+        #patrimonio-interface { flex-direction: column; height: auto; min-height: 100vh; }
         #patrimonio-interface .sidebar {
-            width: 100%;
-            min-width: unset;
-            height: auto;
-            max-height: 180px;
-            border-right: none;
-            border-bottom: 4px solid #eab308;
+            width: 100%; max-height: 150px; overflow-y: auto;
+            border-right: none; border-bottom: 2px solid #eab308;
         }
-        #patrimonio-interface .sidebar-header {
-            padding: 10px 15px;
-        }
-        #patrimonio-interface .sidebar-logo {
-            width: 45px;
-            height: 45px;
-            min-width: 45px;
-            font-size: 20px;
-        }
-        #patrimonio-interface .sidebar-title h2 {
-            font-size: 14px;
-        }
-        #patrimonio-interface .room-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-            padding: 5px 10px;
-            overflow-y: visible;
-            max-height: 80px;
-        }
-        #patrimonio-interface .room-item {
-            padding: 5px 12px;
-            font-size: 11px;
-            border-radius: 15px;
-            white-space: nowrap;
-        }
-        #patrimonio-interface .room-list-title {
-            padding: 8px 15px 0;
-        }
-        #patrimonio-interface .main-content {
-            height: auto;
-            flex: 1;
-            overflow: hidden;
-        }
-        .search-box {
-            min-width: 120px;
-            max-width: 100%;
-            flex: 1;
-        }
-        .tab-nav {
-            padding: 0 10px;
-        }
-        .tab-btn {
-            padding: 10px 14px;
-            font-size: 11px;
-        }
-        .table-wrapper {
-            max-height: calc(100vh - 350px);
-        }
-        .form-card {
-            padding: 15px;
-            margin: 0;
-        }
-        #patrimonio-interface .top-bar {
-            padding: 8px 12px;
-        }
-        #patrimonio-interface .top-bar h1 {
-            font-size: 15px;
-        }
+        #patrimonio-interface .sidebar-header { display: none; }
+        #patrimonio-interface .room-list { display: flex; flex-wrap: wrap; gap: 5px; max-height: none; padding: 5px; }
+        #patrimonio-interface .room-item { padding: 5px 10px; font-size: 11px; border-radius: 15px; white-space: nowrap; }
+        #patrimonio-interface .main-content { height: auto; overflow-y: visible; }
+        .search-box { width: 100%; }
+        .tab-nav { overflow-x: auto; padding: 0 10px; }
+        .tab-btn { padding: 10px 12px; font-size: 11px; white-space: nowrap; }
     }
 </style>
 </head>
@@ -488,7 +190,7 @@
         <aside class="sidebar">
             <div class="sidebar-top">
                 <div class="sidebar-header">
-                    <div class="sidebar-logo">S</div>
+                    <img src="img/SIGARD.png" alt="Logo" class="sidebar-logo">
                     <div class="sidebar-title">
                         <h2>PATRIMÔNIO</h2>
                         <p>CCM Anchieta</p>
@@ -496,11 +198,11 @@
                 </div>
                 <div class="room-list-title">Filtrar por Ambiente</div>
                 <ul class="room-list" id="pat-room-list-updated">
-                    <li class="room-item active"><i class="fa-solid fa-boxes-stacked"></i> Ver Tudo</li>
+                    <li class="room-item active"><i class="fa-solid fa-spinner fa-spin"></i> Carregando...</li>
                 </ul>
             </div>
             <div class="sidebar-footer">
-                <a href="#" class="btn-back"><i class="fa-solid fa-arrow-left"></i> Voltar ao SIGA</a>
+                <a href="restrito.html" class="btn-back"><i class="fa-solid fa-arrow-left"></i> Voltar ao SIGA</a>
             </div>
         </aside>
 
@@ -511,7 +213,7 @@
                 <h1 id="pat-panel-title">📦 Patrimônio</h1>
                 <div class="top-actions">
                     <button class="btn-top btn-warning" onclick="abrirQRScanner()"><i class="fa-solid fa-qrcode"></i> QR Code</button>
-                    <button class="btn-top btn-primary" onclick="imprimirEtiquetas()"><i class="fa-solid fa-print"></i> Imprimir</button>
+                    <button class="btn-top btn-primary" onclick="imprimirEtiquetas()"><i class="fa-solid fa-print"></i> Imprimir Etiquetas</button>
                 </div>
                 <div class="search-box">
                     <i class="fa-solid fa-search" style="color:#64748b;"></i>
@@ -523,7 +225,7 @@
             <div class="tab-nav">
                 <button class="tab-btn active" onclick="alternarAbaPat('lista')"><i class="fa-solid fa-list"></i> Lista</button>
                 <button class="tab-btn" onclick="alternarAbaPat('cadastro')"><i class="fa-solid fa-plus"></i> Cadastro</button>
-                <button class="tab-btn" onclick="alternarAbaPat('bloco')"><i class="fa-solid fa-layer-group"></i> Bloco</button>
+                <button class="tab-btn" onclick="alternarAbaPat('bloco')"><i class="fa-solid fa-layer-group"></i> Registro em Bloco</button>
                 <button class="tab-btn" onclick="alternarAbaPat('ambientes')"><i class="fa-solid fa-school"></i> Ambientes</button>
             </div>
 
@@ -534,20 +236,16 @@
                     <table>
                         <thead>
                             <tr>
-                                <th style="min-width:130px;">Código</th>
+                                <th style="width:130px;">Código</th>
                                 <th>Item</th>
-                                <th style="width:70px;">Foto</th>
-                                <th style="min-width:100px;">Local</th>
-                                <th style="min-width:100px;">Status</th>
-                                <th style="width:50px;">Ações</th>
+                                <th style="width:80px;">Foto</th>
+                                <th style="width:100px;">Local</th>
+                                <th style="width:100px;">Status</th>
+                                <th style="width:60px;">Ações</th>
                             </tr>
                         </thead>
                         <tbody id="pat-table-body">
-                            <tr><td colspan="6" style="text-align:center;padding:30px;color:#94a3b8;">
-                                <i class="fa-solid fa-box-open" style="font-size:24px;display:block;margin-bottom:10px;"></i>
-                                Nenhum item cadastrado.<br>
-                                <small>Clique em "Cadastro" para adicionar.</small>
-                            </td></tr>
+                            <tr><td colspan="6" style="text-align:center;padding:30px;">Carregando...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -565,7 +263,7 @@
                         <label>Código / QR Code:</label>
                         <div style="display:flex;gap:8px;">
                             <input type="text" id="pat-reg-code" placeholder="Ex: 100003506623" oninput="patChecarEdicao()" style="flex:1;">
-                            <button class="btn-top btn-warning" onclick="abrirQRScannerCadastro()" style="padding:8px 12px;"><i class="fa-solid fa-qrcode"></i></button>
+                            <button class="btn-top btn-warning" onclick="abrirQRScannerCadastro()"><i class="fa-solid fa-qrcode"></i></button>
                         </div>
                     </div>
                     <div class="form-group">
@@ -584,11 +282,8 @@
                     </div>
                     <div class="form-group">
                         <label>Localização:</label>
-                        <select id="pat-reg-room">
+                        <select id="pat-reg-room" class="select-salas-dinamicas">
                             <option value="Almoxarifado">Almoxarifado</option>
-                            <option value="Sala 1">Sala 1</option>
-                            <option value="Sala 2">Sala 2</option>
-                            <option value="Laboratório">Laboratório</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -606,15 +301,15 @@
                     </div>
                     <div class="form-group">
                         <label>Foto do Item:</label>
-                        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                            <button class="btn-top btn-primary" onclick="document.getElementById('pat-reg-foto').click()"><i class="fa-solid fa-camera"></i> Tirar/Upload</button>
+                        <div style="display:flex;gap:8px;">
+                            <button class="btn-top btn-primary" onclick="document.getElementById('pat-reg-foto').click()"><i class="fa-solid fa-camera"></i> Tirar/Upload Foto</button>
                             <input type="file" id="pat-reg-foto" accept="image/*" capture="environment" style="display:none;" onchange="previewFotoCadastro()">
                         </div>
                         <img id="pat-foto-preview" class="foto-preview" src="" alt="Preview da foto" style="display:none;">
                     </div>
-                    <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;">
-                        <button class="btn-top btn-success" onclick="patExecutarCadastro()" style="flex:1;padding:12px;font-size:14px;min-width:120px;">💾 Salvar</button>
-                        <button class="btn-top btn-danger" onclick="patExcluirItem()" id="pat-btn-excluir" style="display:none;padding:12px;min-width:100px;">🗑️ Excluir</button>
+                    <div style="display:flex;gap:10px;margin-top:20px;">
+                        <button class="btn-top btn-success" onclick="patExecutarCadastro()" style="flex:1;padding:12px;font-size:14px;">💾 Salvar</button>
+                        <button class="btn-top btn-danger" onclick="patExcluirItem()" id="pat-btn-excluir" style="display:none;">🗑️ Excluir</button>
                     </div>
                 </div>
             </div>
@@ -641,27 +336,24 @@
                     </div>
                     <div class="form-group">
                         <label>Localização:</label>
-                        <select id="bloco-room">
+                        <select id="bloco-room" class="select-salas-dinamicas">
                             <option value="Almoxarifado">Almoxarifado</option>
-                            <option value="Sala 1">Sala 1</option>
-                            <option value="Sala 2">Sala 2</option>
-                            <option value="Laboratório">Laboratório</option>
                         </select>
                     </div>
-                    <div style="display:flex;gap:15px;flex-wrap:wrap;">
-                        <div class="form-group" style="flex:1;min-width:150px;">
+                    <div style="display:flex;gap:15px;">
+                        <div class="form-group" style="flex:1;">
                             <label>Código Inicial:</label>
                             <input type="text" id="bloco-codigo-inicial" placeholder="Ex: 100003506623">
                         </div>
-                        <div class="form-group" style="flex:1;min-width:100px;">
+                        <div class="form-group" style="flex:1;">
                             <label>Quantidade:</label>
                             <input type="number" id="bloco-quantidade" value="2" min="2" max="100">
                         </div>
                     </div>
                     <div class="form-group">
                         <label>Foto (mesma para todos):</label>
-                        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                            <button class="btn-top btn-primary" onclick="document.getElementById('bloco-foto').click()"><i class="fa-solid fa-camera"></i> Tirar/Upload</button>
+                        <div style="display:flex;gap:8px;">
+                            <button class="btn-top btn-primary" onclick="document.getElementById('bloco-foto').click()"><i class="fa-solid fa-camera"></i> Tirar/Upload Foto</button>
                             <input type="file" id="bloco-foto" accept="image/*" capture="environment" style="display:none;" onchange="previewFotoBloco()">
                         </div>
                         <img id="bloco-foto-preview" class="foto-preview" src="" alt="Preview" style="display:none;">
@@ -678,14 +370,14 @@
                     <h3 style="margin-bottom:20px;color:#005088;">🏠 Gerenciar Ambientes</h3>
                     <div class="form-group">
                         <label>Novo Ambiente:</label>
-                        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                            <input type="text" id="pat-new-amb" placeholder="Ex: Sala Maker" style="flex:1;min-width:150px;">
+                        <div style="display:flex;gap:8px;">
+                            <input type="text" id="pat-new-amb" placeholder="Ex: Sala Maker" style="flex:1;">
                             <button class="btn-top btn-success" onclick="patAdicionarAmbiente()">+ Adicionar</button>
                         </div>
                     </div>
-                    <label style="font-weight:600;font-size:13px;color:#475569;margin-top:15px;display:block;">Ambientes cadastrados:</label>
-                    <ul class="mini-list-ambientes" id="pat-mini-amb-list" style="list-style:none;max-height:250px;overflow-y:auto;border:1px solid #e2e8f0;border-radius:6px;padding:0;margin-top:5px;">
-                        <li style="padding:12px;color:#64748b;text-align:center;">Nenhum ambiente cadastrado.</li>
+                    <label style="font-weight:600;font-size:13px;color:#475569;margin-top:15px;">Ambientes cadastrados:</label>
+                    <ul class="mini-list-ambientes" id="pat-mini-amb-list" style="list-style:none;max-height:300px;overflow-y:auto;border:1px solid #e2e8f0;border-radius:6px;padding:0;">
+                        <li style="padding:8px 12px;color:#64748b;">Carregando...</li>
                     </ul>
                 </div>
             </div>
@@ -693,138 +385,79 @@
     </div>
 
     <!-- QR CODE SCANNER MODAL -->
-    <div id="qr-scanner-modal">
-        <div>
+    <div id="qr-scanner-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:9999;flex-direction:column;align-items:center;justify-content:center;">
+        <div style="background:white;padding:20px;border-radius:12px;width:90%;max-width:500px;">
             <h3 style="text-align:center;margin-bottom:15px;">📷 Escaneie o QR Code</h3>
-            <div id="qr-reader" style="width:100%;min-height:250px;"></div>
-            <button onclick="fecharQRScanner()" style="width:100%;padding:12px;margin-top:15px;background:#ef4444;color:white;border:none;border-radius:6px;cursor:pointer;font-weight:bold;font-size:14px;">Cancelar</button>
+            <div id="qr-reader" style="width:100%;"></div>
+            <button onclick="fecharQRScanner()" style="width:100%;padding:10px;margin-top:15px;background:#ef4444;color:white;border:none;border-radius:6px;cursor:pointer;font-weight:bold;">Cancelar</button>
         </div>
     </div>
 
 <script>
-    // ============ CONFIGURAÇÃO ============
     const APPS_SCRIPT_PAT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
-    
-    // ============ DADOS DE EXEMPLO (para teste sem API) ============
-    const DADOS_EXEMPLO = [
-        { codigo: '100003506623', item: 'Notebook Lenovo ThinkPad', categoria: 'Informática', localizacao: 'Sala 1', status: 'Bom', responsavel: 'João Silva', foto: '' },
-        { codigo: '100003506624', item: 'Monitor LG 24"', categoria: 'Informática', localizacao: 'Sala 1', status: 'Bom', responsavel: 'João Silva', foto: '' },
-        { codigo: '100003506625', item: 'Cadeira Giratória', categoria: 'Mobiliário', localizacao: 'Sala 2', status: 'Em Manutenção', responsavel: 'Maria Santos', foto: '' },
-        { codigo: '100003506626', item: 'Projetor Epson', categoria: 'Informática', localizacao: 'Sala 2', status: 'Bom', responsavel: 'Carlos Lima', foto: '' },
-        { codigo: '100003506627', item: 'Ar Condicionado', categoria: 'Eletrodomésticos', localizacao: 'Laboratório', status: 'Danificado', responsavel: 'Ana Paula', foto: '' },
-    ];
-    
-    let patTodos = [];
-    let patAmbientes = ['Almoxarifado', 'Sala 1', 'Sala 2', 'Laboratório'];
-    let patSalaFiltro = 'TODOS';
-    let usuarioLogadoPat = { nome: 'Administrador', email: 'admin@anchieta.com', nivel: 3 };
+    let patTodos = [], patAmbientes = [], patSalaFiltro = 'TODOS';
+    let usuarioLogadoPat = {};
     let itensPorPagina = 50;
     let paginaAtual = 0;
     let fotoBase64 = null;
     let qrScanner = null;
-    let usandoAPI = false; // Mudar para true quando a API estiver configurada
 
-    // ============ INICIALIZAÇÃO ============
+    // INICIALIZAÇÃO
     window.addEventListener('DOMContentLoaded', () => {
-        // Carregar dados de exemplo ou da API
-        if (usandoAPI) {
-            // Tentar carregar da API
-            carregarItensPaginado(true);
-            patCarregarAmbientes();
+        const sessao = localStorage.getItem('sgi_ccma_session');
+        if (sessao) {
+            usuarioLogadoPat = JSON.parse(sessao);
+            if (parseInt(usuarioLogadoPat.nivel) < 3) {
+                alert("Acesso restrito ao Nível 3 ou superior.");
+                window.location.href = 'restrito.html';
+                return;
+            }
         } else {
-            // Usar dados de exemplo
-            patTodos = [...DADOS_EXEMPLO];
-            renderizarTabelaPaginada();
-            atualizarSidebarAmbientes();
-            atualizarSelectsSalas();
-            atualizarListaAmbientes();
+            window.location.href = 'restrito.html';
+            return;
         }
-        
-        // Definir responsável
-        document.getElementById('pat-reg-resp').value = usuarioLogadoPat.nome || '';
-        
-        // Atualizar contador do bloco
-        document.getElementById('bloco-quantidade').addEventListener('input', function() {
-            document.getElementById('bloco-total').innerText = this.value || 2;
-        });
+        if (document.getElementById('pat-reg-resp')) document.getElementById('pat-reg-resp').value = usuarioLogadoPat.nome || "";
+        patCarregarAmbientes();
+        carregarItensPaginado();
     });
 
-    // ============ FUNÇÕES DE AMBIENTES ============
-    function atualizarSidebarAmbientes() {
-        const sidebarList = document.getElementById('pat-room-list-updated');
-        sidebarList.innerHTML = `<li class="room-item ${patSalaFiltro==='TODOS'?'active':''}" onclick="patFiltrarSala('TODOS', this)">
-            <i class="fa-solid fa-boxes-stacked"></i> Ver Tudo
-        </li>`;
-        patAmbientes.forEach(sala => {
-            sidebarList.innerHTML += `<li class="room-item ${patSalaFiltro===sala?'active':''}" onclick="patFiltrarSala('${sala}', this)">
-                <i class="fa-solid fa-location-dot"></i> ${sala}
-            </li>`;
-        });
+    // ABAS
+    function alternarAbaPat(aba) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.querySelector(`.tab-btn[onclick="alternarAbaPat('${aba}')"]`).classList.add('active');
+        document.getElementById(`tab-${aba}`).classList.add('active');
+        if (aba === 'lista') carregarItensPaginado(true);
     }
 
-    function atualizarSelectsSalas() {
-        document.querySelectorAll('#pat-reg-room, #bloco-room').forEach(select => {
-            const valorAtual = select.value;
-            select.innerHTML = '';
-            patAmbientes.forEach(sala => {
-                select.innerHTML += `<option value="${sala}">${sala}</option>`;
-            });
-            if (valorAtual && patAmbientes.includes(valorAtual)) {
-                select.value = valorAtual;
-            }
-        });
-    }
-
-    function atualizarListaAmbientes() {
-        const miniBox = document.getElementById('pat-mini-amb-list');
-        if (patAmbientes.length === 0) {
-            miniBox.innerHTML = '<li style="padding:12px;color:#64748b;text-align:center;">Nenhum ambiente cadastrado.</li>';
-            return;
-        }
-        miniBox.innerHTML = '';
-        patAmbientes.forEach(sala => {
-            miniBox.innerHTML += `<li style="padding:10px 12px;display:flex;justify-content:space-between;border-bottom:1px solid #f1f5f9;align-items:center;">
-                <span><i class="fa-solid fa-location-dot" style="color:#005088;margin-right:8px;"></i>${sala}</span>
-                <button onclick="patDeletarAmbiente('${sala}')" style="background:none;border:none;color:#ef4444;cursor:pointer;padding:4px 8px;border-radius:4px;hover:background:#fee2e2;">
-                    <i class="fa-solid fa-trash"></i>
-                </button>
-            </li>`;
-        });
-    }
-
+    // CARREGAR AMBIENTES
     async function patCarregarAmbientes() {
-        if (!usandoAPI) {
-            // Usar dados locais
-            return;
-        }
         try {
             const r = await fetch(`${APPS_SCRIPT_PAT_URL}?aba=ambientes`, { method: 'GET', cache: 'no-cache' });
             patAmbientes = await r.json();
-            atualizarSidebarAmbientes();
-            atualizarSelectsSalas();
-            atualizarListaAmbientes();
-        } catch(e) { 
-            console.error('Erro ao carregar ambientes:', e);
-            // Usar dados locais como fallback
-            atualizarSidebarAmbientes();
-            atualizarSelectsSalas();
-            atualizarListaAmbientes();
-        }
+            const sidebarList = document.getElementById('pat-room-list-updated');
+            sidebarList.innerHTML = `<li class="room-item ${patSalaFiltro==='TODOS'?'active':''}" onclick="patFiltrarSala('TODOS', this)"><span><i class="fa-solid fa-boxes-stacked"></i> Ver Tudo</span></li>`;
+            patAmbientes.forEach(sala => {
+                sidebarList.innerHTML += `<li class="room-item ${patSalaFiltro===sala?'active':''}" onclick="patFiltrarSala('${sala}', this)"><span><i class="fa-solid fa-location-dot"></i> ${sala}</span></li>`;
+            });
+            document.querySelectorAll('.select-salas-dinamicas').forEach(select => {
+                select.innerHTML = '<option value="Almoxarifado">Almoxarifado</option>';
+                patAmbientes.forEach(sala => { select.innerHTML += `<option value="${sala}">${sala}</option>`; });
+            });
+            const miniBox = document.getElementById('pat-mini-amb-list');
+            miniBox.innerHTML = '';
+            patAmbientes.forEach(sala => {
+                miniBox.innerHTML += `<li style="padding:8px 12px;display:flex;justify-content:space-between;border-bottom:1px solid #f1f5f9;">
+                    <span>${sala}</span>
+                    <button onclick="patDeletarAmbiente('${sala}')" style="background:none;border:none;color:#ef4444;cursor:pointer;"><i class="fa-solid fa-trash"></i></button>
+                </li>`;
+            });
+        } catch(e) { console.error(e); }
     }
 
-    // ============ CARREGAR ITENS ============
+    // CARREGAR ITENS PAGINADO
     async function carregarItensPaginado(reset = false) {
-        if (reset) { 
-            paginaAtual = 0; 
-            patTodos = []; 
-        }
-        
-        if (!usandoAPI) {
-            // Usar dados de exemplo
-            patTodos = [...DADOS_EXEMPLO];
-            renderizarTabelaPaginada();
-            return;
-        }
+        if (reset) { paginaAtual = 0; patTodos = []; }
         
         try {
             const response = await fetch(`${APPS_SCRIPT_PAT_URL}?aba=patrimonio`, { method: 'GET', cache: 'no-cache' });
@@ -832,10 +465,7 @@
             paginaAtual = 0;
             renderizarTabelaPaginada();
         } catch (error) {
-            console.error('Erro ao carregar:', error);
-            // Fallback para dados de exemplo
-            patTodos = [...DADOS_EXEMPLO];
-            renderizarTabelaPaginada();
+            document.getElementById('pat-table-body').innerHTML = '<tr><td colspan="6" style="text-align:center;color:red;">Erro ao carregar.</td></tr>';
         }
     }
 
@@ -851,35 +481,28 @@
         const fim = inicio + itensPorPagina;
         const paginaItens = itens.slice(inicio, fim);
         
+        if (paginaAtual === 0) tbody.innerHTML = '';
+        
         if (paginaItens.length === 0 && paginaAtual === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:30px;color:#94a3b8;">
-                <i class="fa-solid fa-box-open" style="font-size:24px;display:block;margin-bottom:10px;"></i>
-                Nenhum item encontrado.
-            </td></tr>`;
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:#64748b;">Nenhum item encontrado.</td></tr>';
             document.getElementById('btn-carregar-mais').style.display = 'none';
-            document.getElementById('contador-itens').innerText = '0 itens';
             return;
         }
         
-        tbody.innerHTML = '';
         paginaItens.forEach(item => {
             let statusLimpo = (item.status || '').toLowerCase();
-            let badgeClass = 'status-bom';
-            if (statusLimpo.includes('manuten')) badgeClass = 'status-manutencao';
-            else if (statusLimpo.includes('danific')) badgeClass = 'status-danificado';
+            let badgeClass = statusLimpo.includes('manuten') ? 'status-manutencao' : statusLimpo.includes('danific') ? 'status-danificado' : 'status-bom';
             
             const tr = document.createElement('tr');
             tr.onclick = () => carregarParaEdicao(item.codigo);
             tr.innerHTML = `
                 <td style="color:#005088;font-weight:bold;">${item.codigo}</td>
-                <td><strong>${item.item || 'Sem nome'}</strong><br><small style="color:#64748b;">${item.categoria || ''}</small></td>
-                <td>${item.foto ? `<img src="${item.foto}" class="foto-mini" onerror="this.style.display='none'">` : '<span style="color:#94a3b8;">—</span>'}</td>
+                <td><strong>${item.item}</strong><br><small style="color:#64748b;">${item.categoria || ''}</small></td>
+                <td>${item.foto ? `<img src="${item.foto}" class="foto-mini" onerror="this.style.display='none'">` : '—'}</td>
                 <td>${item.localizacao || '—'}</td>
                 <td><span class="status-badge ${badgeClass}">${item.status || 'Bom'}</span></td>
                 <td>
-                    <button onclick="event.stopPropagation();carregarParaEdicao('${item.codigo}')" style="background:none;border:none;color:#005088;cursor:pointer;font-size:16px;" title="Editar">
-                        <i class="fa-solid fa-pen-to-square"></i>
-                    </button>
+                    <button onclick="event.stopPropagation();carregarParaEdicao('${item.codigo}')" style="background:none;border:none;color:#005088;cursor:pointer;" title="Editar"><i class="fa-solid fa-pen-to-square"></i></button>
                 </td>
             `;
             tbody.appendChild(tr);
@@ -897,44 +520,26 @@
     function filtrarTabela() {
         const termo = document.getElementById('pat-search-input').value.trim().toLowerCase();
         const tbody = document.getElementById('pat-table-body');
-        if (!termo) { 
-            paginaAtual = 0; 
-            renderizarTabelaPaginada(); 
-            return; 
-        }
+        if (!termo) { paginaAtual = 0; renderizarTabelaPaginada(); return; }
         
+        tbody.innerHTML = '';
         const filtrados = patTodos.filter(item => 
             (item.codigo || '').toLowerCase().includes(termo) || 
             (item.item || '').toLowerCase().includes(termo)
         ).slice(0, 100);
         
-        if (filtrados.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:20px;color:#94a3b8;">Nenhum resultado para "${termo}"</td></tr>`;
-            document.getElementById('contador-itens').innerText = '0 itens encontrados';
-            document.getElementById('btn-carregar-mais').style.display = 'none';
-            return;
-        }
-        
-        tbody.innerHTML = '';
         filtrados.forEach(item => {
             let statusLimpo = (item.status || '').toLowerCase();
-            let badgeClass = 'status-bom';
-            if (statusLimpo.includes('manuten')) badgeClass = 'status-manutencao';
-            else if (statusLimpo.includes('danific')) badgeClass = 'status-danificado';
-            
+            let badgeClass = statusLimpo.includes('manuten') ? 'status-manutencao' : statusLimpo.includes('danific') ? 'status-danificado' : 'status-bom';
             const tr = document.createElement('tr');
             tr.onclick = () => carregarParaEdicao(item.codigo);
             tr.innerHTML = `
                 <td style="color:#005088;font-weight:bold;">${item.codigo}</td>
-                <td><strong>${item.item || 'Sem nome'}</strong><br><small style="color:#64748b;">${item.categoria || ''}</small></td>
-                <td>${item.foto ? `<img src="${item.foto}" class="foto-mini">` : '<span style="color:#94a3b8;">—</span>'}</td>
+                <td><strong>${item.item}</strong></td>
+                <td>${item.foto ? `<img src="${item.foto}" class="foto-mini">` : '—'}</td>
                 <td>${item.localizacao || '—'}</td>
                 <td><span class="status-badge ${badgeClass}">${item.status || 'Bom'}</span></td>
-                <td>
-                    <button onclick="event.stopPropagation();carregarParaEdicao('${item.codigo}')" style="background:none;border:none;color:#005088;cursor:pointer;font-size:16px;">
-                        <i class="fa-solid fa-pen-to-square"></i>
-                    </button>
-                </td>
+                <td><button onclick="event.stopPropagation();carregarParaEdicao('${item.codigo}')" style="background:none;border:none;color:#005088;cursor:pointer;"><i class="fa-solid fa-pen-to-square"></i></button></td>
             `;
             tbody.appendChild(tr);
         });
@@ -951,18 +556,7 @@
         renderizarTabelaPaginada();
     }
 
-    // ============ ABAS ============
-    function alternarAbaPat(aba) {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        
-        document.querySelector(`.tab-btn[onclick="alternarAbaPat('${aba}')"]`).classList.add('active');
-        document.getElementById(`tab-${aba}`).classList.add('active');
-        
-        if (aba === 'lista') carregarItensPaginado(true);
-    }
-
-    // ============ CADASTRO ============
+    // CARREGAR PARA EDIÇÃO
     function carregarParaEdicao(codigo) {
         const item = patTodos.find(i => i.codigo === codigo);
         if (!item) return;
@@ -970,22 +564,16 @@
         alternarAbaPat('cadastro');
         document.getElementById('pat-cad-title').innerHTML = '<i class="fa-solid fa-pen-to-square" style="color:#eab308;"></i> Modo de Edição';
         document.getElementById('pat-reg-code').value = item.codigo;
-        document.getElementById('pat-reg-item').value = item.item || '';
+        document.getElementById('pat-reg-item').value = item.item;
         document.getElementById('pat-reg-cat').value = item.categoria || 'Outros';
-        
-        // Atualizar select de sala
-        const selectSala = document.getElementById('pat-reg-room');
-        if (patAmbientes.includes(item.localizacao)) {
-            selectSala.value = item.localizacao;
-        }
-        
+        document.getElementById('pat-reg-room').value = item.localizacao || 'Almoxarifado';
         document.getElementById('pat-reg-resp').value = item.responsavel || usuarioLogadoPat.nome || '';
         
+        let statusLimpo = (item.status || '').toLowerCase();
         let statusValor = 'Bom';
-        const statusLower = (item.status || '').toLowerCase();
-        if (statusLower.includes('manuten')) statusValor = 'Em Manutenção';
-        else if (statusLower.includes('danific')) statusValor = 'Danificado';
-        else if (statusLower.includes('inserv')) statusValor = 'Inservível';
+        if (statusLimpo.includes('manuten')) statusValor = 'Em Manutenção';
+        if (statusLimpo.includes('danific')) statusValor = 'Danificado';
+        if (statusLimpo.includes('inserv')) statusValor = 'Inservível';
         document.getElementById('pat-reg-status').value = statusValor;
         
         document.getElementById('pat-btn-excluir').style.display = 'inline-block';
@@ -993,129 +581,50 @@
         if (item.foto) {
             document.getElementById('pat-foto-preview').src = item.foto;
             document.getElementById('pat-foto-preview').style.display = 'block';
-        } else {
-            document.getElementById('pat-foto-preview').style.display = 'none';
         }
     }
 
-    function patChecarEdicao() {
-        const codigo = document.getElementById('pat-reg-code').value.trim();
-        if (!codigo) return;
-        const item = patTodos.find(i => i.codigo === codigo);
-        if (item) carregarParaEdicao(codigo);
-    }
-
-    function patResetarCadastro() {
-        document.getElementById('pat-cad-title').innerHTML = 'Cadastrar Novo Patrimônio';
-        document.getElementById('pat-reg-code').value = '';
-        document.getElementById('pat-reg-item').value = '';
-        document.getElementById('pat-reg-resp').value = usuarioLogadoPat.nome || '';
-        document.getElementById('pat-reg-status').value = 'Bom';
-        document.getElementById('pat-btn-excluir').style.display = 'none';
-        document.getElementById('pat-foto-preview').style.display = 'none';
-        document.getElementById('pat-foto-preview').src = '';
-        fotoBase64 = null;
-    }
-
-    function patExecutarCadastro() {
-        const codigo = document.getElementById('pat-reg-code').value.trim();
-        const item = document.getElementById('pat-reg-item').value.trim();
-        const category = document.getElementById('pat-reg-cat').value;
-        const sala = document.getElementById('pat-reg-room').value;
-        const funcionario = document.getElementById('pat-reg-resp').value.trim();
-        const status = document.getElementById('pat-reg-status').value;
-        
-        if (!codigo || !item || !funcionario) {
-            alert('Preencha os campos obrigatórios (Código, Item e Responsável).');
-            return;
+    // QR CODE
+    function abrirQRScanner() {
+        document.getElementById('qr-scanner-modal').style.display = 'flex';
+        if (!qrScanner) {
+            qrScanner = new Html5Qrcode("qr-reader");
         }
-        
-        // Verificar se já existe
-        const existe = patTodos.findIndex(i => i.codigo === codigo);
-        const novoItem = {
-            codigo,
-            item,
-            categoria: category,
-            localizacao: sala,
-            responsavel: funcionario,
-            status,
-            foto: fotoBase64 || ''
-        };
-        
-        if (existe >= 0) {
-            patTodos[existe] = novoItem;
-            alert('Item atualizado com sucesso!');
-        } else {
-            patTodos.push(novoItem);
-            alert('Item cadastrado com sucesso!');
-        }
-        
-        patResetarCadastro();
-        renderizarTabelaPaginada();
+        qrScanner.start(
+            { facingMode: "environment" },
+            { fps: 10, qrbox: { width: 250, height: 150 } },
+            (decodedText) => {
+                document.getElementById('pat-search-input').value = decodedText;
+                filtrarTabela();
+                fecharQRScanner();
+            },
+            () => {}
+        ).catch(() => alert("Erro ao acessar câmera."));
     }
 
-    function patExcluirItem() {
-        const codigo = document.getElementById('pat-reg-code').value.trim();
-        if (!codigo) return;
-        if (!confirm(`Tem certeza que deseja excluir o item "${codigo}"?`)) return;
-        
-        const index = patTodos.findIndex(i => i.codigo === codigo);
-        if (index >= 0) {
-            patTodos.splice(index, 1);
-            alert('Item excluído!');
-            patResetarCadastro();
-            renderizarTabelaPaginada();
+    function abrirQRScannerCadastro() {
+        document.getElementById('qr-scanner-modal').style.display = 'flex';
+        if (!qrScanner) qrScanner = new Html5Qrcode("qr-reader");
+        qrScanner.start(
+            { facingMode: "environment" },
+            { fps: 10, qrbox: { width: 250, height: 150 } },
+            (decodedText) => {
+                document.getElementById('pat-reg-code').value = decodedText;
+                fecharQRScanner();
+                patChecarEdicao();
+            },
+            () => {}
+        ).catch(() => alert("Erro ao acessar câmera."));
+    }
+
+    function fecharQRScanner() {
+        document.getElementById('qr-scanner-modal').style.display = 'none';
+        if (qrScanner) {
+            qrScanner.stop().catch(() => {});
         }
     }
 
-    // ============ REGISTRO EM BLOCO ============
-    function patExecutarCadastroBloco() {
-        const item = document.getElementById('bloco-item').value.trim();
-        const category = document.getElementById('bloco-cat').value;
-        const sala = document.getElementById('bloco-room').value;
-        const codigoInicial = document.getElementById('bloco-codigo-inicial').value.trim();
-        const quantidade = parseInt(document.getElementById('bloco-quantidade').value) || 2;
-        const fotoBloco = document.getElementById('bloco-foto-preview').src || '';
-        
-        if (!item) { alert('Digite o nome do item.'); return; }
-        if (!codigoInicial) { alert('Digite o código inicial.'); return; }
-        if (quantidade < 1) { alert('Quantidade deve ser maior que 0.'); return; }
-        
-        if (!confirm(`Cadastrar ${quantidade} itens a partir do código ${codigoInicial}?`)) return;
-        
-        const codigoBase = parseInt(codigoInicial.replace(/\D/g, ''));
-        let sucessos = 0;
-        
-        for (let i = 0; i < quantidade; i++) {
-            const novoCodigo = String(codigoBase + i);
-            const novoItem = {
-                codigo: novoCodigo,
-                item: item,
-                categoria: category,
-                localizacao: sala,
-                responsavel: usuarioLogadoPat.nome || 'Administrador',
-                status: 'Bom',
-                foto: fotoBloco
-            };
-            
-            // Verificar se já existe
-            const existe = patTodos.findIndex(p => p.codigo === novoCodigo);
-            if (existe >= 0) {
-                patTodos[existe] = novoItem;
-            } else {
-                patTodos.push(novoItem);
-            }
-            sucessos++;
-        }
-        
-        alert(`${sucessos} de ${quantidade} itens cadastrados com sucesso!`);
-        document.getElementById('bloco-item').value = '';
-        document.getElementById('bloco-codigo-inicial').value = '';
-        document.getElementById('bloco-foto-preview').style.display = 'none';
-        renderizarTabelaPaginada();
-    }
-
-    // ============ FOTOS ============
+    // FOTO
     function previewFotoCadastro() {
         const file = document.getElementById('pat-reg-foto').files[0];
         if (!file) return;
@@ -1139,175 +648,158 @@
         reader.readAsDataURL(file);
     }
 
-    // ============ QR CODE ============
-    function abrirQRScanner() {
-        const modal = document.getElementById('qr-scanner-modal');
-        modal.style.display = 'flex';
+    // CADASTRO
+    function patChecarEdicao() {
+        const codigo = document.getElementById('pat-reg-code').value.trim();
+        if (!codigo) return;
+        const item = patTodos.find(i => i.codigo === codigo);
+        if (item) carregarParaEdicao(codigo);
+    }
+
+    async function patExecutarCadastro() {
+        const codigo = document.getElementById('pat-reg-code').value.trim();
+        const item = document.getElementById('pat-reg-item').value.trim();
+        const category = document.getElementById('pat-reg-cat').value;
+        const sala = document.getElementById('pat-reg-room').value;
+        const funcionario = document.getElementById('pat-reg-resp').value.trim();
+        const status = document.getElementById('pat-reg-status').value;
         
-        if (!qrScanner) {
-            qrScanner = new Html5Qrcode("qr-reader");
-        }
+        if (!codigo || !item || !funcionario) { alert('Preencha os campos obrigatórios.'); return; }
         
-        qrScanner.start(
-            { facingMode: "environment" },
-            { fps: 10, qrbox: { width: 250, height: 150 } },
-            (decodedText) => {
-                document.getElementById('pat-search-input').value = decodedText;
-                filtrarTabela();
-                fecharQRScanner();
-            },
-            (error) => {
-                // Erros de leitura são normais, ignorar
+        const payload = {
+            operacao: "PAT_CADASTRAR",
+            codigo, item, categoria: category, localizacao: sala,
+            responsavel: funcionario, status,
+            emailOperador: usuarioLogadoPat.email,
+            foto: fotoBase64 || ''
+        };
+        
+        try {
+            const r = await fetch(APPS_SCRIPT_PAT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
+            const res = await r.json();
+            if (res.status === "success" || res.status === "updated") {
+                alert(res.status === "updated" ? "Atualizado!" : "Cadastrado!");
+                patResetarCadastro();
+                carregarItensPaginado(true);
+            } else {
+                alert('Erro: ' + (res.message || 'Falha.'));
             }
-        ).catch((err) => {
-            console.error('Erro ao acessar câmera:', err);
-            alert('Erro ao acessar a câmera. Verifique as permissões.');
-            fecharQRScanner();
-        });
+        } catch (e) { alert('Erro de conexão.'); }
     }
 
-    function abrirQRScannerCadastro() {
-        const modal = document.getElementById('qr-scanner-modal');
-        modal.style.display = 'flex';
+    function patResetarCadastro() {
+        document.getElementById('pat-cad-title').innerHTML = 'Cadastrar Novo Patrimônio';
+        ['pat-reg-code','pat-reg-item','pat-reg-resp'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('pat-reg-status').value = 'Bom';
+        document.getElementById('pat-btn-excluir').style.display = 'none';
+        document.getElementById('pat-foto-preview').style.display = 'none';
+        fotoBase64 = null;
+    }
+
+    async function patExcluirItem() {
+        const codigo = document.getElementById('pat-reg-code').value.trim();
+        if (!codigo || !confirm(`Excluir ${codigo}?`)) return;
+        try {
+            const r = await fetch(APPS_SCRIPT_PAT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ operacao: "PAT_EXCLUIR", codigo, emailOperador: usuarioLogadoPat.email }) });
+            const res = await r.json();
+            if (res.status === "success") { alert('Excluído!'); patResetarCadastro(); carregarItensPaginado(true); }
+        } catch (e) { alert('Erro.'); }
+    }
+
+    // REGISTRO EM BLOCO
+    document.getElementById('bloco-quantidade').addEventListener('input', function() {
+        document.getElementById('bloco-total').innerText = this.value;
+    });
+
+    async function patExecutarCadastroBloco() {
+        const item = document.getElementById('bloco-item').value.trim();
+        const category = document.getElementById('bloco-cat').value;
+        const sala = document.getElementById('bloco-room').value;
+        const codigoInicial = document.getElementById('bloco-codigo-inicial').value.trim();
+        const quantidade = parseInt(document.getElementById('bloco-quantidade').value);
+        const fotoBloco = document.getElementById('bloco-foto-preview').src || '';
         
-        if (!qrScanner) {
-            qrScanner = new Html5Qrcode("qr-reader");
+        if (!item || !codigoInicial || quantidade < 1) { alert('Preencha todos os campos.'); return; }
+        if (!confirm(`Cadastrar ${quantidade} itens?`)) return;
+        
+        let sucessos = 0;
+        const codigoBase = parseInt(codigoInicial.replace(/\D/g, ''));
+        
+        for (let i = 0; i < quantidade; i++) {
+            const novoCodigo = String(codigoBase + i);
+            const payload = {
+                operacao: "PAT_CADASTRAR",
+                codigo: novoCodigo, item, categoria: category,
+                localizacao: sala, responsavel: usuarioLogadoPat.nome,
+                status: 'Bom', emailOperador: usuarioLogadoPat.email,
+                foto: fotoBloco
+            };
+            try {
+                const r = await fetch(APPS_SCRIPT_PAT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
+                const res = await r.json();
+                if (res.status === "success" || res.status === "updated") sucessos++;
+            } catch (e) { console.error('Erro no item', novoCodigo); }
         }
         
-        qrScanner.start(
-            { facingMode: "environment" },
-            { fps: 10, qrbox: { width: 250, height: 150 } },
-            (decodedText) => {
-                document.getElementById('pat-reg-code').value = decodedText;
-                fecharQRScanner();
-                patChecarEdicao();
-            },
-            (error) => {}
-        ).catch((err) => {
-            console.error('Erro ao acessar câmera:', err);
-            alert('Erro ao acessar a câmera. Verifique as permissões.');
-            fecharQRScanner();
-        });
-    }
-
-    function fecharQRScanner() {
-        document.getElementById('qr-scanner-modal').style.display = 'none';
-        if (qrScanner) {
-            qrScanner.stop().catch(() => {});
+        alert(`${sucessos} de ${quantidade} itens cadastrados!`);
+        if (sucessos > 0) {
+            document.getElementById('bloco-item').value = '';
+            document.getElementById('bloco-codigo-inicial').value = '';
+            document.getElementById('bloco-foto-preview').style.display = 'none';
+            carregarItensPaginado(true);
         }
     }
 
-    // ============ AMBIENTES ============
-    function patAdicionarAmbiente() {
+    // AMBIENTES
+    async function patAdicionarAmbiente() {
         const nome = document.getElementById('pat-new-amb').value.trim();
-        if (!nome) { alert('Digite o nome do ambiente.'); return; }
-        if (patAmbientes.includes(nome)) { alert('Ambiente já cadastrado.'); return; }
-        
-        patAmbientes.push(nome);
-        document.getElementById('pat-new-amb').value = '';
-        atualizarSidebarAmbientes();
-        atualizarSelectsSalas();
-        atualizarListaAmbientes();
-        alert(`Ambiente "${nome}" adicionado!`);
+        if (!nome) return;
+        try {
+            await fetch(APPS_SCRIPT_PAT_URL, { method: 'POST', body: JSON.stringify({ operacao: "AMB_ADICIONAR", ambiente: nome }) });
+            document.getElementById('pat-new-amb').value = '';
+            await patCarregarAmbientes();
+        } catch (e) { alert('Erro.'); }
     }
 
-    function patDeletarAmbiente(nome) {
-        if (!confirm(`Remover o ambiente "${nome}"?`)) return;
-        if (nome === 'Almoxarifado') { alert('Não é possível remover o Almoxarifado.'); return; }
-        
-        patAmbientes = patAmbientes.filter(a => a !== nome);
-        atualizarSidebarAmbientes();
-        atualizarSelectsSalas();
-        atualizarListaAmbientes();
-        
-        if (patSalaFiltro === nome) {
-            patSalaFiltro = 'TODOS';
-            document.querySelectorAll('#pat-room-list-updated .room-item').forEach(el => el.classList.remove('active'));
-            document.querySelector('#pat-room-list-updated .room-item:first-child')?.classList.add('active');
-            document.getElementById('pat-panel-title').innerText = '📦 Patrimônio';
-            renderizarTabelaPaginada();
-        }
-        alert(`Ambiente "${nome}" removido!`);
+    async function patDeletarAmbiente(nome) {
+        if (!confirm(`Remover "${nome}"?`)) return;
+        try {
+            await fetch(APPS_SCRIPT_PAT_URL, { method: 'POST', body: JSON.stringify({ operacao: "AMB_DELETAR", ambiente: nome }) });
+            await patCarregarAmbientes();
+        } catch (e) { alert('Erro.'); }
     }
 
-    // ============ IMPRIMIR ETIQUETAS ============
+    // IMPRIMIR ETIQUETAS
     function imprimirEtiquetas() {
-        const selecionados = prompt('Digite os códigos dos itens separados por vírgula (ou deixe em branco para os itens visíveis):');
+        const selecionados = prompt('Digite os códigos dos itens separados por vírgula (ou deixe em branco para todos visíveis):');
         let itens;
-        
-        if (selecionados && selecionados.trim() !== '') {
+        if (selecionados) {
             const codigos = selecionados.split(',').map(c => c.trim());
             itens = patTodos.filter(i => codigos.includes(i.codigo));
         } else {
-            const filtrados = patSalaFiltro !== 'TODOS' 
-                ? patTodos.filter(item => item.localizacao === patSalaFiltro)
-                : patTodos;
-            itens = filtrados.slice(0, 24);
+            itens = patTodos.slice(0, 24); // Máximo 24 etiquetas por folha
         }
         
-        if (itens.length === 0) {
-            alert('Nenhum item encontrado para impressão.');
-            return;
-        }
+        if (itens.length === 0) { alert('Nenhum item encontrado.'); return; }
         
-        // Gerar HTML para impressão
-        let html = '<html><head>';
-        html += '<meta charset="UTF-8">';
-        html += '<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>';
-        html += '<style>';
-        html += '@page { size: A4; margin: 8mm; }';
-        html += 'body { font-family: Arial, sans-serif; margin: 0; padding: 0; }';
-        html += '.etiquetas { display: flex; flex-wrap: wrap; gap: 4mm; }';
-        html += '.etiqueta { width: 45%; border: 1px dashed #999; padding: 5mm; text-align: center; page-break-inside: avoid; box-sizing: border-box; border-radius: 4px; }';
-        html += '.etiqueta strong { font-size: 14px; display: block; margin-bottom: 2px; color: #005088; }';
-        html += '.etiqueta .codigo { font-size: 11px; color: #333; margin: 3px 0; font-weight: bold; }';
-        html += '.etiqueta .item { font-size: 12px; font-weight: bold; margin: 3px 0; }';
-        html += '.etiqueta .local { font-size: 10px; color: #666; }';
-        html += '.qr-container { margin: 5px auto; display: flex; justify-content: center; }';
-        html += '.footer { text-align: center; font-size: 8px; color: #999; margin-top: 5mm; border-top: 1px solid #eee; padding-top: 3mm; }';
-        html += '@media print { .etiqueta { border: 1px solid #ddd; } }';
-        html += '</style></head><body>';
-        html += '<div class="etiquetas">';
-        
-        itens.forEach((item, index) => {
-            html += '<div class="etiqueta">';
-            html += '<strong>CCM Anchieta</strong>';
-            html += '<div class="codigo">🏷️ ' + (item.codigo || '---') + '</div>';
-            html += '<div class="item">' + (item.item || 'Item sem nome') + '</div>';
-            html += '<div class="local">📍 ' + (item.localizacao || '—') + '</div>';
-            html += '<div class="qr-container" id="qr-' + index + '"></div>';
-            html += '</div>';
+        let html = '<div style="display:flex;flex-wrap:wrap;gap:10px;padding:20px;font-family:Arial;font-size:10px;">';
+        itens.forEach(item => {
+            html += `
+                <div style="width:30%;border:1px solid #ccc;padding:8px;margin-bottom:8px;text-align:center;page-break-inside:avoid;">
+                    <strong>CCM Anchieta</strong><br>
+                    <span style="font-size:9px;">${item.codigo}</span><br>
+                    <strong>${item.item}</strong><br>
+                    <span style="font-size:8px;">${item.localizacao || ''}</span>
+                    ${item.foto ? `<br><img src="${item.foto}" style="width:50px;height:50px;object-fit:cover;margin-top:5px;">` : ''}
+                </div>`;
         });
-        
         html += '</div>';
-        html += '<div class="footer">Gerado pelo SIGA Anchieta - ' + new Date().toLocaleDateString('pt-BR') + '</div>';
-        html += '<script>';
-        html += 'var codigos = ' + JSON.stringify(itens.map(i => i.codigo)) + ';';
-        html += 'codigos.forEach(function(codigo, index) {';
-        html += '  new QRCode(document.getElementById("qr-" + index), {';
-        html += '    text: codigo || "---", width: 70, height: 70,';
-        html += '    colorDark: "#005088", colorLight: "#ffffff"';
-        html += '  });';
-        html += '});';
-        html += 'setTimeout(function() { window.print(); }, 1200);';
-        html += '<\/script>';
-        html += '</body></html>';
         
         const win = window.open('', '_blank', 'width=800,height=600');
-        if (win) {
-            win.document.write(html);
-            win.document.close();
-        } else {
-            alert('Por favor, permita pop-ups para impressão das etiquetas.');
-        }
+        win.document.write(html);
+        win.document.close();
+        setTimeout(() => win.print(), 500);
     }
-
-    // ============ FECHAR MODAL COM ESC ============
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            fecharQRScanner();
-        }
-    });
 </script>
 </body>
 </html>
