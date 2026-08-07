@@ -769,36 +769,114 @@
         } catch (e) { alert('Erro.'); }
     }
 
-    // IMPRIMIR ETIQUETAS
+    // IMPRIMIR ETIQUETAS COM QR CODE
     function imprimirEtiquetas() {
         const selecionados = prompt('Digite os códigos dos itens separados por vírgula (ou deixe em branco para todos visíveis):');
         let itens;
-        if (selecionados) {
+        if (selecionados && selecionados.trim() !== '') {
             const codigos = selecionados.split(',').map(c => c.trim());
             itens = patTodos.filter(i => codigos.includes(i.codigo));
         } else {
-            itens = patTodos.slice(0, 24); // Máximo 24 etiquetas por folha
+            const filtrados = patSalaFiltro !== 'TODOS' 
+                ? patTodos.filter(item => item.localizacao === patSalaFiltro)
+                : patTodos;
+            itens = filtrados.slice(0, 24);
         }
         
-        if (itens.length === 0) { alert('Nenhum item encontrado.'); return; }
+        if (itens.length === 0) { 
+            alert('Nenhum item encontrado.'); 
+            return; 
+        }
         
-        let html = '<div style="display:flex;flex-wrap:wrap;gap:10px;padding:20px;font-family:Arial;font-size:10px;">';
-        itens.forEach(item => {
-            html += `
-                <div style="width:30%;border:1px solid #ccc;padding:8px;margin-bottom:8px;text-align:center;page-break-inside:avoid;">
-                    <strong>CCM Anchieta</strong><br>
-                    <span style="font-size:9px;">${item.codigo}</span><br>
-                    <strong>${item.item}</strong><br>
-                    <span style="font-size:8px;">${item.localizacao || ''}</span>
-                    ${item.foto ? `<br><img src="${item.foto}" style="width:50px;height:50px;object-fit:cover;margin-top:5px;">` : ''}
-                </div>`;
-        });
+        // Monta o HTML com QR Codes
+        let html = '<!DOCTYPE html><html><head>';
+        html += '<meta charset="UTF-8">';
+        html += '<title>Etiquetas Patrimônio</title>';
+        html += '<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>';
+        html += '<style>';
+        html += '@page { size: A4; margin: 8mm; }';
+        html += 'body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f9fafb; }';
+        html += '.etiquetas { display: flex; flex-wrap: wrap; gap: 8mm; padding: 5mm; justify-content: center; }';
+        html += '.etiqueta { ';
+        html += '  width: 130px; ';
+        html += '  min-height: 180px; ';
+        html += '  border: 1px solid #d1d5db; ';
+        html += '  padding: 8px; ';
+        html += '  text-align: center; ';
+        html += '  page-break-inside: avoid; ';
+        html += '  box-sizing: border-box; ';
+        html += '  background: white; ';
+        html += '  border-radius: 6px; ';
+        html += '  box-shadow: 0 1px 3px rgba(0,0,0,0.1); ';
+        html += '  display: flex; ';
+        html += '  flex-direction: column; ';
+        html += '  align-items: center; ';
+        html += '  justify-content: space-between; ';
+        html += '}';
+        html += '.etiqueta .header { font-size: 9px; font-weight: bold; color: #005088; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px; width: 100%; }';
+        html += '.etiqueta .codigo { font-size: 11px; font-weight: bold; color: #1e293b; margin: 4px 0; }';
+        html += '.etiqueta .item { font-size: 10px; font-weight: 600; color: #334155; margin: 3px 0; line-height: 1.2; max-height: 32px; overflow: hidden; }';
+        html += '.etiqueta .local { font-size: 8px; color: #64748b; margin: 2px 0; }';
+        html += '.etiqueta .qr-container { margin: 4px auto; display: flex; justify-content: center; }';
+        html += '.etiqueta .qr-container canvas { width: 70px !important; height: 70px !important; }';
+        html += '.etiqueta .footer { font-size: 7px; color: #94a3b8; border-top: 1px solid #e5e7eb; padding-top: 4px; width: 100%; }';
+        html += '@media print { ';
+        html += '  body { background: white; } ';
+        html += '  .etiqueta { box-shadow: none; border-color: #999; } ';
+        html += '  .no-print { display: none; } ';
+        html += '}';
+        html += '</style>';
+        html += '</head><body>';
+        html += '<div style="text-align:center;padding:10px;margin-bottom:10px;" class="no-print">';
+        html += '<button onclick="window.print()" style="padding:10px 30px;background:#005088;color:white;border:none;border-radius:6px;font-size:16px;cursor:pointer;">🖨️ Imprimir Etiquetas</button>';
+        html += ' <button onclick="window.close()" style="padding:10px 30px;background:#ef4444;color:white;border:none;border-radius:6px;font-size:16px;cursor:pointer;">✖ Fechar</button>';
+        html += '<p style="margin-top:10px;color:#64748b;">' + itens.length + ' etiquetas geradas</p>';
         html += '</div>';
+        html += '<div class="etiquetas">';
         
-        const win = window.open('', '_blank', 'width=800,height=600');
-        win.document.write(html);
-        win.document.close();
-        setTimeout(() => win.print(), 500);
+        itens.forEach((item, index) => {
+            const codigo = item.codigo || '---';
+            const nome = item.item || 'Item sem nome';
+            const local = item.localizacao || '—';
+            
+            html += '<div class="etiqueta">';
+            html += '  <div class="header">CCM ANCHIETA</div>';
+            html += '  <div class="codigo">' + codigo + '</div>';
+            html += '  <div class="item">' + nome + '</div>';
+            html += '  <div class="local">📍 ' + local + '</div>';
+            html += '  <div class="qr-container" id="qr-' + index + '"></div>';
+            html += '  <div class="footer">Patrimônio</div>';
+            html += '</div>';
+        });
+        
+        html += '</div>';
+        html += '<script>';
+        html += 'const codigos = ' + JSON.stringify(itens.map(i => i.codigo)) + ';';
+        html += 'codigos.forEach(function(codigo, index) {';
+        html += '  try {';
+        html += '    new QRCode(document.getElementById("qr-" + index), {';
+        html += '      text: codigo || "---",';
+        html += '      width: 70,';
+        html += '      height: 70,';
+        html += '      colorDark: "#005088",';
+        html += '      colorLight: "#ffffff",';
+        html += '      correctLevel: QRCode.CorrectLevel.H';
+        html += '    });';
+        html += '  } catch(e) {';
+        html += '    document.getElementById("qr-" + index).innerHTML = "<span style=\'font-size:10px;color:#ef4444;\'>Erro</span>";';
+        html += '  }';
+        html += '});';
+        html += 'console.log("QR Codes gerados para", codigos.length, "itens");';
+        html += '<\/script>';
+        html += '</body></html>';
+        
+        const win = window.open('', '_blank', 'width=900,height=700');
+        if (win) {
+            win.document.write(html);
+            win.document.close();
+        } else {
+            alert('Por favor, permita pop-ups para impressão das etiquetas.');
+        }
     }
 </script>
 </body>
