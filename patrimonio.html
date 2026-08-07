@@ -769,37 +769,66 @@
         } catch (e) { alert('Erro.'); }
     }
 
-    // IMPRIMIR ETIQUETAS
-    function imprimirEtiquetas() {
-        const selecionados = prompt('Digite os códigos dos itens separados por vírgula (ou deixe em branco para todos visíveis):');
-        let itens;
-        if (selecionados) {
-            const codigos = selecionados.split(',').map(c => c.trim());
-            itens = patTodos.filter(i => codigos.includes(i.codigo));
-        } else {
-            itens = patTodos.slice(0, 24); // Máximo 24 etiquetas por folha
-        }
-        
-        if (itens.length === 0) { alert('Nenhum item encontrado.'); return; }
-        
-        let html = '<div style="display:flex;flex-wrap:wrap;gap:10px;padding:20px;font-family:Arial;font-size:10px;">';
-        itens.forEach(item => {
-            html += `
-                <div style="width:30%;border:1px solid #ccc;padding:8px;margin-bottom:8px;text-align:center;page-break-inside:avoid;">
-                    <strong>CCM Anchieta</strong><br>
-                    <span style="font-size:9px;">${item.codigo}</span><br>
-                    <strong>${item.item}</strong><br>
-                    <span style="font-size:8px;">${item.localizacao || ''}</span>
-                    ${item.foto ? `<br><img src="${item.foto}" style="width:50px;height:50px;object-fit:cover;margin-top:5px;">` : ''}
-                </div>`;
-        });
-        html += '</div>';
-        
-        const win = window.open('', '_blank', 'width=800,height=600');
-        win.document.write(html);
-        win.document.close();
-        setTimeout(() => win.print(), 500);
+   // IMPRIMIR ETIQUETAS (COM QR CODE)
+function imprimirEtiquetas() {
+    const selecionados = prompt('Digite os códigos dos itens separados por vírgula (ou deixe em branco para todos visíveis):');
+    let itens;
+    if (selecionados) {
+        const codigos = selecionados.split(',').map(c => c.trim());
+        itens = patTodos.filter(i => codigos.includes(i.codigo));
+    } else {
+        const inicio = paginaAtual * itensPorPagina;
+        const filtrados = patSalaFiltro !== 'TODOS' 
+            ? patTodos.filter(item => item.localizacao === patSalaFiltro)
+            : patTodos;
+        itens = filtrados.slice(inicio, inicio + 24);
     }
+    
+    if (itens.length === 0) { alert('Nenhum item encontrado.'); return; }
+    
+    // Monta o HTML com QR Codes
+    const codigos = itens.map(i => i.codigo);
+    
+    let html = '<html><head>';
+    html += '<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>';
+    html += '<style>';
+    html += '@page { size: A4; margin: 5mm; }';
+    html += 'body { font-family: Arial, sans-serif; margin: 0; padding: 0; }';
+    html += '.etiquetas { display: flex; flex-wrap: wrap; gap: 2mm; padding: 5mm; }';
+    html += '.etiqueta { width: 30%; border: 1px dashed #ccc; padding: 5mm; text-align: center; page-break-inside: avoid; margin-bottom: 2mm; box-sizing: border-box; }';
+    html += '.etiqueta strong { font-size: 12px; display: block; margin-bottom: 2px; }';
+    html += '.etiqueta .codigo { font-size: 10px; color: #333; margin: 3px 0; }';
+    html += '.etiqueta .item { font-size: 10px; font-weight: bold; margin: 3px 0; }';
+    html += '.etiqueta .local { font-size: 8px; color: #666; }';
+    html += '.qr-container { margin: 5px auto; display: flex; justify-content: center; }';
+    html += '@media print { .etiqueta { border: 1px solid #ddd; } }';
+    html += '</style></head><body><div class="etiquetas">';
+    
+    itens.forEach((item, index) => {
+        html += '<div class="etiqueta">';
+        html += '<strong>CCM Anchieta</strong>';
+        html += '<div class="codigo">🏷️ ' + item.codigo + '</div>';
+        html += '<div class="item">' + item.item + '</div>';
+        html += '<div class="local">📍 ' + (item.localizacao || '—') + '</div>';
+        html += '<div class="qr-container" id="qr-' + index + '"></div>';
+        html += '</div>';
+    });
+    
+    html += '</div><script>';
+    html += 'var codigos = ' + JSON.stringify(codigos) + ';';
+    html += 'codigos.forEach(function(codigo, index) {';
+    html += '  new QRCode(document.getElementById("qr-" + index), {';
+    html += '    text: codigo, width: 60, height: 60,';
+    html += '    colorDark: "#000000", colorLight: "#ffffff"';
+    html += '  });';
+    html += '});';
+    html += 'setTimeout(function() { window.print(); }, 1000);';
+    html += '</script></body></html>';
+    
+    const win = window.open('', '_blank', 'width=800,height=600');
+    win.document.write(html);
+    win.document.close();
+}
 </script>
 </body>
 </html>
