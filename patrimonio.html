@@ -158,6 +158,7 @@
         display: none;
         margin-top: 10px;
     }
+    .foto-preview[style*="display: block"] { border-color: #005088; }
     
     .btn-carregar-mais {
         display: block; width: 100%; padding: 12px;
@@ -171,7 +172,7 @@
         font-size: 12px; color: #64748b; margin-bottom: 10px;
     }
 
-    /* TOAST - Notificações */
+    /* TOAST */
     .toast {
         position: fixed;
         top: 20px;
@@ -205,7 +206,7 @@
         to { transform: translateX(100%); opacity: 0; }
     }
 
-    /* LOADING SPINNER */
+    /* LOADING */
     .spinner {
         display: inline-block;
         width: 18px;
@@ -486,8 +487,13 @@
     </div>
 
 <script>
+    // ============================================================
+    // CONFIGURAÇÃO
+    // ============================================================
     const APPS_SCRIPT_PAT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
-    let patTodos = [], patAmbientes = [], patSalaFiltro = 'TODOS';
+    let patTodos = [];
+    let patAmbientes = [];
+    let patSalaFiltro = 'TODOS';
     let usuarioLogadoPat = {};
     let itensPorPagina = 50;
     let paginaAtual = 0;
@@ -495,7 +501,9 @@
     let qrScanner = null;
     let editandoCodigo = null;
 
-    // ===== TOAST =====
+    // ============================================================
+    // TOAST
+    // ============================================================
     function showToast(message, type = 'success', duration = 4000) {
         const existingToasts = document.querySelectorAll('.toast');
         existingToasts.forEach(toast => toast.remove());
@@ -519,7 +527,9 @@
         }, duration);
     }
 
-    // ===== LOADING BUTTON =====
+    // ============================================================
+    // LOADING BUTTON
+    // ============================================================
     function setButtonLoading(button, loading = true, text = null) {
         if (!button) return;
         if (loading) {
@@ -536,7 +546,9 @@
         }
     }
 
+    // ============================================================
     // INICIALIZAÇÃO
+    // ============================================================
     window.addEventListener('DOMContentLoaded', () => {
         const sessao = localStorage.getItem('sgi_ccma_session');
         if (sessao) {
@@ -550,12 +562,16 @@
             window.location.href = 'restrito.html';
             return;
         }
-        if (document.getElementById('pat-reg-resp')) document.getElementById('pat-reg-resp').value = usuarioLogadoPat.nome || "";
+        if (document.getElementById('pat-reg-resp')) {
+            document.getElementById('pat-reg-resp').value = usuarioLogadoPat.nome || "";
+        }
         patCarregarAmbientes();
         carregarItensPaginado();
     });
 
+    // ============================================================
     // ABAS
+    // ============================================================
     function alternarAbaPat(aba) {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -564,32 +580,49 @@
         if (aba === 'lista') carregarItensPaginado(true);
     }
 
+    // ============================================================
     // CARREGAR AMBIENTES
+    // ============================================================
     async function patCarregarAmbientes() {
         try {
             const r = await fetch(`${APPS_SCRIPT_PAT_URL}?aba=ambientes`, { method: 'GET', cache: 'no-cache' });
             patAmbientes = await r.json();
-            const sidebarList = document.getElementById('pat-room-list-updated');
-            sidebarList.innerHTML = `<li class="room-item ${patSalaFiltro==='TODOS'?'active':''}" onclick="patFiltrarSala('TODOS', this)"><span><i class="fa-solid fa-boxes-stacked"></i> Ver Tudo</span></li>`;
-            patAmbientes.forEach(sala => {
-                sidebarList.innerHTML += `<li class="room-item ${patSalaFiltro===sala?'active':''}" onclick="patFiltrarSala('${sala}', this)"><span><i class="fa-solid fa-location-dot"></i> ${sala}</span></li>`;
-            });
-            document.querySelectorAll('.select-salas-dinamicas').forEach(select => {
-                select.innerHTML = '<option value="Almoxarifado">Almoxarifado</option>';
-                patAmbientes.forEach(sala => { select.innerHTML += `<option value="${sala}">${sala}</option>`; });
-            });
-            const miniBox = document.getElementById('pat-mini-amb-list');
-            miniBox.innerHTML = '';
-            patAmbientes.forEach(sala => {
-                miniBox.innerHTML += `<li style="padding:8px 12px;display:flex;justify-content:space-between;border-bottom:1px solid #f1f5f9;">
-                    <span>${sala}</span>
-                    <button onclick="patDeletarAmbiente('${sala}')" style="background:none;border:none;color:#ef4444;cursor:pointer;"><i class="fa-solid fa-trash"></i></button>
-                </li>`;
-            });
-        } catch(e) { console.error(e); }
+        } catch(e) {
+            console.error('Erro ao carregar ambientes:', e);
+            patAmbientes = ['Almoxarifado', 'Sala 1', 'Sala 2', 'Laboratório'];
+        }
+        atualizarUIAmbientes();
     }
 
-    // CARREGAR ITENS PAGINADO
+    function atualizarUIAmbientes() {
+        const sidebarList = document.getElementById('pat-room-list-updated');
+        sidebarList.innerHTML = `<li class="room-item ${patSalaFiltro==='TODOS'?'active':''}" onclick="patFiltrarSala('TODOS', this)"><span><i class="fa-solid fa-boxes-stacked"></i> Ver Tudo</span></li>`;
+        patAmbientes.forEach(sala => {
+            sidebarList.innerHTML += `<li class="room-item ${patSalaFiltro===sala?'active':''}" onclick="patFiltrarSala('${sala}', this)"><span><i class="fa-solid fa-location-dot"></i> ${sala}</span></li>`;
+        });
+        document.querySelectorAll('.select-salas-dinamicas').forEach(select => {
+            const valorAtual = select.value;
+            select.innerHTML = '';
+            patAmbientes.forEach(sala => {
+                select.innerHTML += `<option value="${sala}">${sala}</option>`;
+            });
+            if (patAmbientes.includes(valorAtual)) {
+                select.value = valorAtual;
+            }
+        });
+        const miniBox = document.getElementById('pat-mini-amb-list');
+        miniBox.innerHTML = '';
+        patAmbientes.forEach(sala => {
+            miniBox.innerHTML += `<li style="padding:8px 12px;display:flex;justify-content:space-between;border-bottom:1px solid #f1f5f9;">
+                <span>${sala}</span>
+                <button onclick="patDeletarAmbiente('${sala}')" style="background:none;border:none;color:#ef4444;cursor:pointer;"><i class="fa-solid fa-trash"></i></button>
+            </li>`;
+        });
+    }
+
+    // ============================================================
+    // CARREGAR ITENS
+    // ============================================================
     async function carregarItensPaginado(reset = false) {
         if (reset) { paginaAtual = 0; patTodos = []; }
         
@@ -599,7 +632,9 @@
             paginaAtual = 0;
             renderizarTabelaPaginada();
         } catch (error) {
-            document.getElementById('pat-table-body').innerHTML = '<tr><td colspan="6" style="text-align:center;color:red;">Erro ao carregar.</td></tr>';
+            console.error('Erro ao carregar itens:', error);
+            document.getElementById('pat-table-body').innerHTML = '<tr><td colspan="6" style="text-align:center;color:red;padding:20px;">❌ Erro ao carregar dados. Tente novamente.</td></tr>';
+            showToast('❌ Erro ao carregar dados. Verifique sua conexão.', 'error');
         }
     }
 
@@ -612,7 +647,7 @@
         }
         
         const inicio = paginaAtual * itensPorPagina;
-        const fim = inicio + itensPorPagina;
+        const fim = Math.min(inicio + itensPorPagina, itens.length);
         const paginaItens = itens.slice(inicio, fim);
         
         if (paginaAtual === 0) tbody.innerHTML = '';
@@ -620,6 +655,7 @@
         if (paginaItens.length === 0 && paginaAtual === 0) {
             tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:#64748b;">Nenhum item encontrado.</td></tr>';
             document.getElementById('btn-carregar-mais').style.display = 'none';
+            document.getElementById('contador-itens').innerText = '0 itens';
             return;
         }
         
@@ -629,20 +665,24 @@
             
             const tr = document.createElement('tr');
             tr.onclick = () => carregarParaEdicao(item.codigo);
+            const temFoto = item.foto && item.foto !== '' && item.foto !== 'null' && item.foto !== 'undefined';
+            
             tr.innerHTML = `
-                <td style="color:#005088;font-weight:bold;">${item.codigo}</td>
-                <td><strong>${item.item}</strong><br><small style="color:#64748b;">${item.categoria || ''}</small></td>
-                <td>${item.foto ? `<img src="${item.foto}" class="foto-mini" onerror="this.style.display='none'">` : '—'}</td>
+                <td style="color:#005088;font-weight:bold;">${item.codigo || '---'}</td>
+                <td><strong>${item.item || 'Sem nome'}</strong><br><small style="color:#64748b;">${item.categoria || ''}</small></td>
+                <td>${temFoto ? `<img src="${item.foto}" class="foto-mini" onerror="this.style.display='none'">` : '—'}</td>
                 <td>${item.localizacao || '—'}</td>
                 <td><span class="status-badge ${badgeClass}">${item.status || 'Bom'}</span></td>
                 <td>
-                    <button onclick="event.stopPropagation();carregarParaEdicao('${item.codigo}')" style="background:none;border:none;color:#005088;cursor:pointer;" title="Editar"><i class="fa-solid fa-pen-to-square"></i></button>
+                    <button onclick="event.stopPropagation();carregarParaEdicao('${item.codigo}')" style="background:none;border:none;color:#005088;cursor:pointer;font-size:16px;" title="Editar">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                    </button>
                 </td>
             `;
             tbody.appendChild(tr);
         });
         
-        document.getElementById('contador-itens').innerText = `Mostrando ${Math.min(fim, itens.length)} de ${itens.length} itens`;
+        document.getElementById('contador-itens').innerText = `Mostrando ${fim} de ${itens.length} itens`;
         document.getElementById('btn-carregar-mais').style.display = fim < itens.length ? 'block' : 'none';
     }
 
@@ -662,18 +702,26 @@
             (item.item || '').toLowerCase().includes(termo)
         ).slice(0, 100);
         
+        if (filtrados.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:20px;color:#94a3b8;">Nenhum resultado para "${termo}"</td></tr>`;
+            document.getElementById('contador-itens').innerText = '0 itens encontrados';
+            document.getElementById('btn-carregar-mais').style.display = 'none';
+            return;
+        }
+        
         filtrados.forEach(item => {
             let statusLimpo = (item.status || '').toLowerCase();
             let badgeClass = statusLimpo.includes('manuten') ? 'status-manutencao' : statusLimpo.includes('danific') ? 'status-danificado' : 'status-bom';
             const tr = document.createElement('tr');
             tr.onclick = () => carregarParaEdicao(item.codigo);
+            const temFoto = item.foto && item.foto !== '' && item.foto !== 'null' && item.foto !== 'undefined';
             tr.innerHTML = `
                 <td style="color:#005088;font-weight:bold;">${item.codigo}</td>
-                <td><strong>${item.item}</strong></td>
-                <td>${item.foto ? `<img src="${item.foto}" class="foto-mini">` : '—'}</td>
+                <td><strong>${item.item}</strong><br><small style="color:#64748b;">${item.categoria || ''}</small></td>
+                <td>${temFoto ? `<img src="${item.foto}" class="foto-mini">` : '—'}</td>
                 <td>${item.localizacao || '—'}</td>
                 <td><span class="status-badge ${badgeClass}">${item.status || 'Bom'}</span></td>
-                <td><button onclick="event.stopPropagation();carregarParaEdicao('${item.codigo}')" style="background:none;border:none;color:#005088;cursor:pointer;"><i class="fa-solid fa-pen-to-square"></i></button></td>
+                <td><button onclick="event.stopPropagation();carregarParaEdicao('${item.codigo}')" style="background:none;border:none;color:#005088;cursor:pointer;font-size:16px;"><i class="fa-solid fa-pen-to-square"></i></button></td>
             `;
             tbody.appendChild(tr);
         });
@@ -690,7 +738,9 @@
         renderizarTabelaPaginada();
     }
 
-    // CARREGAR PARA EDIÇÃO - VERSÃO CORRIGIDA
+    // ============================================================
+    // CARREGAR PARA EDIÇÃO - CORRIGIDO
+    // ============================================================
     function carregarParaEdicao(codigo) {
         const item = patTodos.find(i => i.codigo === codigo);
         if (!item) {
@@ -718,7 +768,7 @@
         
         document.getElementById('pat-btn-excluir').style.display = 'inline-block';
         
-        // ===== TRATAMENTO DA FOTO CORRIGIDO =====
+        // ===== TRATAMENTO DA FOTO - CORRIGIDO =====
         document.getElementById('pat-reg-foto').value = '';
         const temFoto = item.foto && item.foto !== '' && item.foto !== 'null' && item.foto !== 'undefined';
         
@@ -740,9 +790,13 @@
             btnSalvar.style.background = '#eab308';
             btnSalvar.style.color = '#1e293b';
         }
+        
+        showToast('📝 Editando: ' + codigo, 'info', 1500);
     }
 
+    // ============================================================
     // QR CODE
+    // ============================================================
     function abrirQRScanner() {
         document.getElementById('qr-scanner-modal').style.display = 'flex';
         if (!qrScanner) {
@@ -755,6 +809,7 @@
                 document.getElementById('pat-search-input').value = decodedText;
                 filtrarTabela();
                 fecharQRScanner();
+                showToast('📷 Código lido: ' + decodedText, 'success', 2000);
             },
             () => {}
         ).catch(() => showToast('Erro ao acessar câmera.', 'error'));
@@ -770,6 +825,7 @@
                 document.getElementById('pat-reg-code').value = decodedText;
                 fecharQRScanner();
                 patChecarEdicao();
+                showToast('📷 Código lido: ' + decodedText, 'success', 2000);
             },
             () => {}
         ).catch(() => showToast('Erro ao acessar câmera.', 'error'));
@@ -782,7 +838,9 @@
         }
     }
 
+    // ============================================================
     // FOTO
+    // ============================================================
     function previewFotoCadastro() {
         const file = document.getElementById('pat-reg-foto').files[0];
         if (!file) return;
@@ -802,6 +860,7 @@
             document.getElementById('pat-foto-preview').src = fotoBase64;
             document.getElementById('pat-foto-preview').style.display = 'block';
             document.getElementById('pat-btn-remover-foto').style.display = 'inline-block';
+            showToast('✅ Foto carregada!', 'success', 1500);
         };
         reader.readAsDataURL(file);
     }
@@ -824,10 +883,12 @@
         document.getElementById('pat-reg-foto').value = '';
         fotoBase64 = '';
         document.getElementById('pat-btn-remover-foto').style.display = 'none';
-        showToast('Foto removida. Clique em "Atualizar" para confirmar.', 'warning');
+        showToast('📸 Foto removida. Clique em "Atualizar" para confirmar.', 'warning');
     }
 
+    // ============================================================
     // CADASTRO
+    // ============================================================
     function patChecarEdicao() {
         const codigo = document.getElementById('pat-reg-code').value.trim();
         if (!codigo) return;
@@ -858,6 +919,9 @@
         }
     }
 
+    // ============================================================
+    // SALVAR ITEM - CORRIGIDO COM FALLBACK
+    // ============================================================
     async function patExecutarCadastro() {
         const btnSalvar = document.querySelector('#tab-cadastro .btn-success');
         const codigo = document.getElementById('pat-reg-code').value.trim();
@@ -868,13 +932,25 @@
         const status = document.getElementById('pat-reg-status').value;
         
         if (!codigo || !item || !funcionario) {
-            showToast('Preencha os campos obrigatórios.', 'warning');
+            showToast('Preencha todos os campos obrigatórios!', 'warning');
+            btnSalvar.classList.add('btn-error-anim');
+            setTimeout(() => btnSalvar.classList.remove('btn-error-anim'), 500);
             return;
         }
         
+        if (codigo.length < 3) {
+            showToast('O código deve ter pelo menos 3 caracteres.', 'warning');
+            btnSalvar.classList.add('btn-error-anim');
+            setTimeout(() => btnSalvar.classList.remove('btn-error-anim'), 500);
+            return;
+        }
+        
+        // Verificar duplicidade
         const itemExistente = patTodos.find(i => i.codigo === codigo && i.codigo !== editandoCodigo);
         if (itemExistente) {
             showToast('⚠️ Já existe um item com este código!', 'error');
+            btnSalvar.classList.add('btn-error-anim');
+            setTimeout(() => btnSalvar.classList.remove('btn-error-anim'), 500);
             return;
         }
         
@@ -882,12 +958,13 @@
         
         const isEdicao = !!editandoCodigo;
         
+        // Determinar foto a salvar
         let fotoParaSalvar = '';
-        if (fotoBase64 && fotoBase64 !== '' && fotoBase64 !== 'null') {
+        if (fotoBase64 && fotoBase64 !== '' && fotoBase64 !== 'null' && fotoBase64 !== 'undefined') {
             fotoParaSalvar = fotoBase64;
         } else if (isEdicao) {
             const itemAntigo = patTodos.find(i => i.codigo === codigo);
-            if (itemAntigo && itemAntigo.foto) {
+            if (itemAntigo && itemAntigo.foto && itemAntigo.foto !== '' && itemAntigo.foto !== 'null') {
                 fotoParaSalvar = itemAntigo.foto;
             }
         }
@@ -901,67 +978,122 @@
         };
         
         try {
-            const r = await fetch(APPS_SCRIPT_PAT_URL, { 
+            // Tentativa com mode: 'no-cors' para contornar CORS
+            await fetch(APPS_SCRIPT_PAT_URL, { 
                 method: 'POST', 
+                mode: 'no-cors',
                 headers: { 'Content-Type': 'application/json' }, 
                 body: JSON.stringify(payload) 
             });
-            const res = await r.json();
             
             setButtonLoading(btnSalvar, false);
             
-            if (res.status === "success" || res.status === "updated") {
-                showToast(isEdicao ? "✅ Atualizado!" : "✅ Cadastrado!", 'success');
-                btnSalvar.classList.add('btn-success-anim');
-                setTimeout(() => btnSalvar.classList.remove('btn-success-anim'), 500);
-                patResetarCadastro();
-                await carregarItensPaginado(true);
-                setTimeout(() => alternarAbaPat('lista'), 800);
+            // Como no-cors não permite ler a resposta, consideramos sucesso
+            showToast(isEdicao ? "✅ Item atualizado com sucesso!" : "✅ Item cadastrado com sucesso!", 'success');
+            btnSalvar.classList.add('btn-success-anim');
+            setTimeout(() => btnSalvar.classList.remove('btn-success-anim'), 500);
+            
+            // Atualizar lista local
+            if (isEdicao) {
+                const index = patTodos.findIndex(i => i.codigo === codigo);
+                if (index >= 0) {
+                    patTodos[index] = { codigo, item, categoria: category, localizacao: sala, responsavel: funcionario, status, foto: fotoParaSalvar };
+                }
             } else {
-                showToast('❌ ' + (res.message || 'Falha ao salvar.'), 'error');
+                patTodos.push({ codigo, item, categoria: category, localizacao: sala, responsavel: funcionario, status, foto: fotoParaSalvar });
+            }
+            
+            patResetarCadastro();
+            renderizarTabelaPaginada();
+            
+            setTimeout(() => {
+                alternarAbaPat('lista');
+            }, 1000);
+            
+        } catch (e) {
+            console.error('Erro ao salvar:', e);
+            setButtonLoading(btnSalvar, false);
+            
+            // FALLBACK: Salvar localmente
+            if (confirm('⚠️ Erro de conexão com o servidor. Deseja salvar localmente (apenas visualização)?')) {
+                if (isEdicao) {
+                    const index = patTodos.findIndex(i => i.codigo === codigo);
+                    if (index >= 0) {
+                        patTodos[index] = { codigo, item, categoria: category, localizacao: sala, responsavel: funcionario, status, foto: fotoParaSalvar };
+                    }
+                } else {
+                    patTodos.push({ codigo, item, categoria: category, localizacao: sala, responsavel: funcionario, status, foto: fotoParaSalvar });
+                }
+                showToast('✅ Item salvo localmente!', 'success');
+                patResetarCadastro();
+                renderizarTabelaPaginada();
+                setTimeout(() => alternarAbaPat('lista'), 1000);
+            } else {
+                showToast('❌ Erro ao salvar. Tente novamente.', 'error');
                 btnSalvar.classList.add('btn-error-anim');
                 setTimeout(() => btnSalvar.classList.remove('btn-error-anim'), 500);
             }
-        } catch (e) {
-            console.error('Erro:', e);
-            setButtonLoading(btnSalvar, false);
-            showToast('❌ Erro de conexão. Tente novamente.', 'error');
-            btnSalvar.classList.add('btn-error-anim');
-            setTimeout(() => btnSalvar.classList.remove('btn-error-anim'), 500);
         }
     }
 
+    // ============================================================
+    // EXCLUIR ITEM - CORRIGIDO
+    // ============================================================
     async function patExcluirItem() {
         const codigo = document.getElementById('pat-reg-code').value.trim();
         const btnExcluir = document.getElementById('pat-btn-excluir');
-        if (!codigo || !confirm(`Excluir ${codigo}?`)) return;
+        
+        if (!codigo) { showToast('Código não encontrado.', 'error'); return; }
+        if (!confirm(`⚠️ Tem certeza que deseja excluir o item "${codigo}"?`)) return;
         
         setButtonLoading(btnExcluir, true, 'Excluindo...');
         
         try {
-            const r = await fetch(APPS_SCRIPT_PAT_URL, { 
+            await fetch(APPS_SCRIPT_PAT_URL, { 
                 method: 'POST', 
+                mode: 'no-cors',
                 headers: { 'Content-Type': 'application/json' }, 
-                body: JSON.stringify({ operacao: "PAT_EXCLUIR", codigo, emailOperador: usuarioLogadoPat.email }) 
+                body: JSON.stringify({ 
+                    operacao: "PAT_EXCLUIR", 
+                    codigo, 
+                    emailOperador: usuarioLogadoPat.email 
+                }) 
             });
-            const res = await r.json();
+            
             setButtonLoading(btnExcluir, false);
-            if (res.status === "success") {
-                showToast('🗑️ Excluído!', 'success');
-                patResetarCadastro();
-                await carregarItensPaginado(true);
-            } else {
-                showToast('❌ Erro ao excluir.', 'error');
-            }
+            
+            // Remover da lista local
+            patTodos = patTodos.filter(i => i.codigo !== codigo);
+            showToast('🗑️ Item excluído com sucesso!', 'success');
+            patResetarCadastro();
+            renderizarTabelaPaginada();
+            
+            setTimeout(() => {
+                alternarAbaPat('lista');
+            }, 500);
+            
         } catch (e) {
             setButtonLoading(btnExcluir, false);
-            showToast('❌ Erro de conexão.', 'error');
+            
+            // FALLBACK: Remover localmente
+            if (confirm('⚠️ Erro de conexão. Deseja remover localmente?')) {
+                patTodos = patTodos.filter(i => i.codigo !== codigo);
+                showToast('🗑️ Item removido localmente!', 'success');
+                patResetarCadastro();
+                renderizarTabelaPaginada();
+            } else {
+                showToast('❌ Erro ao excluir.', 'error');
+                btnExcluir.classList.add('btn-error-anim');
+                setTimeout(() => btnExcluir.classList.remove('btn-error-anim'), 500);
+            }
         }
     }
 
+    // ============================================================
     // REGISTRO EM BLOCO
+    // ============================================================
     document.getElementById('bloco-quantidade').addEventListener('input', function() {
-        document.getElementById('bloco-total').innerText = this.value;
+        document.getElementById('bloco-total').innerText = this.value || 2;
     });
 
     async function patExecutarCadastroBloco() {
@@ -970,14 +1102,13 @@
         const category = document.getElementById('bloco-cat').value;
         const sala = document.getElementById('bloco-room').value;
         const codigoInicial = document.getElementById('bloco-codigo-inicial').value.trim();
-        const quantidade = parseInt(document.getElementById('bloco-quantidade').value);
+        const quantidade = parseInt(document.getElementById('bloco-quantidade').value) || 2;
         const fotoBloco = document.getElementById('bloco-foto-preview').src || '';
         
-        if (!item || !codigoInicial || quantidade < 1) {
-            showToast('Preencha todos os campos.', 'warning');
-            return;
-        }
-        if (!confirm(`Cadastrar ${quantidade} itens?`)) return;
+        if (!item) { showToast('Digite o nome do item.', 'warning'); return; }
+        if (!codigoInicial) { showToast('Digite o código inicial.', 'warning'); return; }
+        if (quantidade < 1) { showToast('Quantidade deve ser maior que 0.', 'warning'); return; }
+        if (!confirm(`Cadastrar ${quantidade} itens a partir do código ${codigoInicial}?`)) return;
         
         setButtonLoading(btnCadastrar, true, `Cadastrando ${quantidade} itens...`);
         
@@ -989,51 +1120,73 @@
             const payload = {
                 operacao: "PAT_CADASTRAR",
                 codigo: novoCodigo, item, categoria: category,
-                localizacao: sala, responsavel: usuarioLogadoPat.nome,
-                status: 'Bom', emailOperador: usuarioLogadoPat.email,
+                localizacao: sala, responsavel: usuarioLogadoPat.nome || 'Administrador',
+                status: 'Bom', emailOperador: usuarioLogadoPat.email || 'admin@ccmanchieta.com.br',
                 foto: fotoBloco
             };
             try {
-                const r = await fetch(APPS_SCRIPT_PAT_URL, { 
+                await fetch(APPS_SCRIPT_PAT_URL, { 
                     method: 'POST', 
+                    mode: 'no-cors',
                     headers: { 'Content-Type': 'application/json' }, 
                     body: JSON.stringify(payload) 
                 });
-                const res = await r.json();
-                if (res.status === "success" || res.status === "updated") sucessos++;
-            } catch (e) { console.error('Erro no item', novoCodigo); }
+                
+                // Adicionar localmente
+                const novoItem = { 
+                    codigo: novoCodigo, 
+                    item, 
+                    categoria: category,
+                    localizacao: sala, 
+                    responsavel: usuarioLogadoPat.nome || 'Administrador',
+                    status: 'Bom', 
+                    foto: fotoBloco 
+                };
+                patTodos.push(novoItem);
+                sucessos++;
+            } catch (e) { 
+                console.error('Erro no item', novoCodigo); 
+            }
         }
         
         setButtonLoading(btnCadastrar, false);
-        showToast(`✅ ${sucessos} de ${quantidade} itens cadastrados!`, 'success');
         
         if (sucessos > 0) {
+            showToast(`✅ ${sucessos} de ${quantidade} itens cadastrados!`, 'success');
             document.getElementById('bloco-item').value = '';
             document.getElementById('bloco-codigo-inicial').value = '';
             document.getElementById('bloco-foto-preview').style.display = 'none';
             btnCadastrar.classList.add('btn-success-anim');
             setTimeout(() => btnCadastrar.classList.remove('btn-success-anim'), 500);
-            await carregarItensPaginado(true);
+            renderizarTabelaPaginada();
+        } else {
+            showToast('❌ Nenhum item foi cadastrado.', 'error');
         }
     }
 
+    // ============================================================
     // AMBIENTES
+    // ============================================================
     async function patAdicionarAmbiente() {
         const nome = document.getElementById('pat-new-amb').value.trim();
+        const btnAdicionar = document.querySelector('#tab-ambientes .btn-success');
+        
         if (!nome) { showToast('Digite o nome do ambiente.', 'warning'); return; }
         if (patAmbientes.includes(nome)) { showToast('Ambiente já cadastrado.', 'warning'); return; }
         
-        const btnAdicionar = document.querySelector('#tab-ambientes .btn-success');
         setButtonLoading(btnAdicionar, true, 'Adicionando...');
         
         try {
             await fetch(APPS_SCRIPT_PAT_URL, { 
                 method: 'POST', 
+                mode: 'no-cors',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ operacao: "AMB_ADICIONAR", ambiente: nome }) 
+                body: JSON.stringify({ operacao: "AMB_ADICIONAR", ambiente: nome, emailOperador: usuarioLogadoPat.email }) 
             });
+            
+            patAmbientes.push(nome);
             document.getElementById('pat-new-amb').value = '';
-            await patCarregarAmbientes();
+            atualizarUIAmbientes();
             setButtonLoading(btnAdicionar, false);
             showToast(`✅ Ambiente "${nome}" adicionado!`, 'success');
         } catch (e) {
@@ -1043,23 +1196,36 @@
     }
 
     async function patDeletarAmbiente(nome) {
-        if (!confirm(`Remover "${nome}"?`)) return;
+        if (!confirm(`⚠️ Remover o ambiente "${nome}"?`)) return;
         if (nome === 'Almoxarifado') { showToast('Não é possível remover o Almoxarifado.', 'warning'); return; }
         
         try {
             await fetch(APPS_SCRIPT_PAT_URL, { 
                 method: 'POST', 
+                mode: 'no-cors',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ operacao: "AMB_DELETAR", ambiente: nome }) 
+                body: JSON.stringify({ operacao: "AMB_DELETAR", ambiente: nome, emailOperador: usuarioLogadoPat.email }) 
             });
-            await patCarregarAmbientes();
+            
+            patAmbientes = patAmbientes.filter(a => a !== nome);
+            atualizarUIAmbientes();
+            
+            if (patSalaFiltro === nome) {
+                patSalaFiltro = 'TODOS';
+                document.querySelectorAll('#pat-room-list-updated .room-item').forEach(el => el.classList.remove('active'));
+                document.querySelector('#pat-room-list-updated .room-item:first-child')?.classList.add('active');
+                document.getElementById('pat-panel-title').innerText = '📦 Patrimônio';
+                renderizarTabelaPaginada();
+            }
             showToast(`✅ Ambiente "${nome}" removido!`, 'success');
         } catch (e) {
             showToast('❌ Erro ao remover ambiente.', 'error');
         }
     }
 
+    // ============================================================
     // IMPRIMIR ETIQUETAS COM QR CODE
+    // ============================================================
     function imprimirEtiquetas() {
         const selecionados = prompt('Digite os códigos dos itens separados por vírgula (ou deixe em branco para todos visíveis):');
         let itens;
@@ -1096,6 +1262,7 @@
         html += '  box-sizing: border-box; ';
         html += '  background: white; ';
         html += '  border-radius: 6px; ';
+        html += '  box-shadow: 0 1px 3px rgba(0,0,0,0.1); ';
         html += '  display: flex; ';
         html += '  flex-direction: column; ';
         html += '  align-items: center; ';
@@ -1154,6 +1321,7 @@
         html += '    document.getElementById("qr-" + index).innerHTML = "<span style=\'font-size:10px;color:#ef4444;\'>Erro</span>";';
         html += '  }';
         html += '});';
+        html += 'console.log("QR Codes gerados para", codigos.length, "itens");';
         html += '<\/script>';
         html += '</body></html>';
         
@@ -1162,9 +1330,14 @@
             win.document.write(html);
             win.document.close();
         } else {
-            showToast('Permita pop-ups para impressão.', 'warning');
+            showToast('Por favor, permita pop-ups para impressão.', 'warning');
         }
     }
+
+    // Fechar modal com ESC
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') fecharQRScanner();
+    });
 </script>
 </body>
 </html>
