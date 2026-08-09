@@ -181,6 +181,37 @@
         .tab-nav { overflow-x: auto; padding: 0 10px; }
         .tab-btn { padding: 10px 12px; font-size: 11px; white-space: nowrap; }
     }
+    /* Estilos para a seção de foto */
+#pat-foto-preview {
+    transition: all 0.3s ease;
+    background: #f8fafc;
+}
+
+#pat-foto-preview[style*="display: block"] {
+    border: 2px solid #005088;
+    padding: 4px;
+}
+
+#pat-btn-remover-foto {
+    transition: all 0.2s ease;
+}
+
+#pat-btn-remover-foto:hover {
+    transform: scale(1.05);
+    background: #dc2626 !important;
+}
+
+/* Mensagem de ajuda */
+.foto-helper {
+    color: #64748b;
+    display: block;
+    margin-top: 5px;
+    font-size: 11px;
+    padding: 6px 10px;
+    background: #f1f5f9;
+    border-radius: 4px;
+    border-left: 3px solid #005088;
+}
 </style>
 </head>
 <body>
@@ -254,65 +285,96 @@
                 </button>
             </div>
 
-            <!-- ABA CADASTRO -->
-            <div class="tab-content" id="tab-cadastro">
-                <div class="form-card">
-                    <h3 id="pat-cad-title" style="margin-bottom:20px;color:#005088;">Cadastrar Novo Patrimônio</h3>
-                    
-                    <div class="form-group">
-                        <label>Código / QR Code:</label>
-                        <div style="display:flex;gap:8px;">
-                            <input type="text" id="pat-reg-code" placeholder="Ex: 100003506623" oninput="patChecarEdicao()" style="flex:1;">
-                            <button class="btn-top btn-warning" onclick="abrirQRScannerCadastro()"><i class="fa-solid fa-qrcode"></i></button>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Nome / Descrição:</label>
-                        <input type="text" id="pat-reg-item" placeholder="Ex: Notebook Lenovo ThinkPad">
-                    </div>
-                    <div class="form-group">
-                        <label>Categoria:</label>
-                        <select id="pat-reg-cat">
-                            <option value="Informática">Informática</option>
-                            <option value="Robótica">Robótica</option>
-                            <option value="Mobiliário">Mobiliário</option>
-                            <option value="Eletrodomésticos">Eletrodomésticos</option>
-                            <option value="Outros">Outros</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Localização:</label>
-                        <select id="pat-reg-room" class="select-salas-dinamicas">
-                            <option value="Almoxarifado">Almoxarifado</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Responsável:</label>
-                        <input type="text" id="pat-reg-resp" placeholder="Seu nome">
-                    </div>
-                    <div class="form-group">
-                        <label>Estado:</label>
-                        <select id="pat-reg-status">
-                            <option value="Bom">Bom Estado</option>
-                            <option value="Em Manutenção">Em Manutenção</option>
-                            <option value="Danificado">Danificado</option>
-                            <option value="Inservível">Inservível</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Foto do Item:</label>
-                        <div style="display:flex;gap:8px;">
-                            <button class="btn-top btn-primary" onclick="document.getElementById('pat-reg-foto').click()"><i class="fa-solid fa-camera"></i> Tirar/Upload Foto</button>
-                            <input type="file" id="pat-reg-foto" accept="image/*" capture="environment" style="display:none;" onchange="previewFotoCadastro()">
-                        </div>
-                        <img id="pat-foto-preview" class="foto-preview" src="" alt="Preview da foto" style="display:none;">
-                    </div>
-                    <div style="display:flex;gap:10px;margin-top:20px;">
-                        <button class="btn-top btn-success" onclick="patExecutarCadastro()" style="flex:1;padding:12px;font-size:14px;">💾 Salvar</button>
-                        <button class="btn-top btn-danger" onclick="patExcluirItem()" id="pat-btn-excluir" style="display:none;">🗑️ Excluir</button>
-                    </div>
-                </div>
+<!-- ABA CADASTRO -->
+<div class="tab-content" id="tab-cadastro">
+    <div class="form-card">
+        <h3 id="pat-cad-title" style="margin-bottom:20px;color:#005088;">Cadastrar Novo Patrimônio</h3>
+        
+        <div class="form-group">
+            <label>Código / QR Code:</label>
+            <div style="display:flex;gap:8px;">
+                <input type="text" id="pat-reg-code" placeholder="Ex: 100003506623" oninput="patChecarEdicao()" style="flex:1;">
+                <button class="btn-top btn-warning" onclick="abrirQRScannerCadastro()"><i class="fa-solid fa-qrcode"></i></button>
             </div>
+        </div>
+        
+        <div class="form-group">
+            <label>Nome / Descrição:</label>
+            <input type="text" id="pat-reg-item" placeholder="Ex: Notebook Lenovo ThinkPad">
+        </div>
+        
+        <div class="form-group">
+            <label>Categoria:</label>
+            <select id="pat-reg-cat">
+                <option value="Informática">Informática</option>
+                <option value="Robótica">Robótica</option>
+                <option value="Mobiliário">Mobiliário</option>
+                <option value="Eletrodomésticos">Eletrodomésticos</option>
+                <option value="Outros">Outros</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label>Localização:</label>
+            <select id="pat-reg-room" class="select-salas-dinamicas">
+                <option value="Almoxarifado">Almoxarifado</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label>Responsável:</label>
+            <input type="text" id="pat-reg-resp" placeholder="Seu nome">
+        </div>
+        
+        <div class="form-group">
+            <label>Estado:</label>
+            <select id="pat-reg-status">
+                <option value="Bom">Bom Estado</option>
+                <option value="Em Manutenção">Em Manutenção</option>
+                <option value="Danificado">Danificado</option>
+                <option value="Inservível">Inservível</option>
+            </select>
+        </div>
+        
+        <!-- ====== SEÇÃO DE FOTO COM BOTÃO REMOVER ====== -->
+        <div class="form-group">
+            <label>Foto do Item:</label>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <!-- Botão Upload Foto -->
+                <button class="btn-top btn-primary" onclick="document.getElementById('pat-reg-foto').click()">
+                    <i class="fa-solid fa-camera"></i> Tirar/Upload Foto
+                </button>
+                
+                <!-- Botão Remover Foto (oculto por padrão) -->
+                <button class="btn-top btn-danger" onclick="removerFoto()" id="pat-btn-remover-foto" style="display:none;">
+                    <i class="fa-solid fa-trash"></i> Remover Foto
+                </button>
+                
+                <input type="file" id="pat-reg-foto" accept="image/*" capture="environment" style="display:none;" onchange="previewFotoCadastro()">
+            </div>
+            
+            <!-- Preview da Foto -->
+            <img id="pat-foto-preview" class="foto-preview" src="" alt="Preview da foto" style="display:none;">
+            
+            <!-- Mensagem de ajuda -->
+            <small style="color:#64748b;display:block;margin-top:5px;font-size:11px;">
+                <i class="fa-solid fa-info-circle"></i> 
+                Clique em "Tirar/Upload Foto" para adicionar ou substituir a imagem. 
+                Use "Remover Foto" para excluir a imagem atual.
+            </small>
+        </div>
+        <!-- ====== FIM DA SEÇÃO DE FOTO ====== -->
+        
+        <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;">
+            <button class="btn-top btn-success" onclick="patExecutarCadastro()" style="flex:1;padding:12px;font-size:14px;min-width:120px;">
+                <i class="fa-solid fa-floppy-disk"></i> Salvar
+            </button>
+            <button class="btn-top btn-danger" onclick="patExcluirItem()" id="pat-btn-excluir" style="display:none;padding:12px;min-width:100px;">
+                <i class="fa-solid fa-trash"></i> Excluir
+            </button>
+        </div>
+    </div>
+</div>
 
             <!-- ABA REGISTRO EM BLOCO -->
             <div class="tab-content" id="tab-bloco">
@@ -557,32 +619,41 @@
     }
 
     // CARREGAR PARA EDIÇÃO
-    function carregarParaEdicao(codigo) {
-        const item = patTodos.find(i => i.codigo === codigo);
-        if (!item) return;
-        
-        alternarAbaPat('cadastro');
-        document.getElementById('pat-cad-title').innerHTML = '<i class="fa-solid fa-pen-to-square" style="color:#eab308;"></i> Modo de Edição';
-        document.getElementById('pat-reg-code').value = item.codigo;
-        document.getElementById('pat-reg-item').value = item.item;
-        document.getElementById('pat-reg-cat').value = item.categoria || 'Outros';
-        document.getElementById('pat-reg-room').value = item.localizacao || 'Almoxarifado';
-        document.getElementById('pat-reg-resp').value = item.responsavel || usuarioLogadoPat.nome || '';
-        
-        let statusLimpo = (item.status || '').toLowerCase();
-        let statusValor = 'Bom';
-        if (statusLimpo.includes('manuten')) statusValor = 'Em Manutenção';
-        if (statusLimpo.includes('danific')) statusValor = 'Danificado';
-        if (statusLimpo.includes('inserv')) statusValor = 'Inservível';
-        document.getElementById('pat-reg-status').value = statusValor;
-        
-        document.getElementById('pat-btn-excluir').style.display = 'inline-block';
-        
-        if (item.foto) {
-            document.getElementById('pat-foto-preview').src = item.foto;
-            document.getElementById('pat-foto-preview').style.display = 'block';
-        }
+function carregarParaEdicao(codigo) {
+    const item = patTodos.find(i => i.codigo === codigo);
+    if (!item) return;
+    
+    alternarAbaPat('cadastro');
+    document.getElementById('pat-cad-title').innerHTML = '<i class="fa-solid fa-pen-to-square" style="color:#eab308;"></i> Modo de Edição';
+    document.getElementById('pat-reg-code').value = item.codigo;
+    document.getElementById('pat-reg-item').value = item.item;
+    document.getElementById('pat-reg-cat').value = item.categoria || 'Outros';
+    document.getElementById('pat-reg-room').value = item.localizacao || 'Almoxarifado';
+    document.getElementById('pat-reg-resp').value = item.responsavel || usuarioLogadoPat.nome || '';
+    
+    let statusLimpo = (item.status || '').toLowerCase();
+    let statusValor = 'Bom';
+    if (statusLimpo.includes('manuten')) statusValor = 'Em Manutenção';
+    if (statusLimpo.includes('danific')) statusValor = 'Danificado';
+    if (statusLimpo.includes('inserv')) statusValor = 'Inservível';
+    document.getElementById('pat-reg-status').value = statusValor;
+    
+    document.getElementById('pat-btn-excluir').style.display = 'inline-block';
+    
+    // CORREÇÃO: Carregar a foto existente para preview
+    if (item.foto && item.foto !== '') {
+        document.getElementById('pat-foto-preview').src = item.foto;
+        document.getElementById('pat-foto-preview').style.display = 'block';
+        // Armazenar a foto atual para manter se não for alterada
+        fotoBase64 = item.foto;
+    } else {
+        document.getElementById('pat-foto-preview').style.display = 'none';
+        fotoBase64 = null;
     }
+    
+    // CORREÇÃO: Resetar o input de arquivo para permitir novo upload
+    document.getElementById('pat-reg-foto').value = '';
+}
 
     // QR CODE
     function abrirQRScanner() {
@@ -625,18 +696,60 @@
     }
 
     // FOTO
-    function previewFotoCadastro() {
-        const file = document.getElementById('pat-reg-foto').files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            fotoBase64 = e.target.result;
-            document.getElementById('pat-foto-preview').src = fotoBase64;
-            document.getElementById('pat-foto-preview').style.display = 'block';
-        };
-        reader.readAsDataURL(file);
+function previewFotoCadastro() {
+    const file = document.getElementById('pat-reg-foto').files[0];
+    if (!file) return;
+    
+    // Verificar se é uma imagem válida
+    if (!file.type.startsWith('image/')) {
+        alert('Por favor, selecione um arquivo de imagem válido.');
+        document.getElementById('pat-reg-foto').value = '';
+        return;
     }
+    
+    // Verificar tamanho do arquivo (máx 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+        alert('A imagem é muito grande. Máximo 5MB.');
+        document.getElementById('pat-reg-foto').value = '';
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        fotoBase64 = e.target.result;
+        document.getElementById('pat-foto-preview').src = fotoBase64;
+        document.getElementById('pat-foto-preview').style.display = 'block';
+        document.getElementById('pat-foto-preview').style.border = '2px solid #059669';
+        
+        // Mostrar botão de remover foto
+        const btnRemoverFoto = document.getElementById('pat-btn-remover-foto');
+        if (btnRemoverFoto) {
+            btnRemoverFoto.style.display = 'inline-block';
+        }
+    };
+    reader.onerror = function() {
+        alert('Erro ao ler o arquivo. Tente novamente.');
+    };
+    reader.readAsDataURL(file);
+}
 
+function removerFoto() {
+    if (!confirm('Deseja realmente remover a foto deste item?')) return;
+    
+    // Limpar preview
+    document.getElementById('pat-foto-preview').style.display = 'none';
+    document.getElementById('pat-foto-preview').src = '';
+    document.getElementById('pat-reg-foto').value = '';
+    fotoBase64 = '';
+    
+    // Esconder botão de remover
+    const btnRemoverFoto = document.getElementById('pat-btn-remover-foto');
+    if (btnRemoverFoto) {
+        btnRemoverFoto.style.display = 'none';
+    }
+    
+    alert('Foto removida. Clique em "Atualizar" para confirmar a alteração.');
+}
     function previewFotoBloco() {
         const file = document.getElementById('bloco-foto').files[0];
         if (!file) return;
@@ -656,46 +769,123 @@
         if (item) carregarParaEdicao(codigo);
     }
 
-    async function patExecutarCadastro() {
-        const codigo = document.getElementById('pat-reg-code').value.trim();
-        const item = document.getElementById('pat-reg-item').value.trim();
-        const category = document.getElementById('pat-reg-cat').value;
-        const sala = document.getElementById('pat-reg-room').value;
-        const funcionario = document.getElementById('pat-reg-resp').value.trim();
-        const status = document.getElementById('pat-reg-status').value;
-        
-        if (!codigo || !item || !funcionario) { alert('Preencha os campos obrigatórios.'); return; }
-        
-        const payload = {
-            operacao: "PAT_CADASTRAR",
-            codigo, item, categoria: category, localizacao: sala,
-            responsavel: funcionario, status,
-            emailOperador: usuarioLogadoPat.email,
-            foto: fotoBase64 || ''
-        };
-        
-        try {
-            const r = await fetch(APPS_SCRIPT_PAT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
-            const res = await r.json();
-            if (res.status === "success" || res.status === "updated") {
-                alert(res.status === "updated" ? "Atualizado!" : "Cadastrado!");
-                patResetarCadastro();
-                carregarItensPaginado(true);
-            } else {
-                alert('Erro: ' + (res.message || 'Falha.'));
-            }
-        } catch (e) { alert('Erro de conexão.'); }
+  async function patExecutarCadastro() {
+    const codigo = document.getElementById('pat-reg-code').value.trim();
+    const item = document.getElementById('pat-reg-item').value.trim();
+    const category = document.getElementById('pat-reg-cat').value;
+    const sala = document.getElementById('pat-reg-room').value;
+    const funcionario = document.getElementById('pat-reg-resp').value.trim();
+    const status = document.getElementById('pat-reg-status').value;
+    
+    // Validações
+    if (!codigo || !item || !funcionario) {
+        alert('Preencha os campos obrigatórios: Código, Item e Responsável.');
+        return;
     }
-
-    function patResetarCadastro() {
-        document.getElementById('pat-cad-title').innerHTML = 'Cadastrar Novo Patrimônio';
-        ['pat-reg-code','pat-reg-item','pat-reg-resp'].forEach(id => document.getElementById(id).value = '');
-        document.getElementById('pat-reg-status').value = 'Bom';
-        document.getElementById('pat-btn-excluir').style.display = 'none';
-        document.getElementById('pat-foto-preview').style.display = 'none';
-        fotoBase64 = null;
+    
+    // Verificar se o código tem pelo menos 5 caracteres
+    if (codigo.length < 5) {
+        alert('O código deve ter pelo menos 5 caracteres.');
+        return;
     }
+    
+    // Verificar se já existe um item com este código
+    const itemExistente = patTodos.find(i => i.codigo === codigo);
+    const isEdicao = !!itemExistente;
+    
+    // Determinar a foto a ser salvar
+    let fotoParaSalvar = '';
+    
+    if (fotoBase64) {
+        // Se há uma nova foto (upload ou mantida)
+        fotoParaSalvar = fotoBase64;
+    } else if (isEdicao && itemExistente.foto) {
+        // Se é edição e não há nova foto, manter a foto existente
+        fotoParaSalvar = itemExistente.foto;
+    }
+    // Se não houver foto, salvar como vazio
+    
+    const payload = {
+        operacao: "PAT_CADASTRAR",
+        codigo, 
+        item, 
+        categoria: category, 
+        localizacao: sala,
+        responsavel: funcionario, 
+        status,
+        emailOperador: usuarioLogadoPat.email,
+        foto: fotoParaSalvar
+    };
+    
+    try {
+        const r = await fetch(APPS_SCRIPT_PAT_URL, { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'text/plain' }, 
+            body: JSON.stringify(payload) 
+        });
+        
+        if (!r.ok) {
+            throw new Error(`HTTP ${r.status}: ${r.statusText}`);
+        }
+        
+        const res = await r.json();
+        
+        if (res.status === "success" || res.status === "updated") {
+            alert(isEdicao ? "✅ Item atualizado com sucesso!" : "✅ Item cadastrado com sucesso!");
+            patResetarCadastro();
+            carregarItensPaginado(true);
+            // Voltar para a aba de lista
+            alternarAbaPat('lista');
+        } else {
+            alert('❌ Erro: ' + (res.message || 'Falha ao salvar.'));
+        }
+    } catch (e) { 
+        alert('❌ Erro de conexão com o servidor. Verifique sua internet e tente novamente.');
+        console.error('Erro detalhado:', e);
+    }
+}
 
+function patResetarCadastro() {
+    // Resetar título
+    document.getElementById('pat-cad-title').innerHTML = 'Cadastrar Novo Patrimônio';
+    
+    // Limpar campos
+    document.getElementById('pat-reg-code').value = '';
+    document.getElementById('pat-reg-code').readOnly = false; // Reativar edição
+    document.getElementById('pat-reg-item').value = '';
+    document.getElementById('pat-reg-resp').value = usuarioLogadoPat.nome || '';
+    document.getElementById('pat-reg-status').value = 'Bom';
+    
+    // Resetar foto
+    document.getElementById('pat-foto-preview').style.display = 'none';
+    document.getElementById('pat-foto-preview').src = '';
+    document.getElementById('pat-reg-foto').value = '';
+    fotoBase64 = null;
+    
+    // Esconder botões extras
+    document.getElementById('pat-btn-excluir').style.display = 'none';
+    const btnRemoverFoto = document.getElementById('pat-btn-remover-foto');
+    if (btnRemoverFoto) {
+        btnRemoverFoto.style.display = 'none';
+    }
+    
+    // Resetar botão salvar
+    const btnSalvar = document.querySelector('#tab-cadastro .btn-success');
+    if (btnSalvar) {
+        btnSalvar.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Salvar';
+        btnSalvar.style.background = '#059669';
+        btnSalvar.style.color = 'white';
+    }
+}
+// Adicione esta função para remover a foto do item
+function removerFoto() {
+    if (!confirm('Remover a foto deste item?')) return;
+    document.getElementById('pat-foto-preview').style.display = 'none';
+    document.getElementById('pat-foto-preview').src = '';
+    document.getElementById('pat-reg-foto').value = '';
+    fotoBase64 = '';
+    alert('Foto removida. Salve o item para confirmar a alteração.');
+}
     async function patExcluirItem() {
         const codigo = document.getElementById('pat-reg-code').value.trim();
         if (!codigo || !confirm(`Excluir ${codigo}?`)) return;
