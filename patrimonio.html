@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Patrimônio – SIGA Anchieta</title>
+    <title>Patrimônio – SIGA Anchieta (Offline)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://unpkg.com/html5-qrcode"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📦</text></svg>">
 <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -45,6 +44,12 @@
         width: 70px; height: 70px; min-width: 70px;
         object-fit: cover; border-radius: 50%;
         background-color: white; border: 2px solid white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+        font-weight: bold;
+        color: #005088;
     }
     #patrimonio-interface .sidebar-title h2 { font-size: 16px; font-weight: bold; }
     #patrimonio-interface .sidebar-title p { font-size: 11px; color: #cbd5e1; }
@@ -96,6 +101,8 @@
     #patrimonio-interface .btn-success:hover { background: #047857; }
     #patrimonio-interface .btn-danger { background: #ef4444; color: white; }
     #patrimonio-interface .btn-danger:hover { background: #dc2626; }
+    #patrimonio-interface .btn-secondary { background: #6b7280; color: white; }
+    #patrimonio-interface .btn-secondary:hover { background: #4b5563; }
     
     .search-box {
         display: flex; align-items: center; background: #f1f5f9;
@@ -147,15 +154,18 @@
     .form-group input, .form-group select {
         width: 100%; padding: 10px; border: 1px solid #cbd5e1;
         border-radius: 6px; font-size: 14px; outline: none;
+        background: white;
     }
-    .form-group input:focus, .form-group select:focus { border-color: #005088; }
+    .form-group input:focus, .form-group select:focus { border-color: #005088; box-shadow: 0 0 0 3px rgba(0,80,136,0.1); }
+    .form-group input:disabled { background: #f1f5f9; cursor: not-allowed; }
     
     .foto-preview {
         width: 200px; height: 150px; object-fit: cover;
         border-radius: 8px; border: 2px dashed #cbd5e1;
-        display: flex; align-items: center; justify-content: center;
-        color: #94a3b8; font-size: 12px; margin-top: 10px;
+        display: none;
+        margin-top: 10px;
     }
+    .foto-preview[style*="display: block"] { border-color: #005088; }
     
     .btn-carregar-mais {
         display: block; width: 100%; padding: 12px;
@@ -191,6 +201,7 @@
     .toast-success { background: #059669; border-left: 4px solid #34d399; }
     .toast-error { background: #dc2626; border-left: 4px solid #fca5a5; }
     .toast-warning { background: #d97706; border-left: 4px solid #fcd34d; }
+    .toast-info { background: #005088; border-left: 4px solid #60a5fa; }
     @keyframes slideInRight {
         from { transform: translateX(100%); opacity: 0; }
         to { transform: translateX(0); opacity: 1; }
@@ -242,6 +253,32 @@
         80% { transform: translateX(5px); }
     }
 
+    /* STATUS OFFLINE */
+    .status-offline {
+        background: #fef3c7;
+        color: #92400e;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid #fcd34d;
+    }
+    .status-online {
+        background: #d1fae5;
+        color: #065f46;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid #34d399;
+    }
+
     @media (max-width: 768px) {
         #patrimonio-interface { flex-direction: column; height: auto; min-height: 100vh; }
         #patrimonio-interface .sidebar {
@@ -255,6 +292,8 @@
         .search-box { width: 100%; }
         .tab-nav { overflow-x: auto; padding: 0 10px; }
         .tab-btn { padding: 10px 12px; font-size: 11px; white-space: nowrap; }
+        .top-actions { width: 100%; justify-content: flex-start; }
+        .status-offline, .status-online { font-size: 10px; padding: 4px 10px; }
     }
 </style>
 </head>
@@ -265,7 +304,7 @@
         <aside class="sidebar">
             <div class="sidebar-top">
                 <div class="sidebar-header">
-                    <img src="img/SIGARD.png" alt="Logo" class="sidebar-logo" onerror="this.style.display='none'">
+                    <div class="sidebar-logo">🏛️</div>
                     <div class="sidebar-title">
                         <h2>PATRIMÔNIO</h2>
                         <p>CCM Anchieta</p>
@@ -273,11 +312,13 @@
                 </div>
                 <div class="room-list-title">Filtrar por Ambiente</div>
                 <ul class="room-list" id="pat-room-list-updated">
-                    <li class="room-item active"><i class="fa-solid fa-spinner fa-spin"></i> Carregando...</li>
+                    <li class="room-item active" onclick="patFiltrarSala('TODOS', this)">
+                        <i class="fa-solid fa-boxes-stacked"></i> Ver Tudo
+                    </li>
                 </ul>
             </div>
             <div class="sidebar-footer">
-                <a href="restrito.html" class="btn-back"><i class="fa-solid fa-arrow-left"></i> Voltar ao SIGA</a>
+                <a href="#" class="btn-back"><i class="fa-solid fa-arrow-left"></i> Voltar ao SIGA</a>
             </div>
         </aside>
 
@@ -285,10 +326,16 @@
         <main class="main-content">
             <!-- TOP BAR -->
             <header class="top-bar">
-                <h1 id="pat-panel-title">📦 Patrimônio</h1>
+                <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                    <h1 id="pat-panel-title">📦 Patrimônio</h1>
+                    <span id="status-conexao" class="status-online">
+                        <i class="fa-solid fa-wifi"></i> Online
+                    </span>
+                </div>
                 <div class="top-actions">
                     <button class="btn-top btn-warning" onclick="abrirQRScanner()"><i class="fa-solid fa-qrcode"></i> QR Code</button>
-                    <button class="btn-top btn-primary" onclick="imprimirEtiquetas()"><i class="fa-solid fa-print"></i> Imprimir Etiquetas</button>
+                    <button class="btn-top btn-primary" onclick="imprimirEtiquetas()"><i class="fa-solid fa-print"></i> Imprimir</button>
+                    <button class="btn-top btn-secondary" onclick="exportarDados()"><i class="fa-solid fa-download"></i> Exportar</button>
                 </div>
                 <div class="search-box">
                     <i class="fa-solid fa-search" style="color:#64748b;"></i>
@@ -300,7 +347,7 @@
             <div class="tab-nav">
                 <button class="tab-btn active" onclick="alternarAbaPat('lista')"><i class="fa-solid fa-list"></i> Lista</button>
                 <button class="tab-btn" onclick="alternarAbaPat('cadastro')"><i class="fa-solid fa-plus"></i> Cadastro</button>
-                <button class="tab-btn" onclick="alternarAbaPat('bloco')"><i class="fa-solid fa-layer-group"></i> Registro em Bloco</button>
+                <button class="tab-btn" onclick="alternarAbaPat('bloco')"><i class="fa-solid fa-layer-group"></i> Bloco</button>
                 <button class="tab-btn" onclick="alternarAbaPat('ambientes')"><i class="fa-solid fa-school"></i> Ambientes</button>
             </div>
 
@@ -320,7 +367,11 @@
                             </tr>
                         </thead>
                         <tbody id="pat-table-body">
-                            <tr><td colspan="6" style="text-align:center;padding:30px;">Carregando...</td></tr>
+                            <tr><td colspan="6" style="text-align:center;padding:30px;color:#94a3b8;">
+                                <i class="fa-solid fa-box-open" style="font-size:24px;display:block;margin-bottom:10px;"></i>
+                                Nenhum item cadastrado.<br>
+                                <small>Clique em "Cadastro" para adicionar.</small>
+                            </td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -338,7 +389,7 @@
                         <label>Código / QR Code:</label>
                         <div style="display:flex;gap:8px;">
                             <input type="text" id="pat-reg-code" placeholder="Ex: 100003506623" oninput="patChecarEdicao()" style="flex:1;">
-                            <button class="btn-top btn-warning" onclick="abrirQRScannerCadastro()"><i class="fa-solid fa-qrcode"></i></button>
+                            <button class="btn-top btn-warning" onclick="abrirQRScannerCadastro()" style="padding:8px 14px;"><i class="fa-solid fa-qrcode"></i></button>
                         </div>
                     </div>
                     <div class="form-group">
@@ -378,17 +429,17 @@
                         <label>Foto do Item:</label>
                         <div style="display:flex;gap:8px;flex-wrap:wrap;">
                             <button class="btn-top btn-primary" onclick="document.getElementById('pat-reg-foto').click()">
-                                <i class="fa-solid fa-camera"></i> Tirar/Upload Foto
+                                <i class="fa-solid fa-camera"></i> Tirar/Upload
                             </button>
                             <button class="btn-top btn-danger" onclick="removerFoto()" id="pat-btn-remover-foto" style="display:none;">
                                 <i class="fa-solid fa-trash"></i> Remover Foto
                             </button>
                             <input type="file" id="pat-reg-foto" accept="image/*" capture="environment" style="display:none;" onchange="previewFotoCadastro()">
                         </div>
-                        <img id="pat-foto-preview" class="foto-preview" src="" alt="Preview da foto" style="display:none;">
+                        <img id="pat-foto-preview" class="foto-preview" src="" alt="Preview da foto">
                         <small style="color:#64748b;display:block;margin-top:5px;font-size:11px;">
                             <i class="fa-solid fa-info-circle"></i> 
-                            Clique em "Tirar/Upload Foto" para adicionar ou substituir a imagem.
+                            Clique em "Tirar/Upload" para adicionar ou substituir a imagem.
                         </small>
                     </div>
                     <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;">
@@ -441,10 +492,10 @@
                     <div class="form-group">
                         <label>Foto (mesma para todos):</label>
                         <div style="display:flex;gap:8px;">
-                            <button class="btn-top btn-primary" onclick="document.getElementById('bloco-foto').click()"><i class="fa-solid fa-camera"></i> Tirar/Upload Foto</button>
+                            <button class="btn-top btn-primary" onclick="document.getElementById('bloco-foto').click()"><i class="fa-solid fa-camera"></i> Tirar/Upload</button>
                             <input type="file" id="bloco-foto" accept="image/*" capture="environment" style="display:none;" onchange="previewFotoBloco()">
                         </div>
-                        <img id="bloco-foto-preview" class="foto-preview" src="" alt="Preview" style="display:none;">
+                        <img id="bloco-foto-preview" class="foto-preview" src="" alt="Preview">
                     </div>
                     <button class="btn-top btn-success" onclick="patExecutarCadastroBloco()" style="width:100%;padding:12px;font-size:14px;margin-top:15px;">
                         💾 Cadastrar <span id="bloco-total">2</span> itens
@@ -464,8 +515,8 @@
                         </div>
                     </div>
                     <label style="font-weight:600;font-size:13px;color:#475569;margin-top:15px;display:block;">Ambientes cadastrados:</label>
-                    <ul class="mini-list-ambientes" id="pat-mini-amb-list" style="list-style:none;max-height:300px;overflow-y:auto;border:1px solid #e2e8f0;border-radius:6px;padding:0;">
-                        <li style="padding:8px 12px;color:#64748b;">Carregando...</li>
+                    <ul class="mini-list-ambientes" id="pat-mini-amb-list" style="list-style:none;max-height:250px;overflow-y:auto;border:1px solid #e2e8f0;border-radius:6px;padding:0;margin-top:5px;">
+                        <li style="padding:12px;color:#64748b;text-align:center;">Nenhum ambiente cadastrado.</li>
                     </ul>
                 </div>
             </div>
@@ -476,22 +527,41 @@
     <div id="qr-scanner-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:9999;flex-direction:column;align-items:center;justify-content:center;">
         <div style="background:white;padding:20px;border-radius:12px;width:90%;max-width:500px;">
             <h3 style="text-align:center;margin-bottom:15px;">📷 Escaneie o QR Code</h3>
-            <div id="qr-reader" style="width:100%;"></div>
-            <button onclick="fecharQRScanner()" style="width:100%;padding:10px;margin-top:15px;background:#ef4444;color:white;border:none;border-radius:6px;cursor:pointer;font-weight:bold;">Cancelar</button>
+            <div id="qr-reader" style="width:100%;min-height:250px;"></div>
+            <button onclick="fecharQRScanner()" style="width:100%;padding:12px;margin-top:15px;background:#ef4444;color:white;border:none;border-radius:6px;cursor:pointer;font-weight:bold;font-size:14px;">Cancelar</button>
         </div>
     </div>
 
 <script>
-    const APPS_SCRIPT_PAT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
-    let patTodos = [], patAmbientes = [], patSalaFiltro = 'TODOS';
-    let usuarioLogadoPat = {};
+    // ============================================================
+    // SISTEMA DE PATRIMÔNIO - VERSÃO OFFLINE COMPLETA
+    // ============================================================
+    
+    // ===== CONFIGURAÇÕES =====
+    let patTodos = [];
+    let patAmbientes = ['Almoxarifado', 'Sala 1', 'Sala 2', 'Laboratório'];
+    let patSalaFiltro = 'TODOS';
+    let usuarioLogadoPat = { nome: 'Administrador', email: 'admin@ccmanchieta.com.br', nivel: 3 };
     let itensPorPagina = 50;
     let paginaAtual = 0;
     let fotoBase64 = null;
     let qrScanner = null;
-    let usandoAPILocal = false; // Flag para controle
+    let editandoCodigo = null;
 
-    // ===== TOAST =====
+    // ============================================================
+    // DADOS DE EXEMPLO INICIAIS
+    // ============================================================
+    const DADOS_INICIAIS = [
+        { codigo: '100001', item: 'Notebook Dell Inspiron', categoria: 'Informática', localizacao: 'Sala 1', status: 'Bom', responsavel: 'João Silva', foto: '' },
+        { codigo: '100002', item: 'Cadeira Giratória', categoria: 'Mobiliário', localizacao: 'Sala 2', status: 'Em Manutenção', responsavel: 'Maria Santos', foto: '' },
+        { codigo: '100003', item: 'Projetor Epson EB-2250', categoria: 'Informática', localizacao: 'Sala 1', status: 'Bom', responsavel: 'Carlos Lima', foto: '' },
+        { codigo: '100004', item: 'Ar Condicionado Split', categoria: 'Eletrodomésticos', localizacao: 'Laboratório', status: 'Danificado', responsavel: 'Ana Paula', foto: '' },
+        { codigo: '100005', item: 'Mesa de Professor', categoria: 'Mobiliário', localizacao: 'Sala 2', status: 'Bom', responsavel: 'José Carlos', foto: '' }
+    ];
+
+    // ============================================================
+    // TOAST - NOTIFICAÇÕES
+    // ============================================================
     function showToast(message, type = 'success', duration = 4000) {
         const existingToasts = document.querySelectorAll('.toast');
         existingToasts.forEach(toast => toast.remove());
@@ -501,7 +571,8 @@
         const icons = {
             success: 'fa-solid fa-check-circle',
             error: 'fa-solid fa-circle-exclamation',
-            warning: 'fa-solid fa-triangle-exclamation'
+            warning: 'fa-solid fa-triangle-exclamation',
+            info: 'fa-solid fa-circle-info'
         };
         toast.innerHTML = `
             <i class="${icons[type] || icons.success}" style="font-size:20px;"></i>
@@ -514,7 +585,9 @@
         }, duration);
     }
 
-    // ===== LOADING BUTTON =====
+    // ============================================================
+    // LOADING BUTTON
+    // ============================================================
     function setButtonLoading(button, loading = true, text = null) {
         if (!button) return;
         if (loading) {
@@ -531,151 +604,177 @@
         }
     }
 
-    // ===== INICIALIZAÇÃO =====
+    // ============================================================
+    // INICIALIZAÇÃO
+    // ============================================================
     window.addEventListener('DOMContentLoaded', () => {
+        // Verificar sessão
         const sessao = localStorage.getItem('sgi_ccma_session');
         if (sessao) {
-            usuarioLogadoPat = JSON.parse(sessao);
-            if (parseInt(usuarioLogadoPat.nivel) < 3) {
-                alert("Acesso restrito ao Nível 3 ou superior.");
-                window.location.href = 'restrito.html';
-                return;
+            try {
+                const dados = JSON.parse(sessao);
+                usuarioLogadoPat = dados;
+                if (parseInt(usuarioLogadoPat.nivel) < 3) {
+                    alert("Acesso restrito ao Nível 3 ou superior.");
+                    window.location.href = 'restrito.html';
+                    return;
+                }
+            } catch(e) {
+                console.error('Erro ao ler sessão:', e);
             }
-        } else {
-            window.location.href = 'restrito.html';
-            return;
         }
+        
+        // Carregar dados salvos no localStorage
+        carregarDadosLocal();
+        
+        // Atualizar responsável
         if (document.getElementById('pat-reg-resp')) {
-            document.getElementById('pat-reg-resp').value = usuarioLogadoPat.nome || "";
+            document.getElementById('pat-reg-resp').value = usuarioLogadoPat.nome || 'Administrador';
         }
-        patCarregarAmbientes();
-        carregarItensPaginado();
+        
+        // Inicializar
+        atualizarUIAmbientes();
+        renderizarTabelaPaginada();
+        atualizarStatusConexao();
+        
+        // Atualizar contador do bloco
+        document.getElementById('bloco-quantidade').addEventListener('input', function() {
+            document.getElementById('bloco-total').innerText = this.value || 2;
+        });
     });
 
-    // ===== ABAS =====
-    function alternarAbaPat(aba) {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        document.querySelector(`.tab-btn[onclick="alternarAbaPat('${aba}')"]`).classList.add('active');
-        document.getElementById(`tab-${aba}`).classList.add('active');
-        if (aba === 'lista') carregarItensPaginado(true);
-    }
-
-    // ===== CARREGAR AMBIENTES =====
-    async function patCarregarAmbientes() {
+    // ============================================================
+    // SALVAR / CARREGAR DADOS LOCALMENTE
+    // ============================================================
+    function salvarDadosLocal() {
         try {
-            const r = await fetch(`${APPS_SCRIPT_PAT_URL}?aba=ambientes`, { method: 'GET', cache: 'no-cache' });
-            patAmbientes = await r.json();
-        } catch(e) { 
-            console.error('Erro ao carregar ambientes:', e);
-            patAmbientes = ['Almoxarifado', 'Sala 1', 'Sala 2', 'Laboratório'];
+            const dados = {
+                itens: patTodos,
+                ambientes: patAmbientes,
+                data: new Date().toISOString()
+            };
+            localStorage.setItem('patrimonio_dados', JSON.stringify(dados));
+            console.log('Dados salvos localmente:', patTodos.length, 'itens');
+        } catch(e) {
+            console.error('Erro ao salvar dados localmente:', e);
         }
-        atualizarUIAmbientes();
     }
 
+    function carregarDadosLocal() {
+        try {
+            const dadosSalvos = localStorage.getItem('patrimonio_dados');
+            if (dadosSalvos) {
+                const dados = JSON.parse(dadosSalvos);
+                if (dados.itens && dados.itens.length > 0) {
+                    patTodos = dados.itens;
+                    console.log('Dados carregados do localStorage:', patTodos.length, 'itens');
+                }
+                if (dados.ambientes && dados.ambientes.length > 0) {
+                    patAmbientes = dados.ambientes;
+                }
+            }
+        } catch(e) {
+            console.error('Erro ao carregar dados localmente:', e);
+        }
+        
+        // Se não há dados, usar os dados iniciais
+        if (patTodos.length === 0) {
+            patTodos = JSON.parse(JSON.stringify(DADOS_INICIAIS));
+            salvarDadosLocal();
+            console.log('Dados iniciais carregados');
+        }
+    }
+
+    // ============================================================
+    // STATUS DE CONEXÃO
+    // ============================================================
+    function atualizarStatusConexao() {
+        const statusEl = document.getElementById('status-conexao');
+        if (navigator.onLine) {
+            statusEl.className = 'status-online';
+            statusEl.innerHTML = '<i class="fa-solid fa-wifi"></i> Online';
+        } else {
+            statusEl.className = 'status-offline';
+            statusEl.innerHTML = '<i class="fa-solid fa-wifi-slash"></i> Offline (Dados locais)';
+        }
+    }
+
+    window.addEventListener('online', atualizarStatusConexao);
+    window.addEventListener('offline', atualizarStatusConexao);
+
+    // ============================================================
+    // AMBIENTES
+    // ============================================================
     function atualizarUIAmbientes() {
+        // Sidebar
         const sidebarList = document.getElementById('pat-room-list-updated');
-        sidebarList.innerHTML = `<li class="room-item ${patSalaFiltro==='TODOS'?'active':''}" onclick="patFiltrarSala('TODOS', this)"><span><i class="fa-solid fa-boxes-stacked"></i> Ver Tudo</span></li>`;
+        sidebarList.innerHTML = `<li class="room-item ${patSalaFiltro==='TODOS'?'active':''}" onclick="patFiltrarSala('TODOS', this)"><i class="fa-solid fa-boxes-stacked"></i> Ver Tudo</li>`;
         patAmbientes.forEach(sala => {
-            sidebarList.innerHTML += `<li class="room-item ${patSalaFiltro===sala?'active':''}" onclick="patFiltrarSala('${sala}', this)"><span><i class="fa-solid fa-location-dot"></i> ${sala}</span></li>`;
+            sidebarList.innerHTML += `<li class="room-item ${patSalaFiltro===sala?'active':''}" onclick="patFiltrarSala('${sala}', this)"><i class="fa-solid fa-location-dot"></i> ${sala}</li>`;
         });
+        
+        // Selects
         document.querySelectorAll('.select-salas-dinamicas').forEach(select => {
-            select.innerHTML = '<option value="Almoxarifado">Almoxarifado</option>';
-            patAmbientes.forEach(sala => { select.innerHTML += `<option value="${sala}">${sala}</option>`; });
+            const valorAtual = select.value;
+            select.innerHTML = '';
+            patAmbientes.forEach(sala => {
+                select.innerHTML += `<option value="${sala}">${sala}</option>`;
+            });
+            if (patAmbientes.includes(valorAtual)) {
+                select.value = valorAtual;
+            }
         });
+        
+        // Lista de ambientes
         const miniBox = document.getElementById('pat-mini-amb-list');
+        if (patAmbientes.length === 0) {
+            miniBox.innerHTML = '<li style="padding:12px;color:#64748b;text-align:center;">Nenhum ambiente cadastrado.</li>';
+            return;
+        }
         miniBox.innerHTML = '';
         patAmbientes.forEach(sala => {
             miniBox.innerHTML += `<li style="padding:8px 12px;display:flex;justify-content:space-between;border-bottom:1px solid #f1f5f9;">
-                <span>${sala}</span>
-                <button onclick="patDeletarAmbiente('${sala}')" style="background:none;border:none;color:#ef4444;cursor:pointer;"><i class="fa-solid fa-trash"></i></button>
+                <span><i class="fa-solid fa-location-dot" style="color:#005088;margin-right:8px;"></i>${sala}</span>
+                <button onclick="patDeletarAmbiente('${sala}')" style="background:none;border:none;color:#ef4444;cursor:pointer;padding:4px 8px;border-radius:4px;">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
             </li>`;
         });
+        
+        salvarDadosLocal();
     }
 
-    // ===== CARREGAR ITENS =====
-    async function carregarItensPaginado(reset = false) {
-        if (reset) { paginaAtual = 0; patTodos = []; }
-        try {
-            const response = await fetch(`${APPS_SCRIPT_PAT_URL}?aba=patrimonio`, { method: 'GET', cache: 'no-cache' });
-            patTodos = await response.json();
+    function patAdicionarAmbiente() {
+        const nome = document.getElementById('pat-new-amb').value.trim();
+        if (!nome) { showToast('Digite o nome do ambiente.', 'warning'); return; }
+        if (patAmbientes.includes(nome)) { showToast('Ambiente já cadastrado.', 'warning'); return; }
+        
+        patAmbientes.push(nome);
+        document.getElementById('pat-new-amb').value = '';
+        atualizarUIAmbientes();
+        showToast(`✅ Ambiente "${nome}" adicionado!`, 'success');
+    }
+
+    function patDeletarAmbiente(nome) {
+        if (!confirm(`⚠️ Remover o ambiente "${nome}"?`)) return;
+        if (nome === 'Almoxarifado') { showToast('Não é possível remover o Almoxarifado.', 'warning'); return; }
+        
+        patAmbientes = patAmbientes.filter(a => a !== nome);
+        atualizarUIAmbientes();
+        
+        if (patSalaFiltro === nome) {
+            patSalaFiltro = 'TODOS';
+            document.querySelectorAll('#pat-room-list-updated .room-item').forEach(el => el.classList.remove('active'));
+            document.querySelector('#pat-room-list-updated .room-item:first-child')?.classList.add('active');
+            document.getElementById('pat-panel-title').innerText = '📦 Patrimônio';
             renderizarTabelaPaginada();
-        } catch (error) {
-            console.error('Erro ao carregar itens:', error);
-            // Dados de exemplo para fallback
-            if (patTodos.length === 0) {
-                patTodos = [
-                    { codigo: '100001', item: 'Notebook Dell', categoria: 'Informática', localizacao: 'Sala 1', status: 'Bom', responsavel: 'João Silva', foto: '' },
-                    { codigo: '100002', item: 'Cadeira Giratória', categoria: 'Mobiliário', localizacao: 'Sala 2', status: 'Em Manutenção', responsavel: 'Maria Santos', foto: '' },
-                    { codigo: '100003', item: 'Projetor Epson', categoria: 'Informática', localizacao: 'Sala 1', status: 'Bom', responsavel: 'Carlos Lima', foto: '' }
-                ];
-                renderizarTabelaPaginada();
-            }
         }
+        showToast(`✅ Ambiente "${nome}" removido!`, 'success');
     }
 
-    function renderizarTabelaPaginada() {
-        const tbody = document.getElementById('pat-table-body');
-        let itens = patSalaFiltro !== 'TODOS' ? patTodos.filter(item => item.localizacao === patSalaFiltro) : patTodos;
-        const inicio = paginaAtual * itensPorPagina;
-        const paginaItens = itens.slice(inicio, inicio + itensPorPagina);
-        
-        if (paginaAtual === 0) tbody.innerHTML = '';
-        if (paginaItens.length === 0 && paginaAtual === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:#64748b;">Nenhum item encontrado.</td></tr>';
-            document.getElementById('btn-carregar-mais').style.display = 'none';
-            return;
-        }
-        
-        paginaItens.forEach(item => {
-            let statusLimpo = (item.status || '').toLowerCase();
-            let badgeClass = statusLimpo.includes('manuten') ? 'status-manutencao' : statusLimpo.includes('danific') ? 'status-danificado' : 'status-bom';
-            const tr = document.createElement('tr');
-            tr.onclick = () => carregarParaEdicao(item.codigo);
-            tr.innerHTML = `
-                <td style="color:#005088;font-weight:bold;">${item.codigo}</td>
-                <td><strong>${item.item}</strong><br><small style="color:#64748b;">${item.categoria || ''}</small></td>
-                <td>${item.foto ? `<img src="${item.foto}" class="foto-mini" onerror="this.style.display='none'">` : '—'}</td>
-                <td>${item.localizacao || '—'}</td>
-                <td><span class="status-badge ${badgeClass}">${item.status || 'Bom'}</span></td>
-                <td><button onclick="event.stopPropagation();carregarParaEdicao('${item.codigo}')" style="background:none;border:none;color:#005088;cursor:pointer;" title="Editar"><i class="fa-solid fa-pen-to-square"></i></button></td>
-            `;
-            tbody.appendChild(tr);
-        });
-        document.getElementById('contador-itens').innerText = `Mostrando ${Math.min(inicio + itensPorPagina, itens.length)} de ${itens.length} itens`;
-        document.getElementById('btn-carregar-mais').style.display = (inicio + itensPorPagina) < itens.length ? 'block' : 'none';
-    }
-
-    function carregarMaisItens() { paginaAtual++; renderizarTabelaPaginada(); }
-
-    function filtrarTabela() {
-        const termo = document.getElementById('pat-search-input').value.trim().toLowerCase();
-        if (!termo) { paginaAtual = 0; renderizarTabelaPaginada(); return; }
-        const filtrados = patTodos.filter(item => 
-            (item.codigo || '').toLowerCase().includes(termo) || 
-            (item.item || '').toLowerCase().includes(termo)
-        );
-        const tbody = document.getElementById('pat-table-body');
-        tbody.innerHTML = '';
-        filtrados.slice(0, 100).forEach(item => {
-            let badgeClass = (item.status || '').toLowerCase().includes('manuten') ? 'status-manutencao' : 
-                           (item.status || '').toLowerCase().includes('danific') ? 'status-danificado' : 'status-bom';
-            const tr = document.createElement('tr');
-            tr.onclick = () => carregarParaEdicao(item.codigo);
-            tr.innerHTML = `
-                <td style="color:#005088;font-weight:bold;">${item.codigo}</td>
-                <td><strong>${item.item}</strong></td>
-                <td>${item.foto ? `<img src="${item.foto}" class="foto-mini">` : '—'}</td>
-                <td>${item.localizacao || '—'}</td>
-                <td><span class="status-badge ${badgeClass}">${item.status || 'Bom'}</span></td>
-                <td><button onclick="event.stopPropagation();carregarParaEdicao('${item.codigo}')" style="background:none;border:none;color:#005088;cursor:pointer;"><i class="fa-solid fa-pen-to-square"></i></button></td>
-            `;
-            tbody.appendChild(tr);
-        });
-        document.getElementById('contador-itens').innerText = `${filtrados.length} itens encontrados`;
-        document.getElementById('btn-carregar-mais').style.display = 'none';
-    }
-
+    // ============================================================
+    // FILTROS
+    // ============================================================
     function patFiltrarSala(sala, elementoBotao) {
         patSalaFiltro = sala;
         document.querySelectorAll('#pat-room-list-updated .room-item').forEach(el => el.classList.remove('active'));
@@ -685,15 +784,127 @@
         renderizarTabelaPaginada();
     }
 
-    // ===== CARREGAR PARA EDIÇÃO =====
+    // ============================================================
+    // ABAS
+    // ============================================================
+    function alternarAbaPat(aba) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.querySelector(`.tab-btn[onclick="alternarAbaPat('${aba}')"]`).classList.add('active');
+        document.getElementById(`tab-${aba}`).classList.add('active');
+        if (aba === 'lista') renderizarTabelaPaginada();
+    }
+
+    // ============================================================
+    // TABELA
+    // ============================================================
+    function renderizarTabelaPaginada() {
+        const tbody = document.getElementById('pat-table-body');
+        let itens = patSalaFiltro !== 'TODOS' 
+            ? patTodos.filter(item => item.localizacao === patSalaFiltro)
+            : patTodos;
+        
+        const inicio = paginaAtual * itensPorPagina;
+        const fim = Math.min(inicio + itensPorPagina, itens.length);
+        const paginaItens = itens.slice(inicio, fim);
+        
+        if (paginaItens.length === 0 && paginaAtual === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:30px;color:#94a3b8;">
+                <i class="fa-solid fa-box-open" style="font-size:24px;display:block;margin-bottom:10px;"></i>
+                Nenhum item encontrado.
+            </td></tr>`;
+            document.getElementById('btn-carregar-mais').style.display = 'none';
+            document.getElementById('contador-itens').innerText = '0 itens';
+            return;
+        }
+        
+        tbody.innerHTML = '';
+        paginaItens.forEach(item => {
+            let statusLimpo = (item.status || '').toLowerCase();
+            let badgeClass = 'status-bom';
+            if (statusLimpo.includes('manuten')) badgeClass = 'status-manutencao';
+            else if (statusLimpo.includes('danific')) badgeClass = 'status-danificado';
+            
+            const tr = document.createElement('tr');
+            tr.onclick = () => carregarParaEdicao(item.codigo);
+            tr.innerHTML = `
+                <td style="color:#005088;font-weight:bold;">${item.codigo || '---'}</td>
+                <td><strong>${item.item || 'Sem nome'}</strong><br><small style="color:#64748b;">${item.categoria || ''}</small></td>
+                <td>${item.foto ? `<img src="${item.foto}" class="foto-mini" onerror="this.style.display='none'">` : '<span style="color:#94a3b8;">—</span>'}</td>
+                <td>${item.localizacao || '—'}</td>
+                <td><span class="status-badge ${badgeClass}">${item.status || 'Bom'}</span></td>
+                <td>
+                    <button onclick="event.stopPropagation();carregarParaEdicao('${item.codigo}')" style="background:none;border:none;color:#005088;cursor:pointer;font-size:16px;" title="Editar">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+        
+        document.getElementById('contador-itens').innerText = `Mostrando ${fim} de ${itens.length} itens`;
+        document.getElementById('btn-carregar-mais').style.display = fim < itens.length ? 'block' : 'none';
+    }
+
+    function carregarMaisItens() {
+        paginaAtual++;
+        renderizarTabelaPaginada();
+    }
+
+    function filtrarTabela() {
+        const termo = document.getElementById('pat-search-input').value.trim().toLowerCase();
+        const tbody = document.getElementById('pat-table-body');
+        if (!termo) { 
+            paginaAtual = 0; 
+            renderizarTabelaPaginada(); 
+            return; 
+        }
+        
+        const filtrados = patTodos.filter(item => 
+            (item.codigo || '').toLowerCase().includes(termo) || 
+            (item.item || '').toLowerCase().includes(termo)
+        );
+        
+        if (filtrados.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:20px;color:#94a3b8;">Nenhum resultado para "${termo}"</td></tr>`;
+            document.getElementById('contador-itens').innerText = '0 itens encontrados';
+            document.getElementById('btn-carregar-mais').style.display = 'none';
+            return;
+        }
+        
+        tbody.innerHTML = '';
+        filtrados.slice(0, 100).forEach(item => {
+            let badgeClass = (item.status || '').toLowerCase().includes('manuten') ? 'status-manutencao' : 
+                           (item.status || '').toLowerCase().includes('danific') ? 'status-danificado' : 'status-bom';
+            const tr = document.createElement('tr');
+            tr.onclick = () => carregarParaEdicao(item.codigo);
+            tr.innerHTML = `
+                <td style="color:#005088;font-weight:bold;">${item.codigo}</td>
+                <td><strong>${item.item}</strong><br><small style="color:#64748b;">${item.categoria || ''}</small></td>
+                <td>${item.foto ? `<img src="${item.foto}" class="foto-mini">` : '<span style="color:#94a3b8;">—</span>'}</td>
+                <td>${item.localizacao || '—'}</td>
+                <td><span class="status-badge ${badgeClass}">${item.status || 'Bom'}</span></td>
+                <td><button onclick="event.stopPropagation();carregarParaEdicao('${item.codigo}')" style="background:none;border:none;color:#005088;cursor:pointer;font-size:16px;"><i class="fa-solid fa-pen-to-square"></i></button></td>
+            `;
+            tbody.appendChild(tr);
+        });
+        document.getElementById('contador-itens').innerText = `${filtrados.length} itens encontrados`;
+        document.getElementById('btn-carregar-mais').style.display = 'none';
+    }
+
+    // ============================================================
+    // EDIÇÃO
+    // ============================================================
     function carregarParaEdicao(codigo) {
         const item = patTodos.find(i => i.codigo === codigo);
         if (!item) { showToast('Item não encontrado!', 'error'); return; }
         
+        editandoCodigo = codigo;
         alternarAbaPat('cadastro');
-        document.getElementById('pat-cad-title').innerHTML = '<i class="fa-solid fa-pen-to-square" style="color:#eab308;"></i> Modo de Edição - ' + codigo;
+        
+        document.getElementById('pat-cad-title').innerHTML = `<i class="fa-solid fa-pen-to-square" style="color:#eab308;"></i> Modo de Edição - ${codigo}`;
         document.getElementById('pat-reg-code').value = item.codigo || '';
-        document.getElementById('pat-reg-code').readOnly = true;
+        document.getElementById('pat-reg-code').disabled = true;
         document.getElementById('pat-reg-item').value = item.item || '';
         document.getElementById('pat-reg-cat').value = item.categoria || 'Outros';
         
@@ -712,53 +923,76 @@
         else if (statusLower.includes('danific')) statusValor = 'Danificado';
         else if (statusLower.includes('inserv')) statusValor = 'Inservível';
         document.getElementById('pat-reg-status').value = statusValor;
+        
         document.getElementById('pat-btn-excluir').style.display = 'inline-block';
         
-        // ===== TRATAMENTO DA FOTO =====
+        // FOTO
         document.getElementById('pat-reg-foto').value = '';
         const temFoto = item.foto && item.foto !== '' && item.foto !== 'null' && item.foto !== 'undefined';
         
         if (temFoto) {
             document.getElementById('pat-foto-preview').src = item.foto;
             document.getElementById('pat-foto-preview').style.display = 'block';
-            document.getElementById('pat-foto-preview').style.border = '2px solid #005088';
             fotoBase64 = item.foto;
-            const btnRemoverFoto = document.getElementById('pat-btn-remover-foto');
-            if (btnRemoverFoto) btnRemoverFoto.style.display = 'inline-block';
+            document.getElementById('pat-btn-remover-foto').style.display = 'inline-block';
         } else {
             document.getElementById('pat-foto-preview').style.display = 'none';
             document.getElementById('pat-foto-preview').src = '';
             fotoBase64 = null;
-            const btnRemoverFoto = document.getElementById('pat-btn-remover-foto');
-            if (btnRemoverFoto) btnRemoverFoto.style.display = 'none';
+            document.getElementById('pat-btn-remover-foto').style.display = 'none';
         }
         
+        // Atualizar botão salvar
         const btnSalvar = document.querySelector('#tab-cadastro .btn-success');
         if (btnSalvar) {
             btnSalvar.innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Atualizar';
             btnSalvar.style.background = '#eab308';
             btnSalvar.style.color = '#1e293b';
         }
+        
+        // Scroll para o topo
+        document.querySelector('.form-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        showToast('📝 Editando item: ' + codigo, 'info', 2000);
     }
 
-    // ===== REMOVER FOTO =====
-    function removerFoto() {
-        if (!confirm('Deseja realmente remover a foto deste item?')) return;
+    function patChecarEdicao() {
+        const codigo = document.getElementById('pat-reg-code').value.trim();
+        if (!codigo) return;
+        const item = patTodos.find(i => i.codigo === codigo);
+        if (item) carregarParaEdicao(codigo);
+    }
+
+    function patResetarCadastro() {
+        document.getElementById('pat-cad-title').innerHTML = 'Cadastrar Novo Patrimônio';
+        document.getElementById('pat-reg-code').value = '';
+        document.getElementById('pat-reg-code').disabled = false;
+        document.getElementById('pat-reg-item').value = '';
+        document.getElementById('pat-reg-resp').value = usuarioLogadoPat.nome || '';
+        document.getElementById('pat-reg-status').value = 'Bom';
         document.getElementById('pat-foto-preview').style.display = 'none';
         document.getElementById('pat-foto-preview').src = '';
         document.getElementById('pat-reg-foto').value = '';
-        fotoBase64 = '';
-        const btnRemoverFoto = document.getElementById('pat-btn-remover-foto');
-        if (btnRemoverFoto) btnRemoverFoto.style.display = 'none';
-        showToast('✅ Foto removida. Clique em "Atualizar" para confirmar.', 'warning');
+        fotoBase64 = null;
+        document.getElementById('pat-btn-excluir').style.display = 'none';
+        document.getElementById('pat-btn-remover-foto').style.display = 'none';
+        editandoCodigo = null;
+        
+        const btnSalvar = document.querySelector('#tab-cadastro .btn-success');
+        if (btnSalvar) {
+            btnSalvar.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Salvar';
+            btnSalvar.style.background = '#059669';
+            btnSalvar.style.color = 'white';
+        }
     }
 
-    // ===== PREVIEW FOTO =====
+    // ============================================================
+    // FOTO
+    // ============================================================
     function previewFotoCadastro() {
         const file = document.getElementById('pat-reg-foto').files[0];
         if (!file) return;
         if (!file.type.startsWith('image/')) {
-            showToast('Por favor, selecione um arquivo de imagem válido.', 'error');
+            showToast('Por favor, selecione uma imagem válida.', 'error');
             document.getElementById('pat-reg-foto').value = '';
             return;
         }
@@ -772,9 +1006,8 @@
             fotoBase64 = e.target.result;
             document.getElementById('pat-foto-preview').src = fotoBase64;
             document.getElementById('pat-foto-preview').style.display = 'block';
-            document.getElementById('pat-foto-preview').style.border = '2px solid #059669';
-            const btnRemoverFoto = document.getElementById('pat-btn-remover-foto');
-            if (btnRemoverFoto) btnRemoverFoto.style.display = 'inline-block';
+            document.getElementById('pat-btn-remover-foto').style.display = 'inline-block';
+            showToast('✅ Foto carregada!', 'success', 1500);
         };
         reader.readAsDataURL(file);
     }
@@ -790,68 +1023,20 @@
         reader.readAsDataURL(file);
     }
 
-    // ===== QR CODE =====
-    function abrirQRScanner() {
-        document.getElementById('qr-scanner-modal').style.display = 'flex';
-        if (!qrScanner) qrScanner = new Html5Qrcode("qr-reader");
-        qrScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 150 } },
-            (decodedText) => {
-                document.getElementById('pat-search-input').value = decodedText;
-                filtrarTabela();
-                fecharQRScanner();
-            }, () => {}
-        ).catch(() => showToast('Erro ao acessar câmera.', 'error'));
-    }
-
-    function abrirQRScannerCadastro() {
-        document.getElementById('qr-scanner-modal').style.display = 'flex';
-        if (!qrScanner) qrScanner = new Html5Qrcode("qr-reader");
-        qrScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 150 } },
-            (decodedText) => {
-                document.getElementById('pat-reg-code').value = decodedText;
-                fecharQRScanner();
-                patChecarEdicao();
-            }, () => {}
-        ).catch(() => showToast('Erro ao acessar câmera.', 'error'));
-    }
-
-    function fecharQRScanner() {
-        document.getElementById('qr-scanner-modal').style.display = 'none';
-        if (qrScanner) qrScanner.stop().catch(() => {});
-    }
-
-    // ===== CADASTRO =====
-    function patChecarEdicao() {
-        const codigo = document.getElementById('pat-reg-code').value.trim();
-        if (!codigo) return;
-        const item = patTodos.find(i => i.codigo === codigo);
-        if (item) carregarParaEdicao(codigo);
-    }
-
-    function patResetarCadastro() {
-        document.getElementById('pat-cad-title').innerHTML = 'Cadastrar Novo Patrimônio';
-        document.getElementById('pat-reg-code').value = '';
-        document.getElementById('pat-reg-code').readOnly = false;
-        document.getElementById('pat-reg-item').value = '';
-        document.getElementById('pat-reg-resp').value = usuarioLogadoPat.nome || '';
-        document.getElementById('pat-reg-status').value = 'Bom';
+    function removerFoto() {
+        if (!confirm('Deseja realmente remover a foto deste item?')) return;
         document.getElementById('pat-foto-preview').style.display = 'none';
         document.getElementById('pat-foto-preview').src = '';
         document.getElementById('pat-reg-foto').value = '';
-        fotoBase64 = null;
-        document.getElementById('pat-btn-excluir').style.display = 'none';
-        const btnRemoverFoto = document.getElementById('pat-btn-remover-foto');
-        if (btnRemoverFoto) btnRemoverFoto.style.display = 'none';
-        const btnSalvar = document.querySelector('#tab-cadastro .btn-success');
-        if (btnSalvar) {
-            btnSalvar.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Salvar';
-            btnSalvar.style.background = '#059669';
-            btnSalvar.style.color = 'white';
-        }
+        fotoBase64 = '';
+        document.getElementById('pat-btn-remover-foto').style.display = 'none';
+        showToast('📸 Foto removida. Clique em "Salvar" para confirmar.', 'warning');
     }
 
-    // ===== SALVAR ITEM (CORRIGIDO COM FALLBACK) =====
-    async function patExecutarCadastro() {
+    // ============================================================
+    // SALVAR ITEM
+    // ============================================================
+    function patExecutarCadastro() {
         const btnSalvar = document.querySelector('#tab-cadastro .btn-success');
         const codigo = document.getElementById('pat-reg-code').value.trim();
         const item = document.getElementById('pat-reg-item').value.trim();
@@ -860,139 +1045,127 @@
         const funcionario = document.getElementById('pat-reg-resp').value.trim();
         const status = document.getElementById('pat-reg-status').value;
         
+        // Validações
         if (!codigo || !item || !funcionario) {
             showToast('Preencha todos os campos obrigatórios!', 'warning');
             btnSalvar.classList.add('btn-error-anim');
             setTimeout(() => btnSalvar.classList.remove('btn-error-anim'), 500);
             return;
         }
-        if (codigo.length < 5) {
-            showToast('O código deve ter pelo menos 5 caracteres.', 'warning');
+        if (codigo.length < 3) {
+            showToast('O código deve ter pelo menos 3 caracteres.', 'warning');
             btnSalvar.classList.add('btn-error-anim');
             setTimeout(() => btnSalvar.classList.remove('btn-error-anim'), 500);
             return;
         }
         
-        setButtonLoading(btnSalvar, true, 'Salvando...');
-        
-        const itemExistente = patTodos.find(i => i.codigo === codigo);
-        const isEdicao = !!itemExistente;
-        
-        let fotoParaSalvar = '';
-        if (fotoBase64 && fotoBase64 !== '' && fotoBase64 !== 'null' && fotoBase64 !== 'undefined') {
-            fotoParaSalvar = fotoBase64;
-        } else if (isEdicao && itemExistente.foto && itemExistente.foto !== '' && itemExistente.foto !== 'null') {
-            fotoParaSalvar = itemExistente.foto;
+        // Verificar duplicidade (exceto se for edição do mesmo)
+        const itemExistente = patTodos.find(i => i.codigo === codigo && i.codigo !== editandoCodigo);
+        if (itemExistente) {
+            showToast('⚠️ Já existe um item com este código!', 'error');
+            btnSalvar.classList.add('btn-error-anim');
+            setTimeout(() => btnSalvar.classList.remove('btn-error-anim'), 500);
+            return;
         }
         
-        const payload = {
-            operacao: "PAT_CADASTRAR",
-            codigo, item, categoria: category, localizacao: sala,
-            responsavel: funcionario, status,
-            emailOperador: usuarioLogadoPat.email || 'admin@ccmanchieta.com.br',
+        // Ativar loading
+        setButtonLoading(btnSalvar, true, 'Salvando...');
+        
+        // Preparar dados
+        const isEdicao = !!editandoCodigo;
+        
+        // Determinar foto a salvar
+        let fotoParaSalvar = '';
+        if (fotoBase64 && fotoBase64 !== '' && fotoBase64 !== 'null') {
+            fotoParaSalvar = fotoBase64;
+        } else if (isEdicao) {
+            const itemAntigo = patTodos.find(i => i.codigo === codigo);
+            if (itemAntigo && itemAntigo.foto) {
+                fotoParaSalvar = itemAntigo.foto;
+            }
+        }
+        
+        const novoItem = {
+            codigo,
+            item,
+            categoria: category,
+            localizacao: sala,
+            responsavel: funcionario,
+            status,
             foto: fotoParaSalvar
         };
         
+        // Salvar
         try {
-            // Tentativa com mode: 'no-cors' para contornar CORS
-            const r = await fetch(APPS_SCRIPT_PAT_URL, { 
-                method: 'POST', 
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' }, 
-                body: JSON.stringify(payload) 
-            });
-            
-            setButtonLoading(btnSalvar, false);
-            
-            // Com no-cors, não podemos ler a resposta, mas se não deu erro, consideramos sucesso
-            showToast(isEdicao ? "✅ Item atualizado com sucesso!" : "✅ Item cadastrado com sucesso!", 'success');
-            btnSalvar.classList.add('btn-success-anim');
-            setTimeout(() => btnSalvar.classList.remove('btn-success-anim'), 500);
-            
-            // Salvar localmente também para manter consistência
             if (isEdicao) {
                 const index = patTodos.findIndex(i => i.codigo === codigo);
                 if (index >= 0) {
-                    patTodos[index] = { ...payload, foto: fotoParaSalvar };
+                    patTodos[index] = novoItem;
                 }
             } else {
-                patTodos.push({ codigo, item, categoria: category, localizacao: sala, responsavel: funcionario, status, foto: fotoParaSalvar });
+                patTodos.push(novoItem);
             }
+            
+            salvarDadosLocal();
+            setButtonLoading(btnSalvar, false);
+            
+            // Animação de sucesso
+            btnSalvar.classList.add('btn-success-anim');
+            setTimeout(() => btnSalvar.classList.remove('btn-success-anim'), 500);
+            
+            showToast(isEdicao ? '✅ Item atualizado com sucesso!' : '✅ Item cadastrado com sucesso!', 'success');
             
             patResetarCadastro();
             renderizarTabelaPaginada();
             
             setTimeout(() => {
                 alternarAbaPat('lista');
-            }, 1000);
+            }, 800);
             
         } catch (e) {
             console.error('Erro ao salvar:', e);
             setButtonLoading(btnSalvar, false);
-            
-            // Fallback: Salvar localmente
-            if (confirm('⚠️ Erro de conexão com o servidor. Deseja salvar localmente (apenas visualização)?')) {
-                if (isEdicao) {
-                    const index = patTodos.findIndex(i => i.codigo === codigo);
-                    if (index >= 0) {
-                        patTodos[index] = { codigo, item, categoria: category, localizacao: sala, responsavel: funcionario, status, foto: fotoParaSalvar };
-                    }
-                } else {
-                    patTodos.push({ codigo, item, categoria: category, localizacao: sala, responsavel: funcionario, status, foto: fotoParaSalvar });
-                }
-                showToast('✅ Item salvo localmente!', 'success');
-                patResetarCadastro();
-                renderizarTabelaPaginada();
-                setTimeout(() => alternarAbaPat('lista'), 1000);
-            } else {
-                showToast('❌ Erro ao salvar. Tente novamente.', 'error');
-                btnSalvar.classList.add('btn-error-anim');
-                setTimeout(() => btnSalvar.classList.remove('btn-error-anim'), 500);
-            }
+            showToast('❌ Erro ao salvar o item.', 'error');
+            btnSalvar.classList.add('btn-error-anim');
+            setTimeout(() => btnSalvar.classList.remove('btn-error-anim'), 500);
         }
     }
 
-    // ===== EXCLUIR ITEM =====
-    async function patExcluirItem() {
+    // ============================================================
+    // EXCLUIR ITEM
+    // ============================================================
+    function patExcluirItem() {
         const codigo = document.getElementById('pat-reg-code').value.trim();
         const btnExcluir = document.getElementById('pat-btn-excluir');
-        if (!codigo || !confirm(`⚠️ Tem certeza que deseja excluir o item "${codigo}"?`)) return;
+        
+        if (!codigo) { showToast('Código não encontrado.', 'error'); return; }
+        if (!confirm(`⚠️ Tem certeza que deseja excluir o item "${codigo}"?`)) return;
         
         setButtonLoading(btnExcluir, true, 'Excluindo...');
         
         try {
-            await fetch(APPS_SCRIPT_PAT_URL, { 
-                method: 'POST', 
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' }, 
-                body: JSON.stringify({ operacao: "PAT_EXCLUIR", codigo, emailOperador: usuarioLogadoPat.email || 'admin@ccmanchieta.com.br' }) 
-            });
-            
-            setButtonLoading(btnExcluir, false);
             patTodos = patTodos.filter(i => i.codigo !== codigo);
+            salvarDadosLocal();
+            setButtonLoading(btnExcluir, false);
+            
             showToast('🗑️ Item excluído com sucesso!', 'success');
             patResetarCadastro();
             renderizarTabelaPaginada();
-        } catch (e) {
+            
+            setTimeout(() => {
+                alternarAbaPat('lista');
+            }, 500);
+            
+        } catch(e) {
             setButtonLoading(btnExcluir, false);
-            // Fallback: remover localmente
-            if (confirm('⚠️ Erro de conexão. Deseja remover localmente?')) {
-                patTodos = patTodos.filter(i => i.codigo !== codigo);
-                showToast('🗑️ Item removido localmente!', 'success');
-                patResetarCadastro();
-                renderizarTabelaPaginada();
-            } else {
-                showToast('❌ Erro ao excluir.', 'error');
-            }
+            showToast('❌ Erro ao excluir o item.', 'error');
         }
     }
 
-    // ===== REGISTRO EM BLOCO =====
-    document.getElementById('bloco-quantidade').addEventListener('input', function() {
-        document.getElementById('bloco-total').innerText = this.value;
-    });
-
-    async function patExecutarCadastroBloco() {
+    // ============================================================
+    // REGISTRO EM BLOCO
+    // ============================================================
+    function patExecutarCadastroBloco() {
         const btnCadastrar = document.querySelector('#tab-bloco .btn-success');
         const item = document.getElementById('bloco-item').value.trim();
         const category = document.getElementById('bloco-cat').value;
@@ -1013,25 +1186,27 @@
         
         for (let i = 0; i < quantidade; i++) {
             const novoCodigo = String(codigoBase + i);
-            const payload = {
-                operacao: "PAT_CADASTRAR",
-                codigo: novoCodigo, item, categoria: category,
-                localizacao: sala, responsavel: usuarioLogadoPat.nome || 'Administrador',
-                status: 'Bom', emailOperador: usuarioLogadoPat.email || 'admin@ccmanchieta.com.br',
+            const novoItem = {
+                codigo: novoCodigo,
+                item: item,
+                categoria: category,
+                localizacao: sala,
+                responsavel: usuarioLogadoPat.nome || 'Administrador',
+                status: 'Bom',
                 foto: fotoBloco
             };
-            try {
-                await fetch(APPS_SCRIPT_PAT_URL, { 
-                    method: 'POST', 
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify(payload) 
-                });
-                patTodos.push({ ...payload });
-                sucessos++;
-            } catch (e) { console.error('Erro no item', novoCodigo); }
+            
+            // Verificar duplicidade
+            const existe = patTodos.findIndex(p => p.codigo === novoCodigo);
+            if (existe >= 0) {
+                patTodos[existe] = novoItem;
+            } else {
+                patTodos.push(novoItem);
+            }
+            sucessos++;
         }
         
+        salvarDadosLocal();
         setButtonLoading(btnCadastrar, false);
         
         if (sucessos > 0) {
@@ -1047,51 +1222,58 @@
         }
     }
 
-    // ===== AMBIENTES =====
-    async function patAdicionarAmbiente() {
-        const nome = document.getElementById('pat-new-amb').value.trim();
-        const btnAdicionar = document.querySelector('#tab-ambientes .btn-success');
-        if (!nome) { showToast('Digite o nome do ambiente.', 'warning'); return; }
-        if (patAmbientes.includes(nome)) { showToast('Ambiente já cadastrado.', 'warning'); return; }
-        
-        setButtonLoading(btnAdicionar, true, 'Adicionando...');
-        try {
-            await fetch(APPS_SCRIPT_PAT_URL, { 
-                method: 'POST', 
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ operacao: "AMB_ADICIONAR", ambiente: nome }) 
-            });
-            patAmbientes.push(nome);
-            document.getElementById('pat-new-amb').value = '';
-            atualizarUIAmbientes();
-            setButtonLoading(btnAdicionar, false);
-            showToast(`✅ Ambiente "${nome}" adicionado!`, 'success');
-        } catch (e) {
-            setButtonLoading(btnAdicionar, false);
-            showToast('❌ Erro ao adicionar ambiente.', 'error');
+    // ============================================================
+    // QR CODE
+    // ============================================================
+    function abrirQRScanner() {
+        document.getElementById('qr-scanner-modal').style.display = 'flex';
+        if (!qrScanner) {
+            qrScanner = new Html5Qrcode("qr-reader");
+        }
+        qrScanner.start(
+            { facingMode: "environment" },
+            { fps: 10, qrbox: { width: 250, height: 150 } },
+            (decodedText) => {
+                document.getElementById('pat-search-input').value = decodedText;
+                filtrarTabela();
+                fecharQRScanner();
+                showToast(`📷 Código lido: ${decodedText}`, 'success', 2000);
+            },
+            () => {}
+        ).catch(() => showToast('Erro ao acessar câmera.', 'error'));
+    }
+
+    function abrirQRScannerCadastro() {
+        document.getElementById('qr-scanner-modal').style.display = 'flex';
+        if (!qrScanner) qrScanner = new Html5Qrcode("qr-reader");
+        qrScanner.start(
+            { facingMode: "environment" },
+            { fps: 10, qrbox: { width: 250, height: 150 } },
+            (decodedText) => {
+                document.getElementById('pat-reg-code').value = decodedText;
+                fecharQRScanner();
+                patChecarEdicao();
+                showToast(`📷 Código lido: ${decodedText}`, 'success', 2000);
+            },
+            () => {}
+        ).catch(() => showToast('Erro ao acessar câmera.', 'error'));
+    }
+
+    function fecharQRScanner() {
+        document.getElementById('qr-scanner-modal').style.display = 'none';
+        if (qrScanner) {
+            qrScanner.stop().catch(() => {});
         }
     }
 
-    async function patDeletarAmbiente(nome) {
-        if (!confirm(`⚠️ Remover o ambiente "${nome}"?`)) return;
-        if (nome === 'Almoxarifado') { showToast('Não é possível remover o Almoxarifado.', 'warning'); return; }
-        try {
-            await fetch(APPS_SCRIPT_PAT_URL, { 
-                method: 'POST', 
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ operacao: "AMB_DELETAR", ambiente: nome }) 
-            });
-            patAmbientes = patAmbientes.filter(a => a !== nome);
-            atualizarUIAmbientes();
-            showToast(`✅ Ambiente "${nome}" removido!`, 'success');
-        } catch (e) {
-            showToast('❌ Erro ao remover ambiente.', 'error');
-        }
-    }
+    // Fechar modal com ESC
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') fecharQRScanner();
+    });
 
-    // ===== IMPRIMIR ETIQUETAS =====
+    // ============================================================
+    // IMPRIMIR ETIQUETAS
+    // ============================================================
     function imprimirEtiquetas() {
         const selecionados = prompt('Digite os códigos dos itens separados por vírgula (ou deixe em branco para todos visíveis):');
         let itens;
@@ -1099,10 +1281,16 @@
             const codigos = selecionados.split(',').map(c => c.trim());
             itens = patTodos.filter(i => codigos.includes(i.codigo));
         } else {
-            const filtrados = patSalaFiltro !== 'TODOS' ? patTodos.filter(item => item.localizacao === patSalaFiltro) : patTodos;
+            const filtrados = patSalaFiltro !== 'TODOS' 
+                ? patTodos.filter(item => item.localizacao === patSalaFiltro)
+                : patTodos;
             itens = filtrados.slice(0, 24);
         }
-        if (itens.length === 0) { showToast('Nenhum item encontrado.', 'warning'); return; }
+        
+        if (itens.length === 0) { 
+            showToast('Nenhum item encontrado.', 'warning');
+            return; 
+        }
         
         let html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Etiquetas</title>';
         html += '<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>';
@@ -1142,8 +1330,35 @@
         html += '<\/script></body></html>';
         
         const win = window.open('', '_blank', 'width=900,height=700');
-        if (win) { win.document.write(html); win.document.close(); } 
-        else { showToast('Permita pop-ups para impressão.', 'warning'); }
+        if (win) { 
+            win.document.write(html); 
+            win.document.close(); 
+        } else { 
+            showToast('Por favor, permita pop-ups para impressão.', 'warning');
+        }
+    }
+
+    // ============================================================
+    // EXPORTAR DADOS
+    // ============================================================
+    function exportarDados() {
+        if (patTodos.length === 0) {
+            showToast('Nenhum dado para exportar.', 'warning');
+            return;
+        }
+        
+        let csv = 'Código,Item,Categoria,Local,Status,Responsável\n';
+        patTodos.forEach(item => {
+            csv += `${item.codigo || ''},${item.item || ''},${item.categoria || ''},${item.localizacao || ''},${item.status || 'Bom'},${item.responsavel || ''}\n`;
+        });
+        
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `patrimonio_${new Date().toISOString().slice(0,10)}.csv`;
+        link.click();
+        
+        showToast('📊 Dados exportados com sucesso!', 'success');
     }
 </script>
 </body>
