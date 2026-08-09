@@ -212,6 +212,168 @@
     border-radius: 4px;
     border-left: 3px solid #005088;
 }
+    /* ===== ANIMAÇÕES DE LOADING ===== */
+
+/* Spinner de carregamento */
+.spinner {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border: 3px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 0.8s ease-in-out infinite;
+    vertical-align: middle;
+    margin-right: 8px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Spinner para botão success (verde) */
+.spinner-success {
+    border: 3px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+}
+
+/* Spinner para botão warning (amarelo) */
+.spinner-warning {
+    border: 3px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+}
+
+/* Estado de loading do botão */
+.btn-loading {
+    opacity: 0.8;
+    cursor: wait !important;
+    pointer-events: none;
+    position: relative;
+}
+
+.btn-loading::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 6px;
+    background: rgba(0,0,0,0.1);
+    animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.6; }
+}
+
+/* Feedback de sucesso no botão */
+.btn-success-anim {
+    animation: successPop 0.5s ease;
+}
+
+@keyframes successPop {
+    0% { transform: scale(1); }
+    30% { transform: scale(1.05); }
+    60% { transform: scale(0.95); }
+    100% { transform: scale(1); }
+}
+
+/* Feedback de erro no botão */
+.btn-error-anim {
+    animation: errorShake 0.5s ease;
+}
+
+@keyframes errorShake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-10px); }
+    40% { transform: translateX(10px); }
+    60% { transform: translateX(-5px); }
+    80% { transform: translateX(5px); }
+}
+
+/* Toast de notificação */
+.toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 16px 24px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    z-index: 99999;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    animation: slideInRight 0.4s ease-out;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: 400px;
+    min-width: 250px;
+}
+
+.toast-success {
+    background: #059669;
+    border-left: 4px solid #34d399;
+}
+
+.toast-error {
+    background: #dc2626;
+    border-left: 4px solid #fca5a5;
+}
+
+.toast-warning {
+    background: #d97706;
+    border-left: 4px solid #fcd34d;
+}
+
+.toast-info {
+    background: #005088;
+    border-left: 4px solid #60a5fa;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.toast-hide {
+    animation: slideOutRight 0.3s ease-in forwards;
+}
+
+@keyframes slideOutRight {
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+/* Progress bar no botão */
+.btn-progress {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-progress::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    100% {
+        left: 100%;
+    }
+}
 </style>
 </head>
 <body>
@@ -420,7 +582,7 @@
                         </div>
                         <img id="bloco-foto-preview" class="foto-preview" src="" alt="Preview" style="display:none;">
                     </div>
-                    <button class="btn-top btn-success" onclick="patExecutarCadastroBloco()" style="width:100%;padding:12px;font-size:14px;margin-top:15px;">
+                    <button class="btn-top btn-success" onclick="()" style="width:100%;padding:12px;font-size:14px;margin-top:15px;">
                         💾 Cadastrar <span id="bloco-total">2</span> itens
                     </button>
                 </div>
@@ -621,40 +783,89 @@
     // CARREGAR PARA EDIÇÃO
 function carregarParaEdicao(codigo) {
     const item = patTodos.find(i => i.codigo === codigo);
-    if (!item) return;
+    if (!item) {
+        alert('Item não encontrado!');
+        return;
+    }
     
+    // Mudar para a aba de cadastro
     alternarAbaPat('cadastro');
-    document.getElementById('pat-cad-title').innerHTML = '<i class="fa-solid fa-pen-to-square" style="color:#eab308;"></i> Modo de Edição';
-    document.getElementById('pat-reg-code').value = item.codigo;
-    document.getElementById('pat-reg-item').value = item.item;
+    
+    // Atualizar título para modo de edição
+    document.getElementById('pat-cad-title').innerHTML = '<i class="fa-solid fa-pen-to-square" style="color:#eab308;"></i> Modo de Edição - ' + codigo;
+    
+    // Preencher todos os campos do formulário
+    document.getElementById('pat-reg-code').value = item.codigo || '';
+    document.getElementById('pat-reg-code').readOnly = true;
+    document.getElementById('pat-reg-item').value = item.item || '';
     document.getElementById('pat-reg-cat').value = item.categoria || 'Outros';
-    document.getElementById('pat-reg-room').value = item.localizacao || 'Almoxarifado';
+    
+    // Selecionar a localização correta
+    const selectSala = document.getElementById('pat-reg-room');
+    if (item.localizacao && patAmbientes.includes(item.localizacao)) {
+        selectSala.value = item.localizacao;
+    } else {
+        selectSala.value = 'Almoxarifado';
+    }
+    
     document.getElementById('pat-reg-resp').value = item.responsavel || usuarioLogadoPat.nome || '';
     
+    // Definir o status correto
     let statusLimpo = (item.status || '').toLowerCase();
     let statusValor = 'Bom';
     if (statusLimpo.includes('manuten')) statusValor = 'Em Manutenção';
-    if (statusLimpo.includes('danific')) statusValor = 'Danificado';
-    if (statusLimpo.includes('inserv')) statusValor = 'Inservível';
+    else if (statusLimpo.includes('danific')) statusValor = 'Danificado';
+    else if (statusLimpo.includes('inserv')) statusValor = 'Inservível';
     document.getElementById('pat-reg-status').value = statusValor;
     
+    // Mostrar botão de excluir
     document.getElementById('pat-btn-excluir').style.display = 'inline-block';
     
-    // CORREÇÃO: Carregar a foto existente para preview
-    if (item.foto && item.foto !== '') {
+    // ====== CORREÇÃO: TRATAMENTO DA FOTO ======
+    // Resetar o input de arquivo
+    document.getElementById('pat-reg-foto').value = '';
+    
+    // Verificar se o item tem foto (verificando se existe e não é vazia)
+    const temFoto = item.foto && 
+                    item.foto !== '' && 
+                    item.foto !== 'null' && 
+                    item.foto !== 'undefined' &&
+                    item.foto !== 'NULL' &&
+                    item.foto !== 'None';
+    
+    if (temFoto) {
+        // Carregar a foto existente
         document.getElementById('pat-foto-preview').src = item.foto;
         document.getElementById('pat-foto-preview').style.display = 'block';
-        // Armazenar a foto atual para manter se não for alterada
+        document.getElementById('pat-foto-preview').style.border = '2px solid #005088';
         fotoBase64 = item.foto;
+        
+        // Mostrar botão de remover foto
+        const btnRemoverFoto = document.getElementById('pat-btn-remover-foto');
+        if (btnRemoverFoto) {
+            btnRemoverFoto.style.display = 'inline-block';
+        }
     } else {
+        // Item NÃO tem foto - esconder tudo
         document.getElementById('pat-foto-preview').style.display = 'none';
+        document.getElementById('pat-foto-preview').src = '';
         fotoBase64 = null;
+        
+        // Esconder botão de remover foto
+        const btnRemoverFoto = document.getElementById('pat-btn-remover-foto');
+        if (btnRemoverFoto) {
+            btnRemoverFoto.style.display = 'none';
+        }
     }
     
-    // CORREÇÃO: Resetar o input de arquivo para permitir novo upload
-    document.getElementById('pat-reg-foto').value = '';
+    // Atualizar botão salvar
+    const btnSalvar = document.querySelector('#tab-cadastro .btn-success');
+    if (btnSalvar) {
+        btnSalvar.innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Atualizar';
+        btnSalvar.style.background = '#eab308';
+        btnSalvar.style.color = '#1e293b';
+    }
 }
-
     // QR CODE
     function abrirQRScanner() {
         document.getElementById('qr-scanner-modal').style.display = 'flex';
@@ -777,33 +988,37 @@ function removerFoto() {
     const funcionario = document.getElementById('pat-reg-resp').value.trim();
     const status = document.getElementById('pat-reg-status').value;
     
-    // Validações
     if (!codigo || !item || !funcionario) {
         alert('Preencha os campos obrigatórios: Código, Item e Responsável.');
         return;
     }
     
-    // Verificar se o código tem pelo menos 5 caracteres
     if (codigo.length < 5) {
         alert('O código deve ter pelo menos 5 caracteres.');
         return;
     }
     
-    // Verificar se já existe um item com este código
     const itemExistente = patTodos.find(i => i.codigo === codigo);
     const isEdicao = !!itemExistente;
     
-    // Determinar a foto a ser salvar
+    // ====== CORREÇÃO: TRATAMENTO DA FOTO PARA EDIÇÃO ======
     let fotoParaSalvar = '';
     
-    if (fotoBase64) {
-        // Se há uma nova foto (upload ou mantida)
+    // Verificar se há uma nova foto carregada
+    if (fotoBase64 && fotoBase64 !== '' && fotoBase64 !== 'null' && fotoBase64 !== 'undefined') {
         fotoParaSalvar = fotoBase64;
-    } else if (isEdicao && itemExistente.foto) {
-        // Se é edição e não há nova foto, manter a foto existente
+    } 
+    // Se é edição e tem foto existente, manter a foto
+    else if (isEdicao && itemExistente.foto && 
+             itemExistente.foto !== '' && 
+             itemExistente.foto !== 'null' && 
+             itemExistente.foto !== 'undefined') {
         fotoParaSalvar = itemExistente.foto;
     }
-    // Se não houver foto, salvar como vazio
+    // Se não tem foto, enviar vazio
+    else {
+        fotoParaSalvar = '';
+    }
     
     const payload = {
         operacao: "PAT_CADASTRAR",
@@ -813,19 +1028,19 @@ function removerFoto() {
         localizacao: sala,
         responsavel: funcionario, 
         status,
-        emailOperador: usuarioLogadoPat.email,
+        emailOperador: usuarioLogadoPat.email || 'admin@ccmanchieta.com.br',
         foto: fotoParaSalvar
     };
     
     try {
         const r = await fetch(APPS_SCRIPT_PAT_URL, { 
             method: 'POST', 
-            headers: { 'Content-Type': 'text/plain' }, 
+            headers: { 'Content-Type': 'application/json' }, 
             body: JSON.stringify(payload) 
         });
         
         if (!r.ok) {
-            throw new Error(`HTTP ${r.status}: ${r.statusText}`);
+            throw new Error(`HTTP ${r.status}`);
         }
         
         const res = await r.json();
@@ -833,25 +1048,78 @@ function removerFoto() {
         if (res.status === "success" || res.status === "updated") {
             alert(isEdicao ? "✅ Item atualizado com sucesso!" : "✅ Item cadastrado com sucesso!");
             patResetarCadastro();
-            carregarItensPaginado(true);
-            // Voltar para a aba de lista
+            await carregarItensPaginado(true);
             alternarAbaPat('lista');
         } else {
             alert('❌ Erro: ' + (res.message || 'Falha ao salvar.'));
         }
-    } catch (e) { 
-        alert('❌ Erro de conexão com o servidor. Verifique sua internet e tente novamente.');
-        console.error('Erro detalhado:', e);
+    } catch (e) {
+        console.error('Erro:', e);
+        alert('❌ Erro de conexão. Tente novamente.');
     }
 }
 
-function patResetarCadastro() {
-    // Resetar título
-    document.getElementById('pat-cad-title').innerHTML = 'Cadastrar Novo Patrimônio';
+// Função para mostrar toast de notificação
+function showToast(message, type = 'success', duration = 4000) {
+    // Remover toasts existentes
+    const existingToasts = document.querySelectorAll('.toast');
+    existingToasts.forEach(toast => toast.remove());
     
-    // Limpar campos
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    
+    // Ícones
+    const icons = {
+        success: 'fa-solid fa-check-circle',
+        error: 'fa-solid fa-circle-exclamation',
+        warning: 'fa-solid fa-triangle-exclamation',
+        info: 'fa-solid fa-circle-info'
+    };
+    
+    toast.innerHTML = `
+        <i class="${icons[type] || icons.info}" style="font-size:20px;"></i>
+        <span>${message}</span>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Remover após o tempo
+    setTimeout(() => {
+        toast.classList.add('toast-hide');
+        setTimeout(() => toast.remove(), 300);
+    }, duration);
+}
+
+// Função para ativar loading em um botão
+function setButtonLoading(button, loading = true, text = null) {
+    if (!button) return;
+    
+    if (loading) {
+        // Salvar texto original
+        button.dataset.originalText = button.innerHTML;
+        button.classList.add('btn-loading', 'btn-progress');
+        button.disabled = true;
+        
+        // Mudar texto com spinner
+        button.innerHTML = `
+            <span class="spinner spinner-${button.classList.contains('btn-success') ? 'success' : 'warning'}"></span>
+            ${text || 'Processando...'}
+        `;
+    } else {
+        // Restaurar texto
+        button.classList.remove('btn-loading', 'btn-progress');
+        button.disabled = false;
+        if (button.dataset.originalText) {
+            button.innerHTML = button.dataset.originalText;
+        }
+    }
+}
+    
+    
+function patResetarCadastro() {
+    document.getElementById('pat-cad-title').innerHTML = 'Cadastrar Novo Patrimônio';
     document.getElementById('pat-reg-code').value = '';
-    document.getElementById('pat-reg-code').readOnly = false; // Reativar edição
+    document.getElementById('pat-reg-code').readOnly = false;
     document.getElementById('pat-reg-item').value = '';
     document.getElementById('pat-reg-resp').value = usuarioLogadoPat.nome || '';
     document.getElementById('pat-reg-status').value = 'Bom';
@@ -862,7 +1130,7 @@ function patResetarCadastro() {
     document.getElementById('pat-reg-foto').value = '';
     fotoBase64 = null;
     
-    // Esconder botões extras
+    // Esconder botões
     document.getElementById('pat-btn-excluir').style.display = 'none';
     const btnRemoverFoto = document.getElementById('pat-btn-remover-foto');
     if (btnRemoverFoto) {
@@ -877,87 +1145,289 @@ function patResetarCadastro() {
         btnSalvar.style.color = 'white';
     }
 }
-// Adicione esta função para remover a foto do item
 function removerFoto() {
-    if (!confirm('Remover a foto deste item?')) return;
+    if (!confirm('Deseja realmente remover a foto deste item?')) return;
+    
+    // Limpar preview
     document.getElementById('pat-foto-preview').style.display = 'none';
     document.getElementById('pat-foto-preview').src = '';
     document.getElementById('pat-reg-foto').value = '';
     fotoBase64 = '';
-    alert('Foto removida. Salve o item para confirmar a alteração.');
+    
+    // Esconder botão de remover
+    const btnRemoverFoto = document.getElementById('pat-btn-remover-foto');
+    if (btnRemoverFoto) {
+        btnRemoverFoto.style.display = 'none';
+    }
+    
+    alert('✅ Foto removida. Clique em "Atualizar" para confirmar.');
 }
-    async function patExcluirItem() {
-        const codigo = document.getElementById('pat-reg-code').value.trim();
-        if (!codigo || !confirm(`Excluir ${codigo}?`)) return;
+    
+async function patExcluirItem() {
+    const codigo = document.getElementById('pat-reg-code').value.trim();
+    const btnExcluir = document.getElementById('pat-btn-excluir');
+    
+    if (!codigo) return;
+    if (!confirm(`⚠️ Tem certeza que deseja excluir o item "${codigo}"?`)) return;
+    
+    // Ativar loading no botão excluir
+    setButtonLoading(btnExcluir, true, 'Excluindo...');
+    
+    try {
+        const r = await fetch(APPS_SCRIPT_PAT_URL, { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json' }, 
+            body: JSON.stringify({ 
+                operacao: "PAT_EXCLUIR", 
+                codigo, 
+                emailOperador: usuarioLogadoPat.email || 'admin@ccmanchieta.com.br' 
+            }) 
+        });
+        
+        const res = await r.json();
+        setButtonLoading(btnExcluir, false);
+        
+        if (res.status === "success") {
+            showToast('🗑️ Item excluído com sucesso!', 'success');
+            patResetarCadastro();
+            await carregarItensPaginado(true);
+        } else {
+            showToast('❌ Erro ao excluir o item.', 'error');
+        }
+    } catch (e) {
+        console.error('Erro:', e);
+        setButtonLoading(btnExcluir, false);
+        showToast('❌ Erro de conexão.', 'error');
+    }
+}
+
+   async function patExecutarCadastro() {
+    const btnSalvar = document.querySelector('#tab-cadastro .btn-success');
+    const codigo = document.getElementById('pat-reg-code').value.trim();
+    const item = document.getElementById('pat-reg-item').value.trim();
+    const category = document.getElementById('pat-reg-cat').value;
+    const sala = document.getElementById('pat-reg-room').value;
+    const funcionario = document.getElementById('pat-reg-resp').value.trim();
+    const status = document.getElementById('pat-reg-status').value;
+    
+    // Validações
+    if (!codigo || !item || !funcionario) {
+        showToast('Preencha todos os campos obrigatórios!', 'warning');
+        // Animação de erro no botão
+        btnSalvar.classList.add('btn-error-anim');
+        setTimeout(() => btnSalvar.classList.remove('btn-error-anim'), 500);
+        return;
+    }
+    
+    if (codigo.length < 5) {
+        showToast('O código deve ter pelo menos 5 caracteres.', 'warning');
+        btnSalvar.classList.add('btn-error-anim');
+        setTimeout(() => btnSalvar.classList.remove('btn-error-anim'), 500);
+        return;
+    }
+    
+    // Ativar loading no botão
+    setButtonLoading(btnSalvar, true, 'Salvando...');
+    
+    const itemExistente = patTodos.find(i => i.codigo === codigo);
+    const isEdicao = !!itemExistente;
+    
+    // Tratamento da foto
+    let fotoParaSalvar = '';
+    if (fotoBase64 && fotoBase64 !== '' && fotoBase64 !== 'null' && fotoBase64 !== 'undefined') {
+        fotoParaSalvar = fotoBase64;
+    } else if (isEdicao && itemExistente.foto && 
+               itemExistente.foto !== '' && 
+               itemExistente.foto !== 'null' && 
+               itemExistente.foto !== 'undefined') {
+        fotoParaSalvar = itemExistente.foto;
+    }
+    
+    const payload = {
+        operacao: "PAT_CADASTRAR",
+        codigo, 
+        item, 
+        categoria: category, 
+        localizacao: sala,
+        responsavel: funcionario, 
+        status,
+        emailOperador: usuarioLogadoPat.email || 'admin@ccmanchieta.com.br',
+        foto: fotoParaSalvar
+    };
+    
+    try {
+        const r = await fetch(APPS_SCRIPT_PAT_URL, { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json' }, 
+            body: JSON.stringify(payload) 
+        });
+        
+        if (!r.ok) {
+            throw new Error(`HTTP ${r.status}`);
+        }
+        
+        const res = await r.json();
+        
+        // Desativar loading
+        setButtonLoading(btnSalvar, false);
+        
+        if (res.status === "success" || res.status === "updated") {
+            // Animação de sucesso no botão
+            btnSalvar.classList.add('btn-success-anim');
+            setTimeout(() => btnSalvar.classList.remove('btn-success-anim'), 500);
+            
+            const msg = isEdicao ? "✅ Item atualizado com sucesso!" : "✅ Item cadastrado com sucesso!";
+            showToast(msg, 'success');
+            
+            patResetarCadastro();
+            await carregarItensPaginado(true);
+            
+            // Mudar para a aba de lista após 1 segundo
+            setTimeout(() => {
+                alternarAbaPat('lista');
+            }, 1000);
+        } else {
+            showToast('❌ ' + (res.message || 'Falha ao salvar.'), 'error');
+            btnSalvar.classList.add('btn-error-anim');
+            setTimeout(() => btnSalvar.classList.remove('btn-error-anim'), 500);
+        }
+    } catch (e) {
+        console.error('Erro:', e);
+        setButtonLoading(btnSalvar, false);
+        showToast('❌ Erro de conexão. Tente novamente.', 'error');
+        btnSalvar.classList.add('btn-error-anim');
+        setTimeout(() => btnSalvar.classList.remove('btn-error-anim'), 500);
+    }
+}
+
+
+async function patExecutarCadastroBloco() {
+    const btnCadastrar = document.querySelector('#tab-bloco .btn-success');
+    const item = document.getElementById('bloco-item').value.trim();
+    const category = document.getElementById('bloco-cat').value;
+    const sala = document.getElementById('bloco-room').value;
+    const codigoInicial = document.getElementById('bloco-codigo-inicial').value.trim();
+    const quantidade = parseInt(document.getElementById('bloco-quantidade').value) || 2;
+    const fotoBloco = document.getElementById('bloco-foto-preview').src || '';
+    
+    if (!item) {
+        showToast('Digite o nome do item.', 'warning');
+        return;
+    }
+    if (!codigoInicial) {
+        showToast('Digite o código inicial.', 'warning');
+        return;
+    }
+    if (quantidade < 1) {
+        showToast('Quantidade deve ser maior que 0.', 'warning');
+        return;
+    }
+    
+    if (!confirm(`Cadastrar ${quantidade} itens a partir do código ${codigoInicial}?`)) return;
+    
+    // Ativar loading
+    setButtonLoading(btnCadastrar, true, `Cadastrando ${quantidade} itens...`);
+    
+    let sucessos = 0;
+    const codigoBase = parseInt(codigoInicial.replace(/\D/g, ''));
+    
+    for (let i = 0; i < quantidade; i++) {
+        const novoCodigo = String(codigoBase + i);
+        const payload = {
+            operacao: "PAT_CADASTRAR",
+            codigo: novoCodigo, 
+            item, 
+            categoria: category,
+            localizacao: sala, 
+            responsavel: usuarioLogadoPat.nome || 'Administrador',
+            status: 'Bom', 
+            emailOperador: usuarioLogadoPat.email || 'admin@ccmanchieta.com.br',
+            foto: fotoBloco
+        };
         try {
-            const r = await fetch(APPS_SCRIPT_PAT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ operacao: "PAT_EXCLUIR", codigo, emailOperador: usuarioLogadoPat.email }) });
+            const r = await fetch(APPS_SCRIPT_PAT_URL, { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify(payload) 
+            });
             const res = await r.json();
-            if (res.status === "success") { alert('Excluído!'); patResetarCadastro(); carregarItensPaginado(true); }
-        } catch (e) { alert('Erro.'); }
-    }
-
-    // REGISTRO EM BLOCO
-    document.getElementById('bloco-quantidade').addEventListener('input', function() {
-        document.getElementById('bloco-total').innerText = this.value;
-    });
-
-    async function patExecutarCadastroBloco() {
-        const item = document.getElementById('bloco-item').value.trim();
-        const category = document.getElementById('bloco-cat').value;
-        const sala = document.getElementById('bloco-room').value;
-        const codigoInicial = document.getElementById('bloco-codigo-inicial').value.trim();
-        const quantidade = parseInt(document.getElementById('bloco-quantidade').value);
-        const fotoBloco = document.getElementById('bloco-foto-preview').src || '';
-        
-        if (!item || !codigoInicial || quantidade < 1) { alert('Preencha todos os campos.'); return; }
-        if (!confirm(`Cadastrar ${quantidade} itens?`)) return;
-        
-        let sucessos = 0;
-        const codigoBase = parseInt(codigoInicial.replace(/\D/g, ''));
-        
-        for (let i = 0; i < quantidade; i++) {
-            const novoCodigo = String(codigoBase + i);
-            const payload = {
-                operacao: "PAT_CADASTRAR",
-                codigo: novoCodigo, item, categoria: category,
-                localizacao: sala, responsavel: usuarioLogadoPat.nome,
-                status: 'Bom', emailOperador: usuarioLogadoPat.email,
-                foto: fotoBloco
-            };
-            try {
-                const r = await fetch(APPS_SCRIPT_PAT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
-                const res = await r.json();
-                if (res.status === "success" || res.status === "updated") sucessos++;
-            } catch (e) { console.error('Erro no item', novoCodigo); }
-        }
-        
-        alert(`${sucessos} de ${quantidade} itens cadastrados!`);
-        if (sucessos > 0) {
-            document.getElementById('bloco-item').value = '';
-            document.getElementById('bloco-codigo-inicial').value = '';
-            document.getElementById('bloco-foto-preview').style.display = 'none';
-            carregarItensPaginado(true);
+            if (res.status === "success" || res.status === "updated") sucessos++;
+        } catch (e) { 
+            console.error('Erro no item', novoCodigo); 
         }
     }
-
+    
+    // Desativar loading
+    setButtonLoading(btnCadastrar, false);
+    
+    if (sucessos > 0) {
+        showToast(`✅ ${sucessos} de ${quantidade} itens cadastrados com sucesso!`, 'success');
+        document.getElementById('bloco-item').value = '';
+        document.getElementById('bloco-codigo-inicial').value = '';
+        document.getElementById('bloco-foto-preview').style.display = 'none';
+        btnCadastrar.classList.add('btn-success-anim');
+        setTimeout(() => btnCadastrar.classList.remove('btn-success-anim'), 500);
+        await carregarItensPaginado(true);
+    } else {
+        showToast('❌ Nenhum item foi cadastrado.', 'error');
+        btnCadastrar.classList.add('btn-error-anim');
+        setTimeout(() => btnCadastrar.classList.remove('btn-error-anim'), 500);
+    }
+}
+    
     // AMBIENTES
-    async function patAdicionarAmbiente() {
-        const nome = document.getElementById('pat-new-amb').value.trim();
-        if (!nome) return;
-        try {
-            await fetch(APPS_SCRIPT_PAT_URL, { method: 'POST', body: JSON.stringify({ operacao: "AMB_ADICIONAR", ambiente: nome }) });
-            document.getElementById('pat-new-amb').value = '';
-            await patCarregarAmbientes();
-        } catch (e) { alert('Erro.'); }
+async function patAdicionarAmbiente() {
+    const nome = document.getElementById('pat-new-amb').value.trim();
+    const btnAdicionar = document.querySelector('#tab-ambientes .btn-success');
+    
+    if (!nome) {
+        showToast('Digite o nome do ambiente.', 'warning');
+        return;
     }
+    if (patAmbientes.includes(nome)) {
+        showToast('Ambiente já cadastrado.', 'warning');
+        return;
+    }
+    
+    setButtonLoading(btnAdicionar, true, 'Adicionando...');
+    
+    try {
+        await fetch(APPS_SCRIPT_PAT_URL, { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ operacao: "AMB_ADICIONAR", ambiente: nome }) 
+        });
+        
+        document.getElementById('pat-new-amb').value = '';
+        await patCarregarAmbientes();
+        setButtonLoading(btnAdicionar, false);
+        showToast(`✅ Ambiente "${nome}" adicionado!`, 'success');
+    } catch (e) {
+        setButtonLoading(btnAdicionar, false);
+        showToast('❌ Erro ao adicionar ambiente.', 'error');
+    }
+}
 
-    async function patDeletarAmbiente(nome) {
-        if (!confirm(`Remover "${nome}"?`)) return;
-        try {
-            await fetch(APPS_SCRIPT_PAT_URL, { method: 'POST', body: JSON.stringify({ operacao: "AMB_DELETAR", ambiente: nome }) });
-            await patCarregarAmbientes();
-        } catch (e) { alert('Erro.'); }
+async function patDeletarAmbiente(nome) {
+    if (!confirm(`⚠️ Remover o ambiente "${nome}"?`)) return;
+    if (nome === 'Almoxarifado') {
+        showToast('Não é possível remover o Almoxarifado.', 'warning');
+        return;
     }
+    
+    try {
+        await fetch(APPS_SCRIPT_PAT_URL, { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ operacao: "AMB_DELETAR", ambiente: nome }) 
+        });
+        
+        await patCarregarAmbientes();
+        showToast(`✅ Ambiente "${nome}" removido!`, 'success');
+    } catch (e) {
+        showToast('❌ Erro ao remover ambiente.', 'error');
+    }
+}
 
     // IMPRIMIR ETIQUETAS COM QR CODE
     function imprimirEtiquetas() {
