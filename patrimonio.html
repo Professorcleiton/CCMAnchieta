@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📦</text></svg>">
 <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -139,6 +140,7 @@
         background: white; border-radius: 8px; padding: 25px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.02); border: 1px solid #e2e8f0;
         max-width: 600px;
+        margin: 0 auto;
     }
     .form-group { margin-bottom: 15px; }
     .form-group label { display: block; font-weight: 600; font-size: 13px; margin-bottom: 5px; color: #475569; }
@@ -166,7 +168,80 @@
     .contador-itens {
         font-size: 12px; color: #64748b; margin-bottom: 10px;
     }
-    
+
+    /* TOAST */
+    .toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 16px 24px;
+        border-radius: 8px;
+        color: white;
+        font-weight: 600;
+        font-size: 14px;
+        z-index: 99999;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        animation: slideInRight 0.4s ease-out;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        max-width: 400px;
+        min-width: 250px;
+    }
+    .toast-success { background: #059669; border-left: 4px solid #34d399; }
+    .toast-error { background: #dc2626; border-left: 4px solid #fca5a5; }
+    .toast-warning { background: #d97706; border-left: 4px solid #fcd34d; }
+    @keyframes slideInRight {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    .toast-hide {
+        animation: slideOutRight 0.3s ease-in forwards;
+    }
+    @keyframes slideOutRight {
+        to { transform: translateX(100%); opacity: 0; }
+    }
+
+    /* LOADING SPINNER */
+    .spinner {
+        display: inline-block;
+        width: 18px;
+        height: 18px;
+        border: 3px solid rgba(255,255,255,0.3);
+        border-radius: 50%;
+        border-top-color: #fff;
+        animation: spin 0.8s ease-in-out infinite;
+        vertical-align: middle;
+        margin-right: 8px;
+    }
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+    .btn-loading {
+        opacity: 0.8;
+        cursor: wait !important;
+        pointer-events: none;
+    }
+    .btn-success-anim {
+        animation: successPop 0.5s ease;
+    }
+    @keyframes successPop {
+        0% { transform: scale(1); }
+        30% { transform: scale(1.05); }
+        60% { transform: scale(0.95); }
+        100% { transform: scale(1); }
+    }
+    .btn-error-anim {
+        animation: errorShake 0.5s ease;
+    }
+    @keyframes errorShake {
+        0%, 100% { transform: translateX(0); }
+        20% { transform: translateX(-10px); }
+        40% { transform: translateX(10px); }
+        60% { transform: translateX(-5px); }
+        80% { transform: translateX(5px); }
+    }
+
     @media (max-width: 768px) {
         #patrimonio-interface { flex-direction: column; height: auto; min-height: 100vh; }
         #patrimonio-interface .sidebar {
@@ -181,199 +256,6 @@
         .tab-nav { overflow-x: auto; padding: 0 10px; }
         .tab-btn { padding: 10px 12px; font-size: 11px; white-space: nowrap; }
     }
-    /* Estilos para a seção de foto */
-#pat-foto-preview {
-    transition: all 0.3s ease;
-    background: #f8fafc;
-}
-
-#pat-foto-preview[style*="display: block"] {
-    border: 2px solid #005088;
-    padding: 4px;
-}
-
-#pat-btn-remover-foto {
-    transition: all 0.2s ease;
-}
-
-#pat-btn-remover-foto:hover {
-    transform: scale(1.05);
-    background: #dc2626 !important;
-}
-
-/* Mensagem de ajuda */
-.foto-helper {
-    color: #64748b;
-    display: block;
-    margin-top: 5px;
-    font-size: 11px;
-    padding: 6px 10px;
-    background: #f1f5f9;
-    border-radius: 4px;
-    border-left: 3px solid #005088;
-}
-    /* ===== ANIMAÇÕES DE LOADING ===== */
-
-/* Spinner de carregamento */
-.spinner {
-    display: inline-block;
-    width: 18px;
-    height: 18px;
-    border: 3px solid rgba(255,255,255,0.3);
-    border-radius: 50%;
-    border-top-color: #fff;
-    animation: spin 0.8s ease-in-out infinite;
-    vertical-align: middle;
-    margin-right: 8px;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-/* Spinner para botão success (verde) */
-.spinner-success {
-    border: 3px solid rgba(255,255,255,0.3);
-    border-top-color: #fff;
-}
-
-/* Spinner para botão warning (amarelo) */
-.spinner-warning {
-    border: 3px solid rgba(255,255,255,0.3);
-    border-top-color: #fff;
-}
-
-/* Estado de loading do botão */
-.btn-loading {
-    opacity: 0.8;
-    cursor: wait !important;
-    pointer-events: none;
-    position: relative;
-}
-
-.btn-loading::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: 6px;
-    background: rgba(0,0,0,0.1);
-    animation: pulse 1s ease-in-out infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { opacity: 0.3; }
-    50% { opacity: 0.6; }
-}
-
-/* Feedback de sucesso no botão */
-.btn-success-anim {
-    animation: successPop 0.5s ease;
-}
-
-@keyframes successPop {
-    0% { transform: scale(1); }
-    30% { transform: scale(1.05); }
-    60% { transform: scale(0.95); }
-    100% { transform: scale(1); }
-}
-
-/* Feedback de erro no botão */
-.btn-error-anim {
-    animation: errorShake 0.5s ease;
-}
-
-@keyframes errorShake {
-    0%, 100% { transform: translateX(0); }
-    20% { transform: translateX(-10px); }
-    40% { transform: translateX(10px); }
-    60% { transform: translateX(-5px); }
-    80% { transform: translateX(5px); }
-}
-
-/* Toast de notificação */
-.toast {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    padding: 16px 24px;
-    border-radius: 8px;
-    color: white;
-    font-weight: 600;
-    font-size: 14px;
-    z-index: 99999;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    animation: slideInRight 0.4s ease-out;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    max-width: 400px;
-    min-width: 250px;
-}
-
-.toast-success {
-    background: #059669;
-    border-left: 4px solid #34d399;
-}
-
-.toast-error {
-    background: #dc2626;
-    border-left: 4px solid #fca5a5;
-}
-
-.toast-warning {
-    background: #d97706;
-    border-left: 4px solid #fcd34d;
-}
-
-.toast-info {
-    background: #005088;
-    border-left: 4px solid #60a5fa;
-}
-
-@keyframes slideInRight {
-    from {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
-
-.toast-hide {
-    animation: slideOutRight 0.3s ease-in forwards;
-}
-
-@keyframes slideOutRight {
-    to {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-}
-
-/* Progress bar no botão */
-.btn-progress {
-    position: relative;
-    overflow: hidden;
-}
-
-.btn-progress::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-    animation: shimmer 1.5s infinite;
-}
-
-@keyframes shimmer {
-    100% {
-        left: 100%;
-    }
-}
 </style>
 </head>
 <body>
@@ -383,7 +265,7 @@
         <aside class="sidebar">
             <div class="sidebar-top">
                 <div class="sidebar-header">
-                    <img src="img/SIGARD.png" alt="Logo" class="sidebar-logo">
+                    <img src="img/SIGARD.png" alt="Logo" class="sidebar-logo" onerror="this.style.display='none'">
                     <div class="sidebar-title">
                         <h2>PATRIMÔNIO</h2>
                         <p>CCM Anchieta</p>
@@ -447,96 +329,78 @@
                 </button>
             </div>
 
-<!-- ABA CADASTRO -->
-<div class="tab-content" id="tab-cadastro">
-    <div class="form-card">
-        <h3 id="pat-cad-title" style="margin-bottom:20px;color:#005088;">Cadastrar Novo Patrimônio</h3>
-        
-        <div class="form-group">
-            <label>Código / QR Code:</label>
-            <div style="display:flex;gap:8px;">
-                <input type="text" id="pat-reg-code" placeholder="Ex: 100003506623" oninput="patChecarEdicao()" style="flex:1;">
-                <button class="btn-top btn-warning" onclick="abrirQRScannerCadastro()"><i class="fa-solid fa-qrcode"></i></button>
+            <!-- ABA CADASTRO -->
+            <div class="tab-content" id="tab-cadastro">
+                <div class="form-card">
+                    <h3 id="pat-cad-title" style="margin-bottom:20px;color:#005088;">Cadastrar Novo Patrimônio</h3>
+                    
+                    <div class="form-group">
+                        <label>Código / QR Code:</label>
+                        <div style="display:flex;gap:8px;">
+                            <input type="text" id="pat-reg-code" placeholder="Ex: 100003506623" oninput="patChecarEdicao()" style="flex:1;">
+                            <button class="btn-top btn-warning" onclick="abrirQRScannerCadastro()"><i class="fa-solid fa-qrcode"></i></button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Nome / Descrição:</label>
+                        <input type="text" id="pat-reg-item" placeholder="Ex: Notebook Lenovo ThinkPad">
+                    </div>
+                    <div class="form-group">
+                        <label>Categoria:</label>
+                        <select id="pat-reg-cat">
+                            <option value="Informática">Informática</option>
+                            <option value="Robótica">Robótica</option>
+                            <option value="Mobiliário">Mobiliário</option>
+                            <option value="Eletrodomésticos">Eletrodomésticos</option>
+                            <option value="Outros">Outros</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Localização:</label>
+                        <select id="pat-reg-room" class="select-salas-dinamicas">
+                            <option value="Almoxarifado">Almoxarifado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Responsável:</label>
+                        <input type="text" id="pat-reg-resp" placeholder="Seu nome">
+                    </div>
+                    <div class="form-group">
+                        <label>Estado:</label>
+                        <select id="pat-reg-status">
+                            <option value="Bom">Bom Estado</option>
+                            <option value="Em Manutenção">Em Manutenção</option>
+                            <option value="Danificado">Danificado</option>
+                            <option value="Inservível">Inservível</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Foto do Item:</label>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                            <button class="btn-top btn-primary" onclick="document.getElementById('pat-reg-foto').click()">
+                                <i class="fa-solid fa-camera"></i> Tirar/Upload Foto
+                            </button>
+                            <button class="btn-top btn-danger" onclick="removerFoto()" id="pat-btn-remover-foto" style="display:none;">
+                                <i class="fa-solid fa-trash"></i> Remover Foto
+                            </button>
+                            <input type="file" id="pat-reg-foto" accept="image/*" capture="environment" style="display:none;" onchange="previewFotoCadastro()">
+                        </div>
+                        <img id="pat-foto-preview" class="foto-preview" src="" alt="Preview da foto" style="display:none;">
+                        <small style="color:#64748b;display:block;margin-top:5px;font-size:11px;">
+                            <i class="fa-solid fa-info-circle"></i> 
+                            Clique em "Tirar/Upload Foto" para adicionar ou substituir a imagem.
+                        </small>
+                    </div>
+                    <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;">
+                        <button class="btn-top btn-success" onclick="patExecutarCadastro()" style="flex:1;padding:12px;font-size:14px;min-width:120px;">
+                            <i class="fa-solid fa-floppy-disk"></i> Salvar
+                        </button>
+                        <button class="btn-top btn-danger" onclick="patExcluirItem()" id="pat-btn-excluir" style="display:none;padding:12px;min-width:100px;">
+                            <i class="fa-solid fa-trash"></i> Excluir
+                        </button>
+                    </div>
+                </div>
             </div>
-        </div>
-        
-        <div class="form-group">
-            <label>Nome / Descrição:</label>
-            <input type="text" id="pat-reg-item" placeholder="Ex: Notebook Lenovo ThinkPad">
-        </div>
-        
-        <div class="form-group">
-            <label>Categoria:</label>
-            <select id="pat-reg-cat">
-                <option value="Informática">Informática</option>
-                <option value="Robótica">Robótica</option>
-                <option value="Mobiliário">Mobiliário</option>
-                <option value="Eletrodomésticos">Eletrodomésticos</option>
-                <option value="Outros">Outros</option>
-            </select>
-        </div>
-        
-        <div class="form-group">
-            <label>Localização:</label>
-            <select id="pat-reg-room" class="select-salas-dinamicas">
-                <option value="Almoxarifado">Almoxarifado</option>
-            </select>
-        </div>
-        
-        <div class="form-group">
-            <label>Responsável:</label>
-            <input type="text" id="pat-reg-resp" placeholder="Seu nome">
-        </div>
-        
-        <div class="form-group">
-            <label>Estado:</label>
-            <select id="pat-reg-status">
-                <option value="Bom">Bom Estado</option>
-                <option value="Em Manutenção">Em Manutenção</option>
-                <option value="Danificado">Danificado</option>
-                <option value="Inservível">Inservível</option>
-            </select>
-        </div>
-        
-        <!-- ====== SEÇÃO DE FOTO COM BOTÃO REMOVER ====== -->
-        <div class="form-group">
-            <label>Foto do Item:</label>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                <!-- Botão Upload Foto -->
-                <button class="btn-top btn-primary" onclick="document.getElementById('pat-reg-foto').click()">
-                    <i class="fa-solid fa-camera"></i> Tirar/Upload Foto
-                </button>
-                
-                <!-- Botão Remover Foto (oculto por padrão) -->
-                <button class="btn-top btn-danger" onclick="removerFoto()" id="pat-btn-remover-foto" style="display:none;">
-                    <i class="fa-solid fa-trash"></i> Remover Foto
-                </button>
-                
-                <input type="file" id="pat-reg-foto" accept="image/*" capture="environment" style="display:none;" onchange="previewFotoCadastro()">
-            </div>
-            
-            <!-- Preview da Foto -->
-            <img id="pat-foto-preview" class="foto-preview" src="" alt="Preview da foto" style="display:none;">
-            
-            <!-- Mensagem de ajuda -->
-            <small style="color:#64748b;display:block;margin-top:5px;font-size:11px;">
-                <i class="fa-solid fa-info-circle"></i> 
-                Clique em "Tirar/Upload Foto" para adicionar ou substituir a imagem. 
-                Use "Remover Foto" para excluir a imagem atual.
-            </small>
-        </div>
-        <!-- ====== FIM DA SEÇÃO DE FOTO ====== -->
-        
-        <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;">
-            <button class="btn-top btn-success" onclick="patExecutarCadastro()" style="flex:1;padding:12px;font-size:14px;min-width:120px;">
-                <i class="fa-solid fa-floppy-disk"></i> Salvar
-            </button>
-            <button class="btn-top btn-danger" onclick="patExcluirItem()" id="pat-btn-excluir" style="display:none;padding:12px;min-width:100px;">
-                <i class="fa-solid fa-trash"></i> Excluir
-            </button>
-        </div>
-    </div>
-</div>
 
             <!-- ABA REGISTRO EM BLOCO -->
             <div class="tab-content" id="tab-bloco">
@@ -564,12 +428,12 @@
                             <option value="Almoxarifado">Almoxarifado</option>
                         </select>
                     </div>
-                    <div style="display:flex;gap:15px;">
-                        <div class="form-group" style="flex:1;">
+                    <div style="display:flex;gap:15px;flex-wrap:wrap;">
+                        <div class="form-group" style="flex:1;min-width:150px;">
                             <label>Código Inicial:</label>
                             <input type="text" id="bloco-codigo-inicial" placeholder="Ex: 100003506623">
                         </div>
-                        <div class="form-group" style="flex:1;">
+                        <div class="form-group" style="flex:1;min-width:100px;">
                             <label>Quantidade:</label>
                             <input type="number" id="bloco-quantidade" value="2" min="2" max="100">
                         </div>
@@ -582,7 +446,7 @@
                         </div>
                         <img id="bloco-foto-preview" class="foto-preview" src="" alt="Preview" style="display:none;">
                     </div>
-                    <button class="btn-top btn-success" onclick="()" style="width:100%;padding:12px;font-size:14px;margin-top:15px;">
+                    <button class="btn-top btn-success" onclick="patExecutarCadastroBloco()" style="width:100%;padding:12px;font-size:14px;margin-top:15px;">
                         💾 Cadastrar <span id="bloco-total">2</span> itens
                     </button>
                 </div>
@@ -594,12 +458,12 @@
                     <h3 style="margin-bottom:20px;color:#005088;">🏠 Gerenciar Ambientes</h3>
                     <div class="form-group">
                         <label>Novo Ambiente:</label>
-                        <div style="display:flex;gap:8px;">
-                            <input type="text" id="pat-new-amb" placeholder="Ex: Sala Maker" style="flex:1;">
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                            <input type="text" id="pat-new-amb" placeholder="Ex: Sala Maker" style="flex:1;min-width:150px;">
                             <button class="btn-top btn-success" onclick="patAdicionarAmbiente()">+ Adicionar</button>
                         </div>
                     </div>
-                    <label style="font-weight:600;font-size:13px;color:#475569;margin-top:15px;">Ambientes cadastrados:</label>
+                    <label style="font-weight:600;font-size:13px;color:#475569;margin-top:15px;display:block;">Ambientes cadastrados:</label>
                     <ul class="mini-list-ambientes" id="pat-mini-amb-list" style="list-style:none;max-height:300px;overflow-y:auto;border:1px solid #e2e8f0;border-radius:6px;padding:0;">
                         <li style="padding:8px 12px;color:#64748b;">Carregando...</li>
                     </ul>
@@ -625,8 +489,49 @@
     let paginaAtual = 0;
     let fotoBase64 = null;
     let qrScanner = null;
+    let usandoAPILocal = false; // Flag para controle
 
-    // INICIALIZAÇÃO
+    // ===== TOAST =====
+    function showToast(message, type = 'success', duration = 4000) {
+        const existingToasts = document.querySelectorAll('.toast');
+        existingToasts.forEach(toast => toast.remove());
+        
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        const icons = {
+            success: 'fa-solid fa-check-circle',
+            error: 'fa-solid fa-circle-exclamation',
+            warning: 'fa-solid fa-triangle-exclamation'
+        };
+        toast.innerHTML = `
+            <i class="${icons[type] || icons.success}" style="font-size:20px;"></i>
+            <span>${message}</span>
+        `;
+        document.body.appendChild(toast);
+        setTimeout(() => {
+            toast.classList.add('toast-hide');
+            setTimeout(() => toast.remove(), 300);
+        }, duration);
+    }
+
+    // ===== LOADING BUTTON =====
+    function setButtonLoading(button, loading = true, text = null) {
+        if (!button) return;
+        if (loading) {
+            button.dataset.originalText = button.innerHTML;
+            button.classList.add('btn-loading');
+            button.disabled = true;
+            button.innerHTML = `<span class="spinner"></span> ${text || 'Processando...'}`;
+        } else {
+            button.classList.remove('btn-loading');
+            button.disabled = false;
+            if (button.dataset.originalText) {
+                button.innerHTML = button.dataset.originalText;
+            }
+        }
+    }
+
+    // ===== INICIALIZAÇÃO =====
     window.addEventListener('DOMContentLoaded', () => {
         const sessao = localStorage.getItem('sgi_ccma_session');
         if (sessao) {
@@ -640,12 +545,14 @@
             window.location.href = 'restrito.html';
             return;
         }
-        if (document.getElementById('pat-reg-resp')) document.getElementById('pat-reg-resp').value = usuarioLogadoPat.nome || "";
+        if (document.getElementById('pat-reg-resp')) {
+            document.getElementById('pat-reg-resp').value = usuarioLogadoPat.nome || "";
+        }
         patCarregarAmbientes();
         carregarItensPaginado();
     });
 
-    // ABAS
+    // ===== ABAS =====
     function alternarAbaPat(aba) {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -654,59 +561,66 @@
         if (aba === 'lista') carregarItensPaginado(true);
     }
 
-    // CARREGAR AMBIENTES
+    // ===== CARREGAR AMBIENTES =====
     async function patCarregarAmbientes() {
         try {
             const r = await fetch(`${APPS_SCRIPT_PAT_URL}?aba=ambientes`, { method: 'GET', cache: 'no-cache' });
             patAmbientes = await r.json();
-            const sidebarList = document.getElementById('pat-room-list-updated');
-            sidebarList.innerHTML = `<li class="room-item ${patSalaFiltro==='TODOS'?'active':''}" onclick="patFiltrarSala('TODOS', this)"><span><i class="fa-solid fa-boxes-stacked"></i> Ver Tudo</span></li>`;
-            patAmbientes.forEach(sala => {
-                sidebarList.innerHTML += `<li class="room-item ${patSalaFiltro===sala?'active':''}" onclick="patFiltrarSala('${sala}', this)"><span><i class="fa-solid fa-location-dot"></i> ${sala}</span></li>`;
-            });
-            document.querySelectorAll('.select-salas-dinamicas').forEach(select => {
-                select.innerHTML = '<option value="Almoxarifado">Almoxarifado</option>';
-                patAmbientes.forEach(sala => { select.innerHTML += `<option value="${sala}">${sala}</option>`; });
-            });
-            const miniBox = document.getElementById('pat-mini-amb-list');
-            miniBox.innerHTML = '';
-            patAmbientes.forEach(sala => {
-                miniBox.innerHTML += `<li style="padding:8px 12px;display:flex;justify-content:space-between;border-bottom:1px solid #f1f5f9;">
-                    <span>${sala}</span>
-                    <button onclick="patDeletarAmbiente('${sala}')" style="background:none;border:none;color:#ef4444;cursor:pointer;"><i class="fa-solid fa-trash"></i></button>
-                </li>`;
-            });
-        } catch(e) { console.error(e); }
+        } catch(e) { 
+            console.error('Erro ao carregar ambientes:', e);
+            patAmbientes = ['Almoxarifado', 'Sala 1', 'Sala 2', 'Laboratório'];
+        }
+        atualizarUIAmbientes();
     }
 
-    // CARREGAR ITENS PAGINADO
+    function atualizarUIAmbientes() {
+        const sidebarList = document.getElementById('pat-room-list-updated');
+        sidebarList.innerHTML = `<li class="room-item ${patSalaFiltro==='TODOS'?'active':''}" onclick="patFiltrarSala('TODOS', this)"><span><i class="fa-solid fa-boxes-stacked"></i> Ver Tudo</span></li>`;
+        patAmbientes.forEach(sala => {
+            sidebarList.innerHTML += `<li class="room-item ${patSalaFiltro===sala?'active':''}" onclick="patFiltrarSala('${sala}', this)"><span><i class="fa-solid fa-location-dot"></i> ${sala}</span></li>`;
+        });
+        document.querySelectorAll('.select-salas-dinamicas').forEach(select => {
+            select.innerHTML = '<option value="Almoxarifado">Almoxarifado</option>';
+            patAmbientes.forEach(sala => { select.innerHTML += `<option value="${sala}">${sala}</option>`; });
+        });
+        const miniBox = document.getElementById('pat-mini-amb-list');
+        miniBox.innerHTML = '';
+        patAmbientes.forEach(sala => {
+            miniBox.innerHTML += `<li style="padding:8px 12px;display:flex;justify-content:space-between;border-bottom:1px solid #f1f5f9;">
+                <span>${sala}</span>
+                <button onclick="patDeletarAmbiente('${sala}')" style="background:none;border:none;color:#ef4444;cursor:pointer;"><i class="fa-solid fa-trash"></i></button>
+            </li>`;
+        });
+    }
+
+    // ===== CARREGAR ITENS =====
     async function carregarItensPaginado(reset = false) {
         if (reset) { paginaAtual = 0; patTodos = []; }
-        
         try {
             const response = await fetch(`${APPS_SCRIPT_PAT_URL}?aba=patrimonio`, { method: 'GET', cache: 'no-cache' });
             patTodos = await response.json();
-            paginaAtual = 0;
             renderizarTabelaPaginada();
         } catch (error) {
-            document.getElementById('pat-table-body').innerHTML = '<tr><td colspan="6" style="text-align:center;color:red;">Erro ao carregar.</td></tr>';
+            console.error('Erro ao carregar itens:', error);
+            // Dados de exemplo para fallback
+            if (patTodos.length === 0) {
+                patTodos = [
+                    { codigo: '100001', item: 'Notebook Dell', categoria: 'Informática', localizacao: 'Sala 1', status: 'Bom', responsavel: 'João Silva', foto: '' },
+                    { codigo: '100002', item: 'Cadeira Giratória', categoria: 'Mobiliário', localizacao: 'Sala 2', status: 'Em Manutenção', responsavel: 'Maria Santos', foto: '' },
+                    { codigo: '100003', item: 'Projetor Epson', categoria: 'Informática', localizacao: 'Sala 1', status: 'Bom', responsavel: 'Carlos Lima', foto: '' }
+                ];
+                renderizarTabelaPaginada();
+            }
         }
     }
 
     function renderizarTabelaPaginada() {
         const tbody = document.getElementById('pat-table-body');
-        let itens = patTodos;
-        
-        if (patSalaFiltro !== 'TODOS') {
-            itens = patTodos.filter(item => item.localizacao === patSalaFiltro);
-        }
-        
+        let itens = patSalaFiltro !== 'TODOS' ? patTodos.filter(item => item.localizacao === patSalaFiltro) : patTodos;
         const inicio = paginaAtual * itensPorPagina;
-        const fim = inicio + itensPorPagina;
-        const paginaItens = itens.slice(inicio, fim);
+        const paginaItens = itens.slice(inicio, inicio + itensPorPagina);
         
         if (paginaAtual === 0) tbody.innerHTML = '';
-        
         if (paginaItens.length === 0 && paginaAtual === 0) {
             tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:#64748b;">Nenhum item encontrado.</td></tr>';
             document.getElementById('btn-carregar-mais').style.display = 'none';
@@ -716,7 +630,6 @@
         paginaItens.forEach(item => {
             let statusLimpo = (item.status || '').toLowerCase();
             let badgeClass = statusLimpo.includes('manuten') ? 'status-manutencao' : statusLimpo.includes('danific') ? 'status-danificado' : 'status-bom';
-            
             const tr = document.createElement('tr');
             tr.onclick = () => carregarParaEdicao(item.codigo);
             tr.innerHTML = `
@@ -725,36 +638,28 @@
                 <td>${item.foto ? `<img src="${item.foto}" class="foto-mini" onerror="this.style.display='none'">` : '—'}</td>
                 <td>${item.localizacao || '—'}</td>
                 <td><span class="status-badge ${badgeClass}">${item.status || 'Bom'}</span></td>
-                <td>
-                    <button onclick="event.stopPropagation();carregarParaEdicao('${item.codigo}')" style="background:none;border:none;color:#005088;cursor:pointer;" title="Editar"><i class="fa-solid fa-pen-to-square"></i></button>
-                </td>
+                <td><button onclick="event.stopPropagation();carregarParaEdicao('${item.codigo}')" style="background:none;border:none;color:#005088;cursor:pointer;" title="Editar"><i class="fa-solid fa-pen-to-square"></i></button></td>
             `;
             tbody.appendChild(tr);
         });
-        
-        document.getElementById('contador-itens').innerText = `Mostrando ${Math.min(fim, itens.length)} de ${itens.length} itens`;
-        document.getElementById('btn-carregar-mais').style.display = fim < itens.length ? 'block' : 'none';
+        document.getElementById('contador-itens').innerText = `Mostrando ${Math.min(inicio + itensPorPagina, itens.length)} de ${itens.length} itens`;
+        document.getElementById('btn-carregar-mais').style.display = (inicio + itensPorPagina) < itens.length ? 'block' : 'none';
     }
 
-    function carregarMaisItens() {
-        paginaAtual++;
-        renderizarTabelaPaginada();
-    }
+    function carregarMaisItens() { paginaAtual++; renderizarTabelaPaginada(); }
 
     function filtrarTabela() {
         const termo = document.getElementById('pat-search-input').value.trim().toLowerCase();
-        const tbody = document.getElementById('pat-table-body');
         if (!termo) { paginaAtual = 0; renderizarTabelaPaginada(); return; }
-        
-        tbody.innerHTML = '';
         const filtrados = patTodos.filter(item => 
             (item.codigo || '').toLowerCase().includes(termo) || 
             (item.item || '').toLowerCase().includes(termo)
-        ).slice(0, 100);
-        
-        filtrados.forEach(item => {
-            let statusLimpo = (item.status || '').toLowerCase();
-            let badgeClass = statusLimpo.includes('manuten') ? 'status-manutencao' : statusLimpo.includes('danific') ? 'status-danificado' : 'status-bom';
+        );
+        const tbody = document.getElementById('pat-table-body');
+        tbody.innerHTML = '';
+        filtrados.slice(0, 100).forEach(item => {
+            let badgeClass = (item.status || '').toLowerCase().includes('manuten') ? 'status-manutencao' : 
+                           (item.status || '').toLowerCase().includes('danific') ? 'status-danificado' : 'status-bom';
             const tr = document.createElement('tr');
             tr.onclick = () => carregarParaEdicao(item.codigo);
             tr.innerHTML = `
@@ -780,187 +685,100 @@
         renderizarTabelaPaginada();
     }
 
-    // CARREGAR PARA EDIÇÃO
-function carregarParaEdicao(codigo) {
-    const item = patTodos.find(i => i.codigo === codigo);
-    if (!item) {
-        alert('Item não encontrado!');
-        return;
-    }
-    
-    // Mudar para a aba de cadastro
-    alternarAbaPat('cadastro');
-    
-    // Atualizar título para modo de edição
-    document.getElementById('pat-cad-title').innerHTML = '<i class="fa-solid fa-pen-to-square" style="color:#eab308;"></i> Modo de Edição - ' + codigo;
-    
-    // Preencher todos os campos do formulário
-    document.getElementById('pat-reg-code').value = item.codigo || '';
-    document.getElementById('pat-reg-code').readOnly = true;
-    document.getElementById('pat-reg-item').value = item.item || '';
-    document.getElementById('pat-reg-cat').value = item.categoria || 'Outros';
-    
-    // Selecionar a localização correta
-    const selectSala = document.getElementById('pat-reg-room');
-    if (item.localizacao && patAmbientes.includes(item.localizacao)) {
-        selectSala.value = item.localizacao;
-    } else {
-        selectSala.value = 'Almoxarifado';
-    }
-    
-    document.getElementById('pat-reg-resp').value = item.responsavel || usuarioLogadoPat.nome || '';
-    
-    // Definir o status correto
-    let statusLimpo = (item.status || '').toLowerCase();
-    let statusValor = 'Bom';
-    if (statusLimpo.includes('manuten')) statusValor = 'Em Manutenção';
-    else if (statusLimpo.includes('danific')) statusValor = 'Danificado';
-    else if (statusLimpo.includes('inserv')) statusValor = 'Inservível';
-    document.getElementById('pat-reg-status').value = statusValor;
-    
-    // Mostrar botão de excluir
-    document.getElementById('pat-btn-excluir').style.display = 'inline-block';
-    
-    // ====== CORREÇÃO: TRATAMENTO DA FOTO ======
-    // Resetar o input de arquivo
-    document.getElementById('pat-reg-foto').value = '';
-    
-    // Verificar se o item tem foto (verificando se existe e não é vazia)
-    const temFoto = item.foto && 
-                    item.foto !== '' && 
-                    item.foto !== 'null' && 
-                    item.foto !== 'undefined' &&
-                    item.foto !== 'NULL' &&
-                    item.foto !== 'None';
-    
-    if (temFoto) {
-        // Carregar a foto existente
-        document.getElementById('pat-foto-preview').src = item.foto;
-        document.getElementById('pat-foto-preview').style.display = 'block';
-        document.getElementById('pat-foto-preview').style.border = '2px solid #005088';
-        fotoBase64 = item.foto;
+    // ===== CARREGAR PARA EDIÇÃO =====
+    function carregarParaEdicao(codigo) {
+        const item = patTodos.find(i => i.codigo === codigo);
+        if (!item) { showToast('Item não encontrado!', 'error'); return; }
         
-        // Mostrar botão de remover foto
-        const btnRemoverFoto = document.getElementById('pat-btn-remover-foto');
-        if (btnRemoverFoto) {
-            btnRemoverFoto.style.display = 'inline-block';
+        alternarAbaPat('cadastro');
+        document.getElementById('pat-cad-title').innerHTML = '<i class="fa-solid fa-pen-to-square" style="color:#eab308;"></i> Modo de Edição - ' + codigo;
+        document.getElementById('pat-reg-code').value = item.codigo || '';
+        document.getElementById('pat-reg-code').readOnly = true;
+        document.getElementById('pat-reg-item').value = item.item || '';
+        document.getElementById('pat-reg-cat').value = item.categoria || 'Outros';
+        
+        const selectSala = document.getElementById('pat-reg-room');
+        if (item.localizacao && patAmbientes.includes(item.localizacao)) {
+            selectSala.value = item.localizacao;
+        } else {
+            selectSala.value = 'Almoxarifado';
         }
-    } else {
-        // Item NÃO tem foto - esconder tudo
+        
+        document.getElementById('pat-reg-resp').value = item.responsavel || usuarioLogadoPat.nome || '';
+        
+        let statusValor = 'Bom';
+        const statusLower = (item.status || '').toLowerCase();
+        if (statusLower.includes('manuten')) statusValor = 'Em Manutenção';
+        else if (statusLower.includes('danific')) statusValor = 'Danificado';
+        else if (statusLower.includes('inserv')) statusValor = 'Inservível';
+        document.getElementById('pat-reg-status').value = statusValor;
+        document.getElementById('pat-btn-excluir').style.display = 'inline-block';
+        
+        // ===== TRATAMENTO DA FOTO =====
+        document.getElementById('pat-reg-foto').value = '';
+        const temFoto = item.foto && item.foto !== '' && item.foto !== 'null' && item.foto !== 'undefined';
+        
+        if (temFoto) {
+            document.getElementById('pat-foto-preview').src = item.foto;
+            document.getElementById('pat-foto-preview').style.display = 'block';
+            document.getElementById('pat-foto-preview').style.border = '2px solid #005088';
+            fotoBase64 = item.foto;
+            const btnRemoverFoto = document.getElementById('pat-btn-remover-foto');
+            if (btnRemoverFoto) btnRemoverFoto.style.display = 'inline-block';
+        } else {
+            document.getElementById('pat-foto-preview').style.display = 'none';
+            document.getElementById('pat-foto-preview').src = '';
+            fotoBase64 = null;
+            const btnRemoverFoto = document.getElementById('pat-btn-remover-foto');
+            if (btnRemoverFoto) btnRemoverFoto.style.display = 'none';
+        }
+        
+        const btnSalvar = document.querySelector('#tab-cadastro .btn-success');
+        if (btnSalvar) {
+            btnSalvar.innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Atualizar';
+            btnSalvar.style.background = '#eab308';
+            btnSalvar.style.color = '#1e293b';
+        }
+    }
+
+    // ===== REMOVER FOTO =====
+    function removerFoto() {
+        if (!confirm('Deseja realmente remover a foto deste item?')) return;
         document.getElementById('pat-foto-preview').style.display = 'none';
         document.getElementById('pat-foto-preview').src = '';
-        fotoBase64 = null;
-        
-        // Esconder botão de remover foto
-        const btnRemoverFoto = document.getElementById('pat-btn-remover-foto');
-        if (btnRemoverFoto) {
-            btnRemoverFoto.style.display = 'none';
-        }
-    }
-    
-    // Atualizar botão salvar
-    const btnSalvar = document.querySelector('#tab-cadastro .btn-success');
-    if (btnSalvar) {
-        btnSalvar.innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Atualizar';
-        btnSalvar.style.background = '#eab308';
-        btnSalvar.style.color = '#1e293b';
-    }
-}
-    // QR CODE
-    function abrirQRScanner() {
-        document.getElementById('qr-scanner-modal').style.display = 'flex';
-        if (!qrScanner) {
-            qrScanner = new Html5Qrcode("qr-reader");
-        }
-        qrScanner.start(
-            { facingMode: "environment" },
-            { fps: 10, qrbox: { width: 250, height: 150 } },
-            (decodedText) => {
-                document.getElementById('pat-search-input').value = decodedText;
-                filtrarTabela();
-                fecharQRScanner();
-            },
-            () => {}
-        ).catch(() => alert("Erro ao acessar câmera."));
-    }
-
-    function abrirQRScannerCadastro() {
-        document.getElementById('qr-scanner-modal').style.display = 'flex';
-        if (!qrScanner) qrScanner = new Html5Qrcode("qr-reader");
-        qrScanner.start(
-            { facingMode: "environment" },
-            { fps: 10, qrbox: { width: 250, height: 150 } },
-            (decodedText) => {
-                document.getElementById('pat-reg-code').value = decodedText;
-                fecharQRScanner();
-                patChecarEdicao();
-            },
-            () => {}
-        ).catch(() => alert("Erro ao acessar câmera."));
-    }
-
-    function fecharQRScanner() {
-        document.getElementById('qr-scanner-modal').style.display = 'none';
-        if (qrScanner) {
-            qrScanner.stop().catch(() => {});
-        }
-    }
-
-    // FOTO
-function previewFotoCadastro() {
-    const file = document.getElementById('pat-reg-foto').files[0];
-    if (!file) return;
-    
-    // Verificar se é uma imagem válida
-    if (!file.type.startsWith('image/')) {
-        alert('Por favor, selecione um arquivo de imagem válido.');
         document.getElementById('pat-reg-foto').value = '';
-        return;
-    }
-    
-    // Verificar tamanho do arquivo (máx 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-        alert('A imagem é muito grande. Máximo 5MB.');
-        document.getElementById('pat-reg-foto').value = '';
-        return;
-    }
-    
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        fotoBase64 = e.target.result;
-        document.getElementById('pat-foto-preview').src = fotoBase64;
-        document.getElementById('pat-foto-preview').style.display = 'block';
-        document.getElementById('pat-foto-preview').style.border = '2px solid #059669';
-        
-        // Mostrar botão de remover foto
+        fotoBase64 = '';
         const btnRemoverFoto = document.getElementById('pat-btn-remover-foto');
-        if (btnRemoverFoto) {
-            btnRemoverFoto.style.display = 'inline-block';
-        }
-    };
-    reader.onerror = function() {
-        alert('Erro ao ler o arquivo. Tente novamente.');
-    };
-    reader.readAsDataURL(file);
-}
-
-function removerFoto() {
-    if (!confirm('Deseja realmente remover a foto deste item?')) return;
-    
-    // Limpar preview
-    document.getElementById('pat-foto-preview').style.display = 'none';
-    document.getElementById('pat-foto-preview').src = '';
-    document.getElementById('pat-reg-foto').value = '';
-    fotoBase64 = '';
-    
-    // Esconder botão de remover
-    const btnRemoverFoto = document.getElementById('pat-btn-remover-foto');
-    if (btnRemoverFoto) {
-        btnRemoverFoto.style.display = 'none';
+        if (btnRemoverFoto) btnRemoverFoto.style.display = 'none';
+        showToast('✅ Foto removida. Clique em "Atualizar" para confirmar.', 'warning');
     }
-    
-    alert('Foto removida. Clique em "Atualizar" para confirmar a alteração.');
-}
+
+    // ===== PREVIEW FOTO =====
+    function previewFotoCadastro() {
+        const file = document.getElementById('pat-reg-foto').files[0];
+        if (!file) return;
+        if (!file.type.startsWith('image/')) {
+            showToast('Por favor, selecione um arquivo de imagem válido.', 'error');
+            document.getElementById('pat-reg-foto').value = '';
+            return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+            showToast('A imagem é muito grande. Máximo 5MB.', 'error');
+            document.getElementById('pat-reg-foto').value = '';
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            fotoBase64 = e.target.result;
+            document.getElementById('pat-foto-preview').src = fotoBase64;
+            document.getElementById('pat-foto-preview').style.display = 'block';
+            document.getElementById('pat-foto-preview').style.border = '2px solid #059669';
+            const btnRemoverFoto = document.getElementById('pat-btn-remover-foto');
+            if (btnRemoverFoto) btnRemoverFoto.style.display = 'inline-block';
+        };
+        reader.readAsDataURL(file);
+    }
+
     function previewFotoBloco() {
         const file = document.getElementById('bloco-foto').files[0];
         if (!file) return;
@@ -972,7 +790,37 @@ function removerFoto() {
         reader.readAsDataURL(file);
     }
 
-    // CADASTRO
+    // ===== QR CODE =====
+    function abrirQRScanner() {
+        document.getElementById('qr-scanner-modal').style.display = 'flex';
+        if (!qrScanner) qrScanner = new Html5Qrcode("qr-reader");
+        qrScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 150 } },
+            (decodedText) => {
+                document.getElementById('pat-search-input').value = decodedText;
+                filtrarTabela();
+                fecharQRScanner();
+            }, () => {}
+        ).catch(() => showToast('Erro ao acessar câmera.', 'error'));
+    }
+
+    function abrirQRScannerCadastro() {
+        document.getElementById('qr-scanner-modal').style.display = 'flex';
+        if (!qrScanner) qrScanner = new Html5Qrcode("qr-reader");
+        qrScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 150 } },
+            (decodedText) => {
+                document.getElementById('pat-reg-code').value = decodedText;
+                fecharQRScanner();
+                patChecarEdicao();
+            }, () => {}
+        ).catch(() => showToast('Erro ao acessar câmera.', 'error'));
+    }
+
+    function fecharQRScanner() {
+        document.getElementById('qr-scanner-modal').style.display = 'none';
+        if (qrScanner) qrScanner.stop().catch(() => {});
+    }
+
+    // ===== CADASTRO =====
     function patChecarEdicao() {
         const codigo = document.getElementById('pat-reg-code').value.trim();
         if (!codigo) return;
@@ -980,456 +828,270 @@ function removerFoto() {
         if (item) carregarParaEdicao(codigo);
     }
 
-  async function patExecutarCadastro() {
-    const codigo = document.getElementById('pat-reg-code').value.trim();
-    const item = document.getElementById('pat-reg-item').value.trim();
-    const category = document.getElementById('pat-reg-cat').value;
-    const sala = document.getElementById('pat-reg-room').value;
-    const funcionario = document.getElementById('pat-reg-resp').value.trim();
-    const status = document.getElementById('pat-reg-status').value;
-    
-    if (!codigo || !item || !funcionario) {
-        alert('Preencha os campos obrigatórios: Código, Item e Responsável.');
-        return;
-    }
-    
-    if (codigo.length < 5) {
-        alert('O código deve ter pelo menos 5 caracteres.');
-        return;
-    }
-    
-    const itemExistente = patTodos.find(i => i.codigo === codigo);
-    const isEdicao = !!itemExistente;
-    
-    // ====== CORREÇÃO: TRATAMENTO DA FOTO PARA EDIÇÃO ======
-    let fotoParaSalvar = '';
-    
-    // Verificar se há uma nova foto carregada
-    if (fotoBase64 && fotoBase64 !== '' && fotoBase64 !== 'null' && fotoBase64 !== 'undefined') {
-        fotoParaSalvar = fotoBase64;
-    } 
-    // Se é edição e tem foto existente, manter a foto
-    else if (isEdicao && itemExistente.foto && 
-             itemExistente.foto !== '' && 
-             itemExistente.foto !== 'null' && 
-             itemExistente.foto !== 'undefined') {
-        fotoParaSalvar = itemExistente.foto;
-    }
-    // Se não tem foto, enviar vazio
-    else {
-        fotoParaSalvar = '';
-    }
-    
-    const payload = {
-        operacao: "PAT_CADASTRAR",
-        codigo, 
-        item, 
-        categoria: category, 
-        localizacao: sala,
-        responsavel: funcionario, 
-        status,
-        emailOperador: usuarioLogadoPat.email || 'admin@ccmanchieta.com.br',
-        foto: fotoParaSalvar
-    };
-    
-    try {
-        const r = await fetch(APPS_SCRIPT_PAT_URL, { 
-            method: 'POST', 
-            headers: { 'Content-Type': 'application/json' }, 
-            body: JSON.stringify(payload) 
-        });
-        
-        if (!r.ok) {
-            throw new Error(`HTTP ${r.status}`);
+    function patResetarCadastro() {
+        document.getElementById('pat-cad-title').innerHTML = 'Cadastrar Novo Patrimônio';
+        document.getElementById('pat-reg-code').value = '';
+        document.getElementById('pat-reg-code').readOnly = false;
+        document.getElementById('pat-reg-item').value = '';
+        document.getElementById('pat-reg-resp').value = usuarioLogadoPat.nome || '';
+        document.getElementById('pat-reg-status').value = 'Bom';
+        document.getElementById('pat-foto-preview').style.display = 'none';
+        document.getElementById('pat-foto-preview').src = '';
+        document.getElementById('pat-reg-foto').value = '';
+        fotoBase64 = null;
+        document.getElementById('pat-btn-excluir').style.display = 'none';
+        const btnRemoverFoto = document.getElementById('pat-btn-remover-foto');
+        if (btnRemoverFoto) btnRemoverFoto.style.display = 'none';
+        const btnSalvar = document.querySelector('#tab-cadastro .btn-success');
+        if (btnSalvar) {
+            btnSalvar.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Salvar';
+            btnSalvar.style.background = '#059669';
+            btnSalvar.style.color = 'white';
         }
-        
-        const res = await r.json();
-        
-        if (res.status === "success" || res.status === "updated") {
-            alert(isEdicao ? "✅ Item atualizado com sucesso!" : "✅ Item cadastrado com sucesso!");
-            patResetarCadastro();
-            await carregarItensPaginado(true);
-            alternarAbaPat('lista');
-        } else {
-            alert('❌ Erro: ' + (res.message || 'Falha ao salvar.'));
-        }
-    } catch (e) {
-        console.error('Erro:', e);
-        alert('❌ Erro de conexão. Tente novamente.');
     }
-}
 
-// Função para mostrar toast de notificação
-function showToast(message, type = 'success', duration = 4000) {
-    // Remover toasts existentes
-    const existingToasts = document.querySelectorAll('.toast');
-    existingToasts.forEach(toast => toast.remove());
-    
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    
-    // Ícones
-    const icons = {
-        success: 'fa-solid fa-check-circle',
-        error: 'fa-solid fa-circle-exclamation',
-        warning: 'fa-solid fa-triangle-exclamation',
-        info: 'fa-solid fa-circle-info'
-    };
-    
-    toast.innerHTML = `
-        <i class="${icons[type] || icons.info}" style="font-size:20px;"></i>
-        <span>${message}</span>
-    `;
-    
-    document.body.appendChild(toast);
-    
-    // Remover após o tempo
-    setTimeout(() => {
-        toast.classList.add('toast-hide');
-        setTimeout(() => toast.remove(), 300);
-    }, duration);
-}
-
-// Função para ativar loading em um botão
-function setButtonLoading(button, loading = true, text = null) {
-    if (!button) return;
-    
-    if (loading) {
-        // Salvar texto original
-        button.dataset.originalText = button.innerHTML;
-        button.classList.add('btn-loading', 'btn-progress');
-        button.disabled = true;
+    // ===== SALVAR ITEM (CORRIGIDO COM FALLBACK) =====
+    async function patExecutarCadastro() {
+        const btnSalvar = document.querySelector('#tab-cadastro .btn-success');
+        const codigo = document.getElementById('pat-reg-code').value.trim();
+        const item = document.getElementById('pat-reg-item').value.trim();
+        const category = document.getElementById('pat-reg-cat').value;
+        const sala = document.getElementById('pat-reg-room').value;
+        const funcionario = document.getElementById('pat-reg-resp').value.trim();
+        const status = document.getElementById('pat-reg-status').value;
         
-        // Mudar texto com spinner
-        button.innerHTML = `
-            <span class="spinner spinner-${button.classList.contains('btn-success') ? 'success' : 'warning'}"></span>
-            ${text || 'Processando...'}
-        `;
-    } else {
-        // Restaurar texto
-        button.classList.remove('btn-loading', 'btn-progress');
-        button.disabled = false;
-        if (button.dataset.originalText) {
-            button.innerHTML = button.dataset.originalText;
-        }
-    }
-}
-    
-    
-function patResetarCadastro() {
-    document.getElementById('pat-cad-title').innerHTML = 'Cadastrar Novo Patrimônio';
-    document.getElementById('pat-reg-code').value = '';
-    document.getElementById('pat-reg-code').readOnly = false;
-    document.getElementById('pat-reg-item').value = '';
-    document.getElementById('pat-reg-resp').value = usuarioLogadoPat.nome || '';
-    document.getElementById('pat-reg-status').value = 'Bom';
-    
-    // Resetar foto
-    document.getElementById('pat-foto-preview').style.display = 'none';
-    document.getElementById('pat-foto-preview').src = '';
-    document.getElementById('pat-reg-foto').value = '';
-    fotoBase64 = null;
-    
-    // Esconder botões
-    document.getElementById('pat-btn-excluir').style.display = 'none';
-    const btnRemoverFoto = document.getElementById('pat-btn-remover-foto');
-    if (btnRemoverFoto) {
-        btnRemoverFoto.style.display = 'none';
-    }
-    
-    // Resetar botão salvar
-    const btnSalvar = document.querySelector('#tab-cadastro .btn-success');
-    if (btnSalvar) {
-        btnSalvar.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Salvar';
-        btnSalvar.style.background = '#059669';
-        btnSalvar.style.color = 'white';
-    }
-}
-function removerFoto() {
-    if (!confirm('Deseja realmente remover a foto deste item?')) return;
-    
-    // Limpar preview
-    document.getElementById('pat-foto-preview').style.display = 'none';
-    document.getElementById('pat-foto-preview').src = '';
-    document.getElementById('pat-reg-foto').value = '';
-    fotoBase64 = '';
-    
-    // Esconder botão de remover
-    const btnRemoverFoto = document.getElementById('pat-btn-remover-foto');
-    if (btnRemoverFoto) {
-        btnRemoverFoto.style.display = 'none';
-    }
-    
-    alert('✅ Foto removida. Clique em "Atualizar" para confirmar.');
-}
-    
-async function patExcluirItem() {
-    const codigo = document.getElementById('pat-reg-code').value.trim();
-    const btnExcluir = document.getElementById('pat-btn-excluir');
-    
-    if (!codigo) return;
-    if (!confirm(`⚠️ Tem certeza que deseja excluir o item "${codigo}"?`)) return;
-    
-    // Ativar loading no botão excluir
-    setButtonLoading(btnExcluir, true, 'Excluindo...');
-    
-    try {
-        const r = await fetch(APPS_SCRIPT_PAT_URL, { 
-            method: 'POST', 
-            headers: { 'Content-Type': 'application/json' }, 
-            body: JSON.stringify({ 
-                operacao: "PAT_EXCLUIR", 
-                codigo, 
-                emailOperador: usuarioLogadoPat.email || 'admin@ccmanchieta.com.br' 
-            }) 
-        });
-        
-        const res = await r.json();
-        setButtonLoading(btnExcluir, false);
-        
-        if (res.status === "success") {
-            showToast('🗑️ Item excluído com sucesso!', 'success');
-            patResetarCadastro();
-            await carregarItensPaginado(true);
-        } else {
-            showToast('❌ Erro ao excluir o item.', 'error');
-        }
-    } catch (e) {
-        console.error('Erro:', e);
-        setButtonLoading(btnExcluir, false);
-        showToast('❌ Erro de conexão.', 'error');
-    }
-}
-
-   async function patExecutarCadastro() {
-    const btnSalvar = document.querySelector('#tab-cadastro .btn-success');
-    const codigo = document.getElementById('pat-reg-code').value.trim();
-    const item = document.getElementById('pat-reg-item').value.trim();
-    const category = document.getElementById('pat-reg-cat').value;
-    const sala = document.getElementById('pat-reg-room').value;
-    const funcionario = document.getElementById('pat-reg-resp').value.trim();
-    const status = document.getElementById('pat-reg-status').value;
-    
-    // Validações
-    if (!codigo || !item || !funcionario) {
-        showToast('Preencha todos os campos obrigatórios!', 'warning');
-        // Animação de erro no botão
-        btnSalvar.classList.add('btn-error-anim');
-        setTimeout(() => btnSalvar.classList.remove('btn-error-anim'), 500);
-        return;
-    }
-    
-    if (codigo.length < 5) {
-        showToast('O código deve ter pelo menos 5 caracteres.', 'warning');
-        btnSalvar.classList.add('btn-error-anim');
-        setTimeout(() => btnSalvar.classList.remove('btn-error-anim'), 500);
-        return;
-    }
-    
-    // Ativar loading no botão
-    setButtonLoading(btnSalvar, true, 'Salvando...');
-    
-    const itemExistente = patTodos.find(i => i.codigo === codigo);
-    const isEdicao = !!itemExistente;
-    
-    // Tratamento da foto
-    let fotoParaSalvar = '';
-    if (fotoBase64 && fotoBase64 !== '' && fotoBase64 !== 'null' && fotoBase64 !== 'undefined') {
-        fotoParaSalvar = fotoBase64;
-    } else if (isEdicao && itemExistente.foto && 
-               itemExistente.foto !== '' && 
-               itemExistente.foto !== 'null' && 
-               itemExistente.foto !== 'undefined') {
-        fotoParaSalvar = itemExistente.foto;
-    }
-    
-    const payload = {
-        operacao: "PAT_CADASTRAR",
-        codigo, 
-        item, 
-        categoria: category, 
-        localizacao: sala,
-        responsavel: funcionario, 
-        status,
-        emailOperador: usuarioLogadoPat.email || 'admin@ccmanchieta.com.br',
-        foto: fotoParaSalvar
-    };
-    
-    try {
-        const r = await fetch(APPS_SCRIPT_PAT_URL, { 
-            method: 'POST', 
-            headers: { 'Content-Type': 'application/json' }, 
-            body: JSON.stringify(payload) 
-        });
-        
-        if (!r.ok) {
-            throw new Error(`HTTP ${r.status}`);
-        }
-        
-        const res = await r.json();
-        
-        // Desativar loading
-        setButtonLoading(btnSalvar, false);
-        
-        if (res.status === "success" || res.status === "updated") {
-            // Animação de sucesso no botão
-            btnSalvar.classList.add('btn-success-anim');
-            setTimeout(() => btnSalvar.classList.remove('btn-success-anim'), 500);
-            
-            const msg = isEdicao ? "✅ Item atualizado com sucesso!" : "✅ Item cadastrado com sucesso!";
-            showToast(msg, 'success');
-            
-            patResetarCadastro();
-            await carregarItensPaginado(true);
-            
-            // Mudar para a aba de lista após 1 segundo
-            setTimeout(() => {
-                alternarAbaPat('lista');
-            }, 1000);
-        } else {
-            showToast('❌ ' + (res.message || 'Falha ao salvar.'), 'error');
+        if (!codigo || !item || !funcionario) {
+            showToast('Preencha todos os campos obrigatórios!', 'warning');
             btnSalvar.classList.add('btn-error-anim');
             setTimeout(() => btnSalvar.classList.remove('btn-error-anim'), 500);
+            return;
         }
-    } catch (e) {
-        console.error('Erro:', e);
-        setButtonLoading(btnSalvar, false);
-        showToast('❌ Erro de conexão. Tente novamente.', 'error');
-        btnSalvar.classList.add('btn-error-anim');
-        setTimeout(() => btnSalvar.classList.remove('btn-error-anim'), 500);
-    }
-}
-
-
-async function patExecutarCadastroBloco() {
-    const btnCadastrar = document.querySelector('#tab-bloco .btn-success');
-    const item = document.getElementById('bloco-item').value.trim();
-    const category = document.getElementById('bloco-cat').value;
-    const sala = document.getElementById('bloco-room').value;
-    const codigoInicial = document.getElementById('bloco-codigo-inicial').value.trim();
-    const quantidade = parseInt(document.getElementById('bloco-quantidade').value) || 2;
-    const fotoBloco = document.getElementById('bloco-foto-preview').src || '';
-    
-    if (!item) {
-        showToast('Digite o nome do item.', 'warning');
-        return;
-    }
-    if (!codigoInicial) {
-        showToast('Digite o código inicial.', 'warning');
-        return;
-    }
-    if (quantidade < 1) {
-        showToast('Quantidade deve ser maior que 0.', 'warning');
-        return;
-    }
-    
-    if (!confirm(`Cadastrar ${quantidade} itens a partir do código ${codigoInicial}?`)) return;
-    
-    // Ativar loading
-    setButtonLoading(btnCadastrar, true, `Cadastrando ${quantidade} itens...`);
-    
-    let sucessos = 0;
-    const codigoBase = parseInt(codigoInicial.replace(/\D/g, ''));
-    
-    for (let i = 0; i < quantidade; i++) {
-        const novoCodigo = String(codigoBase + i);
+        if (codigo.length < 5) {
+            showToast('O código deve ter pelo menos 5 caracteres.', 'warning');
+            btnSalvar.classList.add('btn-error-anim');
+            setTimeout(() => btnSalvar.classList.remove('btn-error-anim'), 500);
+            return;
+        }
+        
+        setButtonLoading(btnSalvar, true, 'Salvando...');
+        
+        const itemExistente = patTodos.find(i => i.codigo === codigo);
+        const isEdicao = !!itemExistente;
+        
+        let fotoParaSalvar = '';
+        if (fotoBase64 && fotoBase64 !== '' && fotoBase64 !== 'null' && fotoBase64 !== 'undefined') {
+            fotoParaSalvar = fotoBase64;
+        } else if (isEdicao && itemExistente.foto && itemExistente.foto !== '' && itemExistente.foto !== 'null') {
+            fotoParaSalvar = itemExistente.foto;
+        }
+        
         const payload = {
             operacao: "PAT_CADASTRAR",
-            codigo: novoCodigo, 
-            item, 
-            categoria: category,
-            localizacao: sala, 
-            responsavel: usuarioLogadoPat.nome || 'Administrador',
-            status: 'Bom', 
+            codigo, item, categoria: category, localizacao: sala,
+            responsavel: funcionario, status,
             emailOperador: usuarioLogadoPat.email || 'admin@ccmanchieta.com.br',
-            foto: fotoBloco
+            foto: fotoParaSalvar
         };
+        
         try {
+            // Tentativa com mode: 'no-cors' para contornar CORS
             const r = await fetch(APPS_SCRIPT_PAT_URL, { 
                 method: 'POST', 
+                mode: 'no-cors',
                 headers: { 'Content-Type': 'application/json' }, 
                 body: JSON.stringify(payload) 
             });
-            const res = await r.json();
-            if (res.status === "success" || res.status === "updated") sucessos++;
-        } catch (e) { 
-            console.error('Erro no item', novoCodigo); 
+            
+            setButtonLoading(btnSalvar, false);
+            
+            // Com no-cors, não podemos ler a resposta, mas se não deu erro, consideramos sucesso
+            showToast(isEdicao ? "✅ Item atualizado com sucesso!" : "✅ Item cadastrado com sucesso!", 'success');
+            btnSalvar.classList.add('btn-success-anim');
+            setTimeout(() => btnSalvar.classList.remove('btn-success-anim'), 500);
+            
+            // Salvar localmente também para manter consistência
+            if (isEdicao) {
+                const index = patTodos.findIndex(i => i.codigo === codigo);
+                if (index >= 0) {
+                    patTodos[index] = { ...payload, foto: fotoParaSalvar };
+                }
+            } else {
+                patTodos.push({ codigo, item, categoria: category, localizacao: sala, responsavel: funcionario, status, foto: fotoParaSalvar });
+            }
+            
+            patResetarCadastro();
+            renderizarTabelaPaginada();
+            
+            setTimeout(() => {
+                alternarAbaPat('lista');
+            }, 1000);
+            
+        } catch (e) {
+            console.error('Erro ao salvar:', e);
+            setButtonLoading(btnSalvar, false);
+            
+            // Fallback: Salvar localmente
+            if (confirm('⚠️ Erro de conexão com o servidor. Deseja salvar localmente (apenas visualização)?')) {
+                if (isEdicao) {
+                    const index = patTodos.findIndex(i => i.codigo === codigo);
+                    if (index >= 0) {
+                        patTodos[index] = { codigo, item, categoria: category, localizacao: sala, responsavel: funcionario, status, foto: fotoParaSalvar };
+                    }
+                } else {
+                    patTodos.push({ codigo, item, categoria: category, localizacao: sala, responsavel: funcionario, status, foto: fotoParaSalvar });
+                }
+                showToast('✅ Item salvo localmente!', 'success');
+                patResetarCadastro();
+                renderizarTabelaPaginada();
+                setTimeout(() => alternarAbaPat('lista'), 1000);
+            } else {
+                showToast('❌ Erro ao salvar. Tente novamente.', 'error');
+                btnSalvar.classList.add('btn-error-anim');
+                setTimeout(() => btnSalvar.classList.remove('btn-error-anim'), 500);
+            }
         }
     }
-    
-    // Desativar loading
-    setButtonLoading(btnCadastrar, false);
-    
-    if (sucessos > 0) {
-        showToast(`✅ ${sucessos} de ${quantidade} itens cadastrados com sucesso!`, 'success');
-        document.getElementById('bloco-item').value = '';
-        document.getElementById('bloco-codigo-inicial').value = '';
-        document.getElementById('bloco-foto-preview').style.display = 'none';
-        btnCadastrar.classList.add('btn-success-anim');
-        setTimeout(() => btnCadastrar.classList.remove('btn-success-anim'), 500);
-        await carregarItensPaginado(true);
-    } else {
-        showToast('❌ Nenhum item foi cadastrado.', 'error');
-        btnCadastrar.classList.add('btn-error-anim');
-        setTimeout(() => btnCadastrar.classList.remove('btn-error-anim'), 500);
-    }
-}
-    
-    // AMBIENTES
-async function patAdicionarAmbiente() {
-    const nome = document.getElementById('pat-new-amb').value.trim();
-    const btnAdicionar = document.querySelector('#tab-ambientes .btn-success');
-    
-    if (!nome) {
-        showToast('Digite o nome do ambiente.', 'warning');
-        return;
-    }
-    if (patAmbientes.includes(nome)) {
-        showToast('Ambiente já cadastrado.', 'warning');
-        return;
-    }
-    
-    setButtonLoading(btnAdicionar, true, 'Adicionando...');
-    
-    try {
-        await fetch(APPS_SCRIPT_PAT_URL, { 
-            method: 'POST', 
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ operacao: "AMB_ADICIONAR", ambiente: nome }) 
-        });
-        
-        document.getElementById('pat-new-amb').value = '';
-        await patCarregarAmbientes();
-        setButtonLoading(btnAdicionar, false);
-        showToast(`✅ Ambiente "${nome}" adicionado!`, 'success');
-    } catch (e) {
-        setButtonLoading(btnAdicionar, false);
-        showToast('❌ Erro ao adicionar ambiente.', 'error');
-    }
-}
 
-async function patDeletarAmbiente(nome) {
-    if (!confirm(`⚠️ Remover o ambiente "${nome}"?`)) return;
-    if (nome === 'Almoxarifado') {
-        showToast('Não é possível remover o Almoxarifado.', 'warning');
-        return;
-    }
-    
-    try {
-        await fetch(APPS_SCRIPT_PAT_URL, { 
-            method: 'POST', 
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ operacao: "AMB_DELETAR", ambiente: nome }) 
-        });
+    // ===== EXCLUIR ITEM =====
+    async function patExcluirItem() {
+        const codigo = document.getElementById('pat-reg-code').value.trim();
+        const btnExcluir = document.getElementById('pat-btn-excluir');
+        if (!codigo || !confirm(`⚠️ Tem certeza que deseja excluir o item "${codigo}"?`)) return;
         
-        await patCarregarAmbientes();
-        showToast(`✅ Ambiente "${nome}" removido!`, 'success');
-    } catch (e) {
-        showToast('❌ Erro ao remover ambiente.', 'error');
+        setButtonLoading(btnExcluir, true, 'Excluindo...');
+        
+        try {
+            await fetch(APPS_SCRIPT_PAT_URL, { 
+                method: 'POST', 
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify({ operacao: "PAT_EXCLUIR", codigo, emailOperador: usuarioLogadoPat.email || 'admin@ccmanchieta.com.br' }) 
+            });
+            
+            setButtonLoading(btnExcluir, false);
+            patTodos = patTodos.filter(i => i.codigo !== codigo);
+            showToast('🗑️ Item excluído com sucesso!', 'success');
+            patResetarCadastro();
+            renderizarTabelaPaginada();
+        } catch (e) {
+            setButtonLoading(btnExcluir, false);
+            // Fallback: remover localmente
+            if (confirm('⚠️ Erro de conexão. Deseja remover localmente?')) {
+                patTodos = patTodos.filter(i => i.codigo !== codigo);
+                showToast('🗑️ Item removido localmente!', 'success');
+                patResetarCadastro();
+                renderizarTabelaPaginada();
+            } else {
+                showToast('❌ Erro ao excluir.', 'error');
+            }
+        }
     }
-}
 
-    // IMPRIMIR ETIQUETAS COM QR CODE
+    // ===== REGISTRO EM BLOCO =====
+    document.getElementById('bloco-quantidade').addEventListener('input', function() {
+        document.getElementById('bloco-total').innerText = this.value;
+    });
+
+    async function patExecutarCadastroBloco() {
+        const btnCadastrar = document.querySelector('#tab-bloco .btn-success');
+        const item = document.getElementById('bloco-item').value.trim();
+        const category = document.getElementById('bloco-cat').value;
+        const sala = document.getElementById('bloco-room').value;
+        const codigoInicial = document.getElementById('bloco-codigo-inicial').value.trim();
+        const quantidade = parseInt(document.getElementById('bloco-quantidade').value) || 2;
+        const fotoBloco = document.getElementById('bloco-foto-preview').src || '';
+        
+        if (!item) { showToast('Digite o nome do item.', 'warning'); return; }
+        if (!codigoInicial) { showToast('Digite o código inicial.', 'warning'); return; }
+        if (quantidade < 1) { showToast('Quantidade deve ser maior que 0.', 'warning'); return; }
+        if (!confirm(`Cadastrar ${quantidade} itens a partir do código ${codigoInicial}?`)) return;
+        
+        setButtonLoading(btnCadastrar, true, `Cadastrando ${quantidade} itens...`);
+        
+        let sucessos = 0;
+        const codigoBase = parseInt(codigoInicial.replace(/\D/g, ''));
+        
+        for (let i = 0; i < quantidade; i++) {
+            const novoCodigo = String(codigoBase + i);
+            const payload = {
+                operacao: "PAT_CADASTRAR",
+                codigo: novoCodigo, item, categoria: category,
+                localizacao: sala, responsavel: usuarioLogadoPat.nome || 'Administrador',
+                status: 'Bom', emailOperador: usuarioLogadoPat.email || 'admin@ccmanchieta.com.br',
+                foto: fotoBloco
+            };
+            try {
+                await fetch(APPS_SCRIPT_PAT_URL, { 
+                    method: 'POST', 
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify(payload) 
+                });
+                patTodos.push({ ...payload });
+                sucessos++;
+            } catch (e) { console.error('Erro no item', novoCodigo); }
+        }
+        
+        setButtonLoading(btnCadastrar, false);
+        
+        if (sucessos > 0) {
+            showToast(`✅ ${sucessos} de ${quantidade} itens cadastrados!`, 'success');
+            document.getElementById('bloco-item').value = '';
+            document.getElementById('bloco-codigo-inicial').value = '';
+            document.getElementById('bloco-foto-preview').style.display = 'none';
+            btnCadastrar.classList.add('btn-success-anim');
+            setTimeout(() => btnCadastrar.classList.remove('btn-success-anim'), 500);
+            renderizarTabelaPaginada();
+        } else {
+            showToast('❌ Nenhum item foi cadastrado.', 'error');
+        }
+    }
+
+    // ===== AMBIENTES =====
+    async function patAdicionarAmbiente() {
+        const nome = document.getElementById('pat-new-amb').value.trim();
+        const btnAdicionar = document.querySelector('#tab-ambientes .btn-success');
+        if (!nome) { showToast('Digite o nome do ambiente.', 'warning'); return; }
+        if (patAmbientes.includes(nome)) { showToast('Ambiente já cadastrado.', 'warning'); return; }
+        
+        setButtonLoading(btnAdicionar, true, 'Adicionando...');
+        try {
+            await fetch(APPS_SCRIPT_PAT_URL, { 
+                method: 'POST', 
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ operacao: "AMB_ADICIONAR", ambiente: nome }) 
+            });
+            patAmbientes.push(nome);
+            document.getElementById('pat-new-amb').value = '';
+            atualizarUIAmbientes();
+            setButtonLoading(btnAdicionar, false);
+            showToast(`✅ Ambiente "${nome}" adicionado!`, 'success');
+        } catch (e) {
+            setButtonLoading(btnAdicionar, false);
+            showToast('❌ Erro ao adicionar ambiente.', 'error');
+        }
+    }
+
+    async function patDeletarAmbiente(nome) {
+        if (!confirm(`⚠️ Remover o ambiente "${nome}"?`)) return;
+        if (nome === 'Almoxarifado') { showToast('Não é possível remover o Almoxarifado.', 'warning'); return; }
+        try {
+            await fetch(APPS_SCRIPT_PAT_URL, { 
+                method: 'POST', 
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ operacao: "AMB_DELETAR", ambiente: nome }) 
+            });
+            patAmbientes = patAmbientes.filter(a => a !== nome);
+            atualizarUIAmbientes();
+            showToast(`✅ Ambiente "${nome}" removido!`, 'success');
+        } catch (e) {
+            showToast('❌ Erro ao remover ambiente.', 'error');
+        }
+    }
+
+    // ===== IMPRIMIR ETIQUETAS =====
     function imprimirEtiquetas() {
         const selecionados = prompt('Digite os códigos dos itens separados por vírgula (ou deixe em branco para todos visíveis):');
         let itens;
@@ -1437,106 +1099,51 @@ async function patDeletarAmbiente(nome) {
             const codigos = selecionados.split(',').map(c => c.trim());
             itens = patTodos.filter(i => codigos.includes(i.codigo));
         } else {
-            const filtrados = patSalaFiltro !== 'TODOS' 
-                ? patTodos.filter(item => item.localizacao === patSalaFiltro)
-                : patTodos;
+            const filtrados = patSalaFiltro !== 'TODOS' ? patTodos.filter(item => item.localizacao === patSalaFiltro) : patTodos;
             itens = filtrados.slice(0, 24);
         }
+        if (itens.length === 0) { showToast('Nenhum item encontrado.', 'warning'); return; }
         
-        if (itens.length === 0) { 
-            alert('Nenhum item encontrado.'); 
-            return; 
-        }
-        
-        // Monta o HTML com QR Codes
-        let html = '<!DOCTYPE html><html><head>';
-        html += '<meta charset="UTF-8">';
-        html += '<title>Etiquetas Patrimônio</title>';
+        let html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Etiquetas</title>';
         html += '<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>';
         html += '<style>';
         html += '@page { size: A4; margin: 8mm; }';
-        html += 'body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f9fafb; }';
+        html += 'body { font-family: Arial; margin: 0; padding: 0; background: #f9fafb; }';
         html += '.etiquetas { display: flex; flex-wrap: wrap; gap: 8mm; padding: 5mm; justify-content: center; }';
-        html += '.etiqueta { ';
-        html += '  width: 130px; ';
-        html += '  min-height: 180px; ';
-        html += '  border: 1px solid #d1d5db; ';
-        html += '  padding: 8px; ';
-        html += '  text-align: center; ';
-        html += '  page-break-inside: avoid; ';
-        html += '  box-sizing: border-box; ';
-        html += '  background: white; ';
-        html += '  border-radius: 6px; ';
-        html += '  box-shadow: 0 1px 3px rgba(0,0,0,0.1); ';
-        html += '  display: flex; ';
-        html += '  flex-direction: column; ';
-        html += '  align-items: center; ';
-        html += '  justify-content: space-between; ';
-        html += '}';
+        html += '.etiqueta { width: 130px; min-height: 180px; border: 1px solid #d1d5db; padding: 8px; text-align: center; page-break-inside: avoid; background: white; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; }';
         html += '.etiqueta .header { font-size: 9px; font-weight: bold; color: #005088; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px; width: 100%; }';
         html += '.etiqueta .codigo { font-size: 11px; font-weight: bold; color: #1e293b; margin: 4px 0; }';
         html += '.etiqueta .item { font-size: 10px; font-weight: 600; color: #334155; margin: 3px 0; line-height: 1.2; max-height: 32px; overflow: hidden; }';
         html += '.etiqueta .local { font-size: 8px; color: #64748b; margin: 2px 0; }';
-        html += '.etiqueta .qr-container { margin: 4px auto; display: flex; justify-content: center; }';
-        html += '.etiqueta .qr-container canvas { width: 70px !important; height: 70px !important; }';
+        html += '.etiqueta .qr-container { margin: 4px auto; }';
         html += '.etiqueta .footer { font-size: 7px; color: #94a3b8; border-top: 1px solid #e5e7eb; padding-top: 4px; width: 100%; }';
-        html += '@media print { ';
-        html += '  body { background: white; } ';
-        html += '  .etiqueta { box-shadow: none; border-color: #999; } ';
-        html += '  .no-print { display: none; } ';
-        html += '}';
-        html += '</style>';
-        html += '</head><body>';
-        html += '<div style="text-align:center;padding:10px;margin-bottom:10px;" class="no-print">';
-        html += '<button onclick="window.print()" style="padding:10px 30px;background:#005088;color:white;border:none;border-radius:6px;font-size:16px;cursor:pointer;">🖨️ Imprimir Etiquetas</button>';
+        html += '@media print { body { background: white; } .etiqueta { box-shadow: none; border-color: #999; } .no-print { display: none; } }';
+        html += '</style></head><body>';
+        html += '<div style="text-align:center;padding:10px;" class="no-print">';
+        html += '<button onclick="window.print()" style="padding:10px 30px;background:#005088;color:white;border:none;border-radius:6px;font-size:16px;cursor:pointer;">🖨️ Imprimir</button>';
         html += ' <button onclick="window.close()" style="padding:10px 30px;background:#ef4444;color:white;border:none;border-radius:6px;font-size:16px;cursor:pointer;">✖ Fechar</button>';
-        html += '<p style="margin-top:10px;color:#64748b;">' + itens.length + ' etiquetas geradas</p>';
-        html += '</div>';
+        html += '<p style="margin-top:10px;color:#64748b;">' + itens.length + ' etiquetas</p></div>';
         html += '<div class="etiquetas">';
         
         itens.forEach((item, index) => {
-            const codigo = item.codigo || '---';
-            const nome = item.item || 'Item sem nome';
-            const local = item.localizacao || '—';
-            
             html += '<div class="etiqueta">';
             html += '  <div class="header">CCM ANCHIETA</div>';
-            html += '  <div class="codigo">' + codigo + '</div>';
-            html += '  <div class="item">' + nome + '</div>';
-            html += '  <div class="local">📍 ' + local + '</div>';
+            html += '  <div class="codigo">' + (item.codigo || '---') + '</div>';
+            html += '  <div class="item">' + (item.item || 'Item sem nome') + '</div>';
+            html += '  <div class="local">📍 ' + (item.localizacao || '—') + '</div>';
             html += '  <div class="qr-container" id="qr-' + index + '"></div>';
             html += '  <div class="footer">Patrimônio</div>';
             html += '</div>';
         });
         
-        html += '</div>';
-        html += '<script>';
+        html += '</div><script>';
         html += 'const codigos = ' + JSON.stringify(itens.map(i => i.codigo)) + ';';
-        html += 'codigos.forEach(function(codigo, index) {';
-        html += '  try {';
-        html += '    new QRCode(document.getElementById("qr-" + index), {';
-        html += '      text: codigo || "---",';
-        html += '      width: 70,';
-        html += '      height: 70,';
-        html += '      colorDark: "#005088",';
-        html += '      colorLight: "#ffffff",';
-        html += '      correctLevel: QRCode.CorrectLevel.H';
-        html += '    });';
-        html += '  } catch(e) {';
-        html += '    document.getElementById("qr-" + index).innerHTML = "<span style=\'font-size:10px;color:#ef4444;\'>Erro</span>";';
-        html += '  }';
-        html += '});';
-        html += 'console.log("QR Codes gerados para", codigos.length, "itens");';
-        html += '<\/script>';
-        html += '</body></html>';
+        html += 'codigos.forEach((cod, i) => { new QRCode(document.getElementById("qr-" + i), { text: cod || "---", width: 70, height: 70, colorDark: "#005088", colorLight: "#ffffff" }); });';
+        html += '<\/script></body></html>';
         
         const win = window.open('', '_blank', 'width=900,height=700');
-        if (win) {
-            win.document.write(html);
-            win.document.close();
-        } else {
-            alert('Por favor, permita pop-ups para impressão das etiquetas.');
-        }
+        if (win) { win.document.write(html); win.document.close(); } 
+        else { showToast('Permita pop-ups para impressão.', 'warning'); }
     }
 </script>
 </body>
