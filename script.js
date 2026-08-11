@@ -375,35 +375,47 @@ function selecionarTurma(turma) {
     select.innerHTML = '<option value="">-- Escolha o Aluno --</option>';
     
     const alunos = cacheAlunosPorTurma[turma] || [];
-    alunos.sort().forEach(a => { 
-        const opt = document.createElement('option'); 
-        opt.value = a; 
-        opt.textContent = a; 
-        select.appendChild(opt); 
+    
+    // 🆕 Cria um mapa de contagem de apontamentos por aluno
+    const contagem = {};
+    todosOsRegistros.forEach(r => {
+        if (r.tipo === 'apontamento' && r.aluno) {
+            const nomeAluno = r.aluno.trim();
+            contagem[nomeAluno] = (contagem[nomeAluno] || 0) + 1;
+        }
+    });
+    
+    alunos.sort().forEach(a => {
+        const opt = document.createElement('option');
+        opt.value = a;
+        const qtd = contagem[a] || 0;
+        // 🆕 Mostra o nome + quantidade de apontamentos
+        opt.textContent = a + ' (' + qtd + ')';
+        select.appendChild(opt);
     });
     
     select.value = '';
     filtrarRegistrosPorAluno();
     
-    // TORNA O BOTÃO DO PRÉ-CONSELHO VISÍVEL ASSIM QUE UMA TURMA É SELECIONADA
+    // TORNA O BOTÃO DO PRÉ-CONSELHO VISÍVEL
     const btnPreConselho = document.getElementById('btn-gerar-pdf-pre-conselho');
     if (btnPreConselho) {
         btnPreConselho.style.display = 'inline-flex';
     }
 
-    // 🆕 Mostrar botão de seleção múltipla
+    // Mostrar botão de seleção múltipla
     const btnMultiplo = document.getElementById('btn-selecionar-varios');
     if (btnMultiplo) btnMultiplo.style.display = 'inline-flex';
     
-    // 🆕 Esconder botão de voltar (se estiver visível)
+    // Esconder botão de voltar
     const btnVoltar = document.getElementById('btn-voltar-seletor');
     if (btnVoltar) btnVoltar.style.display = 'none';
     
-    // 🆕 Esconder área de checkboxes (se estiver visível)
+    // Esconder área de checkboxes
     const areaMultipla = document.getElementById('selecao-multipla');
     if (areaMultipla) areaMultipla.style.display = 'none';
     
-    // 🆕 Mostrar seletor normal
+    // Mostrar seletor normal
     if (select) select.style.display = 'inline-block';
 
     document.getElementById('app-sidebar').classList.remove('open');
