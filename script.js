@@ -732,7 +732,10 @@ function filtrarRegistrosPorAluno() {
     atualizarPainelRanking();
 }
 
-function verificarTeclaEnter(e, setor) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); salvarPost(setor); } }
+function verificarTeclaEnter(e, setor) { 
+    // Enter agora apenas quebra a linha, não salva mais
+    return;
+}
 
 // =============================================
 // SALVAR APONTAMENTO (COM SUPORTE OFFLINE)
