@@ -1,4 +1,4 @@
-const CACHE_NAME = 'siga-cache-v7'; // Incremente para v7, v8... a cada nova alteração no site
+const CACHE_NAME = 'siga-cache-v10'; // Incremente para v7, v8... a cada nova alteração no site
 
 const urlsToCache = [
     '/',
