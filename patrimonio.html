@@ -958,15 +958,22 @@
         
         const isEdicao = !!editandoCodigo;
         
-        // Determinar foto a salvar
+               // Determinar foto a salvar
         let fotoParaSalvar = '';
         if (fotoBase64 && fotoBase64 !== '' && fotoBase64 !== 'null' && fotoBase64 !== 'undefined') {
             fotoParaSalvar = fotoBase64;
         } else if (isEdicao) {
             const itemAntigo = patTodos.find(i => i.codigo === codigo);
-            if (itemAntigo && itemAntigo.foto && itemAntigo.foto !== '' && itemAntigo.foto !== 'null') {
+            if (itemAntigo && itemAntigo.foto && 
+                itemAntigo.foto !== '' && 
+                itemAntigo.foto !== 'null' && 
+                itemAntigo.foto !== 'undefined') {
                 fotoParaSalvar = itemAntigo.foto;
             }
+        }
+        // Se ainda estiver vazio, usar null explicitamente
+        if (!fotoParaSalvar) {
+            fotoParaSalvar = '';
         }
         
         const payload = {
