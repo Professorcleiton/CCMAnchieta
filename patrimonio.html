@@ -977,37 +977,42 @@
             foto: fotoParaSalvar
         };
         
-        try {
-            // Tentativa com mode: 'no-cors' para contornar CORS
-            await fetch(APPS_SCRIPT_PAT_URL, { 
+                try {
+            const r = await fetch(APPS_SCRIPT_PAT_URL, { 
                 method: 'POST', 
                 headers: { 'Content-Type': 'text/plain' },  
                 body: JSON.stringify(payload) 
             });
             
+            const res = await r.json();
             setButtonLoading(btnSalvar, false);
             
-            // Como no-cors não permite ler a resposta, consideramos sucesso
-            showToast(isEdicao ? "✅ Item atualizado com sucesso!" : "✅ Item cadastrado com sucesso!", 'success');
-            btnSalvar.classList.add('btn-success-anim');
-            setTimeout(() => btnSalvar.classList.remove('btn-success-anim'), 500);
-            
-            // Atualizar lista local
-            if (isEdicao) {
-                const index = patTodos.findIndex(i => i.codigo === codigo);
-                if (index >= 0) {
-                    patTodos[index] = { codigo, item, categoria: category, localizacao: sala, responsavel: funcionario, status, foto: fotoParaSalvar };
+            if (res.status === "success" || res.status === "updated") {
+                showToast(isEdicao ? "✅ Item atualizado com sucesso!" : "✅ Item cadastrado com sucesso!", 'success');
+                btnSalvar.classList.add('btn-success-anim');
+                setTimeout(() => btnSalvar.classList.remove('btn-success-anim'), 500);
+                
+                // Atualizar lista local
+                if (isEdicao) {
+                    const index = patTodos.findIndex(i => i.codigo === codigo);
+                    if (index >= 0) {
+                        patTodos[index] = { codigo, item, categoria: category, localizacao: sala, responsavel: funcionario, status, foto: fotoParaSalvar };
+                    }
+                } else {
+                    patTodos.push({ codigo, item, categoria: category, localizacao: sala, responsavel: funcionario, status, foto: fotoParaSalvar });
                 }
+                
+                patResetarCadastro();
+                renderizarTabelaPaginada();
+                
+                setTimeout(() => {
+                    alternarAbaPat('lista');
+                }, 1000);
             } else {
-                patTodos.push({ codigo, item, categoria: category, localizacao: sala, responsavel: funcionario, status, foto: fotoParaSalvar });
+                showToast('❌ Erro: ' + (res.message || 'Não autorizado.'), 'error');
+                btnSalvar.classList.add('btn-error-anim');
+                setTimeout(() => btnSalvar.classList.remove('btn-error-anim'), 500);
             }
-            
-            patResetarCadastro();
-            renderizarTabelaPaginada();
-            
-            setTimeout(() => {
-                alternarAbaPat('lista');
-            }, 1000);
             
         } catch (e) {
             console.error('Erro ao salvar:', e);
