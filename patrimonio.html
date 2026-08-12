@@ -1367,6 +1367,25 @@ reader.onload = async function(e) {
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') fecharQRScanner();
     });
+
+function alternarSidebarPat() {
+    const sidebar = document.querySelector('#patrimonio-interface .sidebar');
+    const overlay = document.getElementById('sidebar-overlay-pat');
+    sidebar.classList.toggle('open');
+    if (overlay) overlay.classList.toggle('active');
+}
+
+window.addEventListener('resize', function() {
+    const btn = document.querySelector('.btn-menu-pat');
+    if (btn) btn.style.display = window.innerWidth <= 768 ? 'inline-flex' : 'none';
+});
+
+window.addEventListener('DOMContentLoaded', function() {
+    const btn = document.querySelector('.btn-menu-pat');
+    if (btn) btn.style.display = window.innerWidth <= 768 ? 'inline-flex' : 'none';
+});
+    
 </script>
+    <div class="sidebar-overlay-pat" id="sidebar-overlay-pat" onclick="alternarSidebarPat()"></div>
 </body>
 </html>
