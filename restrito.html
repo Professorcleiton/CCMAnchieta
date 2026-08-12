@@ -2584,19 +2584,55 @@ let recadosAniversario = {};
 async function verificarAniversariantes() {
     try {
         const hoje = new Date();
-        const dia = String(hoje.getDate()).padStart(2, '0');
-        const mes = String(hoje.getMonth() + 1).padStart(2, '0');
-        const dataHoje = dia + '/' + mes;
+        const dia = hoje.getDate();
+        const mes = hoje.getMonth() + 1;
+        const dataHoje = String(dia).padStart(2, '0') + '/' + String(mes).padStart(2, '0');
         
         const elData = document.getElementById('data-hoje-aniversario');
         if (elData) elData.innerText = dataHoje;
         
-        const resp = await fetch(APPS_SCRIPT_V2 + '?aba=usuarios');
-        const usuarios = await resp.json();
+        aniversariantesHoje = [];
         
-        aniversariantesHoje = usuarios.filter(u => {
-            if (!u.data_nasc) return false;
-            return u.data_nasc.trim() === dataHoje;
+        // Busca FUNCIONÁRIOS
+        const respUsers = await fetch(APPS_SCRIPT_V2 + '?aba=usuarios');
+        const usuarios = await respUsers.json();
+        
+        usuarios.forEach(u => {
+            if (!u.data_nasc) return;
+            
+            let diaNasc, mesNasc;
+            
+            // Tenta interpretar a data em vários formatos
+            const dataNasc = u.data_nasc.toString().trim();
+            
+            // Formato: "Wed Aug 12 2026..." (data completa)
+            if (dataNasc.includes('GMT') || dataNasc.includes('00:00:00')) {
+                const d = new Date(dataNasc);
+                if (!isNaN(d.getTime())) {
+                    diaNasc = d.getDate();
+                    mesNasc = d.getMonth() + 1;
+                }
+            }
+            // Formato: "12/08" (string DD/MM)
+            else if (dataNasc.includes('/') && dataNasc.length <= 5) {
+                const partes = dataNasc.split('/');
+                diaNasc = parseInt(partes[0]);
+                mesNasc = parseInt(partes[1]);
+            }
+            // Formato: "12/08/1990" (string DD/MM/YYYY)
+            else if (dataNasc.includes('/') && dataNasc.length >= 8) {
+                const partes = dataNasc.split('/');
+                diaNasc = parseInt(partes[0]);
+                mesNasc = parseInt(partes[1]);
+            }
+            
+            if (diaNasc === dia && mesNasc === mes) {
+                aniversariantesHoje.push({
+                    nome: u.nome,
+                    setor: u.setor || 'Funcionário',
+                    tipo: 'funcionario'
+                });
+            }
         });
         
         if (aniversariantesHoje.length > 0) {
