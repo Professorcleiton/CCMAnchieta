@@ -981,8 +981,7 @@
             // Tentativa com mode: 'no-cors' para contornar CORS
             await fetch(APPS_SCRIPT_PAT_URL, { 
                 method: 'POST', 
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' }, 
+                headers: { 'Content-Type': 'text/plain' },  
                 body: JSON.stringify(payload) 
             });
             
@@ -1051,8 +1050,7 @@
         try {
             await fetch(APPS_SCRIPT_PAT_URL, { 
                 method: 'POST', 
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' }, 
+                headers: { 'Content-Type': 'text/plain' }, 
                 body: JSON.stringify({ 
                     operacao: "PAT_EXCLUIR", 
                     codigo, 
@@ -1127,8 +1125,7 @@
             try {
                 await fetch(APPS_SCRIPT_PAT_URL, { 
                     method: 'POST', 
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' }, 
+                    headers: { 'Content-Type': 'text/plain' },  
                     body: JSON.stringify(payload) 
                 });
                 
@@ -1179,8 +1176,7 @@
         try {
             await fetch(APPS_SCRIPT_PAT_URL, { 
                 method: 'POST', 
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'text/plain' }, 
                 body: JSON.stringify({ operacao: "AMB_ADICIONAR", ambiente: nome, emailOperador: usuarioLogadoPat.email }) 
             });
             
@@ -1202,8 +1198,7 @@
         try {
             await fetch(APPS_SCRIPT_PAT_URL, { 
                 method: 'POST', 
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'text/plain' }, 
                 body: JSON.stringify({ operacao: "AMB_DELETAR", ambiente: nome, emailOperador: usuarioLogadoPat.email }) 
             });
             
