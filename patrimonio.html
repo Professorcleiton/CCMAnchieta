@@ -855,13 +855,13 @@
             return;
         }
         const reader = new FileReader();
-        reader.onload = function(e) {
-            fotoBase64 = e.target.result;
-            document.getElementById('pat-foto-preview').src = fotoBase64;
-            document.getElementById('pat-foto-preview').style.display = 'block';
-            document.getElementById('pat-btn-remover-foto').style.display = 'inline-block';
-            showToast('✅ Foto carregada!', 'success', 1500);
-        };
+      reader.onload = async function(e) {
+    fotoBase64 = await comprimirImagem(e.target.result, 800, 0.6);
+    document.getElementById('pat-foto-preview').src = fotoBase64;
+    document.getElementById('pat-foto-preview').style.display = 'block';
+    document.getElementById('pat-btn-remover-foto').style.display = 'inline-block';
+    showToast('✅ Foto carregada (' + Math.round(fotoBase64.length/1024) + 'KB)!', 'success', 1500);
+};
         reader.readAsDataURL(file);
     }
 
@@ -869,10 +869,11 @@
         const file = document.getElementById('bloco-foto').files[0];
         if (!file) return;
         const reader = new FileReader();
-        reader.onload = function(e) {
-            document.getElementById('bloco-foto-preview').src = e.target.result;
-            document.getElementById('bloco-foto-preview').style.display = 'block';
-        };
+reader.onload = async function(e) {
+    const fotoComprimida = await comprimirImagem(e.target.result, 800, 0.6);
+    document.getElementById('bloco-foto-preview').src = fotoComprimida;
+    document.getElementById('bloco-foto-preview').style.display = 'block';
+};
         reader.readAsDataURL(file);
     }
 
@@ -1047,6 +1048,27 @@
         }
     }
 
+    function comprimirImagem(base64, maxWidth = 800, qualidade = 0.6) {
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = function() {
+            const canvas = document.createElement('canvas');
+            let w = img.width;
+            let h = img.height;
+            if (w > maxWidth) {
+                h = (h * maxWidth) / w;
+                w = maxWidth;
+            }
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            resolve(canvas.toDataURL('image/jpeg', qualidade));
+        };
+        img.src = base64;
+    });
+}
+    
     // ============================================================
     // EXCLUIR ITEM - CORRIGIDO
     // ============================================================
