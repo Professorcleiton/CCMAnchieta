@@ -953,9 +953,8 @@ const alunoNormalizado = aluno.trim().normalize('NFD').replace(/[\u0300-\u036f]/
     });
 }
 
-// ==== CONTROLE DE BLOQUEIOS ====
 function aplicarBloqueioSetores(setor, nivel) {
-    const setoresDefinidos = ['meivs', 'pedagogico', 'adm', 'direcao'];
+    const setoresDefinidos = ['meivs', 'pedagogico', 'adm', 'direcao']; // "direcao" = Professores
     
     setoresDefinidos.forEach(s => {
         const ta = document.getElementById(`text-${s}`);
@@ -964,24 +963,32 @@ function aplicarBloqueioSetores(setor, nivel) {
         
         let liberado = false;
         
-        if (nivel >= 4) { 
-            liberado = true; 
+        if (nivel >= 4) {
+            liberado = true;
         } 
-        else if (nivel >= 2) { 
-            liberado = true; 
-        } 
+        else if (nivel >= 3 && (setor === 'adm' || setor === 'secretaria' || setor === 'direcao')) {
+            liberado = true;
+        }
         else {
-            if (setor === s || (setor === 'professores' && s === 'direcao')) { 
-                liberado = true; 
+            if (setor === s) {
+                liberado = true;
+            }
+            // Professores (setor "professores") acessam a coluna "direcao" (que exibe Professores)
+            if (setor === 'professores' && s === 'direcao') {
+                liberado = true;
+            }
+            // Se o setor do usuário for "direcao", também acessa "direcao"
+            if (setor === 'direcao' && s === 'direcao') {
+                liberado = true;
             }
         }
         
         if (liberado) {
-            if (ta) ta.disabled = false; 
+            if (ta) ta.disabled = false;
             if (btn) btn.disabled = false;
             if (tabBtn) tabBtn.style.display = 'inline-block';
         } else {
-            if (ta) ta.disabled = true; 
+            if (ta) ta.disabled = true;
             if (btn) btn.disabled = true;
             if (tabBtn) tabBtn.style.display = 'none';
         }
