@@ -2159,6 +2159,10 @@ function abrirSelecaoMultipla() {
     document.getElementById('selecao-multipla').style.display = 'block';
     document.getElementById('btn-gerar-pdf-oficial').style.display = 'none';
     
+    // 🆕 Esconder as colunas de apontamento normais
+    document.getElementById('siga-columns-grid').style.display = 'none';
+    document.getElementById('mobile-tabs-container').style.display = 'none';
+    
     const alunos = cacheAlunosPorTurma[turmaSelecionadaAtiva] || [];
     const container = document.getElementById('lista-checkboxes');
     container.innerHTML = '';
@@ -2174,6 +2178,42 @@ function abrirSelecaoMultipla() {
     alunosSelecionados = [];
     document.getElementById('check-todos').checked = false;
     document.getElementById('contador-selecionados').innerText = '0 selecionados';
+    
+    // 🆕 Trava o setor conforme o usuário logado
+    const setorSelect = document.getElementById('setor-apontamento-multiplo');
+    if (setorSelect && usuarioLogado) {
+        // Define o setor do usuário
+        let setorUsuario = usuarioLogado.setor || 'meivs';
+        
+        // Converte "professores" para "direcao" (coluna dos professores)
+        if (setorUsuario === 'professores') {
+            setorUsuario = 'direcao';
+        }
+        
+        // Se for nível 3+ (admin), permite selecionar
+        if (usuarioLogado.nivel && parseInt(usuarioLogado.nivel) >= 3) {
+            setorSelect.disabled = false;
+            setorSelect.style.background = 'white';
+        } else {
+            // Nível 1-2: trava no setor do usuário
+            setorSelect.disabled = true;
+            setorSelect.style.background = '#e2e8f0';
+        }
+        
+        setorSelect.value = setorUsuario;
+    }
+    
+    // 🆕 Limpar campo de texto
+    const textoApontamento = document.getElementById('texto-apontamento-multiplo');
+    if (textoApontamento) {
+        textoApontamento.value = '';
+    }
+    
+    // 🆕 Focar no campo de texto
+    setTimeout(() => {
+        const textarea = document.getElementById('texto-apontamento-multiplo');
+        if (textarea) textarea.focus();
+    }, 300);
 }
 
 function fecharSelecaoMultipla() {
@@ -2213,9 +2253,22 @@ function confirmarSelecaoMultipla() {
     filtrarRegistrosPorAluno();
 }
 
-    async function salvarApontamentoMultiplo() {
+   async function salvarApontamentoMultiplo() {
     const texto = document.getElementById('texto-apontamento-multiplo').value.trim();
-    const setor = document.getElementById('setor-apontamento-multiplo').value;
+    
+    // 🆕 Usa o setor do usuário logado (travado)
+    let setor = usuarioLogado.setor || 'meivs';
+    
+    // Converte "professores" para "direcao" (coluna dos professores)
+    if (setor === 'professores') {
+        setor = 'direcao';
+    }
+    
+    // 🆕 Se o select estiver habilitado (admin nível 3+), usa o valor selecionado
+    const setorSelect = document.getElementById('setor-apontamento-multiplo');
+    if (setorSelect && !setorSelect.disabled) {
+        setor = setorSelect.value;
+    }
     
     alunosSelecionados = Array.from(document.querySelectorAll('.check-aluno:checked')).map(cb => cb.value);
     
@@ -2248,6 +2301,12 @@ function confirmarSelecaoMultipla() {
             if (navigator.onLine) {
                 const result = await salvarNoServidor(dadosApontamento);
                 if (result.status === 'success') salvos++;
+            } else {
+                // 🆕 Se offline, salva localmente
+                if (db && db.db) {
+                    await db.salvarApontamento(dadosApontamento);
+                    salvos++;
+                }
             }
         } catch (error) {
             console.error('Erro ao salvar para ' + aluno, error);
