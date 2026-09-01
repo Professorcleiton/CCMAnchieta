@@ -1052,17 +1052,117 @@ function fecharModalSelecaoEvent(e) { if (e.target.id === 'modal-selecionar-turm
 // ==== PAINEL DE ADMINISTRAÇÃO ====
 function abrirPainelAdmin() {
     document.getElementById('modal-admin').style.display = 'flex';
-    const select = document.getElementById('admin-nova-turma');
-    select.innerHTML = '<option value="">-- Escolha a nova turma --</option><option value="EXCLUIR" style="color: red; font-weight: bold;">❌ EXCLUIR ALUNO DO SISTEMA</option>';
     
-    Object.keys(cacheAlunosPorTurma).sort().forEach(t => {
-        select.innerHTML += `<option value="${t}">${t}</option>`;
-    });
+    // 🆕 Popular seletor de turmas para REMANEJAMENTO
+    const select = document.getElementById('admin-nova-turma');
+    if (select) {
+        select.innerHTML = '<option value="">-- Escolha a nova turma --</option><option value="EXCLUIR" style="color: red; font-weight: bold;">❌ EXCLUIR ALUNO DO SISTEMA</option>';
+        
+        Object.keys(cacheAlunosPorTurma).sort().forEach(t => {
+            select.innerHTML += `<option value="${t}">${t}</option>`;
+        });
+    }
+    
+    // 🆕 Popular seletor de turmas para NOVO ALUNO
+    const selectNovaTurma = document.getElementById('admin-novo-aluno-turma');
+    if (selectNovaTurma) {
+        selectNovaTurma.innerHTML = '<option value="">-- Selecione a turma --</option>';
+        Object.keys(cacheAlunosPorTurma).sort().forEach(t => {
+            selectNovaTurma.innerHTML += `<option value="${t}">${t}</option>`;
+        });
+    }
+    
+    // 🆕 Limpar campos de novo aluno
+    if (document.getElementById('admin-novo-aluno-id')) {
+        document.getElementById('admin-novo-aluno-id').value = '';
+    }
+    if (document.getElementById('admin-novo-aluno-nome')) {
+        document.getElementById('admin-novo-aluno-nome').value = '';
+    }
+    
+    // Limpar campo de busca de aluno
+    if (document.getElementById('admin-nome-aluno')) {
+        document.getElementById('admin-nome-aluno').value = '';
+    }
+    if (document.getElementById('admin-nova-turma')) {
+        document.getElementById('admin-nova-turma').value = '';
+    }
 }
 
 function fecharModalAdmin() { document.getElementById('modal-admin').style.display = 'none'; }
 function fecharModalAdminEvent(e) { if (e.target.id === 'modal-admin') fecharModalAdmin(); }
 
+// 🆕 Função para adicionar novo aluno
+async function adicionarNovoAluno() {
+    const id = document.getElementById('admin-novo-aluno-id').value.trim();
+    const nome = document.getElementById('admin-novo-aluno-nome').value.trim();
+    const turmaSelect = document.getElementById('admin-novo-aluno-turma');
+    const turma = turmaSelect ? turmaSelect.value : '';
+    const btn = document.getElementById('btn-add-aluno');
+    
+    if (!id || !nome || !turma) {
+        mostrarToast('Preencha ID, Nome e Turma do aluno.', 'aviso');
+        return;
+    }
+    
+    // Deriva o código da turma (ex: "6º Ano A" -> "6A")
+    const turmaTexto = turmaSelect.options[turmaSelect.selectedIndex].text;
+    let turmaCodigo = turma; // Por padrão usa o valor do select
+    
+    // Tenta derivar se o valor for o nome completo
+    const match = turmaTexto.match(/(\d+)[º°]?\s*Ano\s*([A-C])/i);
+    if (match) {
+        turmaCodigo = match[1] + match[2].toUpperCase();
+    } else if (turmaTexto.includes('NEM')) {
+        const matchNEM = turmaTexto.match(/(\d+)/);
+        if (matchNEM) turmaCodigo = matchNEM[1] + 'NEM';
+    } else if (turmaTexto.includes('FD')) {
+        const matchFD = turmaTexto.match(/(\d+)/);
+        if (matchFD) turmaCodigo = matchFD[1] + 'FD';
+    } else if (turmaTexto.includes('AGRO')) {
+        turmaCodigo = '1AGRO';
+    }
+    
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Adicionando...';
+    
+    const payload = {
+        operacao: "ALUNO_ADICIONAR",
+        emailOperador: usuarioLogado.email,
+        aluno_id: id,
+        nome_aluno: nome.toUpperCase(),
+        turma_ref: turmaTexto,
+        turma_codigo: turmaCodigo
+    };
+    
+    try {
+        const response = await fetch(APPS_SCRIPT_URL, { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify(payload) 
+        });
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+            mostrarToast('✅ Aluno adicionado com sucesso!', 'sucesso');
+            // Limpar campos
+            document.getElementById('admin-novo-aluno-id').value = '';
+            document.getElementById('admin-novo-aluno-nome').value = '';
+            document.getElementById('admin-novo-aluno-turma').value = '';
+            await carregarAlunosETurmas();
+            fecharModalAdmin();
+        } else {
+            mostrarToast('❌ Erro: ' + (result.message || 'Falha ao adicionar aluno.'), 'erro');
+        }
+    } catch (e) {
+        mostrarToast('❌ Erro de comunicação com o servidor.', 'erro');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> Adicionar Aluno';
+    }
+}
+
+// Função existente de remanejar/excluir (mantida)
 async function executarAcaoAluno() {
     const nomeAluno = document.getElementById('admin-nome-aluno').value.trim();
     const novaTurma = document.getElementById('admin-nova-turma').value;
@@ -1074,7 +1174,7 @@ async function executarAcaoAluno() {
     if (operacao === 'ALUNO_EXCLUIR' && !confirm(`Tem certeza que deseja EXCLUIR ${nomeAluno} do sistema?`)) return;
     
     btn.disabled = true;
-    btn.innerHTML = 'Processando...';
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processando...';
 
     const payload = {
         operacao: operacao,
@@ -1084,7 +1184,11 @@ async function executarAcaoAluno() {
     };
 
     try {
-        const response = await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+        const response = await fetch(APPS_SCRIPT_URL, { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify(payload) 
+        });
         const result = await response.json();
         
         if (result.status === 'success') {
