@@ -1010,7 +1010,23 @@
         </div>
     </div>
 </div>
-    
+    <!-- ========================================== -->
+<!-- MODAL DE DETALHES DO ALUNO (CENTRAL DE ALERTAS) -->
+<!-- ========================================== -->
+<div class="modal-overlay" id="modal-detalhes-aluno-alerta" onclick="fecharModalDetalhesAlerta(event)">
+    <div class="modal-content" style="max-width: 800px; height: 85vh; display: flex; flex-direction: column;">
+        <div class="modal-header" style="background-color: #991b1b;">
+            <h3><i class="fa-solid fa-magnifying-glass"></i> Detalhes do Aluno</h3>
+            <button onclick="document.getElementById('modal-detalhes-aluno-alerta').style.display='none'" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;">&times;</button>
+        </div>
+        <div class="modal-body" id="conteudo-detalhes-alerta" style="padding: 20px; overflow-y: auto; flex: 1;">
+            <div style="text-align:center;padding:40px;color:#64748b;">
+                <i class="fa-solid fa-spinner fa-spin" style="font-size:40px;display:block;margin-bottom:15px;"></i>
+                Carregando detalhes...
+            </div>
+        </div>
+    </div>
+</div>
           <script src="db.js"></script>
         <script src="script.js"></script>
 <script>
@@ -1639,7 +1655,7 @@ async function carregarAlertasModal() {
         alertas.forEach(a => {
             const cor = a.nivel === 'critico' ? '#dc2626' : '#f59e0b';
             const emoji = a.nivel === 'critico' ? '🔴' : '🟡';
-            html += '<div style="background:white;border-left:5px solid ' + cor + ';padding:15px;margin-bottom:10px;border-radius:8px;">';
+            html += '<div style="background:white;border-left:5px solid ' + cor + ';padding:15px;margin-bottom:10px;border-radius:8px;cursor:pointer;" onclick="abrirDetalhesAlunoAlerta(\'' + a.nome.replace(/'/g, "\\'") + '\')">';
             html += '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">';
             html += '<strong>' + a.nome + '</strong>';
             html += '<span style="background:#e0f2fe;color:#0369a1;padding:3px 10px;border-radius:12px;font-size:12px;">🎒 ' + a.turma + '</span>';
@@ -1676,7 +1692,156 @@ function parseDataModal(str) {
 function fecharModalHorarios(e) { if (e.target.id === 'modal-meus-horarios') document.getElementById('modal-meus-horarios').style.display = 'none'; }
 function fecharModalLab(e) { if (e.target.id === 'modal-agenda-lab') document.getElementById('modal-agenda-lab').style.display = 'none'; }
 function fecharModalAlertas(e) { if (e.target.id === 'modal-alertas') document.getElementById('modal-alertas').style.display = 'none'; }
+// =============================================
+// 🆕 DETALHES DO ALUNO NA CENTRAL DE ALERTAS
+// =============================================
+function abrirDetalhesAlunoAlerta(nomeAluno) {
+    // Verifica nível de acesso (3+)
+    if (!usuarioLogado || parseInt(usuarioLogado.nivel) < 3) {
+        mostrarToast('🔒 Acesso restrito ao nível 3 ou superior.', 'erro');
+        return;
+    }
+    
+    document.getElementById('modal-detalhes-aluno-alerta').style.display = 'flex';
+    document.getElementById('conteudo-detalhes-alerta').innerHTML = 
+        '<div style="text-align:center;padding:40px;"><i class="fa-solid fa-spinner fa-spin" style="font-size:40px;"></i><p>Carregando detalhes de ' + nomeAluno + '...</p></div>';
+    
+    carregarDetalhesAlunoAlerta(nomeAluno);
+}
 
+async function carregarDetalhesAlunoAlerta(nomeAluno) {
+    const container = document.getElementById('conteudo-detalhes-alerta');
+    
+    try {
+        const resp = await fetch(APPS_SCRIPT_V2 + '?aba=todos_os_dados');
+        const data = await resp.json();
+        
+        const hoje = new Date();
+        const limite = new Date(hoje);
+        limite.setDate(limite.getDate() - 30); // Últimos 30 dias
+        
+        // Filtra registros do aluno
+        const nomeNorm = nomeAluno.trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+        
+        const registrosAluno = {
+            atas: [],
+            apontamentos: [],
+            fatosNegativos: [],
+            documentosPendentes: []
+        };
+        
+        // Atas (últimos 30 dias)
+        (data.atas || []).forEach(ata => {
+            const nomeAta = (ata.aluno || '').trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+            const dataAta = parseDataModal(ata.data);
+            if (nomeAta === nomeNorm && dataAta && dataAta >= limite) {
+                registrosAluno.atas.push(ata);
+            }
+        });
+        
+        // Apontamentos (últimos 30 dias)
+        (data.apontamentos || []).forEach(ap => {
+            const nomeAp = (ap.aluno || '').trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+            const dataAp = parseDataModal(ap.dataAtual);
+            if (nomeAp === nomeNorm && dataAp && dataAp >= limite) {
+                registrosAluno.apontamentos.push(ap);
+            }
+        });
+        
+        // Fatos negativos (últimos 30 dias)
+        (data.fatos_seed || []).forEach(fato => {
+            const nomeFato = (fato.aluno || '').trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+            const dataFato = parseDataModal(fato.data);
+            if (nomeFato === nomeNorm && 
+                fato.tipo && fato.tipo.toLowerCase().includes('negativo') && 
+                dataFato && dataFato >= limite) {
+                registrosAluno.fatosNegativos.push(fato);
+            }
+        });
+        
+        // Documentos pendentes
+        (data.documentos || []).forEach(doc => {
+            const nomeDoc = (doc.aluno || '').trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+            if (nomeDoc === nomeNorm && doc.status && doc.status.toLowerCase() === 'pendente') {
+                registrosAluno.documentosPendentes.push(doc);
+            }
+        });
+        
+        // Monta o HTML
+        let html = '<div style="background:#fee2e2;padding:15px;border-radius:8px;margin-bottom:20px;border-left:5px solid #dc2626;">';
+        html += '<strong style="font-size:18px;">👤 ' + nomeAluno + '</strong>';
+        html += '<div style="font-size:12px;color:#64748b;margin-top:5px;">Últimos 30 dias (exceto documentos pendentes)</div>';
+        html += '</div>';
+        
+        // Seção Atas
+        html += '<h4 style="color:#dc2626;margin:15px 0 10px;"><i class="fa-solid fa-file-contract"></i> 📁 Atas Disciplinares (' + registrosAluno.atas.length + ')</h4>';
+        if (registrosAluno.atas.length === 0) {
+            html += '<p style="color:#94a3b8;">Nenhuma ata encontrada.</p>';
+        } else {
+            registrosAluno.atas.forEach(ata => {
+                html += '<div style="background:white;border-left:3px solid #dc2626;padding:10px;margin-bottom:8px;border-radius:4px;">';
+                html += '<strong>📁 Ata nº ' + (ata.numero || '---') + '</strong>';
+                html += '<div style="font-size:12px;color:#64748b;">📅 ' + (ata.data || '---') + '</div>';
+                if (ata.link) {
+                    html += '<a href="' + ata.link + '" target="_blank" style="color:#005088;font-size:12px;">📎 Ver Ata</a>';
+                }
+                html += '</div>';
+            });
+        }
+        
+        // Seção Apontamentos
+        html += '<h4 style="color:#005088;margin:15px 0 10px;"><i class="fa-solid fa-comment"></i> 📝 Apontamentos (' + registrosAluno.apontamentos.length + ')</h4>';
+        if (registrosAluno.apontamentos.length === 0) {
+            html += '<p style="color:#94a3b8;">Nenhum apontamento encontrado.</p>';
+        } else {
+            registrosAluno.apontamentos.forEach(ap => {
+                const setorNome = ap.setor === 'meivs' ? 'MEIV\'S' : ap.setor === 'pedagogico' ? 'Pedagógico' : ap.setor === 'adm' ? 'ADM' : 'Professores';
+                html += '<div style="background:white;border-left:3px solid #005088;padding:10px;margin-bottom:8px;border-radius:4px;">';
+                html += '<strong>' + setorNome + '</strong> — ' + (ap.texto || '---');
+                html += '<div style="font-size:12px;color:#64748b;">👤 ' + (ap.funcionario || '---') + ' | 📅 ' + (ap.dataAtual || '---') + '</div>';
+                html += '</div>';
+            });
+        }
+        
+        // Seção Fatos Negativos
+        html += '<h4 style="color:#b91c1c;margin:15px 0 10px;"><i class="fa-solid fa-triangle-exclamation"></i> ⚠️ Comunicados Negativos (' + registrosAluno.fatosNegativos.length + ')</h4>';
+        if (registrosAluno.fatosNegativos.length === 0) {
+            html += '<p style="color:#94a3b8;">Nenhum comunicado negativo encontrado.</p>';
+        } else {
+            registrosAluno.fatosNegativos.forEach(fato => {
+                html += '<div style="background:white;border-left:3px solid #b91c1c;padding:10px;margin-bottom:8px;border-radius:4px;">';
+                html += '<strong>⚠️ ' + (fato.tipo || 'Negativo') + '</strong>';
+                html += '<div style="font-size:13px;margin-top:3px;">' + (fato.descricao || '---') + '</div>';
+                html += '<div style="font-size:12px;color:#64748b;">📅 ' + (fato.data || '---') + '</div>';
+                html += '</div>';
+            });
+        }
+        
+        // Seção Documentos Pendentes
+        html += '<h4 style="color:#d97706;margin:15px 0 10px;"><i class="fa-solid fa-file"></i> 📄 Documentos Pendentes (' + registrosAluno.documentosPendentes.length + ')</h4>';
+        if (registrosAluno.documentosPendentes.length === 0) {
+            html += '<p style="color:#94a3b8;">Nenhum documento pendente.</p>';
+        } else {
+            registrosAluno.documentosPendentes.forEach(doc => {
+                html += '<div style="background:white;border-left:3px solid #d97706;padding:10px;margin-bottom:8px;border-radius:4px;">';
+                html += '<strong>📄 ' + (doc.documento || '---') + '</strong>';
+                html += '<div style="font-size:12px;color:#64748b;">📅 ' + (doc.data || '---') + ' | Status: ' + (doc.status || 'Pendente') + '</div>';
+                html += '</div>';
+            });
+        }
+        
+        container.innerHTML = html;
+    } catch (e) {
+        console.error(e);
+        container.innerHTML = '<p style="text-align:center;color:red;">Erro ao carregar detalhes.</p>';
+    }
+}
+
+function fecharModalDetalhesAlerta(e) {
+    if (e.target.id === 'modal-detalhes-aluno-alerta') {
+        document.getElementById('modal-detalhes-aluno-alerta').style.display = 'none';
+    }
+}
 // =============================================
 // PROGRESSÃO DE TURMAS
 // =============================================
