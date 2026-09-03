@@ -196,10 +196,9 @@
                                 </div>
                                 
                                 <div style="display:flex;gap:10px;">
-                                    <button onclick="salvarApontamentoMultiplo()" style="background:#005088;color:white;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-weight:bold;flex:1;">
-                                        💾 Salvar Apontamento
-                                    </button>
-                                    <button onclick="fecharSelecaoMultipla()" style="background:#94a3b8;color:white;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-weight:bold;">
+                                    <button id="btn-salvar-apontamento-multiplo" onclick="salvarApontamentoMultiplo()" style="background:#005088;color:white;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-weight:bold;flex:1;">
+    💾 Salvar Apontamento
+</button>                           <button onclick="fecharSelecaoMultipla()" style="background:#94a3b8;color:white;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-weight:bold;">
                                         ↩️ Voltar
                                     </button>
                                 </div>
@@ -2419,9 +2418,10 @@ function confirmarSelecaoMultipla() {
 }
 
    async function salvarApontamentoMultiplo() {
+    const btnSalvar = document.querySelector('#selecao-multipla .btn-salvar, #selecao-multipla button[onclick="salvarApontamentoMultiplo()"]');
     const texto = document.getElementById('texto-apontamento-multiplo').value.trim();
     
-    // 🆕 Usa o setor do usuário logado (travado)
+    // Usa o setor do usuário logado (travado)
     let setor = usuarioLogado.setor || 'meivs';
     
     // Converte "professores" para "direcao" (coluna dos professores)
@@ -2429,7 +2429,7 @@ function confirmarSelecaoMultipla() {
         setor = 'direcao';
     }
     
-    // 🆕 Se o select estiver habilitado (admin nível 3+), usa o valor selecionado
+    // Se o select estiver habilitado (admin nível 3+), usa o valor selecionado
     const setorSelect = document.getElementById('setor-apontamento-multiplo');
     if (setorSelect && !setorSelect.disabled) {
         setor = setorSelect.value;
@@ -2445,6 +2445,14 @@ function confirmarSelecaoMultipla() {
     if (!texto) {
         alert('Digite o apontamento.');
         return;
+    }
+    
+    // 🆕 Desabilita o botão e mostra feedback
+    if (btnSalvar) {
+        btnSalvar.disabled = true;
+        btnSalvar.style.opacity = '0.6';
+        btnSalvar.style.cursor = 'wait';
+        btnSalvar.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando ' + alunosSelecionados.length + ' apontamento(s)...';
     }
     
     const agora = new Date();
@@ -2467,7 +2475,6 @@ function confirmarSelecaoMultipla() {
                 const result = await salvarNoServidor(dadosApontamento);
                 if (result.status === 'success') salvos++;
             } else {
-                // 🆕 Se offline, salva localmente
                 if (db && db.db) {
                     await db.salvarApontamento(dadosApontamento);
                     salvos++;
@@ -2479,14 +2486,30 @@ function confirmarSelecaoMultipla() {
     }
     
     if (salvos > 0) {
-        mostrarToast('✅ Apontamento salvo para ' + salvos + ' aluno(s)!', 'sucesso');
+        mostrarToast('✅ ' + salvos + ' apontamento(s) salvo(s) com sucesso!', 'sucesso');
         document.getElementById('texto-apontamento-multiplo').value = '';
         alunosSelecionados = [];
+        
+        // 🆕 Restaura o botão antes de fechar
+        if (btnSalvar) {
+            btnSalvar.disabled = false;
+            btnSalvar.style.opacity = '1';
+            btnSalvar.style.cursor = 'pointer';
+            btnSalvar.innerHTML = '💾 Salvar Apontamento';
+        }
+        
         fecharSelecaoMultipla();
         await carregarRegistrosDoServidor();
         filtrarRegistrosPorAluno();
     } else {
-        mostrarToast('❌ Erro ao salvar.', 'erro');
+        // 🆕 Restaura o botão em caso de erro
+        if (btnSalvar) {
+            btnSalvar.disabled = false;
+            btnSalvar.style.opacity = '1';
+            btnSalvar.style.cursor = 'pointer';
+            btnSalvar.innerHTML = '💾 Salvar Apontamento';
+        }
+        mostrarToast('❌ Erro ao salvar. Tente novamente.', 'erro');
     }
 }
 
