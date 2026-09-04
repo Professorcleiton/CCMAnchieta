@@ -1324,28 +1324,29 @@ async function enviarPreConselho() {
     if (outros) instrumentos.push(`Outros: ${outros}`);
 
     const payload = {
-        operacao: 'PRE_CONSELHO_SALVAR',
-        professor: usuarioLogado.nome,
-        disciplina: disciplina,
-        turma: turma,
-        trimestre: document.getElementById('pc-trimestre').value,
-        q1: document.getElementById('pc-q1').value,
-        q2: document.getElementById('pc-q2').value,
-        q3: document.getElementById('pc-q3').value,
-        q4: document.getElementById('pc-q4').value,
-        q5: document.getElementById('pc-q5').value,
-        q6: document.getElementById('pc-q6').value.trim(),
-        q7: document.getElementById('pc-q7').value.trim(),
-        q8: document.getElementById('pc-q8').value.trim(),
-        q9: document.getElementById('pc-q9').value.trim(),
-        q10: document.getElementById('pc-q10').value.trim(),
-        q11: document.getElementById('pc-q11').value.trim(),
-        q12: instrumentos.join(', '),
-        q14: document.getElementById('pc-q14').value,
-        q16: document.getElementById('pc-q16').value.trim(),
-        q17: document.getElementById('pc-q17').value,
-        q18: document.getElementById('pc-q18').value.trim()
-    };
+    operacao: 'PRE_CONSELHO_SALVAR',
+    professor: usuarioLogado.nome,
+    disciplina: disciplina,
+    turma: turma,
+    trimestre: document.getElementById('pc-trimestre').value,
+    q1: document.getElementById('pc-q1').value,
+    q2: document.getElementById('pc-q2').value,
+    q3: document.getElementById('pc-q3').value,
+    q4: document.getElementById('pc-q4').value,
+    q5: document.getElementById('pc-q5').value,
+    q6: document.getElementById('pc-q6').value.trim(),
+    q7: document.getElementById('pc-q7').value.trim(),
+    q8: document.getElementById('pc-q8').value.trim(),
+    q9: document.getElementById('pc-q9').value.trim(),
+    q10: document.getElementById('pc-q10').value.trim(),
+    q11: document.getElementById('pc-q11').value.trim(),
+    q12: instrumentos.join(', '),
+    q14: document.getElementById('pc-q14').value,
+    q16: document.getElementById('pc-q16').value.trim(),
+    q17: document.getElementById('pc-q17').value,
+    q17_justificativa: document.getElementById('pc-q17-justificativa').value.trim(), // 🆕
+    q18: document.getElementById('pc-q18').value.trim()
+};
 
     try {
         const resp = await fetch(APPS_SCRIPT_URL, { 
