@@ -2445,8 +2445,156 @@ async function salvarGradeAtual() {
     }
 }
 
-function autoPreencherGrade() {
-    alert('🛠️ Funcionalidade em desenvolvimento!\n\nEm breve, o sistema preencherá a grade automaticamente respeitando:\n- Carga horária de cada disciplina\n- Disponibilidade dos professores\n- Regras de laboratório e tablet');
+async function autoPreencherGrade() {
+    if (!turmaEditando) {
+        alert('Selecione uma turma primeiro.');
+        return;
+    }
+    
+    if (!confirm('⚡ O Auto-Preencher vai usar como referência as disciplinas do ano atual e preencher a grade automaticamente.\n\nContinuar?')) return;
+    
+    const btn = document.querySelector('#modal-gestao-horarios .btn-warning');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Preenchendo...';
+    }
+    
+    try {
+        // Buscar resumo de disciplinas
+        const resp = await fetch(APPS_SCRIPT_V2 + '?aba=resumo_disciplinas');
+        const data = await resp.json();
+        
+        if (data.status !== 'success' || !data.resumo || !data.resumo[turmaEditando]) {
+            alert('Nenhuma informação encontrada para a turma ' + turmaEditando + '.');
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '⚡ Auto-Preencher';
+            }
+            return;
+        }
+        
+        const disciplinasTurma = data.resumo[turmaEditando];
+        
+        // Regras de equipamento
+        const regrasEquipamento = {
+            'Programação': { tipo: 'Lab. Informática', frequencia: 100 },
+            'Robótica': { tipo: 'Lab. Informática', frequencia: 100 },
+            'REC MAT': { tipo: 'Tablet', frequencia: 1 },
+            'REC PORT': { tipo: 'Tablet', frequencia: 1 },
+            'Redação': { tipo: 'Lab. Informática', frequencia: 1 },
+            'Inglês': { tipo: 'Lab. Informática', frequencia: 1 },
+            'Matemática': { tipo: 'Lab. Informática', frequencia: 1 },
+            'Português': { tipo: 'Lab. Informática', frequencia: 1 }
+        };
+        
+        // Limpa a grade
+        limparGradeSemConfirmacao();
+        
+        // Cria lista de aulas a distribuir
+        let aulasParaDistribuir = [];
+        
+        Object.keys(disciplinasTurma).forEach(disciplina => {
+            const qtd = disciplinasTurma[disciplina].qtd;
+            const professor = disciplinasTurma[disciplina].professor;
+            const regra = regrasEquipamento[disciplina] || null;
+            
+            let localPadrao = 'Sala 1';
+            let qtdLab = 0;
+            let qtdTablet = 0;
+            
+            if (regra) {
+                if (regra.frequencia === 100) {
+                    // Todas as aulas no equipamento
+                    if (regra.tipo === 'Lab. Informática') {
+                        qtdLab = qtd;
+                        localPadrao = 'Lab. Informática';
+                    } else if (regra.tipo === 'Tablet') {
+                        qtdTablet = qtd;
+                        localPadrao = 'Tablet';
+                    }
+                } else {
+                    // Apenas 1 aula no equipamento
+                    if (regra.tipo === 'Lab. Informática') {
+                        qtdLab = 1;
+                    } else if (regra.tipo === 'Tablet') {
+                        qtdTablet = 1;
+                    }
+                }
+            }
+            
+            // Adiciona as aulas à lista
+            for (let i = 0; i < qtd; i++) {
+                let local = localPadrao;
+                
+                // Se tem aulas de Lab e esta é uma delas
+                if (qtdLab > 0 && i === 0) {
+                    local = 'Lab. Informática';
+                } else if (qtdTablet > 0 && i === 0) {
+                    local = 'Tablet';
+                }
+                
+                aulasParaDistribuir.push({
+                    disciplina: disciplina,
+                    professor: professor,
+                    local: local
+                });
+            }
+        });
+        
+        // Distribui as aulas na grade
+        let idx = 0;
+        
+        DIAS.forEach(dia => {
+            AULAS.forEach((aula, aulaIdx) => {
+                if (idx < aulasParaDistribuir.length) {
+                    const aulaInfo = aulasParaDistribuir[idx];
+                    gradeAtual[dia][aula] = {
+                        disciplina: aulaInfo.disciplina,
+                        professor: aulaInfo.professor,
+                        local: aulaInfo.local
+                    };
+                    idx++;
+                }
+            });
+        });
+        
+        renderizarGrade();
+        
+        // Verifica conflitos
+        let conflitos = 0;
+        DIAS.forEach(dia => {
+            AULAS.forEach(aula => {
+                const celula = gradeAtual[dia][aula];
+                if (celula.disciplina && verificarConflito(dia, aula, celula.disciplina, celula.professor)) {
+                    conflitos++;
+                }
+            });
+        });
+        
+        if (conflitos > 0) {
+            showToast('⚠️ Grade preenchida com ' + conflitos + ' conflito(s). Revise os destacados em vermelho.', 'warning');
+        } else {
+            showToast('✅ Grade preenchida automaticamente sem conflitos!', 'success');
+        }
+        
+    } catch (e) {
+        console.error('Erro no auto-preencher:', e);
+        showToast('❌ Erro ao preencher grade.', 'error');
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '⚡ Auto-Preencher';
+        }
+    }
+}
+
+function limparGradeSemConfirmacao() {
+    DIAS.forEach(dia => {
+        gradeAtual[dia] = {};
+        AULAS.forEach(aula => {
+            gradeAtual[dia][aula] = { disciplina: '', professor: '', local: '' };
+        });
+    });
 }
 
 function limparGrade() {
