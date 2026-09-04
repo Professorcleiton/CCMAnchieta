@@ -1684,3 +1684,22 @@ select#select-alunos {
     display: flex;
     flex: 1;            /* ocupa todo o espaço disponível, empurrando o footer para baixo */
 }
+@media (max-width: 768px) {
+    #btn-sugestao-flutuante {
+        width: 45px;
+        height: 45px;
+        font-size: 18px;
+        bottom: 15px;
+        right: 15px;
+    }
+    
+    #banner-sugestoes {
+        font-size: 11px;
+        padding: 6px 10px;
+    }
+    
+    #banner-sugestoes button {
+        font-size: 10px;
+        padding: 4px 10px;
+    }
+}
