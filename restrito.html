@@ -1428,7 +1428,7 @@ async function carregarHorariosProfessor() {
         
         let nomeProfessor = usuarioLogado.nome;
         
-        // 🆕 Busca TODOS os horários e filtra localmente (mais flexível)
+        // Busca TODOS os horários
         let url = APPS_SCRIPT_V2 + '?aba=horarios';
         let response = await fetch(url);
         let data = await response.json();
@@ -1437,27 +1437,55 @@ async function carregarHorariosProfessor() {
         // Normaliza o nome do professor logado
         const nomeLogadoNorm = nomeProfessor.trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
         
-        // Filtra localmente (ignora maiúsculas/minúsculas, acentos, espaços)
+        // Filtra horários normais
         let horarios = todos.filter(h => {
             const nomeProf = (h.professor || '').trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
             const nomeApoio = (h.professor_apoio || '').trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
             
             if (nomeProf === nomeLogadoNorm) {
                 h.como_apoio = false;
+                h.isHA = false;
                 return true;
             }
             if (nomeApoio === nomeLogadoNorm) {
                 h.como_apoio = true;
+                h.isHA = false;
                 return true;
             }
             return false;
         });
         
-        // Remove duplicados (mesma turma, dia, aula)
+        // 🆕 Buscar H.A. do professor
+        try {
+            const respHA = await fetch(APPS_SCRIPT_V2 + '?aba=horas_atividade');
+            const dataHA = await respHA.json();
+            
+            dataHA.forEach(h => {
+                const nomeHA = (h.professor || '').trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+                if (nomeHA === nomeLogadoNorm) {
+                    horarios.push({
+                        turma: '---',
+                        dia: h.dia,
+                        aula: h.aula,
+                        horario: h.horario,
+                        disciplina: 'H.A. - Planejamento',
+                        professor: h.professor,
+                        local: 'Coordenação',
+                        como_apoio: false,
+                        isHA: true,
+                        turno: h.turno || 'Manhã'
+                    });
+                }
+            });
+        } catch (e) {
+            console.log('Sem H.A. cadastrada para este professor.');
+        }
+        
+        // Remove duplicados
         const unicos = [];
         const chaves = new Set();
         horarios.forEach(h => {
-            const chave = h.turma + '|' + h.dia + '|' + h.aula;
+            const chave = h.turma + '|' + h.dia + '|' + h.aula + '|' + (h.isHA ? 'HA' : '');
             if (!chaves.has(chave)) {
                 chaves.add(chave);
                 unicos.push(h);
@@ -1480,22 +1508,29 @@ function renderizarHorariosNoModal(horarios, container) {
     const dias = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'];
     const coresDia = { 'Segunda': '#0284c7', 'Terça': '#0d9488', 'Quarta': '#4f46e5', 'Quinta': '#b91c1c', 'Sexta': '#f59e0b' };
     
-    const turmas = [...new Set(horarios.map(h => h.turma))];
+    const turmas = [...new Set(horarios.filter(h => !h.isHA).map(h => h.turma))];
+    const totalAulas = horarios.filter(h => !h.isHA).length;
+    const totalHA = horarios.filter(h => h.isHA).length;
     
     let html = '<div style="display:flex;gap:15px;margin-bottom:20px;flex-wrap:wrap;">';
-    html += '<div style="background:#f8fafc;padding:15px;border-radius:8px;text-align:center;min-width:120px;"><strong style="font-size:24px;color:#6366f1;">' + horarios.length + '</strong><br><small>Aulas/Semana</small></div>';
+    html += '<div style="background:#f8fafc;padding:15px;border-radius:8px;text-align:center;min-width:120px;"><strong style="font-size:24px;color:#6366f1;">' + totalAulas + '</strong><br><small>Aulas/Semana</small></div>';
     html += '<div style="background:#f8fafc;padding:15px;border-radius:8px;text-align:center;min-width:120px;"><strong style="font-size:24px;color:#6366f1;">' + turmas.length + '</strong><br><small>Turmas</small></div>';
+    html += '<div style="background:#fef3c7;padding:15px;border-radius:8px;text-align:center;min-width:120px;"><strong style="font-size:24px;color:#92400e;">' + totalHA + '</strong><br><small>H.A. - Planejamento</small></div>';
     html += '</div>';
     
     dias.forEach(dia => {
         const aulas = horarios.filter(h => h.dia === dia).sort((a, b) => {
-            const getMin = (h) => { const p = h.split('-')[0].trim().split(':'); return parseInt(p[0])*60 + parseInt(p[1]); };
-            return getMin(a.horario) - getMin(b.horario);
+            const getMin = (h) => { 
+                if (!h.horario) return 0;
+                const p = h.horario.split('-')[0].trim().split(':'); 
+                return parseInt(p[0])*60 + parseInt(p[1]); 
+            };
+            return getMin(a) - getMin(b);
         });
         if (aulas.length === 0) return;
         
         html += '<div style="background:white;border-radius:8px;margin-bottom:10px;overflow:hidden;border:1px solid #e2e8f0;">';
-        html += '<div style="padding:10px 15px;font-weight:bold;color:white;background:' + (coresDia[dia] || '#6366f1') + ';">' + dia.toUpperCase() + '-FEIRA <span style="font-size:12px;opacity:0.8;">(' + aulas.length + ' aula' + (aulas.length > 1 ? 's' : '') + ')</span></div>';
+        html += '<div style="padding:10px 15px;font-weight:bold;color:white;background:' + (coresDia[dia] || '#6366f1') + ';">' + dia.toUpperCase() + '-FEIRA <span style="font-size:12px;opacity:0.8;">(' + aulas.length + ')</span></div>';
         html += '<table style="width:100%;border-collapse:collapse;font-size:13px;">';
         html += '<thead><tr style="background:#f8fafc;"><th style="padding:8px;">Aula</th><th style="padding:8px;">Horário</th><th style="padding:8px;">Turma</th><th style="padding:8px;">Disciplina</th><th style="padding:8px;">Local</th></tr></thead><tbody>';
         
@@ -1503,8 +1538,23 @@ function renderizarHorariosNoModal(horarios, container) {
             const isApoio = a.como_apoio ? ' <span style="background:#fef3c7;color:#92400e;padding:2px 6px;border-radius:10px;font-size:10px;">Apoio</span>' : '';
             const isLab = a.local && a.local.toLowerCase().includes('lab') ? ' 🖥️' : '';
             const isTablet = a.local && a.local.toLowerCase().includes('tablet') ? ' 📱' : '';
-            html += '<tr><td style="padding:8px;"><strong>' + a.aula + '</strong></td><td style="padding:8px;">' + a.horario + '</td><td style="padding:8px;"><span style="background:#e0f2fe;color:#0369a1;padding:3px 8px;border-radius:10px;font-size:12px;">' + a.turma + '</span></td><td style="padding:8px;">' + (a.disciplina || '—') + isApoio + isLab + isTablet + '</td><td style="padding:8px;">' + (a.local || '—') + '</td></tr>';
-            if (a.aula === '3ª') {
+            const isHA = a.isHA ? ' <span style="background:#fef3c7;color:#92400e;padding:2px 6px;border-radius:10px;font-size:10px;">H.A.</span>' : '';
+            
+            if (isHA) {
+                // Destacar linha de H.A. com cor diferente
+                html += '<tr style="background:#fef3c7;">';
+            } else {
+                html += '<tr>';
+            }
+            
+            html += '<td style="padding:8px;"><strong>' + a.aula + '</strong></td>';
+            html += '<td style="padding:8px;">' + (a.horario || '—') + '</td>';
+            html += '<td style="padding:8px;"><span style="background:#e0f2fe;color:#0369a1;padding:3px 8px;border-radius:10px;font-size:12px;">' + (a.turma || '---') + '</span></td>';
+            html += '<td style="padding:8px;">' + (a.disciplina || '—') + isHA + isApoio + isLab + isTablet + '</td>';
+            html += '<td style="padding:8px;">' + (a.local || '—') + '</td>';
+            html += '</tr>';
+            
+            if (a.aula === '3ª' && !a.isHA) {
                 const intervalo = a.turno === 'Manhã' ? '09:30 - 09:40' : '15:30 - 15:40';
                 html += '<tr style="background:#fef3c7;"><td colspan="5" style="text-align:center;padding:8px;font-weight:bold;font-size:12px;">☕ INTERVALO — ' + intervalo + '</td></tr>';
             }
@@ -2206,10 +2256,35 @@ async function carregarDisciplinas() {
                     mapa[h.disciplina] = h.professor || '';
                 }
             });
+            
+            // 🆕 Regras de Lab/Tablet
+            const regrasEquipamento = {
+                'Programação': { tipo: 'Lab. Informática', frequencia: 100 },
+                'Robótica': { tipo: 'Lab. Informática', frequencia: 100 },
+                'REC MAT': { tipo: 'Tablet', frequencia: 1 },
+                'REC PORT': { tipo: 'Tablet', frequencia: 1 },
+                'Redação': { tipo: 'Lab. Informática', frequencia: 1 },
+                'Inglês': { tipo: 'Lab. Informática', frequencia: 1 },
+                'Matemática': { tipo: 'Lab. Informática', frequencia: 1 },
+                'Português': { tipo: 'Lab. Informática', frequencia: 1 }
+            };
+            
             disciplinasDisponiveis = Object.keys(mapa).map(d => ({
                 nome: d,
-                professor: mapa[d]
+                professor: mapa[d],
+                // 🆕 Atributos de equipamento
+                precisaLab: regrasEquipamento[d] ? regrasEquipamento[d].tipo === 'Lab. Informática' : false,
+                precisaTablet: regrasEquipamento[d] ? regrasEquipamento[d].tipo === 'Tablet' : false,
+                frequenciaLab: regrasEquipamento[d] ? regrasEquipamento[d].frequencia : 0,
+                tipoEquipamento: regrasEquipamento[d] ? regrasEquipamento[d].tipo : null
             }));
+            
+            // Ordena: primeiro as que precisam de equipamento
+            disciplinasDisponiveis.sort((a, b) => {
+                if (a.tipoEquipamento && !b.tipoEquipamento) return -1;
+                if (!a.tipoEquipamento && b.tipoEquipamento) return 1;
+                return a.nome.localeCompare(b.nome);
+            });
         }
     } catch (e) {
         console.error('Erro ao carregar disciplinas:', e);
