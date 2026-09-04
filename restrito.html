@@ -102,6 +102,16 @@
                     <span id="status-pendentes" style="margin-left: 8px; font-size: 10px; color: #64748b; display: none;"></span>
                 </div>
 
+                <!-- Banner de sugestões -->
+<div id="banner-sugestoes" style="background: linear-gradient(135deg, #fef3c7, #fde68a); padding: 8px 15px; text-align: center; border-bottom: 2px solid #f59e0b; display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap;">
+    <span style="font-size: 12px; font-weight: 600; color: #92400e;">
+        💡 Tem alguma ideia para melhorar o SIGA?
+    </span>
+    <button onclick="abrirModalSugestoes()" style="background: #f59e0b; color: white; border: none; padding: 5px 14px; border-radius: 15px; cursor: pointer; font-weight: bold; font-size: 11px; white-space: nowrap;">
+        Enviar Sugestão
+    </button>
+</div>
+                
                 <!-- ========================================== -->
                 <!-- CAIXA PRINCIPAL DOS APONTAMENTOS -->
                 <!-- ========================================== -->
@@ -1063,6 +1073,12 @@
         </div>
     </div>
 </div>
+
+<!-- Botão flutuante de sugestões -->
+<button id="btn-sugestao-flutuante" onclick="abrirModalSugestoes()" style="position: fixed; bottom: 20px; right: 20px; width: 55px; height: 55px; border-radius: 50%; background: #f59e0b; color: white; border: none; font-size: 22px; cursor: pointer; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.5); z-index: 9990; transition: all 0.3s; display: flex; align-items: center; justify-content: center;" title="Enviar sugestão">
+    <i class="fa-solid fa-lightbulb"></i>
+</button>
+    
           <script src="db.js"></script>
         <script src="script.js"></script>
 <script>
