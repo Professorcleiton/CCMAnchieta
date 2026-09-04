@@ -1496,7 +1496,8 @@ async function carregarRegistrosPreConselho() {
             q14: r.c[17]?.v || '',
             q16: r.c[18]?.v || '',
             q17: r.c[19]?.v || '',
-            q18: r.c[20]?.v || '' 
+            q17_justificativa: r.c[20]?.v || '', // 🆕
+            q18: r.c[21]?.v || '' 
         }));
     } catch (e) {
         console.error("Erro ao carregar Pré-Conselho:", e);
