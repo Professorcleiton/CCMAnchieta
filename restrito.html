@@ -322,10 +322,15 @@
                             <button id="btn-meus-horarios" class="btn-salvar" style="background-color: #6366f1; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: none; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(99, 102, 241, 0.2); margin-bottom: 5px;" onclick="abrirMeusHorarios()">
                                 <i class="fa-solid fa-clock" style="font-size: 18px;"></i> Meus Horários
                             </button>
+
+                            <button id="btn-sugestoes" class="btn-salvar" style="background-color: #f59e0b; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(245, 158, 11, 0.2); margin-bottom: 5px;" onclick="abrirModalSugestoes()">
+                                <i class="fa-solid fa-lightbulb" style="font-size: 18px;"></i> Sugestões e Melhorias
+                            </button>
+                            
                             <!-- BOTÃO - RCO -->
-<a href="https://rco.paas.pr.gov.br" target="_blank" class="btn-salvar" style="background-color: #0284c7; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(2, 132, 199, 0.2); margin-bottom: 5px;">
-    <i class="fa-solid fa-book-open" style="font-size: 18px;"></i> RCO - Registro de Classe Online
-</a>
+                    <a href="https://rco.paas.pr.gov.br" target="_blank" class="btn-salvar" style="background-color: #0284c7; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(2, 132, 199, 0.2); margin-bottom: 5px;">
+                            <i class="fa-solid fa-book-open" style="font-size: 18px;"></i> RCO - Registro de Classe Online
+                    </a>
 
 <!-- BOTÃO - REGISTRO PONTO -->
 <a href="https://registrofrequenciaseed.paas.pr.gov.br" target="_blank" class="btn-salvar" style="background-color: #059669; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(5, 150, 105, 0.2); margin-bottom: 5px;">
@@ -864,7 +869,39 @@
     </div>
 </div>
 
-
+    <!-- MODAL DE SUGESTÕES -->
+<div class="modal-overlay" id="modal-sugestoes" onclick="fecharModalSugestoes(event)">
+    <div class="modal-content" style="max-width: 600px;">
+        <div class="modal-header" style="background-color: #f59e0b;">
+            <h3><i class="fa-solid fa-lightbulb"></i> Sugestões e Melhorias</h3>
+            <button onclick="document.getElementById('modal-sugestoes').style.display='none'" style="background:none;border:none;color:white;font-size:20px;cursor:pointer;">&times;</button>
+        </div>
+        <div class="modal-body" style="padding: 20px;">
+            <div style="margin-bottom: 15px;">
+                <label style="font-weight: bold; display: block; margin-bottom: 5px;">Tipo:</label>
+                <select id="sugestao-tipo" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                    <option value="Melhoria">💡 Melhoria</option>
+                    <option value="Bug">🐛 Bug/Erro</option>
+                    <option value="Ideia Nova">✨ Ideia Nova</option>
+                    <option value="Outro">📝 Outro</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="font-weight: bold; display: block; margin-bottom: 5px;">Sua sugestão:</label>
+                <textarea id="sugestao-texto" rows="4" placeholder="Descreva sua sugestão ou melhoria..." style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; resize: vertical;"></textarea>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button onclick="enviarSugestao()" id="btn-enviar-sugestao" style="background: #f59e0b; color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; flex: 1;">
+                    📨 Enviar Sugestão
+                </button>
+                <button onclick="document.getElementById('modal-sugestoes').style.display='none'" style="background: #e2e8f0; color: #475569; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer;">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+    
         <!-- ========================================== -->
 <!-- MODAL DE HORÁRIOS DO PROFESSOR -->
 <!-- ========================================== -->
@@ -3007,6 +3044,68 @@ async function carregarRecadosAniversario() {
         });
     } catch (e) { console.error('Erro ao carregar recados:', e); }
 }
+
+// =============================================
+// 💡 SUGESTÕES E MELHORIAS
+// =============================================
+function abrirModalSugestoes() {
+    document.getElementById('modal-sugestoes').style.display = 'flex';
+    document.getElementById('sugestao-texto').value = '';
+    document.getElementById('sugestao-tipo').value = 'Melhoria';
+}
+
+function fecharModalSugestoes(e) {
+    if (e.target.id === 'modal-sugestoes') {
+        document.getElementById('modal-sugestoes').style.display = 'none';
+    }
+}
+
+async function enviarSugestao() {
+    const tipo = document.getElementById('sugestao-tipo').value;
+    const texto = document.getElementById('sugestao-texto').value.trim();
+    const btn = document.getElementById('btn-enviar-sugestao');
+    
+    if (!texto) {
+        alert('Digite sua sugestão.');
+        return;
+    }
+    
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Enviando...';
+    
+    const payload = {
+        operacao: "SALVAR_SUGESTAO",
+        tipo: tipo,
+        texto: texto,
+        autor: usuarioLogado ? usuarioLogado.nome : 'Anônimo',
+        emailAutor: usuarioLogado ? usuarioLogado.email : '',
+        data: new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+    };
+    
+    try {
+        const resp = await fetch(APPS_SCRIPT_V2, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify(payload)
+        });
+        
+        const result = await resp.json();
+        
+        if (result.status === 'success') {
+            mostrarToast('✅ Sugestão enviada com sucesso! Obrigado!', 'sucesso');
+            document.getElementById('modal-sugestoes').style.display = 'none';
+            document.getElementById('sugestao-texto').value = '';
+        } else {
+            alert('❌ Erro: ' + (result.message || 'Falha ao enviar.'));
+        }
+    } catch (e) {
+        alert('❌ Erro de conexão.');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '📨 Enviar Sugestão';
+    }
+}
+    
 </script>
   
 </body>
