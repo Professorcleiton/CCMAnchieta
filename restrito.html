@@ -1328,6 +1328,45 @@ function checarSeUsuarioExisteParaEditar() {
         })
         .catch(e => console.error('Erro ao buscar usuários:', e));
 }
+
+// =============================================
+// 🆕 GARANTIR PREFERÊNCIAS DO PROFESSOR
+// =============================================
+document.addEventListener('DOMContentLoaded', function() {
+    const selectSetor = document.getElementById('admin-user-setor');
+    if (selectSetor) {
+        selectSetor.addEventListener('change', function() {
+            const divPref = document.getElementById('preferencias-professor');
+            if (divPref) {
+                divPref.style.display = (this.value === 'professores' || this.value === 'direcao') ? 'block' : 'none';
+            }
+        });
+    }
+    
+    const btnAbrirAdmin = document.getElementById('btn-abrir-admin');
+    if (btnAbrirAdmin) {
+        btnAbrirAdmin.addEventListener('click', function() {
+            setTimeout(function() {
+                const setor = document.getElementById('admin-user-setor');
+                const divPref = document.getElementById('preferencias-professor');
+                if (setor && divPref) {
+                    divPref.style.display = (setor.value === 'professores' || setor.value === 'direcao') ? 'block' : 'none';
+                }
+            }, 200);
+        });
+    }
+});
+
+// =============================================
+// FUNÇÃO TOGGLE PREFERÊNCIAS (GARANTIDA)
+// =============================================
+function togglePreferenciasProfessor() {
+    const setor = document.getElementById('admin-user-setor');
+    const divPref = document.getElementById('preferencias-professor');
+    if (setor && divPref) {
+        divPref.style.display = (setor.value === 'professores' || setor.value === 'direcao') ? 'block' : 'none';
+    }
+}
     
 function togglePreferenciasProfessor() {
     const setor = document.getElementById('admin-user-setor').value;
