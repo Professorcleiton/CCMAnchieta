@@ -330,13 +330,13 @@
                         </div>
                     </div>
 
-                    <!-- Abas mobile -->
-                    <div id="mobile-tabs-container">
-                        <button class="tab-button active" onclick="alternarAbaMobile('meivs', this)">MEIV'S</button>
-                        <button class="tab-button" onclick="alternarAbaMobile('pedagogico', this)">PEDAG.</button>
-                        <button class="tab-button" onclick="alternarAbaMobile('adm', this)">ADM</button>
-                        <button class="tab-button" onclick="alternarAbaMobile('direcao', this)">PROFS.</button>
-                    </div>
+                   <!-- Abas mobile - OCULTAS por padrão -->
+<div id="mobile-tabs-container" style="display: none;">
+    <button class="tab-button active" onclick="alternarAbaMobile('meivs', this)">MEIV'S</button>
+    <button class="tab-button" onclick="alternarAbaMobile('pedagogico', this)">PEDAG.</button>
+    <button class="tab-button" onclick="alternarAbaMobile('adm', this)">ADM</button>
+    <button class="tab-button" onclick="alternarAbaMobile('direcao', this)">PROFS.</button>
+</div>
 
                     <div class="board-container" id="siga-columns-grid">
                         <section class="sector-column active" id="col-meivs">
@@ -495,28 +495,10 @@
             </main>
         </div>
 
-        <!-- Footer -->
-        <footer style="background: #005088; color: #cbd5e1; padding: 20px 30px; text-align: center; font-size: 13px; border-top: 4px solid #eab308; margin-top: 0;">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; max-width: 1200px; margin: 0 auto;">
-                <div style="text-align: left;">
-                    <strong style="color: #eab308; font-size: 14px;">CCM Anchieta</strong><br>
-                    Av. Wenceslau Bras, 356 – Sul Brasileira<br>
-                    Cruzeiro do Oeste – PR | CEP 87.400-000<br>
-                    <i class="fa-solid fa-phone"></i> (44) 3676-1247
-                </div>
-                <div style="text-align: center;">
-                    <img src="img/SIGARD.png" alt="SIGA" style="height: 40px; opacity: 0.8; margin-bottom: 5px;"><br>
-                    <span>SIGA – Sistema Integrado de Gestão Anchieta</span><br>
-                    <span style="font-size: 11px; color: #94a3b8;">Desenvolvido pela equipe pedagógica e administrativa</span>
-                </div>
-                <div style="text-align: right;">
-                    <span style="font-size: 12px; color: #94a3b8;">Acesse também:</span><br>
-                    <a href="index.html" style="color: #eab308; text-decoration: none;">Página Inicial</a> |
-                    <a href="responsaveis.html" style="color: #eab308; text-decoration: none;">Portal dos Pais</a><br>
-                    <span style="font-size: 11px;">&copy; 2026 – Todos os direitos reservados</span>
-                </div>
-            </div>
-        </footer>
+    <!-- Footer simplificado -->
+<footer style="background: #005088; color: #cbd5e1; padding: 12px 20px; text-align: center; font-size: 12px; border-top: 3px solid #eab308;">
+    &copy; 2026 – CCM Anchieta – Todos os direitos reservados
+</footer>
     </div> <!-- fecha #app-interface -->
 
     <!-- ========================================== -->
