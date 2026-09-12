@@ -44,7 +44,7 @@
         </div>
     </div>
 
-       <!-- INTERFACE PRINCIPAL -->
+    <!-- INTERFACE PRINCIPAL -->
     <div id="app-interface">
         <div class="content-wrapper">
             <aside class="sidebar" id="app-sidebar">
@@ -89,7 +89,7 @@
                     </div>
                 </header>
 
-                <!-- 🆕 Banner de Aniversariantes -->
+                <!-- Banner de Aniversariantes -->
                 <div id="banner-aniversario" style="display:none; background: linear-gradient(135deg, #fef3c7, #fde68a); padding: 10px 20px; text-align: center; font-size: 14px; font-weight: 600; color: #92400e; border-bottom: 3px solid #f59e0b; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap;">
                     <span id="texto-banner-aniversario">🎂 Hoje é aniversário de: </span>
                     <button onclick="fecharBannerAniversario()" style="background:#92400e;color:white;border:none;padding:4px 12px;border-radius:15px;cursor:pointer;font-size:12px;font-weight:bold;">OK 🎉</button>
@@ -101,23 +101,13 @@
                     <span id="status-texto">Online</span>
                     <span id="status-pendentes" style="margin-left: 8px; font-size: 10px; color: #64748b; display: none;"></span>
                 </div>
-
-                <!-- Banner de sugestões -->
-<div id="banner-sugestoes" style="background: linear-gradient(135deg, #fef3c7, #fde68a); padding: 8px 15px; text-align: center; border-bottom: 2px solid #f59e0b; display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap;">
-    <span style="font-size: 12px; font-weight: 600; color: #92400e;">
-        💡 Tem alguma ideia para melhorar o SIGA?
-    </span>
-    <button onclick="abrirModalSugestoes()" style="background: #f59e0b; color: white; border: none; padding: 5px 14px; border-radius: 15px; cursor: pointer; font-weight: bold; font-size: 11px; white-space: nowrap;">
-        Enviar Sugestão
-    </button>
-</div>
                 
                 <!-- ========================================== -->
                 <!-- CAIXA PRINCIPAL DOS APONTAMENTOS -->
                 <!-- ========================================== -->
                 <div id="aba-apontamentos" style="display: block; width: 100%;">
                     
-                    <!-- Barra de Resumo (aparece ao selecionar aluno) -->
+                    <!-- Barra de Resumo -->
                     <div class="summary-dashboard-bar" id="student-mini-dash" style="display: none;">
                         <div class="metric-mini-card"><i class="fa-solid fa-chart-line"></i> Apontamentos: <span class="count-number" id="dash-total-count">0</span></div>
                         <div class="mini-chart-bar-container">
@@ -140,7 +130,7 @@
                         <h3 style="margin-top: 15px; font-size: 18px;">Relatório de Apontamentos</h3>
                     </div>
 
-                    <!-- 🆕 Filtro de Período -->
+                    <!-- Filtro de Período -->
                     <div id="filtro-periodo" style="margin-bottom: 10px; background: white; padding: 12px 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
                         <span style="font-weight: bold; color: #0f172a; font-size: 13px;">
                             <i class="fa-solid fa-calendar"></i> Período:
@@ -186,9 +176,7 @@
                                     </label>
                                     <span id="contador-selecionados" style="font-size:12px;color:#64748b;">0 selecionados</span>
                                 </div>
-                                <div id="lista-checkboxes" style="max-height:150px;overflow-y:auto;display:flex;flex-direction:column;gap:5px;margin-bottom:10px;">
-                                    <!-- Checkboxes preenchidos dinamicamente -->
-                                </div>
+                                <div id="lista-checkboxes" style="max-height:150px;overflow-y:auto;display:flex;flex-direction:column;gap:5px;margin-bottom:10px;"></div>
                                 
                                 <div style="margin-bottom:10px;">
                                     <label style="font-weight:bold;display:block;margin-bottom:5px;">📝 Apontamento:</label>
@@ -198,19 +186,16 @@
                                 <div style="margin-bottom:10px;">
                                     <label style="font-weight:bold;display:block;margin-bottom:5px;">Setor:</label>
                                     <select id="setor-apontamento-multiplo" style="width:100%;padding:8px;border:1px solid #cbd5e1;border-radius:6px;background:#e2e8f0;" disabled>
-    <option value="meivs">MEIV'S</option>
-    <option value="pedagogico">Pedagógico</option>
-    <option value="adm">ADM</option>
-    <option value="direcao">Professores</option>
-</select>
+                                        <option value="meivs">MEIV'S</option>
+                                        <option value="pedagogico">Pedagógico</option>
+                                        <option value="adm">ADM</option>
+                                        <option value="direcao">Professores</option>
+                                    </select>
                                 </div>
                                 
                                 <div style="display:flex;gap:10px;">
-                                    <button id="btn-salvar-apontamento-multiplo" onclick="salvarApontamentoMultiplo()" style="background:#005088;color:white;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-weight:bold;flex:1;">
-    💾 Salvar Apontamento
-</button>                           <button onclick="fecharSelecaoMultipla()" style="background:#94a3b8;color:white;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-weight:bold;">
-                                        ↩️ Voltar
-                                    </button>
+                                    <button id="btn-salvar-apontamento-multiplo" onclick="salvarApontamentoMultiplo()" style="background:#005088;color:white;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-weight:bold;flex:1;">💾 Salvar Apontamento</button>
+                                    <button onclick="fecharSelecaoMultipla()" style="background:#94a3b8;color:white;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-weight:bold;">↩️ Voltar</button>
                                 </div>
                             </div>
                             
@@ -225,16 +210,14 @@
                         </div>
                     </div>
 
-                    <!-- 🆕 Card de Aniversariantes -->
+                    <!-- Card de Aniversariantes -->
                     <div id="card-aniversariantes" style="display:none; background: linear-gradient(135deg, #fef3c7, #fde68a); border-radius: 12px; padding: 20px; margin-bottom: 15px; border-left: 5px solid #f59e0b; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.2);">
                         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
                             <h3 style="color:#92400e;margin:0;font-size:16px;">
                                 🎉 Aniversariantes de Hoje — <span id="data-hoje-aniversario"></span>
                             </h3>
                         </div>
-                        <div id="lista-aniversariantes" style="display:flex;flex-direction:column;gap:15px;">
-                            <!-- Preenchido dinamicamente -->
-                        </div>
+                        <div id="lista-aniversariantes" style="display:flex;flex-direction:column;gap:15px;"></div>
                     </div>
 
                     <!-- Cards de Métricas -->
@@ -278,7 +261,7 @@
                         </div>
                     </div>
 
-                    <!-- Painéis de Distribuição e Ações (empilhados) -->
+                    <!-- Painéis de Distribuição e Ações -->
                     <div class="dash-lower-grid">
                         <div class="dash-panel" id="painel-ranking">
                             <div class="dash-panel-title" id="titulo-ranking">
@@ -333,23 +316,17 @@
                                 <i class="fa-solid fa-clock" style="font-size: 18px;"></i> Meus Horários
                             </button>
 
-                            <button id="btn-sugestoes" class="btn-salvar" style="background-color: #f59e0b; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(245, 158, 11, 0.2); margin-bottom: 5px;" onclick="abrirModalSugestoes()">
-                                <i class="fa-solid fa-lightbulb" style="font-size: 18px;"></i> Sugestões e Melhorias
-                            </button>
-
                             <button id="btn-aniversarios" class="btn-salvar" style="background-color: #db2777; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: none; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(219, 39, 119, 0.2); margin-bottom: 5px;" onclick="abrirModalAniversarios(event)">
-    <i class="fa-solid fa-cake-candles" style="font-size: 18px;"></i> Aniversariantes do Mês
-</button>
+                                <i class="fa-solid fa-cake-candles" style="font-size: 18px;"></i> Aniversariantes do Mês
+                            </button>
                             
-                            <!-- BOTÃO - RCO -->
-                    <a href="https://rco.paas.pr.gov.br" target="_blank" class="btn-salvar" style="background-color: #0284c7; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(2, 132, 199, 0.2); margin-bottom: 5px;">
-                            <i class="fa-solid fa-book-open" style="font-size: 18px;"></i> RCO - Registro de Classe Online
-                    </a>
+                            <a href="https://rco.paas.pr.gov.br" target="_blank" class="btn-salvar" style="background-color: #0284c7; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(2, 132, 199, 0.2); margin-bottom: 5px;">
+                                <i class="fa-solid fa-book-open" style="font-size: 18px;"></i> RCO - Registro de Classe Online
+                            </a>
 
-<!-- BOTÃO - REGISTRO PONTO -->
-<a href="https://registrofrequenciaseed.paas.pr.gov.br" target="_blank" class="btn-salvar" style="background-color: #059669; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(5, 150, 105, 0.2); margin-bottom: 5px;">
-    <i class="fa-solid fa-clock" style="font-size: 18px;"></i> Registro de Ponto
-</a>
+                            <a href="https://registrofrequenciaseed.paas.pr.gov.br" target="_blank" class="btn-salvar" style="background-color: #059669; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(5, 150, 105, 0.2); margin-bottom: 5px;">
+                                <i class="fa-solid fa-clock" style="font-size: 18px;"></i> Registro de Ponto
+                            </a>
                         </div>
                     </div>
 
@@ -516,7 +493,7 @@
                     </div>
                 </div>
             </main>
-        </div> <!-- fecha .content-wrapper -->
+        </div>
 
         <!-- Footer -->
         <footer style="background: #005088; color: #cbd5e1; padding: 20px 30px; text-align: center; font-size: 13px; border-top: 4px solid #eab308; margin-top: 0;">
@@ -541,76 +518,75 @@
             </div>
         </footer>
     </div> <!-- fecha #app-interface -->
+
     <!-- ========================================== -->
-<!-- MODAL DE GESTÃO DE HORÁRIOS -->
-<!-- ========================================== -->
-<div class="modal-overlay" id="modal-gestao-horarios" onclick="fecharModalGestaoHorarios(event)">
-    <div class="modal-content" style="max-width: 1100px; height: 90vh; display: flex; flex-direction: column;">
-        <div class="modal-header" style="background-color: #7c3aed;">
-            <h3><i class="fa-solid fa-table"></i> Gestão de Horários</h3>
-            <div style="display:flex;gap:10px;align-items:center;">
-                <button onclick="salvarGradeAtual()" id="btn-salvar-grade" style="background:#22c55e;color:white;border:none;padding:8px 16px;border-radius:6px;font-weight:bold;cursor:pointer;">💾 Salvar</button>
-                <button onclick="document.getElementById('modal-gestao-horarios').style.display='none'" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;">&times;</button>
-            </div>
-        </div>
-        <div class="modal-body" style="padding: 15px; overflow-y: auto; flex: 1;">
-            
-            <!-- Seletor de turma e turno -->
-            <div style="display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap;align-items:center;">
-                <label style="font-weight:bold;">Turma:</label>
-                <select id="gestao-turma" onchange="carregarGradeEdicao()" style="padding:8px 12px;border:1px solid #cbd5e1;border-radius:6px;font-size:14px;">
-                    <option value="">Selecione...</option>
-                </select>
-                <label style="font-weight:bold;margin-left:10px;">Turno:</label>
-                <select id="gestao-turno" onchange="carregarGradeEdicao()" style="padding:8px 12px;border:1px solid #cbd5e1;border-radius:6px;font-size:14px;">
-                    <option value="Manhã">Manhã</option>
-                    <option value="Tarde">Tarde</option>
-                </select>
-                <button onclick="autoPreencherGrade()" style="background:#f59e0b;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:bold;margin-left:auto;">⚡ Auto-Preencher</button>
-                <button onclick="limparGrade()" style="background:#ef4444;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:bold;">🗑️ Limpar</button>
-            </div>
-            
-            <!-- Legenda de conflitos -->
-            <div style="display:flex;gap:15px;margin-bottom:10px;font-size:12px;">
-                <span style="color:#22c55e;">🟢 Sem conflitos</span>
-                <span style="color:#ef4444;">🔴 Conflito detectado</span>
-                <span style="color:#f59e0b;">🟡 Alerta</span>
-            </div>
-            
-            <!-- Grade editável -->
-            <div style="overflow-x:auto;" id="container-grade">
-                <div style="text-align:center;padding:40px;color:#64748b;">
-                    <i class="fa-solid fa-hand-pointer" style="font-size:48px;display:block;margin-bottom:15px;"></i>
-                    <p>Selecione uma turma para começar a editar os horários.</p>
+    <!-- TODOS OS MODAIS FORA DO #app-interface -->
+    <!-- Isso é essencial para o position:fixed funcionar -->
+    <!-- ========================================== -->
+    
+    <!-- MODAL DE GESTÃO DE HORÁRIOS -->
+    <div class="modal-overlay" id="modal-gestao-horarios" onclick="fecharModalGestaoHorarios(event)">
+        <div class="modal-content" style="max-width: 1100px; height: 90vh; display: flex; flex-direction: column;">
+            <div class="modal-header" style="background-color: #7c3aed;">
+                <h3><i class="fa-solid fa-table"></i> Gestão de Horários</h3>
+                <div style="display:flex;gap:10px;align-items:center;">
+                    <button onclick="salvarGradeAtual()" id="btn-salvar-grade" style="background:#22c55e;color:white;border:none;padding:8px 16px;border-radius:6px;font-weight:bold;cursor:pointer;">💾 Salvar</button>
+                    <button onclick="document.getElementById('modal-gestao-horarios').style.display='none'" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;">&times;</button>
                 </div>
             </div>
-            
-        </div>
-    </div>
-</div>
-<!-- ========================================== -->
-<!-- MODAL DE PROGRESSÃO DE TURMAS -->
-<!-- ========================================== -->
-<div class="modal-overlay" id="modal-progressao" onclick="fecharModalProgressao(event)">
-    <div class="modal-content" style="max-width: 1000px; height: 85vh; display: flex; flex-direction: column;">
-        <div class="modal-header" style="background-color: #059669;">
-            <h3><i class="fa-solid fa-arrow-right-arrow-left"></i> Progressão de Turmas</h3>
-            <button onclick="document.getElementById('modal-progressao').style.display='none'" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;">&times;</button>
-        </div>
-        <div class="modal-body" id="conteudo-progressao" style="padding: 20px; overflow-y: auto; flex: 1;">
-            <div style="text-align:center;padding:40px;color:#64748b;">
-                <i class="fa-solid fa-spinner fa-spin" style="font-size:40px;display:block;margin-bottom:15px;"></i>
-                <p>Carregando dados das turmas...</p>
+            <div class="modal-body" style="padding: 15px; overflow-y: auto; flex: 1;">
+                <div style="display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap;align-items:center;">
+                    <label style="font-weight:bold;">Turma:</label>
+                    <select id="gestao-turma" onchange="carregarGradeEdicao()" style="padding:8px 12px;border:1px solid #cbd5e1;border-radius:6px;font-size:14px;">
+                        <option value="">Selecione...</option>
+                    </select>
+                    <label style="font-weight:bold;margin-left:10px;">Turno:</label>
+                    <select id="gestao-turno" onchange="carregarGradeEdicao()" style="padding:8px 12px;border:1px solid #cbd5e1;border-radius:6px;font-size:14px;">
+                        <option value="Manhã">Manhã</option>
+                        <option value="Tarde">Tarde</option>
+                    </select>
+                    <button onclick="autoPreencherGrade()" style="background:#f59e0b;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:bold;margin-left:auto;">⚡ Auto-Preencher</button>
+                    <button onclick="limparGrade()" style="background:#ef4444;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:bold;">🗑️ Limpar</button>
+                </div>
+                
+                <div style="display:flex;gap:15px;margin-bottom:10px;font-size:12px;">
+                    <span style="color:#22c55e;">🟢 Sem conflitos</span>
+                    <span style="color:#ef4444;">🔴 Conflito detectado</span>
+                    <span style="color:#f59e0b;">🟡 Alerta</span>
+                </div>
+                
+                <div style="overflow-x:auto;" id="container-grade">
+                    <div style="text-align:center;padding:40px;color:#64748b;">
+                        <i class="fa-solid fa-hand-pointer" style="font-size:48px;display:block;margin-bottom:15px;"></i>
+                        <p>Selecione uma turma para começar a editar os horários.</p>
+                    </div>
+                </div>
             </div>
         </div>
-        <div style="padding: 15px 20px; background: white; border-top: 1px solid #e2e8f0; text-align: right;">
-            <button onclick="executarProgressao()" id="btn-executar-progressao" style="background:#059669;color:white;border:none;padding:12px 24px;border-radius:6px;font-weight:bold;cursor:pointer;display:none;">
-                <i class="fa-solid fa-check"></i> Confirmar Progressão
-            </button>
+    </div>
+
+    <!-- MODAL DE PROGRESSÃO DE TURMAS -->
+    <div class="modal-overlay" id="modal-progressao" onclick="fecharModalProgressao(event)">
+        <div class="modal-content" style="max-width: 1000px; height: 85vh; display: flex; flex-direction: column;">
+            <div class="modal-header" style="background-color: #059669;">
+                <h3><i class="fa-solid fa-arrow-right-arrow-left"></i> Progressão de Turmas</h3>
+                <button onclick="document.getElementById('modal-progressao').style.display='none'" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;">&times;</button>
+            </div>
+            <div class="modal-body" id="conteudo-progressao" style="padding: 20px; overflow-y: auto; flex: 1;">
+                <div style="text-align:center;padding:40px;color:#64748b;">
+                    <i class="fa-solid fa-spinner fa-spin" style="font-size:40px;display:block;margin-bottom:15px;"></i>
+                    <p>Carregando dados das turmas...</p>
+                </div>
+            </div>
+            <div style="padding: 15px 20px; background: white; border-top: 1px solid #e2e8f0; text-align: right;">
+                <button onclick="executarProgressao()" id="btn-executar-progressao" style="background:#059669;color:white;border:none;padding:12px 24px;border-radius:6px;font-weight:bold;cursor:pointer;display:none;">
+                    <i class="fa-solid fa-check"></i> Confirmar Progressão
+                </button>
+            </div>
         </div>
     </div>
-</div>
-    <!-- MODAL DE OCORRÊNCIAS (SAÍDA ANTECIPADA / ENTRADA ATRASADA) -->
+
+    <!-- MODAL DE OCORRÊNCIAS -->
     <div id="modal-saida" class="modal-overlay" style="display:none; z-index:10000;" onclick="fecharModalSaidaEvent(event)">
         <div class="modal-content" style="max-width: 500px;">
             <div class="modal-header" style="background-color: #f59e0b;">
@@ -746,12 +722,13 @@
                 <div class="input-group"><label>Foram realizadas avaliações específicas?</label><select id="pc-q14" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1;"><option value="Sim">Sim</option><option value="Não">Não</option></select></div>
                 <div class="input-group"><label>Justifique e explique como foi feita a recuperação:</label><textarea id="pc-q16" rows="2" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px;"></textarea></div>
                 <div class="input-group"><label>Foram utilizados instrumentos diferenciados?</label><select id="pc-q17" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1;"><option value="Sim">Sim</option><option value="Não">Não</option></select></div>
-<div class="input-group"><label>Justifique (se sim):</label><textarea id="pc-q17-justificativa" rows="2" placeholder="Descreva os instrumentos diferenciados utilizados..." style="width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px;"></textarea></div>
+                <div class="input-group"><label>Justifique (se sim):</label><textarea id="pc-q17-justificativa" rows="2" placeholder="Descreva os instrumentos diferenciados utilizados..." style="width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px;"></textarea></div>
             
-            <div style="padding: 15px 25px; background: white; border-top: 1px solid #e2e8f0; text-align: right;">
-                <button class="btn-salvar" style="background-color: #0d9488; width: 100%; font-size: 16px; padding: 14px;" id="btn-save-conselho" onclick="enviarPreConselho()">
-                    <i class="fa-solid fa-paper-plane"></i> Enviar Avaliação da Turma
-                </button>
+                <div style="padding: 15px 25px; background: white; border-top: 1px solid #e2e8f0; text-align: right;">
+                    <button class="btn-salvar" style="background-color: #0d9488; width: 100%; font-size: 16px; padding: 14px;" id="btn-save-conselho" onclick="enviarPreConselho()">
+                        <i class="fa-solid fa-paper-plane"></i> Enviar Avaliação da Turma
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -778,330 +755,273 @@
         </div>
     </div>
     
-   <div id="toast-container"></div>
+    <div id="toast-container"></div>
 
-<!-- MODAL ADMIN / GESTÃO -->
-<div class="modal-overlay" id="modal-admin" onclick="fecharModalAdminEvent(event)">
-    <div class="modal-content" style="max-width: 650px;">
-        <div class="modal-header" style="background-color: #475569;">
-            <h3><i class="fa-solid fa-gear"></i> Painel de Gestão SIGA</h3>
-            <button onclick="fecharModalAdmin()" style="background:none;border:none;color:white;font-size:20px;">&times;</button>
-        </div>
-        <div class="modal-body" style="padding: 25px; overflow-y: auto; max-height: 75vh;">
-            <!-- 🆕 Adicionar Novo Aluno -->
-<h4 style="margin-bottom: 15px; color: #059669;"><i class="fa-solid fa-user-plus"></i> Adicionar Novo Aluno</h4>
-<div class="input-group"><label>ID do Aluno:</label><input type="text" id="admin-novo-aluno-id" placeholder="Ex: 1012345678"></div>
-<div class="input-group"><label>Nome do Aluno:</label><input type="text" id="admin-novo-aluno-nome" placeholder="Nome completo"></div>
-<div class="input-group"><label>Turma:</label><select id="admin-novo-aluno-turma" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px;"></select></div>
-<button class="btn-salvar" style="background-color: #059669; margin-top: 10px;" onclick="adicionarNovoAluno()" id="btn-add-aluno">
-    <i class="fa-solid fa-user-plus"></i> Adicionar Aluno
-</button>
-
-<hr style="margin: 25px 0; border: 0; border-top: 1px solid #cbd5e1;">
-            <!-- Remanejar / Excluir Aluno -->
-            <h4 style="margin-bottom: 15px; color: #005088;"><i class="fa-solid fa-user-pen"></i> Remanejar / Excluir Aluno</h4>
-            <div class="input-group"><label>Buscar Aluno:</label><input type="text" id="admin-nome-aluno" list="lista-todos-alunos" placeholder="Digite o nome exato do aluno..."></div>
-            <div class="input-group"><label>Ação / Nova Turma:</label><select id="admin-nova-turma" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 16px;"></select></div>
-            <button class="btn-salvar" style="background-color: #475569; margin-top: 10px;" onclick="executarAcaoAluno()" id="btn-exec-admin">Confirmar Ação</button>
-            
-            <hr style="margin: 25px 0; border: 0; border-top: 1px solid #cbd5e1;">
-            
-            <!-- Gestão de Equipe (Usuários) -->
-            <h4 style="margin-bottom: 15px; color: #b45309;"><i class="fa-solid fa-users-gear"></i> Gestão de Equipe (Usuários)</h4>
-            <div class="input-group"><label>E-mail (Login / Chave de Busca):</label><input type="email" id="admin-user-email" placeholder="email@escola.pr.gov.br"></div>
-            <div class="input-group"><label>Nome Completo:</label><input type="text" id="admin-user-nome" placeholder="Nome do Servidor"></div>
-            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                <div style="flex: 1;"><label style="font-weight: bold; font-size: 14px; margin-bottom: 5px; display: block;">Setor:</label><select id="admin-user-setor" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;" onchange="togglePreferenciasProfessor()"><option value="professores">Professores</option><option value="meivs">MEIV'S</option><option value="pedagogico">Pedagógico</option><option value="adm">ADM</option><option value="direcao">Professores</option></select></div>
-                <div style="flex: 1;"><label style="font-weight: bold; font-size: 14px; margin-bottom: 5px; display: block;">Nível de Acesso:</label><select id="admin-user-nivel" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;"><option value="1">1 - Padrão</option><option value="2">2 - Intermediário</option><option value="3">3 - Administrador</option><option value="4">4 - Direção</option></select></div>
+    <!-- MODAL ADMIN / GESTÃO -->
+    <div class="modal-overlay" id="modal-admin" onclick="fecharModalAdminEvent(event)">
+        <div class="modal-content" style="max-width: 650px;">
+            <div class="modal-header" style="background-color: #475569;">
+                <h3><i class="fa-solid fa-gear"></i> Painel de Gestão SIGA</h3>
+                <button onclick="fecharModalAdmin()" style="background:none;border:none;color:white;font-size:20px;">&times;</button>
             </div>
-            <div class="input-group"><label>Senha (Somente números - ex: RG):</label><input type="text" id="admin-user-senha" placeholder="Deixe em branco para manter a atual (na edição)"></div>
-            
-            <!-- PREFERÊNCIAS DO PROFESSOR -->
-            <div id="preferencias-professor" style="display:none;">
-                <hr style="margin: 20px 0; border: 0; border-top: 2px dashed #7c3aed;">
-                <h4 style="margin-bottom: 15px; color: #7c3aed;"><i class="fa-solid fa-sliders"></i> Preferências do Professor</h4>
-                
-                <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
-                    <div style="flex: 1; min-width: 150px;">
-                        <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 5px;">Turno de Preferência:</label>
-                        <select id="admin-pref-turno" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;">
-                            <option value="Ambos">Ambos</option>
-                            <option value="Manhã">Manhã</option>
-                            <option value="Tarde">Tarde</option>
-                        </select>
-                    </div>
-                    <div style="flex: 1; min-width: 150px;">
-                        <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 5px;">Máx. Aulas por Dia:</label>
-                        <input type="number" id="admin-pref-max-aulas" value="5" min="1" max="6" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;">
-                    </div>
-                    <div style="flex: 1; min-width: 150px;">
-                        <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 5px;">Aulas Geminadas?</label>
-                        <select id="admin-pref-geminadas" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;">
-                            <option value="Não">Não</option>
-                            <option value="Sim">Sim</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div style="margin-bottom: 15px;">
-                    <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 5px;">Restrições Específicas:</label>
-                    <input type="text" id="admin-pref-restricoes" placeholder="Ex: Não pode 1ª aula, Não pode sexta-feira..." style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;">
-                </div>
-                
-                <!-- DATA DE NASCIMENTO -->
-                <div style="margin-bottom: 15px;">
-                    <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 5px;">📅 Data de Nascimento:</label>
-                    <input type="text" id="admin-data-nasc" placeholder="DD/MM" maxlength="5" style="width: 100px; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;">
-                    <span style="font-size: 10px; color: #64748b; display: block; margin-top: 3px;">Apenas dia e mês (ex: 15/08)</span>
-                </div>
-            </div>
-            
-            <div style="display: flex; gap: 10px; margin-top: 10px;">
-                <button class="btn-salvar" style="background-color: #059669; flex: 2;" onclick="salvarUsuarioAdmin()" id="btn-save-user">Salvar Usuário</button>
-                <button class="btn-salvar" style="background-color: #dc2626; flex: 1;" onclick="deletarUsuarioAdmin()" id="btn-del-user">Excluir</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- MODAL DE RECADO DE ANIVERSÁRIO -->
-<div class="modal-overlay" id="modal-recado-aniversario" onclick="fecharModalRecadoAniversario(event)" style="z-index:10001;">
-    <div class="modal-content" style="max-width:500px;">
-        <div class="modal-header" style="background-color:#f59e0b;">
-            <h3>✍️ Deixar Recado</h3>
-            <button onclick="document.getElementById('modal-recado-aniversario').style.display='none'" style="background:none;border:none;color:white;font-size:20px;cursor:pointer;">&times;</button>
-        </div>
-        <div class="modal-body" style="padding:20px;">
-            <input type="hidden" id="recado-aniversariante">
-            <p style="font-weight:bold;margin-bottom:10px;">Recado para: <span id="nome-aniversariante-recado"></span></p>
-            <textarea id="texto-recado" rows="3" placeholder="Escreva sua mensagem de parabéns..." style="width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:6px;resize:vertical;"></textarea>
-            <div style="display:flex;gap:10px;margin-top:15px;">
-                <button onclick="enviarRecadoAniversario()" style="background:#f59e0b;color:white;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-weight:bold;flex:1;">📨 Enviar</button>
-                <button onclick="document.getElementById('modal-recado-aniversario').style.display='none'" style="background:#e2e8f0;color:#475569;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;">Cancelar</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- MODAL DE ANIVERSARIANTES -->
-<div class="modal-overlay" id="modal-aniversarios" style="z-index: 10002;" onclick="fecharModalAniversarios(event)">
-    <div class="modal-content" style="max-width: 800px; height: 85vh; display: flex; flex-direction: column;">
-        <div class="modal-header" style="background-color: #db2777;">
-            <h3><i class="fa-solid fa-cake-candles"></i> Aniversariantes por Mês</h3>
-            <button onclick="document.getElementById('modal-aniversarios').style.display='none'" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;">&times;</button>
-        </div>
-        <div class="modal-body" id="conteudo-aniversarios" style="padding: 20px; overflow-y: auto; flex: 1;">
-            <div style="text-align:center;padding:40px;color:#64748b;">
-                <i class="fa-solid fa-spinner fa-spin" style="font-size:40px;display:block;margin-bottom:15px;"></i>
-                Carregando aniversariantes...
-            </div>
-        </div>
-    </div>
-</div>
-    
-    <!-- MODAL DE SUGESTÕES -->
-<div class="modal-overlay" id="modal-sugestoes" onclick="fecharModalSugestoes(event)">
-    <div class="modal-content" style="max-width: 600px;">
-        <div class="modal-header" style="background-color: #f59e0b;">
-            <h3><i class="fa-solid fa-lightbulb"></i> Sugestões e Melhorias</h3>
-            <button onclick="document.getElementById('modal-sugestoes').style.display='none'" style="background:none;border:none;color:white;font-size:20px;cursor:pointer;">&times;</button>
-        </div>
-        <div class="modal-body" style="padding: 20px;">
-            <div style="margin-bottom: 15px;">
-                <label style="font-weight: bold; display: block; margin-bottom: 5px;">Tipo:</label>
-                <select id="sugestao-tipo" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
-                    <option value="Melhoria">💡 Melhoria</option>
-                    <option value="Bug">🐛 Bug/Erro</option>
-                    <option value="Ideia Nova">✨ Ideia Nova</option>
-                    <option value="Outro">📝 Outro</option>
-                </select>
-            </div>
-            <div style="margin-bottom: 15px;">
-                <label style="font-weight: bold; display: block; margin-bottom: 5px;">Sua sugestão:</label>
-                <textarea id="sugestao-texto" rows="4" placeholder="Descreva sua sugestão ou melhoria..." style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; resize: vertical;"></textarea>
-            </div>
-            <div style="display: flex; gap: 10px;">
-                <button onclick="enviarSugestao()" id="btn-enviar-sugestao" style="background: #f59e0b; color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; flex: 1;">
-                    📨 Enviar Sugestão
+            <div class="modal-body" style="padding: 25px; overflow-y: auto; max-height: 75vh;">
+                <h4 style="margin-bottom: 15px; color: #059669;"><i class="fa-solid fa-user-plus"></i> Adicionar Novo Aluno</h4>
+                <div class="input-group"><label>ID do Aluno:</label><input type="text" id="admin-novo-aluno-id" placeholder="Ex: 1012345678"></div>
+                <div class="input-group"><label>Nome do Aluno:</label><input type="text" id="admin-novo-aluno-nome" placeholder="Nome completo"></div>
+                <div class="input-group"><label>Turma:</label><select id="admin-novo-aluno-turma" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px;"></select></div>
+                <button class="btn-salvar" style="background-color: #059669; margin-top: 10px;" onclick="adicionarNovoAluno()" id="btn-add-aluno">
+                    <i class="fa-solid fa-user-plus"></i> Adicionar Aluno
                 </button>
-                <button onclick="document.getElementById('modal-sugestoes').style.display='none'" style="background: #e2e8f0; color: #475569; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer;">
-                    Cancelar
-                </button>
+
+                <hr style="margin: 25px 0; border: 0; border-top: 1px solid #cbd5e1;">
+                
+                <h4 style="margin-bottom: 15px; color: #005088;"><i class="fa-solid fa-user-pen"></i> Remanejar / Excluir Aluno</h4>
+                <div class="input-group"><label>Buscar Aluno:</label><input type="text" id="admin-nome-aluno" list="lista-todos-alunos" placeholder="Digite o nome exato do aluno..."></div>
+                <div class="input-group"><label>Ação / Nova Turma:</label><select id="admin-nova-turma" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 16px;"></select></div>
+                <button class="btn-salvar" style="background-color: #475569; margin-top: 10px;" onclick="executarAcaoAluno()" id="btn-exec-admin">Confirmar Ação</button>
+                
+                <hr style="margin: 25px 0; border: 0; border-top: 1px solid #cbd5e1;">
+                
+                <h4 style="margin-bottom: 15px; color: #b45309;"><i class="fa-solid fa-users-gear"></i> Gestão de Equipe (Usuários)</h4>
+                <div class="input-group"><label>E-mail (Login / Chave de Busca):</label><input type="email" id="admin-user-email" placeholder="email@escola.pr.gov.br"></div>
+                <div class="input-group"><label>Nome Completo:</label><input type="text" id="admin-user-nome" placeholder="Nome do Servidor"></div>
+                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                    <div style="flex: 1;"><label style="font-weight: bold; font-size: 14px; margin-bottom: 5px; display: block;">Setor:</label><select id="admin-user-setor" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;" onchange="togglePreferenciasProfessor()"><option value="professores">Professores</option><option value="meivs">MEIV'S</option><option value="pedagogico">Pedagógico</option><option value="adm">ADM</option><option value="direcao">Professores</option></select></div>
+                    <div style="flex: 1;"><label style="font-weight: bold; font-size: 14px; margin-bottom: 5px; display: block;">Nível de Acesso:</label><select id="admin-user-nivel" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;"><option value="1">1 - Padrão</option><option value="2">2 - Intermediário</option><option value="3">3 - Administrador</option><option value="4">4 - Direção</option></select></div>
+                </div>
+                <div class="input-group"><label>Senha (Somente números - ex: RG):</label><input type="text" id="admin-user-senha" placeholder="Deixe em branco para manter a atual (na edição)"></div>
+                
+                <div id="preferencias-professor" style="display:none;">
+                    <hr style="margin: 20px 0; border: 0; border-top: 2px dashed #7c3aed;">
+                    <h4 style="margin-bottom: 15px; color: #7c3aed;"><i class="fa-solid fa-sliders"></i> Preferências do Professor</h4>
+                    
+                    <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 150px;">
+                            <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 5px;">Turno de Preferência:</label>
+                            <select id="admin-pref-turno" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                                <option value="Ambos">Ambos</option>
+                                <option value="Manhã">Manhã</option>
+                                <option value="Tarde">Tarde</option>
+                            </select>
+                        </div>
+                        <div style="flex: 1; min-width: 150px;">
+                            <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 5px;">Máx. Aulas por Dia:</label>
+                            <input type="number" id="admin-pref-max-aulas" value="5" min="1" max="6" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                        </div>
+                        <div style="flex: 1; min-width: 150px;">
+                            <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 5px;">Aulas Geminadas?</label>
+                            <select id="admin-pref-geminadas" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                                <option value="Não">Não</option>
+                                <option value="Sim">Sim</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 5px;">Restrições Específicas:</label>
+                        <input type="text" id="admin-pref-restricoes" placeholder="Ex: Não pode 1ª aula, Não pode sexta-feira..." style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 5px;">📅 Data de Nascimento:</label>
+                        <input type="text" id="admin-data-nasc" placeholder="DD/MM" maxlength="5" style="width: 100px; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                        <span style="font-size: 10px; color: #64748b; display: block; margin-top: 3px;">Apenas dia e mês (ex: 15/08)</span>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button class="btn-salvar" style="background-color: #059669; flex: 2;" onclick="salvarUsuarioAdmin()" id="btn-save-user">Salvar Usuário</button>
+                    <button class="btn-salvar" style="background-color: #dc2626; flex: 1;" onclick="deletarUsuarioAdmin()" id="btn-del-user">Excluir</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
+
+    <!-- MODAL DE RECADO DE ANIVERSÁRIO -->
+    <div class="modal-overlay" id="modal-recado-aniversario" onclick="fecharModalRecadoAniversario(event)" style="z-index:10001;">
+        <div class="modal-content" style="max-width:500px;">
+            <div class="modal-header" style="background-color:#f59e0b;">
+                <h3>✍️ Deixar Recado</h3>
+                <button onclick="document.getElementById('modal-recado-aniversario').style.display='none'" style="background:none;border:none;color:white;font-size:20px;cursor:pointer;">&times;</button>
+            </div>
+            <div class="modal-body" style="padding:20px;">
+                <input type="hidden" id="recado-aniversariante">
+                <p style="font-weight:bold;margin-bottom:10px;">Recado para: <span id="nome-aniversariante-recado"></span></p>
+                <textarea id="texto-recado" rows="3" placeholder="Escreva sua mensagem de parabéns..." style="width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:6px;resize:vertical;"></textarea>
+                <div style="display:flex;gap:10px;margin-top:15px;">
+                    <button onclick="enviarRecadoAniversario()" style="background:#f59e0b;color:white;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-weight:bold;flex:1;">📨 Enviar</button>
+                    <button onclick="document.getElementById('modal-recado-aniversario').style.display='none'" style="background:#e2e8f0;color:#475569;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE ANIVERSARIANTES -->
+    <div class="modal-overlay" id="modal-aniversarios" style="z-index: 10002;" onclick="fecharModalAniversarios(event)">
+        <div class="modal-content" style="max-width: 800px; height: 85vh; display: flex; flex-direction: column;">
+            <div class="modal-header" style="background-color: #db2777;">
+                <h3><i class="fa-solid fa-cake-candles"></i> Aniversariantes por Mês</h3>
+                <button onclick="document.getElementById('modal-aniversarios').style.display='none'" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;">&times;</button>
+            </div>
+            <div class="modal-body" id="conteudo-aniversarios" style="padding: 20px; overflow-y: auto; flex: 1;">
+                <div style="text-align:center;padding:40px;color:#64748b;">
+                    <i class="fa-solid fa-spinner fa-spin" style="font-size:40px;display:block;margin-bottom:15px;"></i>
+                    Carregando aniversariantes...
+                </div>
+            </div>
+        </div>
+    </div>
     
-        <!-- ========================================== -->
-<!-- MODAL DE HORÁRIOS DO PROFESSOR -->
-<!-- ========================================== -->
-<div class="modal-overlay" id="modal-meus-horarios" onclick="fecharModalHorarios(event)">
-    <div class="modal-content" style="max-width: 1000px; height: 85vh; display: flex; flex-direction: column;">
-        <div class="modal-header" style="background-color: #6366f1;">
-            <h3><i class="fa-solid fa-clock"></i> Meus Horários</h3>
-            <button onclick="document.getElementById('modal-meus-horarios').style.display='none'" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;">&times;</button>
-        </div>
-        <div class="modal-body" id="conteudo-horarios" style="padding: 20px; overflow-y: auto; flex: 1;">
-            <div style="text-align:center;padding:40px;color:#64748b;">
-                <i class="fa-solid fa-spinner fa-spin" style="font-size:40px;display:block;margin-bottom:15px;"></i>
-                Carregando seus horários...
+    <!-- MODAL DE HORÁRIOS DO PROFESSOR -->
+    <div class="modal-overlay" id="modal-meus-horarios" onclick="fecharModalHorarios(event)">
+        <div class="modal-content" style="max-width: 1000px; height: 85vh; display: flex; flex-direction: column;">
+            <div class="modal-header" style="background-color: #6366f1;">
+                <h3><i class="fa-solid fa-clock"></i> Meus Horários</h3>
+                <button onclick="document.getElementById('modal-meus-horarios').style.display='none'" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;">&times;</button>
             </div>
-        </div>
-    </div>
-</div>
-<!-- ========================================== -->
-<!-- MODAL DE COMUNICADO SEED -->
-<!-- ========================================== -->
-<div class="modal-overlay" id="modal-comunicado-seed" onclick="fecharModalComunicado(event)">
-    <div class="modal-content" style="max-width: 1100px; height: 85vh; display: flex; flex-direction: column;">
-        <div class="modal-header" style="background-color: #8b5cf6;">
-            <h3><i class="fa-solid fa-file-lines"></i> Comunicado de Fato Observado – SEED</h3>
-            <div style="display:flex;gap:10px;align-items:center;">
-                <button id="btn-modal-emitir" onclick="emitirEImprimirModal()" style="background:#22c55e;color:white;border:none;padding:8px 16px;border-radius:6px;font-weight:bold;cursor:pointer;display:none;">✅ Emitir e Imprimir</button>
-                <button onclick="document.getElementById('modal-comunicado-seed').style.display='none'" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;">&times;</button>
-            </div>
-        </div>
-        <div class="modal-body" style="padding: 20px; overflow-y: auto; flex: 1;">
-            <!-- Seção de busca -->
-            <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px;">
-                <div style="flex: 1; min-width: 250px;">
-                    <label style="font-weight:bold;display:block;margin-bottom:5px;">Aluno 1:</label>
-                    <input list="listaAlunosModal1" id="alunoModal1" placeholder="Digite o nome..." style="width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:6px;" oninput="preencherDatalistModal()">
-                    <datalist id="listaAlunosModal1"></datalist>
-                    <button onclick="carregarFatosModal(1)" style="margin-top:8px;background:#8b5cf6;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:bold;">🔍 Buscar fatos</button>
-                    <div id="msgErroModal1" style="font-size:12px;color:red;margin-top:5px;"></div>
-                </div>
-                <div style="flex: 1; min-width: 250px;">
-                    <label style="font-weight:bold;display:block;margin-bottom:5px;">Aluno 2 (opcional):</label>
-                    <input list="listaAlunosModal2" id="alunoModal2" placeholder="Digite o nome..." style="width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:6px;" oninput="preencherDatalistModal()">
-                    <datalist id="listaAlunosModal2"></datalist>
-                    <button onclick="carregarFatosModal(2)" style="margin-top:8px;background:#8b5cf6;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:bold;">🔍 Buscar fatos</button>
-                    <div id="msgErroModal2" style="font-size:12px;color:red;margin-top:5px;"></div>
-                </div>
-            </div>
-            
-            <!-- Botão de novo fato -->
-            <button onclick="abrirModalNovoFato()" style="background:#f59e0b;color:white;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-weight:bold;margin-bottom:20px;">✍️ Registrar Novo Fato</button>
-            
-            <!-- Área dos comunicados -->
-            <div id="conteudo-comunicados" style="display:flex;flex-wrap:wrap;gap:20px;justify-content:center;">
-                <div style="text-align:center;padding:40px;color:#64748b;width:100%;">
-                    <i class="fa-solid fa-search" style="font-size:48px;display:block;margin-bottom:15px;"></i>
-                    <p>Busque um aluno para visualizar os fatos pendentes.</p>
+            <div class="modal-body" id="conteudo-horarios" style="padding: 20px; overflow-y: auto; flex: 1;">
+                <div style="text-align:center;padding:40px;color:#64748b;">
+                    <i class="fa-solid fa-spinner fa-spin" style="font-size:40px;display:block;margin-bottom:15px;"></i>
+                    Carregando seus horários...
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- ========================================== -->
-<!-- MODAL DE NOVO FATO (sub-modal) -->
-<!-- ========================================== -->
-<div class="modal-overlay" id="modal-novo-fato-seed" onclick="fecharModalNovoFatoEvent(event)" style="z-index:10001;">
-    <div class="modal-content" style="max-width:500px;">
-        <div class="modal-header" style="background-color:#f59e0b;">
-            <h3>✍️ Registrar Novo Fato</h3>
-            <button onclick="document.getElementById('modal-novo-fato-seed').style.display='none'" style="background:none;border:none;color:white;font-size:20px;cursor:pointer;">&times;</button>
-        </div>
-        <div class="modal-body" style="padding:20px;">
-            <div style="margin-bottom:15px;">
-                <label>Aluno:</label>
-                <input list="listaAlunosFatoModal" id="fato-aluno-modal" placeholder="Digite o nome..." style="width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:6px;">
-                <datalist id="listaAlunosFatoModal"></datalist>
+    <!-- MODAL DE COMUNICADO SEED -->
+    <div class="modal-overlay" id="modal-comunicado-seed" onclick="fecharModalComunicado(event)">
+        <div class="modal-content" style="max-width: 1100px; height: 85vh; display: flex; flex-direction: column;">
+            <div class="modal-header" style="background-color: #8b5cf6;">
+                <h3><i class="fa-solid fa-file-lines"></i> Comunicado de Fato Observado – SEED</h3>
+                <div style="display:flex;gap:10px;align-items:center;">
+                    <button id="btn-modal-emitir" onclick="emitirEImprimirModal()" style="background:#22c55e;color:white;border:none;padding:8px 16px;border-radius:6px;font-weight:bold;cursor:pointer;display:none;">✅ Emitir e Imprimir</button>
+                    <button onclick="document.getElementById('modal-comunicado-seed').style.display='none'" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;">&times;</button>
+                </div>
             </div>
-            <div style="margin-bottom:15px;">
-                <label>Tipo:</label>
-                <select id="fato-tipo-modal" style="width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:6px;">
-                    <option value="Positivo">Positivo</option>
-                    <option value="Negativo">Negativo</option>
-                </select>
-            </div>
-            <div style="margin-bottom:15px;">
-                <label>Descrição:</label>
-                <textarea id="fato-descricao-modal" rows="3" style="width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:6px;"></textarea>
-            </div>
-            <div style="margin-bottom:15px;">
-                <label>Data do Fato:</label>
-                <input type="date" id="fato-data-modal" style="width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:6px;">
-            </div>
-            <div style="display:flex;gap:10px;justify-content:flex-end;">
-                <button onclick="document.getElementById('modal-novo-fato-seed').style.display='none'" style="padding:10px 20px;border:none;border-radius:6px;background:#ccc;cursor:pointer;">Cancelar</button>
-                <button onclick="salvarNovoFatoModal()" style="padding:10px 20px;border:none;border-radius:6px;background:#22c55e;color:white;cursor:pointer;font-weight:bold;">Salvar</button>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- ========================================== -->
-<!-- MODAL DA AGENDA DO LABORATÓRIO -->
-<!-- ========================================== -->
-<div class="modal-overlay" id="modal-agenda-lab" onclick="fecharModalLab(event)">
-    <div class="modal-content" style="max-width: 1100px; height: 85vh; display: flex; flex-direction: column;">
-        <div class="modal-header" style="background-color: #0f172a;">
-    <h3><i class="fa-solid fa-desktop"></i> Agenda de Equipamentos</h3>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;">
-        <!-- Botões de equipamento -->
-        <button onclick="filtrarEquipamentoModal('Lab. Informática')" id="btn-modal-lab" style="background:#2563eb;color:white;border:none;padding:8px 16px;border-radius:6px;font-weight:bold;cursor:pointer;">🖥️ Lab</button>
-        <button onclick="filtrarEquipamentoModal('Tablet')" id="btn-modal-tablet" style="background:white;color:#0f172a;border:none;padding:8px 16px;border-radius:6px;font-weight:bold;cursor:pointer;">📱 Tablets</button>
-        <!-- Separador -->
-        <span style="color:#64748b;margin:0 5px;">|</span>
-        <!-- Botões de turno -->
-        <button onclick="filtrarTurnoModal('Manhã')" id="btn-modal-manha" style="background:#eab308;color:#0f172a;border:none;padding:8px 16px;border-radius:6px;font-weight:bold;cursor:pointer;">Manhã</button>
-        <button onclick="filtrarTurnoModal('Tarde')" id="btn-modal-tarde" style="background:white;color:#0f172a;border:none;padding:8px 16px;border-radius:6px;font-weight:bold;cursor:pointer;">Tarde</button>
-        <button onclick="document.getElementById('modal-agenda-lab').style.display='none'" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;">&times;</button>
-    </div>
-</div>
-        <div class="modal-body" id="conteudo-lab" style="padding: 20px; overflow-y: auto; flex: 1;">
-            <div style="text-align:center;padding:40px;color:#64748b;">
-                <i class="fa-solid fa-spinner fa-spin" style="font-size:40px;display:block;margin-bottom:15px;"></i>
-                Carregando agenda do laboratório...
+            <div class="modal-body" style="padding: 20px; overflow-y: auto; flex: 1;">
+                <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px;">
+                    <div style="flex: 1; min-width: 250px;">
+                        <label style="font-weight:bold;display:block;margin-bottom:5px;">Aluno 1:</label>
+                        <input list="listaAlunosModal1" id="alunoModal1" placeholder="Digite o nome..." style="width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:6px;" oninput="preencherDatalistModal()">
+                        <datalist id="listaAlunosModal1"></datalist>
+                        <button onclick="carregarFatosModal(1)" style="margin-top:8px;background:#8b5cf6;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:bold;">🔍 Buscar fatos</button>
+                        <div id="msgErroModal1" style="font-size:12px;color:red;margin-top:5px;"></div>
+                    </div>
+                    <div style="flex: 1; min-width: 250px;">
+                        <label style="font-weight:bold;display:block;margin-bottom:5px;">Aluno 2 (opcional):</label>
+                        <input list="listaAlunosModal2" id="alunoModal2" placeholder="Digite o nome..." style="width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:6px;" oninput="preencherDatalistModal()">
+                        <datalist id="listaAlunosModal2"></datalist>
+                        <button onclick="carregarFatosModal(2)" style="margin-top:8px;background:#8b5cf6;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:bold;">🔍 Buscar fatos</button>
+                        <div id="msgErroModal2" style="font-size:12px;color:red;margin-top:5px;"></div>
+                    </div>
+                </div>
+                
+                <button onclick="abrirModalNovoFato()" style="background:#f59e0b;color:white;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-weight:bold;margin-bottom:20px;">✍️ Registrar Novo Fato</button>
+                
+                <div id="conteudo-comunicados" style="display:flex;flex-wrap:wrap;gap:20px;justify-content:center;">
+                    <div style="text-align:center;padding:40px;color:#64748b;width:100%;">
+                        <i class="fa-solid fa-search" style="font-size:48px;display:block;margin-bottom:15px;"></i>
+                        <p>Busque um aluno para visualizar os fatos pendentes.</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- ========================================== -->
-<!-- MODAL DA CENTRAL DE ALERTAS -->
-<!-- ========================================== -->
-<div class="modal-overlay" id="modal-alertas" onclick="fecharModalAlertas(event)">
-    <div class="modal-content" style="max-width: 1100px; height: 85vh; display: flex; flex-direction: column;">
-        <div class="modal-header" style="background-color: #991b1b;">
-            <h3><i class="fa-solid fa-triangle-exclamation"></i> Central de Alertas</h3>
-            <button onclick="document.getElementById('modal-alertas').style.display='none'" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;">&times;</button>
-        </div>
-        <div class="modal-body" id="conteudo-alertas" style="padding: 20px; overflow-y: auto; flex: 1;">
-            <div style="text-align:center;padding:40px;color:#64748b;">
-                <i class="fa-solid fa-spinner fa-spin" style="font-size:40px;display:block;margin-bottom:15px;"></i>
-                Analisando dados dos alunos...
+    <!-- MODAL DE NOVO FATO (sub-modal) -->
+    <div class="modal-overlay" id="modal-novo-fato-seed" onclick="fecharModalNovoFatoEvent(event)" style="z-index:10001;">
+        <div class="modal-content" style="max-width:500px;">
+            <div class="modal-header" style="background-color:#f59e0b;">
+                <h3>✍️ Registrar Novo Fato</h3>
+                <button onclick="document.getElementById('modal-novo-fato-seed').style.display='none'" style="background:none;border:none;color:white;font-size:20px;cursor:pointer;">&times;</button>
+            </div>
+            <div class="modal-body" style="padding:20px;">
+                <div style="margin-bottom:15px;">
+                    <label>Aluno:</label>
+                    <input list="listaAlunosFatoModal" id="fato-aluno-modal" placeholder="Digite o nome..." style="width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:6px;">
+                    <datalist id="listaAlunosFatoModal"></datalist>
+                </div>
+                <div style="margin-bottom:15px;">
+                    <label>Tipo:</label>
+                    <select id="fato-tipo-modal" style="width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:6px;">
+                        <option value="Positivo">Positivo</option>
+                        <option value="Negativo">Negativo</option>
+                    </select>
+                </div>
+                <div style="margin-bottom:15px;">
+                    <label>Descrição:</label>
+                    <textarea id="fato-descricao-modal" rows="3" style="width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:6px;"></textarea>
+                </div>
+                <div style="margin-bottom:15px;">
+                    <label>Data do Fato:</label>
+                    <input type="date" id="fato-data-modal" style="width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:6px;">
+                </div>
+                <div style="display:flex;gap:10px;justify-content:flex-end;">
+                    <button onclick="document.getElementById('modal-novo-fato-seed').style.display='none'" style="padding:10px 20px;border:none;border-radius:6px;background:#ccc;cursor:pointer;">Cancelar</button>
+                    <button onclick="salvarNovoFatoModal()" style="padding:10px 20px;border:none;border-radius:6px;background:#22c55e;color:white;cursor:pointer;font-weight:bold;">Salvar</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
-    <!-- ========================================== -->
-<!-- MODAL DE DETALHES DO ALUNO (CENTRAL DE ALERTAS) -->
-<!-- ========================================== -->
-<div class="modal-overlay" id="modal-detalhes-aluno-alerta" onclick="fecharModalDetalhesAlerta(event)">
-    <div class="modal-content" style="max-width: 800px; height: 85vh; display: flex; flex-direction: column;">
-        <div class="modal-header" style="background-color: #991b1b;">
-            <h3><i class="fa-solid fa-magnifying-glass"></i> Detalhes do Aluno</h3>
-            <button onclick="document.getElementById('modal-detalhes-aluno-alerta').style.display='none'" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;">&times;</button>
-        </div>
-        <div class="modal-body" id="conteudo-detalhes-alerta" style="padding: 20px; overflow-y: auto; flex: 1;">
-            <div style="text-align:center;padding:40px;color:#64748b;">
-                <i class="fa-solid fa-spinner fa-spin" style="font-size:40px;display:block;margin-bottom:15px;"></i>
-                Carregando detalhes...
-            </div>
-        </div>
-    </div>
-</div>
 
-<!-- Botão flutuante de sugestões -->
-<button id="btn-sugestao-flutuante" onclick="abrirModalSugestoes(event)" style="position: fixed; bottom: 20px; right: 20px; width: 55px; height: 55px; border-radius: 50%; background: #f59e0b; color: white; border: none; font-size: 22px; cursor: pointer; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.5); z-index: 9990; transition: all 0.3s; display: flex; align-items: center; justify-content: center;" title="Enviar sugestão">
-    <i class="fa-solid fa-lightbulb"></i>
-</button>
-    
-          <script src="db.js"></script>
-        <script src="script.js"></script>
-<script>
+    <!-- MODAL DA AGENDA DO LABORATÓRIO -->
+    <div class="modal-overlay" id="modal-agenda-lab" onclick="fecharModalLab(event)">
+        <div class="modal-content" style="max-width: 1100px; height: 85vh; display: flex; flex-direction: column;">
+            <div class="modal-header" style="background-color: #0f172a;">
+                <h3><i class="fa-solid fa-desktop"></i> Agenda de Equipamentos</h3>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                    <button onclick="filtrarEquipamentoModal('Lab. Informática')" id="btn-modal-lab" style="background:#2563eb;color:white;border:none;padding:8px 16px;border-radius:6px;font-weight:bold;cursor:pointer;">🖥️ Lab</button>
+                    <button onclick="filtrarEquipamentoModal('Tablet')" id="btn-modal-tablet" style="background:white;color:#0f172a;border:none;padding:8px 16px;border-radius:6px;font-weight:bold;cursor:pointer;">📱 Tablets</button>
+                    <span style="color:#64748b;margin:0 5px;">|</span>
+                    <button onclick="filtrarTurnoModal('Manhã')" id="btn-modal-manha" style="background:#eab308;color:#0f172a;border:none;padding:8px 16px;border-radius:6px;font-weight:bold;cursor:pointer;">Manhã</button>
+                    <button onclick="filtrarTurnoModal('Tarde')" id="btn-modal-tarde" style="background:white;color:#0f172a;border:none;padding:8px 16px;border-radius:6px;font-weight:bold;cursor:pointer;">Tarde</button>
+                    <button onclick="document.getElementById('modal-agenda-lab').style.display='none'" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;">&times;</button>
+                </div>
+            </div>
+            <div class="modal-body" id="conteudo-lab" style="padding: 20px; overflow-y: auto; flex: 1;">
+                <div style="text-align:center;padding:40px;color:#64748b;">
+                    <i class="fa-solid fa-spinner fa-spin" style="font-size:40px;display:block;margin-bottom:15px;"></i>
+                    Carregando agenda do laboratório...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DA CENTRAL DE ALERTAS -->
+    <div class="modal-overlay" id="modal-alertas" onclick="fecharModalAlertas(event)">
+        <div class="modal-content" style="max-width: 1100px; height: 85vh; display: flex; flex-direction: column;">
+            <div class="modal-header" style="background-color: #991b1b;">
+                <h3><i class="fa-solid fa-triangle-exclamation"></i> Central de Alertas</h3>
+                <button onclick="document.getElementById('modal-alertas').style.display='none'" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;">&times;</button>
+            </div>
+            <div class="modal-body" id="conteudo-alertas" style="padding: 20px; overflow-y: auto; flex: 1;">
+                <div style="text-align:center;padding:40px;color:#64748b;">
+                    <i class="fa-solid fa-spinner fa-spin" style="font-size:40px;display:block;margin-bottom:15px;"></i>
+                    Analisando dados dos alunos...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE DETALHES DO ALUNO (CENTRAL DE ALERTAS) -->
+    <div class="modal-overlay" id="modal-detalhes-aluno-alerta" onclick="fecharModalDetalhesAlerta(event)">
+        <div class="modal-content" style="max-width: 800px; height: 85vh; display: flex; flex-direction: column;">
+            <div class="modal-header" style="background-color: #991b1b;">
+                <h3><i class="fa-solid fa-magnifying-glass"></i> Detalhes do Aluno</h3>
+                <button onclick="document.getElementById('modal-detalhes-aluno-alerta').style.display='none'" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;">&times;</button>
+            </div>
+            <div class="modal-body" id="conteudo-detalhes-alerta" style="padding: 20px; overflow-y: auto; flex: 1;">
+                <div style="text-align:center;padding:40px;color:#64748b;">
+                    <i class="fa-solid fa-spinner fa-spin" style="font-size:40px;display:block;margin-bottom:15px;"></i>
+                    Carregando detalhes...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="db.js"></script>
+    <script src="script.js"></script>
+    <script>
 
 // ========== COMUNICADO SEED (MODAL INTEGRADO) ==========
 let comunicadosModal = [];
@@ -1281,10 +1201,10 @@ function fecharModalComunicado(e) {
     if (e.target.id === 'modal-comunicado-seed') document.getElementById('modal-comunicado-seed').style.display = 'none';
 }
 
-// URL secundária para horários e dados de alunos
+// URL secundária
 const APPS_SCRIPT_V2 = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
 
-// Verificar se o email já existe e carregar dados para edição
+// Verificar se o email já existe
 document.addEventListener('DOMContentLoaded', function() {
     const emailInput = document.getElementById('admin-user-email');
     if (emailInput) {
@@ -1298,7 +1218,6 @@ function checarSeUsuarioExisteParaEditar() {
     const emailDigitado = document.getElementById('admin-user-email').value.trim().toLowerCase();
     if (!emailDigitado || !emailDigitado.includes('@')) return;
     
-    // Busca o usuário na lista
     fetch(APPS_SCRIPT_V2 + '?aba=usuarios')
         .then(r => r.json())
         .then(usuarios => {
@@ -1307,10 +1226,8 @@ function checarSeUsuarioExisteParaEditar() {
             const btnSave = document.getElementById('btn-save-user');
             const btnDel = document.getElementById('btn-del-user');
             const divPref = document.getElementById('preferencias-professor');
-            const tituloGestao = document.querySelector('#modal-admin h4:first-of-type');
             
             if (usuarioEncontrado) {
-                // Modo Edição
                 document.getElementById('admin-user-nome').value = usuarioEncontrado.nome || '';
                 document.getElementById('admin-user-setor').value = usuarioEncontrado.setor || 'professores';
                 document.getElementById('admin-user-nivel').value = usuarioEncontrado.nivel || 1;
@@ -1318,30 +1235,27 @@ function checarSeUsuarioExisteParaEditar() {
                 btnSave.style.background = '#eab308';
                 if (btnDel) btnDel.style.display = 'inline-block';
                 
-                // Carregar preferências
                 if (usuarioEncontrado.setor === 'professores') {
                     if (divPref) divPref.style.display = 'block';
                     const turnoEl = document.getElementById('admin-pref-turno');
                     const maxAulasEl = document.getElementById('admin-pref-max-aulas');
                     const geminadasEl = document.getElementById('admin-pref-geminadas');
                     const restricoesEl = document.getElementById('admin-pref-restricoes');
-                    const dataNascEl = document.getElementById('admin-data-nasc'); // 🆕
+                    const dataNascEl = document.getElementById('admin-data-nasc');
                     
                     if (turnoEl) turnoEl.value = usuarioEncontrado.turno_pref || 'Ambos';
                     if (maxAulasEl) maxAulasEl.value = usuarioEncontrado.max_aulas || 5;
                     if (geminadasEl) geminadasEl.value = usuarioEncontrado.geminadas || 'Não';
                     if (restricoesEl) restricoesEl.value = usuarioEncontrado.restricoes || '';
-                    if (dataNascEl) dataNascEl.value = usuarioEncontrado.data_nasc || ''; // 🆕
+                    if (dataNascEl) dataNascEl.value = usuarioEncontrado.data_nasc || '';
                 } else {
                     if (divPref) divPref.style.display = 'none';
                 }
             } else {
-                // Novo usuário
                 btnSave.innerText = 'Salvar Usuário';
                 btnSave.style.background = '#059669';
                 if (btnDel) btnDel.style.display = 'none';
                 if (divPref) divPref.style.display = 'none';
-                // 🆕 Limpar data de nascimento
                 const dataNascEl = document.getElementById('admin-data-nasc');
                 if (dataNascEl) dataNascEl.value = '';
             }
@@ -1349,9 +1263,7 @@ function checarSeUsuarioExisteParaEditar() {
         .catch(e => console.error('Erro ao buscar usuários:', e));
 }
 
-// =============================================
-// 🆕 GARANTIR PREFERÊNCIAS DO PROFESSOR
-// =============================================
+// GARANTIR PREFERÊNCIAS DO PROFESSOR
 document.addEventListener('DOMContentLoaded', function() {
     const selectSetor = document.getElementById('admin-user-setor');
     if (selectSetor) {
@@ -1377,9 +1289,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// =============================================
-// FUNÇÃO TOGGLE PREFERÊNCIAS (GARANTIDA)
-// =============================================
 function togglePreferenciasProfessor() {
     const setor = document.getElementById('admin-user-setor');
     const divPref = document.getElementById('preferencias-professor');
@@ -1387,22 +1296,11 @@ function togglePreferenciasProfessor() {
         divPref.style.display = (setor.value === 'professores' || setor.value === 'direcao') ? 'block' : 'none';
     }
 }
-    
-function togglePreferenciasProfessor() {
-    const setor = document.getElementById('admin-user-setor').value;
-    const divPref = document.getElementById('preferencias-professor');
-    if (divPref) {
-        divPref.style.display = (setor === 'professores') ? 'block' : 'none';
-    }
-}
-    
-// =============================================
+
 // CONTROLE DE ACESSO POR NÍVEL
-// =============================================
 function aplicarControleAcesso() {
     if (!usuarioLogado || !usuarioLogado.nivel) {
         console.warn('⚠️ aplicarControleAcesso: usuarioLogado ainda não está pronto');
-        // Tenta novamente em 500ms
         setTimeout(aplicarControleAcesso, 500);
         return;
     }
@@ -1410,14 +1308,12 @@ function aplicarControleAcesso() {
     const nivel = parseInt(usuarioLogado.nivel);
     console.log('🔐 Aplicando controle de acesso - Nível:', nivel);
     
-    // Nível 4+ (Direção): Progressão, Gestão de Horários, Painel Admin
     const botoesNivel4 = ['btn-progressao', 'btn-gestao-horarios', 'btn-abrir-admin'];
     botoesNivel4.forEach(id => {
         const btn = document.getElementById(id);
         if (btn) btn.style.display = nivel >= 4 ? 'flex' : 'none';
     });
     
-    // Nível 3+ (Admin): Patrimônio, F.O., Central de Alertas, Secretaria, Aniversários
     const botoesNivel3 = ['btn-patrimonio', 'btn-comunicado-seed', 'btn-central-alertas', 'btn-aba-secretaria', 'btn-aniversarios'];
     botoesNivel3.forEach(id => {
         const btn = document.getElementById(id);
@@ -1427,19 +1323,14 @@ function aplicarControleAcesso() {
         }
     });
     
-    // Nível 1+ (Todos): Meus Horários, Agenda Lab
     const botoesTodos = ['btn-meus-horarios', 'btn-agenda-lab'];
     botoesTodos.forEach(id => {
         const btn = document.getElementById(id);
         if (btn) btn.style.display = 'flex';
     });
 }
-    
-// =============================================
-// FUNÇÕES PARA MODAIS
-// =============================================
 
-// ========== HORÁRIOS DO PROFESSOR ==========
+// HORÁRIOS DO PROFESSOR
 function abrirMeusHorarios() {
     document.getElementById('modal-meus-horarios').style.display = 'flex';
     document.getElementById('conteudo-horarios').innerHTML = 
@@ -1456,35 +1347,22 @@ async function carregarHorariosProfessor() {
         }
         
         let nomeProfessor = usuarioLogado.nome;
-        
-        // Busca TODOS os horários
         let url = APPS_SCRIPT_V2 + '?aba=horarios';
         let response = await fetch(url);
         let data = await response.json();
         let todos = (data.status === 'success' && data.horarios) ? data.horarios : [];
         
-        // Normaliza o nome do professor logado
         const nomeLogadoNorm = nomeProfessor.trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
         
-        // Filtra horários normais
         let horarios = todos.filter(h => {
             const nomeProf = (h.professor || '').trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
             const nomeApoio = (h.professor_apoio || '').trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
             
-            if (nomeProf === nomeLogadoNorm) {
-                h.como_apoio = false;
-                h.isHA = false;
-                return true;
-            }
-            if (nomeApoio === nomeLogadoNorm) {
-                h.como_apoio = true;
-                h.isHA = false;
-                return true;
-            }
+            if (nomeProf === nomeLogadoNorm) { h.como_apoio = false; h.isHA = false; return true; }
+            if (nomeApoio === nomeLogadoNorm) { h.como_apoio = true; h.isHA = false; return true; }
             return false;
         });
         
-        // 🆕 Buscar H.A. do professor
         try {
             const respHA = await fetch(APPS_SCRIPT_V2 + '?aba=horas_atividade');
             const dataHA = await respHA.json();
@@ -1493,36 +1371,24 @@ async function carregarHorariosProfessor() {
                 const nomeHA = (h.professor || '').trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
                 if (nomeHA === nomeLogadoNorm) {
                     horarios.push({
-                        turma: '---',
-                        dia: h.dia,
-                        aula: h.aula,
-                        horario: h.horario,
-                        disciplina: 'H.A. - Planejamento',
-                        professor: h.professor,
-                        local: 'Coordenação',
-                        como_apoio: false,
-                        isHA: true,
+                        turma: '---', dia: h.dia, aula: h.aula, horario: h.horario,
+                        disciplina: 'H.A. - Planejamento', professor: h.professor,
+                        local: 'Coordenação', como_apoio: false, isHA: true,
                         turno: h.turno || 'Manhã'
                     });
                 }
             });
-        } catch (e) {
-            console.log('Sem H.A. cadastrada para este professor.');
-        }
+        } catch (e) {}
         
-        // Remove duplicados
         const unicos = [];
         const chaves = new Set();
         horarios.forEach(h => {
             const chave = h.turma + '|' + h.dia + '|' + h.aula + '|' + (h.isHA ? 'HA' : '');
-            if (!chaves.has(chave)) {
-                chaves.add(chave);
-                unicos.push(h);
-            }
+            if (!chaves.has(chave)) { chaves.add(chave); unicos.push(h); }
         });
         
         if (unicos.length === 0) {
-            container.innerHTML = '<div style="text-align:center;padding:40px;color:#64748b;"><i class="fa-solid fa-calendar-xmark" style="font-size:48px;"></i><p>Nenhum horário encontrado para <strong>' + nomeProfessor + '</strong>.</p><p style="font-size:13px;">Verifique se o nome confere com o cadastro na planilha de horários.</p></div>';
+            container.innerHTML = '<div style="text-align:center;padding:40px;color:#64748b;"><i class="fa-solid fa-calendar-xmark" style="font-size:48px;"></i><p>Nenhum horário encontrado para <strong>' + nomeProfessor + '</strong>.</p></div>';
             return;
         }
         
@@ -1569,13 +1435,7 @@ function renderizarHorariosNoModal(horarios, container) {
             const isTablet = a.local && a.local.toLowerCase().includes('tablet') ? ' 📱' : '';
             const isHA = a.isHA ? ' <span style="background:#fef3c7;color:#92400e;padding:2px 6px;border-radius:10px;font-size:10px;">H.A.</span>' : '';
             
-            if (isHA) {
-                // Destacar linha de H.A. com cor diferente
-                html += '<tr style="background:#fef3c7;">';
-            } else {
-                html += '<tr>';
-            }
-            
+            html += isHA ? '<tr style="background:#fef3c7;">' : '<tr>';
             html += '<td style="padding:8px;"><strong>' + a.aula + '</strong></td>';
             html += '<td style="padding:8px;">' + (a.horario || '—') + '</td>';
             html += '<td style="padding:8px;"><span style="background:#e0f2fe;color:#0369a1;padding:3px 8px;border-radius:10px;font-size:12px;">' + (a.turma || '---') + '</span></td>';
@@ -1595,7 +1455,7 @@ function renderizarHorariosNoModal(horarios, container) {
     container.innerHTML = html;
 }
 
-// ========== AGENDA DO LABORATÓRIO/TABLETS (CORRIGIDA) ==========
+// AGENDA DO LABORATÓRIO
 let turnoLabModal = 'Manhã';
 let todosHorariosLab = [];
 let equipamentoModal = 'Lab. Informática';
@@ -1611,7 +1471,6 @@ function abrirAgendaLab() {
 }
 
 function atualizarBotoesAgenda() {
-    // Botões de equipamento
     const btnLab = document.getElementById('btn-modal-lab');
     const btnTab = document.getElementById('btn-modal-tablet');
     if (btnLab) {
@@ -1622,7 +1481,6 @@ function atualizarBotoesAgenda() {
         btnTab.style.background = equipamentoModal === 'Tablet' ? '#db2777' : 'white';
         btnTab.style.color = equipamentoModal === 'Tablet' ? 'white' : '#0f172a';
     }
-    // Botões de turno
     const btnManha = document.getElementById('btn-modal-manha');
     const btnTarde = document.getElementById('btn-modal-tarde');
     if (btnManha) {
@@ -1675,7 +1533,6 @@ function renderizarGradeLabModal(container) {
     
     const horariosTurno = todosHorariosLab.filter(h => h.turno === turnoLabModal);
     
-    // 🔧 CORREÇÃO: Filtra por equipamento E USA na renderização
     const horariosEquip = horariosTurno.filter(h => {
         if (!h.local) return false;
         const localLower = h.local.toLowerCase();
@@ -1686,8 +1543,6 @@ function renderizarGradeLabModal(container) {
         }
         return false;
     });
-    
-    console.log('Equipamento:', equipamentoModal, '| Turno:', turnoLabModal, '| Aulas:', horariosEquip.length);
     
     let html = '<div style="display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap;">';
     html += '<span style="background:#dcfce7;padding:5px 10px;border-radius:5px;font-size:12px;">🟢 Livre</span>';
@@ -1707,7 +1562,6 @@ function renderizarGradeLabModal(container) {
         html += '<td style="padding:8px;background:#f8fafc;font-weight:bold;text-align:center;font-size:11px;">' + aula + '<br><small>' + horarios[i] + '</small></td>';
         
         dias.forEach(dia => {
-            // 🔧 CORREÇÃO: Usa horariosEquip em vez de horariosTurno
             const ocupadas = horariosEquip.filter(h => h.dia === dia && h.aula === aula);
             
             if (ocupadas.length === 0) {
@@ -1752,7 +1606,7 @@ function renderizarGradeLabModal(container) {
     container.innerHTML = html;
 }
 
-// ========== CENTRAL DE ALERTAS ==========
+// CENTRAL DE ALERTAS
 function abrirCentralAlertas() {
     document.getElementById('modal-alertas').style.display = 'flex';
     document.getElementById('conteudo-alertas').innerHTML = 
@@ -1812,10 +1666,6 @@ async function carregarAlertasModal() {
         
         alertas.sort((a, b) => a.nivel === 'critico' && b.nivel !== 'critico' ? -1 : 1);
         
-        const criticos = alertas.filter(a => a.nivel === 'critico').length;
-        const atencao = alertas.filter(a => a.nivel === 'atencao').length;
-        console.log('Alertas:', criticos, 'críticos,', atencao, 'atenção');
-        
         if (alertas.length === 0) {
             container.innerHTML = '<div style="text-align:center;padding:40px;color:#22c55e;"><i class="fa-solid fa-circle-check" style="font-size:48px;"></i><p>Nenhum aluno em situação de alerta.</p></div>';
             return;
@@ -1858,15 +1708,12 @@ function parseDataModal(str) {
     } catch (e) { return null; }
 }
 
-// Fechar modais
 function fecharModalHorarios(e) { if (e.target.id === 'modal-meus-horarios') document.getElementById('modal-meus-horarios').style.display = 'none'; }
 function fecharModalLab(e) { if (e.target.id === 'modal-agenda-lab') document.getElementById('modal-agenda-lab').style.display = 'none'; }
 function fecharModalAlertas(e) { if (e.target.id === 'modal-alertas') document.getElementById('modal-alertas').style.display = 'none'; }
-// =============================================
-// 🆕 DETALHES DO ALUNO NA CENTRAL DE ALERTAS
-// =============================================
+
+// DETALHES DO ALUNO NA CENTRAL DE ALERTAS
 function abrirDetalhesAlunoAlerta(nomeAluno) {
-    // Verifica nível de acesso (3+)
     if (!usuarioLogado || parseInt(usuarioLogado.nivel) < 3) {
         mostrarToast('🔒 Acesso restrito ao nível 3 ou superior.', 'erro');
         return;
@@ -1888,117 +1735,80 @@ async function carregarDetalhesAlunoAlerta(nomeAluno) {
         
         const hoje = new Date();
         const limite = new Date(hoje);
-        limite.setDate(limite.getDate() - 30); // Últimos 30 dias
+        limite.setDate(limite.getDate() - 30);
         
-        // Filtra registros do aluno
         const nomeNorm = nomeAluno.trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
         
-        const registrosAluno = {
-            atas: [],
-            apontamentos: [],
-            fatosNegativos: [],
-            documentosPendentes: []
-        };
+        const registrosAluno = { atas: [], apontamentos: [], fatosNegativos: [], documentosPendentes: [] };
         
-        // Atas (últimos 30 dias)
         (data.atas || []).forEach(ata => {
             const nomeAta = (ata.aluno || '').trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
             const dataAta = parseDataModal(ata.data);
-            if (nomeAta === nomeNorm && dataAta && dataAta >= limite) {
-                registrosAluno.atas.push(ata);
-            }
+            if (nomeAta === nomeNorm && dataAta && dataAta >= limite) registrosAluno.atas.push(ata);
         });
         
-        // Apontamentos (últimos 30 dias)
         (data.apontamentos || []).forEach(ap => {
             const nomeAp = (ap.aluno || '').trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
             const dataAp = parseDataModal(ap.dataAtual);
-            if (nomeAp === nomeNorm && dataAp && dataAp >= limite) {
-                registrosAluno.apontamentos.push(ap);
-            }
+            if (nomeAp === nomeNorm && dataAp && dataAp >= limite) registrosAluno.apontamentos.push(ap);
         });
         
-        // Fatos negativos (últimos 30 dias)
         (data.fatos_seed || []).forEach(fato => {
             const nomeFato = (fato.aluno || '').trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
             const dataFato = parseDataModal(fato.data);
-            if (nomeFato === nomeNorm && 
-                fato.tipo && fato.tipo.toLowerCase().includes('negativo') && 
-                dataFato && dataFato >= limite) {
+            if (nomeFato === nomeNorm && fato.tipo && fato.tipo.toLowerCase().includes('negativo') && dataFato && dataFato >= limite) {
                 registrosAluno.fatosNegativos.push(fato);
             }
         });
         
-        // Documentos pendentes
         (data.documentos || []).forEach(doc => {
             const nomeDoc = (doc.aluno || '').trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-            if (nomeDoc === nomeNorm && doc.status && doc.status.toLowerCase() === 'pendente') {
-                registrosAluno.documentosPendentes.push(doc);
-            }
+            if (nomeDoc === nomeNorm && doc.status && doc.status.toLowerCase() === 'pendente') registrosAluno.documentosPendentes.push(doc);
         });
         
-        // Monta o HTML
         let html = '<div style="background:#fee2e2;padding:15px;border-radius:8px;margin-bottom:20px;border-left:5px solid #dc2626;">';
         html += '<strong style="font-size:18px;">👤 ' + nomeAluno + '</strong>';
-        html += '<div style="font-size:12px;color:#64748b;margin-top:5px;">Últimos 30 dias (exceto documentos pendentes)</div>';
+        html += '<div style="font-size:12px;color:#64748b;margin-top:5px;">Últimos 30 dias</div>';
         html += '</div>';
         
-        // Seção Atas
-        html += '<h4 style="color:#dc2626;margin:15px 0 10px;"><i class="fa-solid fa-file-contract"></i> 📁 Atas Disciplinares (' + registrosAluno.atas.length + ')</h4>';
-        if (registrosAluno.atas.length === 0) {
-            html += '<p style="color:#94a3b8;">Nenhuma ata encontrada.</p>';
-        } else {
-            registrosAluno.atas.forEach(ata => {
-                html += '<div style="background:white;border-left:3px solid #dc2626;padding:10px;margin-bottom:8px;border-radius:4px;">';
-                html += '<strong>📁 Ata nº ' + (ata.numero || '---') + '</strong>';
-                html += '<div style="font-size:12px;color:#64748b;">📅 ' + (ata.data || '---') + '</div>';
-                if (ata.link) {
-                    html += '<a href="' + ata.link + '" target="_blank" style="color:#005088;font-size:12px;">📎 Ver Ata</a>';
-                }
-                html += '</div>';
-            });
-        }
+        html += '<h4 style="color:#dc2626;margin:15px 0 10px;">📁 Atas Disciplinares (' + registrosAluno.atas.length + ')</h4>';
+        if (registrosAluno.atas.length === 0) html += '<p style="color:#94a3b8;">Nenhuma ata encontrada.</p>';
+        else registrosAluno.atas.forEach(ata => {
+            html += '<div style="background:white;border-left:3px solid #dc2626;padding:10px;margin-bottom:8px;border-radius:4px;">';
+            html += '<strong>📁 Ata nº ' + (ata.numero || '---') + '</strong>';
+            html += '<div style="font-size:12px;color:#64748b;">📅 ' + (ata.data || '---') + '</div>';
+            if (ata.link) html += '<a href="' + ata.link + '" target="_blank" style="color:#005088;font-size:12px;">📎 Ver Ata</a>';
+            html += '</div>';
+        });
         
-        // Seção Apontamentos
-        html += '<h4 style="color:#005088;margin:15px 0 10px;"><i class="fa-solid fa-comment"></i> 📝 Apontamentos (' + registrosAluno.apontamentos.length + ')</h4>';
-        if (registrosAluno.apontamentos.length === 0) {
-            html += '<p style="color:#94a3b8;">Nenhum apontamento encontrado.</p>';
-        } else {
-            registrosAluno.apontamentos.forEach(ap => {
-                const setorNome = ap.setor === 'meivs' ? 'MEIV\'S' : ap.setor === 'pedagogico' ? 'Pedagógico' : ap.setor === 'adm' ? 'ADM' : 'Professores';
-                html += '<div style="background:white;border-left:3px solid #005088;padding:10px;margin-bottom:8px;border-radius:4px;">';
-                html += '<strong>' + setorNome + '</strong> — ' + (ap.texto || '---');
-                html += '<div style="font-size:12px;color:#64748b;">👤 ' + (ap.funcionario || '---') + ' | 📅 ' + (ap.dataAtual || '---') + '</div>';
-                html += '</div>';
-            });
-        }
+        html += '<h4 style="color:#005088;margin:15px 0 10px;">📝 Apontamentos (' + registrosAluno.apontamentos.length + ')</h4>';
+        if (registrosAluno.apontamentos.length === 0) html += '<p style="color:#94a3b8;">Nenhum apontamento encontrado.</p>';
+        else registrosAluno.apontamentos.forEach(ap => {
+            const setorNome = ap.setor === 'meivs' ? 'MEIV\'S' : ap.setor === 'pedagogico' ? 'Pedagógico' : ap.setor === 'adm' ? 'ADM' : 'Professores';
+            html += '<div style="background:white;border-left:3px solid #005088;padding:10px;margin-bottom:8px;border-radius:4px;">';
+            html += '<strong>' + setorNome + '</strong> — ' + (ap.texto || '---');
+            html += '<div style="font-size:12px;color:#64748b;">👤 ' + (ap.funcionario || '---') + ' | 📅 ' + (ap.dataAtual || '---') + '</div>';
+            html += '</div>';
+        });
         
-        // Seção Fatos Negativos
-        html += '<h4 style="color:#b91c1c;margin:15px 0 10px;"><i class="fa-solid fa-triangle-exclamation"></i> ⚠️ Comunicados Negativos (' + registrosAluno.fatosNegativos.length + ')</h4>';
-        if (registrosAluno.fatosNegativos.length === 0) {
-            html += '<p style="color:#94a3b8;">Nenhum comunicado negativo encontrado.</p>';
-        } else {
-            registrosAluno.fatosNegativos.forEach(fato => {
-                html += '<div style="background:white;border-left:3px solid #b91c1c;padding:10px;margin-bottom:8px;border-radius:4px;">';
-                html += '<strong>⚠️ ' + (fato.tipo || 'Negativo') + '</strong>';
-                html += '<div style="font-size:13px;margin-top:3px;">' + (fato.descricao || '---') + '</div>';
-                html += '<div style="font-size:12px;color:#64748b;">📅 ' + (fato.data || '---') + '</div>';
-                html += '</div>';
-            });
-        }
+        html += '<h4 style="color:#b91c1c;margin:15px 0 10px;">⚠️ Comunicados Negativos (' + registrosAluno.fatosNegativos.length + ')</h4>';
+        if (registrosAluno.fatosNegativos.length === 0) html += '<p style="color:#94a3b8;">Nenhum comunicado negativo encontrado.</p>';
+        else registrosAluno.fatosNegativos.forEach(fato => {
+            html += '<div style="background:white;border-left:3px solid #b91c1c;padding:10px;margin-bottom:8px;border-radius:4px;">';
+            html += '<strong>⚠️ ' + (fato.tipo || 'Negativo') + '</strong>';
+            html += '<div style="font-size:13px;margin-top:3px;">' + (fato.descricao || '---') + '</div>';
+            html += '<div style="font-size:12px;color:#64748b;">📅 ' + (fato.data || '---') + '</div>';
+            html += '</div>';
+        });
         
-        // Seção Documentos Pendentes
-        html += '<h4 style="color:#d97706;margin:15px 0 10px;"><i class="fa-solid fa-file"></i> 📄 Documentos Pendentes (' + registrosAluno.documentosPendentes.length + ')</h4>';
-        if (registrosAluno.documentosPendentes.length === 0) {
-            html += '<p style="color:#94a3b8;">Nenhum documento pendente.</p>';
-        } else {
-            registrosAluno.documentosPendentes.forEach(doc => {
-                html += '<div style="background:white;border-left:3px solid #d97706;padding:10px;margin-bottom:8px;border-radius:4px;">';
-                html += '<strong>📄 ' + (doc.documento || '---') + '</strong>';
-                html += '<div style="font-size:12px;color:#64748b;">📅 ' + (doc.data || '---') + ' | Status: ' + (doc.status || 'Pendente') + '</div>';
-                html += '</div>';
-            });
-        }
+        html += '<h4 style="color:#d97706;margin:15px 0 10px;">📄 Documentos Pendentes (' + registrosAluno.documentosPendentes.length + ')</h4>';
+        if (registrosAluno.documentosPendentes.length === 0) html += '<p style="color:#94a3b8;">Nenhum documento pendente.</p>';
+        else registrosAluno.documentosPendentes.forEach(doc => {
+            html += '<div style="background:white;border-left:3px solid #d97706;padding:10px;margin-bottom:8px;border-radius:4px;">';
+            html += '<strong>📄 ' + (doc.documento || '---') + '</strong>';
+            html += '<div style="font-size:12px;color:#64748b;">📅 ' + (doc.data || '---') + ' | Status: ' + (doc.status || 'Pendente') + '</div>';
+            html += '</div>';
+        });
         
         container.innerHTML = html;
     } catch (e) {
@@ -2012,9 +1822,8 @@ function fecharModalDetalhesAlerta(e) {
         document.getElementById('modal-detalhes-aluno-alerta').style.display = 'none';
     }
 }
-// =============================================
+
 // PROGRESSÃO DE TURMAS
-// =============================================
 let dadosProgressao = { automaticas: [], comEscolha: [], alunosNonoAno: [] };
 
 function abrirProgressao() {
@@ -2027,11 +1836,9 @@ function abrirProgressao() {
 
 async function carregarDadosProgressao() {
     try {
-        // Busca lista de alunos com turmas
         const resp = await fetch(APPS_SCRIPT_V2 + '?aba=alunos');
         const alunos = await resp.json();
         
-        // Agrupa alunos por turma
         const turmas = {};
         alunos.forEach(a => {
             if (!a.turma_codigo) return;
@@ -2039,11 +1846,9 @@ async function carregarDadosProgressao() {
             turmas[a.turma_codigo].push(a.nome);
         });
         
-        // Regras de progressão
         dadosProgressao.automaticas = [];
         dadosProgressao.comEscolha = [];
         
-        // Turmas automáticas
         const regrasAuto = {
             '6A': '7A', '6B': '7B', '6C': '7C',
             '7A': '8A', '7B': '8B', '7C': '8C', '7D': '8D',
@@ -2056,16 +1861,10 @@ async function carregarDadosProgressao() {
         Object.keys(regrasAuto).forEach(origem => {
             const destino = regrasAuto[origem];
             if (turmas[origem] && turmas[origem].length > 0) {
-                dadosProgressao.automaticas.push({
-                    origem: origem,
-                    destino: destino,
-                    alunos: turmas[origem].length,
-                    nomes: turmas[origem]
-                });
+                dadosProgressao.automaticas.push({ origem, destino, alunos: turmas[origem].length, nomes: turmas[origem] });
             }
         });
         
-        // Turmas do 9º ano (precisam de escolha)
         ['9A', '9B', '9C'].forEach(turma => {
             if (turmas[turma] && turmas[turma].length > 0) {
                 dadosProgressao.comEscolha.push({
@@ -2075,15 +1874,11 @@ async function carregarDadosProgressao() {
             }
         });
         
-        // Concluintes (3º EM, 3º FD)
         ['3ANEM', '3BNEM', '3FD'].forEach(turma => {
             if (turmas[turma] && turmas[turma].length > 0) {
                 dadosProgressao.automaticas.push({
-                    origem: turma,
-                    destino: '🎓 EGRESSOS',
-                    alunos: turmas[turma].length,
-                    nomes: turmas[turma],
-                    egresso: true
+                    origem: turma, destino: '🎓 EGRESSOS',
+                    alunos: turmas[turma].length, nomes: turmas[turma], egresso: true
                 });
             }
         });
@@ -2091,8 +1886,7 @@ async function carregarDadosProgressao() {
         renderizarProgressao();
     } catch (e) {
         console.error(e);
-        document.getElementById('conteudo-progressao').innerHTML = 
-            '<p style="text-align:center;color:red;">Erro ao carregar dados.</p>';
+        document.getElementById('conteudo-progressao').innerHTML = '<p style="text-align:center;color:red;">Erro ao carregar dados.</p>';
     }
 }
 
@@ -2100,7 +1894,6 @@ function renderizarProgressao() {
     const container = document.getElementById('conteudo-progressao');
     let html = '';
     
-    // Seção: Progressão Automática
     if (dadosProgressao.automaticas.length > 0) {
         html += '<h4 style="color:#059669;margin-bottom:15px;">✅ Progressão Automática</h4>';
         html += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px;margin-bottom:25px;">';
@@ -2111,14 +1904,12 @@ function renderizarProgressao() {
             html += '<div style="display:flex;justify-content:space-between;align-items:center;">';
             html += '<strong>' + item.origem + ' ➡️ ' + item.destino + '</strong>';
             html += '<span style="background:white;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:bold;">' + item.alunos + ' alunos</span>';
-            html += '</div>';
-            html += '</div>';
+            html += '</div></div>';
         });
         
         html += '</div>';
     }
     
-    // Seção: 9º Ano com Escolha
     if (dadosProgressao.comEscolha.length > 0) {
         html += '<h4 style="color:#d97706;margin-bottom:15px;">🎓 9º Ano — Escolha o Destino</h4>';
         
@@ -2129,14 +1920,12 @@ function renderizarProgressao() {
             html += '<span style="background:#fef3c7;padding:3px 10px;border-radius:12px;font-size:12px;">' + turma.alunos.length + ' alunos</span>';
             html += '</div>';
             
-            // Botões de ação em lote
             html += '<div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">';
             html += '<button onclick="moverTodosPara(\'' + turma.origem + '\', \'1NEM\')" style="background:#e0f2fe;color:#0369a1;border:none;padding:6px 12px;border-radius:15px;cursor:pointer;font-size:12px;font-weight:bold;">Todos → 1NEM</button>';
             html += '<button onclick="moverTodosPara(\'' + turma.origem + '\', \'1FD\')" style="background:#fce7f3;color:#9d174d;border:none;padding:6px 12px;border-radius:15px;cursor:pointer;font-size:12px;font-weight:bold;">Todos → 1FD</button>';
             html += '<button onclick="moverTodosPara(\'' + turma.origem + '\', \'1AGRO\')" style="background:#fef3c7;color:#92400e;border:none;padding:6px 12px;border-radius:15px;cursor:pointer;font-size:12px;font-weight:bold;">Todos → 1AGRO</button>';
             html += '</div>';
             
-            // Lista de alunos com dropdown
             html += '<div style="max-height:200px;overflow-y:auto;">';
             turma.alunos.forEach((aluno, idx) => {
                 const corDestino = aluno.destino === '1NEM' ? '#e0f2fe' : aluno.destino === '1FD' ? '#fce7f3' : '#fef3c7';
@@ -2146,21 +1935,17 @@ function renderizarProgressao() {
                 html += '<option value="1NEM" ' + (aluno.destino === '1NEM' ? 'selected' : '') + '>1º NEM</option>';
                 html += '<option value="1FD" ' + (aluno.destino === '1FD' ? 'selected' : '') + '>1º FD</option>';
                 html += '<option value="1AGRO" ' + (aluno.destino === '1AGRO' ? 'selected' : '') + '>1º Agro</option>';
-                html += '</select>';
-                html += '</div>';
+                html += '</select></div>';
             });
             html += '</div>';
             
-            // Resumo da turma
             const contagem = { '1NEM': 0, '1FD': 0, '1AGRO': 0 };
             turma.alunos.forEach(a => contagem[a.destino]++);
             html += '<div style="display:flex;gap:10px;margin-top:8px;font-size:11px;color:#64748b;">';
             html += '<span>📘 1NEM: ' + contagem['1NEM'] + '</span>';
             html += '<span>📙 1FD: ' + contagem['1FD'] + '</span>';
             html += '<span>📗 1AGRO: ' + contagem['1AGRO'] + '</span>';
-            html += '</div>';
-            
-            html += '</div>';
+            html += '</div></div>';
         });
     }
     
@@ -2170,30 +1955,23 @@ function renderizarProgressao() {
 
 function moverTodosPara(turmaOrigem, destino) {
     const turma = dadosProgressao.comEscolha.find(t => t.origem === turmaOrigem);
-    if (turma) {
-        turma.alunos.forEach(a => a.destino = destino);
-        renderizarProgressao();
-    }
+    if (turma) { turma.alunos.forEach(a => a.destino = destino); renderizarProgressao(); }
 }
 
 function mudarDestino(turmaOrigem, idx, destino) {
     const turma = dadosProgressao.comEscolha.find(t => t.origem === turmaOrigem);
-    if (turma && turma.alunos[idx]) {
-        turma.alunos[idx].destino = destino;
-        renderizarProgressao();
-    }
+    if (turma && turma.alunos[idx]) { turma.alunos[idx].destino = destino; renderizarProgressao(); }
 }
 
 async function executarProgressao() {
     if (!confirm('⚠️ ATENÇÃO! Esta ação vai mover TODOS os alunos para as novas turmas. Deseja continuar?')) return;
-    if (!confirm('🔴 CONFIRMAÇÃO FINAL: Tem certeza absoluta? Faça backup da planilha antes de prosseguir.')) return;
+    if (!confirm('🔴 CONFIRMAÇÃO FINAL: Tem certeza absoluta?')) return;
     
     const btn = document.getElementById('btn-executar-progressao');
     btn.disabled = true;
     btn.innerText = '⏳ Processando...';
     
     try {
-        // Envia dados para o Apps Script processar
         const payload = {
             operacao: "PROGRESSAO_TURMAS",
             emailOperador: usuarioLogado.email,
@@ -2210,10 +1988,7 @@ async function executarProgressao() {
         const result = await resp.json();
         
         if (result.status === 'success') {
-            alert('✅ Progressão concluída com sucesso!\n\n' + 
-                  'Turmas automáticas: ' + (result.automaticas || 0) + '\n' +
-                  'Alunos do 9º ano: ' + (result.nonoAno || 0) + '\n' +
-                  'Egressos: ' + (result.egressos || 0));
+            alert('✅ Progressão concluída com sucesso!');
             document.getElementById('modal-progressao').style.display = 'none';
         } else {
             alert('❌ Erro: ' + (result.message || 'Falha ao processar.'));
@@ -2227,14 +2002,11 @@ async function executarProgressao() {
 }
 
 function fecharModalProgressao(e) {
-    if (e.target.id === 'modal-progressao') {
-        document.getElementById('modal-progressao').style.display = 'none';
-    }
+    if (e.target.id === 'modal-progressao') document.getElementById('modal-progressao').style.display = 'none';
 }
-    // =============================================
+
 // GESTÃO DE HORÁRIOS
-// =============================================
-let gradeAtual = {}; // { 'Segunda': { '1ª': 'MAT', '2ª': 'PORT', ... }, 'Terça': {...} }
+let gradeAtual = {};
 let disciplinasDisponiveis = [];
 let turmaEditando = '';
 let turnoEditando = 'Manhã';
@@ -2255,17 +2027,12 @@ async function carregarTurmasGestao() {
     try {
         const resp = await fetch(APPS_SCRIPT_V2 + '?aba=alunos');
         const alunos = await resp.json();
-        
-        // Extrai turmas únicas
         const turmas = [...new Set(alunos.map(a => a.turma_codigo).filter(Boolean))].sort();
         
         const select = document.getElementById('gestao-turma');
         select.innerHTML = '<option value="">Selecione uma turma...</option>';
-        turmas.forEach(t => {
-            select.innerHTML += '<option value="' + t + '">' + t + '</option>';
-        });
+        turmas.forEach(t => { select.innerHTML += '<option value="' + t + '">' + t + '</option>'; });
         
-        // Carrega disciplinas disponíveis
         await carregarDisciplinas();
     } catch (e) {
         console.error('Erro ao carregar turmas:', e);
@@ -2278,15 +2045,11 @@ async function carregarDisciplinas() {
         const data = await resp.json();
         
         if (data.status === 'success' && data.horarios) {
-            // Extrai disciplinas únicas com seus professores
             const mapa = {};
             data.horarios.forEach(h => {
-                if (h.disciplina && !mapa[h.disciplina]) {
-                    mapa[h.disciplina] = h.professor || '';
-                }
+                if (h.disciplina && !mapa[h.disciplina]) mapa[h.disciplina] = h.professor || '';
             });
             
-            // 🆕 Regras de Lab/Tablet
             const regrasEquipamento = {
                 'Programação': { tipo: 'Lab. Informática', frequencia: 100 },
                 'Robótica': { tipo: 'Lab. Informática', frequencia: 100 },
@@ -2299,16 +2062,13 @@ async function carregarDisciplinas() {
             };
             
             disciplinasDisponiveis = Object.keys(mapa).map(d => ({
-                nome: d,
-                professor: mapa[d],
-                // 🆕 Atributos de equipamento
+                nome: d, professor: mapa[d],
                 precisaLab: regrasEquipamento[d] ? regrasEquipamento[d].tipo === 'Lab. Informática' : false,
                 precisaTablet: regrasEquipamento[d] ? regrasEquipamento[d].tipo === 'Tablet' : false,
                 frequenciaLab: regrasEquipamento[d] ? regrasEquipamento[d].frequencia : 0,
                 tipoEquipamento: regrasEquipamento[d] ? regrasEquipamento[d].tipo : null
             }));
             
-            // Ordena: primeiro as que precisam de equipamento
             disciplinasDisponiveis.sort((a, b) => {
                 if (a.tipoEquipamento && !b.tipoEquipamento) return -1;
                 if (!a.tipoEquipamento && b.tipoEquipamento) return 1;
@@ -2325,21 +2085,16 @@ async function carregarGradeEdicao() {
     turnoEditando = document.getElementById('gestao-turno').value;
     
     if (!turmaEditando) {
-        document.getElementById('container-grade').innerHTML = 
-            '<div style="text-align:center;padding:40px;color:#64748b;">Selecione uma turma.</div>';
+        document.getElementById('container-grade').innerHTML = '<div style="text-align:center;padding:40px;color:#64748b;">Selecione uma turma.</div>';
         return;
     }
     
-    // Inicializa grade vazia
     gradeAtual = {};
     DIAS.forEach(dia => {
         gradeAtual[dia] = {};
-        AULAS.forEach(aula => {
-            gradeAtual[dia][aula] = { disciplina: '', professor: '', local: '' };
-        });
+        AULAS.forEach(aula => { gradeAtual[dia][aula] = { disciplina: '', professor: '', local: '' }; });
     });
     
-    // Carrega dados existentes
     try {
         const resp = await fetch(APPS_SCRIPT_V2 + '?aba=horarios&turma=' + turmaEditando + '&turno=' + turnoEditando);
         const data = await resp.json();
@@ -2390,18 +2145,13 @@ function renderizarGrade() {
                 html += '<option value="' + d.nome + '" ' + selected + '>' + d.nome + ' (' + d.professor + ')</option>';
             });
             html += '</select>';
-            if (celula.disciplina) {
-                html += '<div style="font-size:10px;color:#64748b;margin-top:2px;">👨‍🏫 ' + celula.professor + '</div>';
-            }
-            if (temConflito) {
-                html += '<div style="font-size:10px;color:#ef4444;margin-top:2px;">⚠️ Conflito</div>';
-            }
+            if (celula.disciplina) html += '<div style="font-size:10px;color:#64748b;margin-top:2px;">👨‍🏫 ' + celula.professor + '</div>';
+            if (temConflito) html += '<div style="font-size:10px;color:#ef4444;margin-top:2px;">⚠️ Conflito</div>';
             html += '</td>';
         });
         
         html += '</tr>';
         
-        // Intervalo após 3ª aula
         if (aula === '3ª') {
             const intervalo = turnoEditando === 'Manhã' ? '09:30-09:40' : '15:30-15:40';
             html += '<tr style="background:#fef3c7;"><td colspan="7" style="text-align:center;font-weight:bold;padding:6px;">☕ INTERVALO — ' + intervalo + '</td></tr>';
@@ -2428,17 +2178,11 @@ function atualizarCelula(dia, aula, disciplinaNome) {
 
 function verificarConflito(dia, aula, disciplina, professor) {
     if (!disciplina || !professor) return false;
-    
-    // Verifica se o professor já está em outra turma no mesmo dia/horário
-    // (Simulação - na versão completa, verifica no banco de dados)
     return false;
 }
 
 async function salvarGradeAtual() {
-    if (!turmaEditando) {
-        alert('Selecione uma turma primeiro.');
-        return;
-    }
+    if (!turmaEditando) { alert('Selecione uma turma primeiro.'); return; }
     
     const btn = document.getElementById('btn-salvar-grade');
     btn.disabled = true;
@@ -2461,11 +2205,8 @@ async function salvarGradeAtual() {
         
         const result = await resp.json();
         
-        if (result.status === 'success') {
-            alert('✅ Grade salva com sucesso!');
-        } else {
-            alert('❌ Erro: ' + (result.message || 'Falha ao salvar.'));
-        }
+        if (result.status === 'success') alert('✅ Grade salva com sucesso!');
+        else alert('❌ Erro: ' + (result.message || 'Falha ao salvar.'));
     } catch (e) {
         alert('❌ Erro de conexão.');
     } finally {
@@ -2475,51 +2216,33 @@ async function salvarGradeAtual() {
 }
 
 async function autoPreencherGrade() {
-    if (!turmaEditando) {
-        alert('Selecione uma turma primeiro.');
-        return;
-    }
-    
-    if (!confirm('⚡ O Auto-Preencher vai usar como referência as disciplinas do ano atual e preencher a grade automaticamente.\n\nContinuar?')) return;
+    if (!turmaEditando) { alert('Selecione uma turma primeiro.'); return; }
+    if (!confirm('⚡ O Auto-Preencher vai usar como referência as disciplinas do ano atual.\n\nContinuar?')) return;
     
     const btn = document.querySelector('#modal-gestao-horarios .btn-warning');
-    if (btn) {
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Preenchendo...';
-    }
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Preenchendo...'; }
     
     try {
-        // Buscar resumo de disciplinas
         const resp = await fetch(APPS_SCRIPT_V2 + '?aba=resumo_disciplinas');
         const data = await resp.json();
         
         if (data.status !== 'success' || !data.resumo || !data.resumo[turmaEditando]) {
             alert('Nenhuma informação encontrada para a turma ' + turmaEditando + '.');
-            if (btn) {
-                btn.disabled = false;
-                btn.innerHTML = '⚡ Auto-Preencher';
-            }
+            if (btn) { btn.disabled = false; btn.innerHTML = '⚡ Auto-Preencher'; }
             return;
         }
         
         const disciplinasTurma = data.resumo[turmaEditando];
         
-        // Regras de equipamento
         const regrasEquipamento = {
             'Programação': { tipo: 'Lab. Informática', frequencia: 100 },
             'Robótica': { tipo: 'Lab. Informática', frequencia: 100 },
             'REC MAT': { tipo: 'Tablet', frequencia: 1 },
-            'REC PORT': { tipo: 'Tablet', frequencia: 1 },
-            'Redação': { tipo: 'Lab. Informática', frequencia: 1 },
-            'Inglês': { tipo: 'Lab. Informática', frequencia: 1 },
-            'Matemática': { tipo: 'Lab. Informática', frequencia: 1 },
-            'Português': { tipo: 'Lab. Informática', frequencia: 1 }
+            'REC PORT': { tipo: 'Tablet', frequencia: 1 }
         };
         
-        // Limpa a grade
         limparGradeSemConfirmacao();
         
-        // Cria lista de aulas a distribuir
         let aulasParaDistribuir = [];
         
         Object.keys(disciplinasTurma).forEach(disciplina => {
@@ -2528,53 +2251,30 @@ async function autoPreencherGrade() {
             const regra = regrasEquipamento[disciplina] || null;
             
             let localPadrao = 'Sala 1';
-            let qtdLab = 0;
-            let qtdTablet = 0;
+            let qtdLab = 0, qtdTablet = 0;
             
             if (regra) {
                 if (regra.frequencia === 100) {
-                    // Todas as aulas no equipamento
-                    if (regra.tipo === 'Lab. Informática') {
-                        qtdLab = qtd;
-                        localPadrao = 'Lab. Informática';
-                    } else if (regra.tipo === 'Tablet') {
-                        qtdTablet = qtd;
-                        localPadrao = 'Tablet';
-                    }
+                    if (regra.tipo === 'Lab. Informática') { qtdLab = qtd; localPadrao = 'Lab. Informática'; }
+                    else if (regra.tipo === 'Tablet') { qtdTablet = qtd; localPadrao = 'Tablet'; }
                 } else {
-                    // Apenas 1 aula no equipamento
-                    if (regra.tipo === 'Lab. Informática') {
-                        qtdLab = 1;
-                    } else if (regra.tipo === 'Tablet') {
-                        qtdTablet = 1;
-                    }
+                    if (regra.tipo === 'Lab. Informática') qtdLab = 1;
+                    else if (regra.tipo === 'Tablet') qtdTablet = 1;
                 }
             }
             
-            // Adiciona as aulas à lista
             for (let i = 0; i < qtd; i++) {
                 let local = localPadrao;
+                if (qtdLab > 0 && i === 0) local = 'Lab. Informática';
+                else if (qtdTablet > 0 && i === 0) local = 'Tablet';
                 
-                // Se tem aulas de Lab e esta é uma delas
-                if (qtdLab > 0 && i === 0) {
-                    local = 'Lab. Informática';
-                } else if (qtdTablet > 0 && i === 0) {
-                    local = 'Tablet';
-                }
-                
-                aulasParaDistribuir.push({
-                    disciplina: disciplina,
-                    professor: professor,
-                    local: local
-                });
+                aulasParaDistribuir.push({ disciplina, professor, local });
             }
         });
         
-        // Distribui as aulas na grade
         let idx = 0;
-        
         DIAS.forEach(dia => {
-            AULAS.forEach((aula, aulaIdx) => {
+            AULAS.forEach((aula) => {
                 if (idx < aulasParaDistribuir.length) {
                     const aulaInfo = aulasParaDistribuir[idx];
                     gradeAtual[dia][aula] = {
@@ -2588,41 +2288,19 @@ async function autoPreencherGrade() {
         });
         
         renderizarGrade();
-        
-        // Verifica conflitos
-        let conflitos = 0;
-        DIAS.forEach(dia => {
-            AULAS.forEach(aula => {
-                const celula = gradeAtual[dia][aula];
-                if (celula.disciplina && verificarConflito(dia, aula, celula.disciplina, celula.professor)) {
-                    conflitos++;
-                }
-            });
-        });
-        
-        if (conflitos > 0) {
-            showToast('⚠️ Grade preenchida com ' + conflitos + ' conflito(s). Revise os destacados em vermelho.', 'warning');
-        } else {
-            showToast('✅ Grade preenchida automaticamente sem conflitos!', 'success');
-        }
-        
+        showToast('✅ Grade preenchida automaticamente!', 'success');
     } catch (e) {
         console.error('Erro no auto-preencher:', e);
         showToast('❌ Erro ao preencher grade.', 'error');
     } finally {
-        if (btn) {
-            btn.disabled = false;
-            btn.innerHTML = '⚡ Auto-Preencher';
-        }
+        if (btn) { btn.disabled = false; btn.innerHTML = '⚡ Auto-Preencher'; }
     }
 }
 
 function limparGradeSemConfirmacao() {
     DIAS.forEach(dia => {
         gradeAtual[dia] = {};
-        AULAS.forEach(aula => {
-            gradeAtual[dia][aula] = { disciplina: '', professor: '', local: '' };
-        });
+        AULAS.forEach(aula => { gradeAtual[dia][aula] = { disciplina: '', professor: '', local: '' }; });
     });
 }
 
@@ -2631,43 +2309,32 @@ function limparGrade() {
     
     DIAS.forEach(dia => {
         gradeAtual[dia] = {};
-        AULAS.forEach(aula => {
-            gradeAtual[dia][aula] = { disciplina: '', professor: '', local: '' };
-        });
+        AULAS.forEach(aula => { gradeAtual[dia][aula] = { disciplina: '', professor: '', local: '' }; });
     });
     
     renderizarGrade();
 }
 
 function fecharModalGestaoHorarios(e) {
-    if (e.target.id === 'modal-gestao-horarios') {
-        document.getElementById('modal-gestao-horarios').style.display = 'none';
-    }
+    if (e.target.id === 'modal-gestao-horarios') document.getElementById('modal-gestao-horarios').style.display = 'none';
 }
-    window.addEventListener('DOMContentLoaded', function() {
-    // Espera um pouco para garantir que o login foi processado
+
+window.addEventListener('DOMContentLoaded', function() {
     setTimeout(function() {
-        if (usuarioLogado && usuarioLogado.nivel) {
-            aplicarControleAcesso();
-        }
+        if (usuarioLogado && usuarioLogado.nivel) aplicarControleAcesso();
     }, 500);
 });
 
-    let alunosSelecionados = [];
+let alunosSelecionados = [];
 
 function abrirSelecaoMultipla() {
-    if (!turmaSelecionadaAtiva) {
-        alert('Selecione uma turma primeiro na barra lateral.');
-        return;
-    }
+    if (!turmaSelecionadaAtiva) { alert('Selecione uma turma primeiro na barra lateral.'); return; }
     
     document.getElementById('select-alunos').style.display = 'none';
     document.getElementById('btn-selecionar-varios').style.display = 'none';
     document.getElementById('btn-voltar-seletor').style.display = 'inline-flex';
     document.getElementById('selecao-multipla').style.display = 'block';
     document.getElementById('btn-gerar-pdf-oficial').style.display = 'none';
-    
-    // 🆕 Esconder as colunas de apontamento normais
     document.getElementById('siga-columns-grid').style.display = 'none';
     document.getElementById('mobile-tabs-container').style.display = 'none';
     
@@ -2687,37 +2354,24 @@ function abrirSelecaoMultipla() {
     document.getElementById('check-todos').checked = false;
     document.getElementById('contador-selecionados').innerText = '0 selecionados';
     
-    // 🆕 Trava o setor conforme o usuário logado
     const setorSelect = document.getElementById('setor-apontamento-multiplo');
     if (setorSelect && usuarioLogado) {
-        // Define o setor do usuário
         let setorUsuario = usuarioLogado.setor || 'meivs';
+        if (setorUsuario === 'professores') setorUsuario = 'direcao';
         
-        // Converte "professores" para "direcao" (coluna dos professores)
-        if (setorUsuario === 'professores') {
-            setorUsuario = 'direcao';
-        }
-        
-        // Se for nível 3+ (admin), permite selecionar
         if (usuarioLogado.nivel && parseInt(usuarioLogado.nivel) >= 3) {
             setorSelect.disabled = false;
             setorSelect.style.background = 'white';
         } else {
-            // Nível 1-2: trava no setor do usuário
             setorSelect.disabled = true;
             setorSelect.style.background = '#e2e8f0';
         }
-        
         setorSelect.value = setorUsuario;
     }
     
-    // 🆕 Limpar campo de texto
     const textoApontamento = document.getElementById('texto-apontamento-multiplo');
-    if (textoApontamento) {
-        textoApontamento.value = '';
-    }
+    if (textoApontamento) textoApontamento.value = '';
     
-    // 🆕 Focar no campo de texto
     setTimeout(() => {
         const textarea = document.getElementById('texto-apontamento-multiplo');
         if (textarea) textarea.focus();
@@ -2730,13 +2384,13 @@ function fecharSelecaoMultipla() {
     document.getElementById('btn-voltar-seletor').style.display = 'none';
     document.getElementById('selecao-multipla').style.display = 'none';
     document.getElementById('btn-gerar-pdf-oficial').style.display = 'inline-flex';
+    document.getElementById('siga-columns-grid').style.display = 'flex';
+    document.getElementById('mobile-tabs-container').style.display = 'flex';
     alunosSelecionados = [];
 }
 
 function marcarTodos(checked) {
-    document.querySelectorAll('.check-aluno').forEach(cb => {
-        cb.checked = checked;
-    });
+    document.querySelectorAll('.check-aluno').forEach(cb => { cb.checked = checked; });
     atualizarContador();
 }
 
@@ -2745,63 +2399,30 @@ function atualizarContador() {
     document.getElementById('contador-selecionados').innerText = alunosSelecionados.length + ' selecionados';
 }
 
-function confirmarSelecaoMultipla() {
-    alunosSelecionados = Array.from(document.querySelectorAll('.check-aluno:checked')).map(cb => cb.value);
-    
-    if (alunosSelecionados.length === 0) {
-        alert('Selecione pelo menos um aluno.');
-        return;
-    }
-    
-    alert(alunosSelecionados.length + ' aluno(s) selecionado(s).\nAgora escreva o apontamento e clique em Salvar.');
-    fecharSelecaoMultipla();
-    
-    // Atualiza o seletor normal com o primeiro aluno (para compatibilidade)
-    document.getElementById('select-alunos').value = alunosSelecionados[0];
-    filtrarRegistrosPorAluno();
-}
-
-   async function salvarApontamentoMultiplo() {
+async function salvarApontamentoMultiplo() {
     const btnSalvar = document.querySelector('#selecao-multipla .btn-salvar, #selecao-multipla button[onclick="salvarApontamentoMultiplo()"]');
     const texto = document.getElementById('texto-apontamento-multiplo').value.trim();
     
-    // Usa o setor do usuário logado (travado)
     let setor = usuarioLogado.setor || 'meivs';
+    if (setor === 'professores') setor = 'direcao';
     
-    // Converte "professores" para "direcao" (coluna dos professores)
-    if (setor === 'professores') {
-        setor = 'direcao';
-    }
-    
-    // Se o select estiver habilitado (admin nível 3+), usa o valor selecionado
     const setorSelect = document.getElementById('setor-apontamento-multiplo');
-    if (setorSelect && !setorSelect.disabled) {
-        setor = setorSelect.value;
-    }
+    if (setorSelect && !setorSelect.disabled) setor = setorSelect.value;
     
     alunosSelecionados = Array.from(document.querySelectorAll('.check-aluno:checked')).map(cb => cb.value);
     
-    if (alunosSelecionados.length === 0) {
-        alert('Selecione pelo menos um aluno.');
-        return;
-    }
+    if (alunosSelecionados.length === 0) { alert('Selecione pelo menos um aluno.'); return; }
+    if (!texto) { alert('Digite o apontamento.'); return; }
     
-    if (!texto) {
-        alert('Digite o apontamento.');
-        return;
-    }
-    
-    // 🆕 Desabilita o botão e mostra feedback
     if (btnSalvar) {
         btnSalvar.disabled = true;
         btnSalvar.style.opacity = '0.6';
         btnSalvar.style.cursor = 'wait';
-        btnSalvar.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando ' + alunosSelecionados.length + ' apontamento(s)...';
+        btnSalvar.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando...';
     }
     
     const agora = new Date();
-    const data = agora.toLocaleDateString('pt-BR') + ' ' + 
-                 agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    const data = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
     
     let salvos = 0;
     
@@ -2819,22 +2440,16 @@ function confirmarSelecaoMultipla() {
                 const result = await salvarNoServidor(dadosApontamento);
                 if (result.status === 'success') salvos++;
             } else {
-                if (db && db.db) {
-                    await db.salvarApontamento(dadosApontamento);
-                    salvos++;
-                }
+                if (db && db.db) { await db.salvarApontamento(dadosApontamento); salvos++; }
             }
-        } catch (error) {
-            console.error('Erro ao salvar para ' + aluno, error);
-        }
+        } catch (error) { console.error('Erro ao salvar para ' + aluno, error); }
     }
     
     if (salvos > 0) {
-        mostrarToast('✅ ' + salvos + ' apontamento(s) salvo(s) com sucesso!', 'sucesso');
+        mostrarToast('✅ ' + salvos + ' apontamento(s) salvo(s)!', 'sucesso');
         document.getElementById('texto-apontamento-multiplo').value = '';
         alunosSelecionados = [];
         
-        // 🆕 Restaura o botão antes de fechar
         if (btnSalvar) {
             btnSalvar.disabled = false;
             btnSalvar.style.opacity = '1';
@@ -2846,7 +2461,6 @@ function confirmarSelecaoMultipla() {
         await carregarRegistrosDoServidor();
         filtrarRegistrosPorAluno();
     } else {
-        // 🆕 Restaura o botão em caso de erro
         if (btnSalvar) {
             btnSalvar.disabled = false;
             btnSalvar.style.opacity = '1';
@@ -2857,9 +2471,7 @@ function confirmarSelecaoMultipla() {
     }
 }
 
-    // =============================================
-// 🆕 RANKING DE TURMAS / GRÁFICO DA TURMA
-// =============================================
+// RANKING DE TURMAS
 let turmaSelecionadaGrafico = null;
 
 function atualizarPainelRanking() {
@@ -2886,21 +2498,15 @@ function mostrarRankingGeral() {
         return;
     }
     
-    // Conta apontamentos por turma
     const contagem = {};
     todosOsRegistros.forEach(r => {
         if (r.tipo === 'apontamento') {
             const turma = encontrarTurmaDoAluno(r.aluno);
-            if (turma && turma !== 'Sem Turma') {
-                contagem[turma] = (contagem[turma] || 0) + 1;
-            }
+            if (turma && turma !== 'Sem Turma') contagem[turma] = (contagem[turma] || 0) + 1;
         }
     });
     
-    // Ordena e pega os top 5+
-    const ranking = Object.entries(contagem)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 8); // Mostra até 8
+    const ranking = Object.entries(contagem).sort((a, b) => b[1] - a[1]).slice(0, 8);
     
     if (ranking.length === 0) {
         container.innerHTML = '<div style="text-align:center;padding:20px;color:#94a3b8;">Nenhum apontamento registrado.</div>';
@@ -2909,8 +2515,6 @@ function mostrarRankingGeral() {
     
     const maxValor = ranking[0][1];
     const total = Object.values(contagem).reduce((s, v) => s + v, 0);
-    
-    // Cores para o ranking (ouro, prata, bronze, etc.)
     const coresRanking = ['#f59e0b', '#94a3b8', '#cd853f', '#64748b', '#64748b', '#64748b', '#64748b', '#64748b'];
     const medalhas = ['🥇', '🥈', '🥉', '4º', '5º', '6º', '7º', '8º'];
     
@@ -2926,8 +2530,7 @@ function mostrarRankingGeral() {
         html += '</div>';
         html += '<div class="dash-bar-track">';
         html += '<div class="dash-bar-fill" style="background:' + cor + ';width:' + pct + '%;"></div>';
-        html += '</div>';
-        html += '</div>';
+        html += '</div></div>';
     });
     
     html += '<div style="text-align:center;font-size:11px;color:#64748b;margin-top:8px;border-top:1px solid #e2e8f0;padding-top:8px;">';
@@ -2949,38 +2552,25 @@ function mostrarGraficoTurma() {
         return;
     }
     
-    // Filtra apontamentos desta turma
     const alunosDaTurma = cacheAlunosPorTurma[turma] || [];
-    const apontamentosTurma = todosOsRegistros.filter(r => 
-        r.tipo === 'apontamento' && alunosDaTurma.includes(r.aluno)
-    );
+    const apontamentosTurma = todosOsRegistros.filter(r => r.tipo === 'apontamento' && alunosDaTurma.includes(r.aluno));
     
     if (apontamentosTurma.length === 0) {
         container.innerHTML = '<div style="text-align:center;padding:20px;color:#94a3b8;">Nenhum apontamento para esta turma.</div>';
         return;
     }
     
-    // Conta por setor
     const setores = {
         'meivs': { nome: 'MEIV\'S', cor: '#0284c7', qtd: 0 },
         'pedagogico': { nome: 'Pedagógico', cor: '#0d9488', qtd: 0 },
         'adm': { nome: 'ADM', cor: '#4f46e5', qtd: 0 },
-        'professores': { nome: 'Professores', cor: '#b91c1c', qtd: 0 },
-        'direcao': { nome: 'Professores', cor: '#b91c1c', qtd: 0 }
+        'professores': { nome: 'Professores', cor: '#b91c1c', qtd: 0 }
     };
     
     apontamentosTurma.forEach(r => {
         const setor = r.setor || 'meivs';
-        if (setores[setor]) {
-            setores[setor].qtd++;
-        } else if (setor === 'professores' || setor === 'direcao') {
-            setores['professores'].qtd++;
-        }
+        if (setores[setor]) setores[setor].qtd++;
     });
-    
-    // Junta professores e direcao
-    setores['professores'].qtd += setores['direcao'].qtd;
-    delete setores['direcao'];
     
     const total = apontamentosTurma.length;
     const maxSetor = Math.max(...Object.values(setores).map(s => s.qtd), 1);
@@ -3001,47 +2591,31 @@ function mostrarGraficoTurma() {
         html += '</div>';
         html += '<div class="dash-bar-track">';
         html += '<div class="dash-bar-fill" style="background:' + s.cor + ';width:' + barPct + '%;"></div>';
-        html += '</div>';
-        html += '</div>';
+        html += '</div></div>';
     });
     
     html += '<div style="text-align:center;margin-top:8px;">';
     html += '<button onclick="mostrarRankingGeral()" style="background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;padding:6px 12px;border-radius:15px;cursor:pointer;font-size:11px;">';
     html += '🔄 Ver ranking geral';
-    html += '</button>';
-    html += '</div>';
+    html += '</button></div>';
     
     container.innerHTML = html;
 }
 
-// 🆕 Atualiza o painel sempre que um aluno for selecionado
-// Adicione esta chamada no final da função filtrarRegistrosPorAluno()
-// e no final da função que reseta o seletor (quando volta ao mural)
-
-// Atualiza o painel a cada 30 segundos também
 setInterval(() => {
-    if (document.getElementById('painel-ranking')) {
-        atualizarPainelRanking();
-    }
+    if (document.getElementById('painel-ranking')) atualizarPainelRanking();
 }, 30000);
 
-// =============================================
-// 🆕 FILTRO DE PERÍODO
-// =============================================
+// FILTRO DE PERÍODO
 let filtroDataInicio = null;
 let filtroDataFim = null;
 
-function getDataAtual() {
-    const hoje = new Date();
-    return hoje.toLocaleDateString('pt-BR'); // dd/mm/yyyy
-}
+function getDataAtual() { return new Date().toLocaleDateString('pt-BR'); }
 
 function parseDataBR(dataStr) {
     if (!dataStr) return null;
     const partes = dataStr.split('/');
-    if (partes.length === 3) {
-        return new Date(parseInt(partes[2]), parseInt(partes[1]) - 1, parseInt(partes[0]));
-    }
+    if (partes.length === 3) return new Date(parseInt(partes[2]), parseInt(partes[1]) - 1, parseInt(partes[0]));
     return null;
 }
 
@@ -3057,9 +2631,9 @@ function filtrarHoje() {
 function filtrarSemana() {
     const hoje = new Date();
     const domingo = new Date(hoje);
-    domingo.setDate(hoje.getDate() - hoje.getDay()); // Domingo
+    domingo.setDate(hoje.getDate() - hoje.getDay());
     const sabado = new Date(domingo);
-    sabado.setDate(domingo.getDate() + 6); // Sábado
+    sabado.setDate(domingo.getDate() + 6);
     
     filtroDataInicio = domingo.toLocaleDateString('pt-BR');
     filtroDataFim = sabado.toLocaleDateString('pt-BR');
@@ -3130,12 +2704,10 @@ function atualizarUIFiltro(texto) {
 }
 
 function registroEstaNoPeriodo(dataStr) {
-    if (!filtroDataInicio && !filtroDataFim) return true; // Sem filtro = mostra tudo
-    
+    if (!filtroDataInicio && !filtroDataFim) return true;
     if (!dataStr) return false;
     
-    const dataRegistro = parseDataBR(dataStr.split(' ')[0]); // Pega só a data, ignora hora
-    
+    const dataRegistro = parseDataBR(dataStr.split(' ')[0]);
     if (!dataRegistro) return false;
     
     const inicio = filtroDataInicio ? parseDataBR(filtroDataInicio) : null;
@@ -3143,7 +2715,6 @@ function registroEstaNoPeriodo(dataStr) {
     
     if (inicio && dataRegistro < inicio) return false;
     if (fim) {
-        // Ajusta fim para o final do dia
         fim.setHours(23, 59, 59, 999);
         if (dataRegistro > fim) return false;
     }
@@ -3151,7 +2722,6 @@ function registroEstaNoPeriodo(dataStr) {
     return true;
 }
 
-// 🆕 Atualiza os cards de métricas com base no período
 function atualizarCardsMetricas() {
     const registrosFiltrados = filtroDataInicio 
         ? todosOsRegistros.filter(r => registroEstaNoPeriodo(r.dataAtual))
@@ -3175,9 +2745,8 @@ function atualizarCardsMetricas() {
     if (valAdm) valAdm.innerText = adm;
     if (valProfessores) valProfessores.innerText = professores;
 }
-    // =============================================
-// 🎂 SISTEMA DE ANIVERSÁRIOS
-// =============================================
+
+// SISTEMA DE ANIVERSÁRIOS
 let aniversariantesHoje = [];
 let recadosAniversario = {};
 
@@ -3193,40 +2762,14 @@ async function verificarAniversariantes() {
         
         aniversariantesHoje = [];
         
-        // Busca FUNCIONÁRIOS
         const respUsers = await fetch(APPS_SCRIPT_V2 + '?aba=usuarios');
         const usuarios = await respUsers.json();
         
         usuarios.forEach(u => {
             if (!u.data_nasc) return;
             
-            let diaNasc, mesNasc;
-            
-            // Tenta interpretar a data em vários formatos
-            const dataNasc = u.data_nasc.toString().trim();
-            
-            // Formato: "Wed Aug 12 2026..." (data completa)
-            if (dataNasc.includes('GMT') || dataNasc.includes('00:00:00')) {
-                const d = new Date(dataNasc);
-                if (!isNaN(d.getTime())) {
-                    diaNasc = d.getDate();
-                    mesNasc = d.getMonth() + 1;
-                }
-            }
-            // Formato: "12/08" (string DD/MM)
-            else if (dataNasc.includes('/') && dataNasc.length <= 5) {
-                const partes = dataNasc.split('/');
-                diaNasc = parseInt(partes[0]);
-                mesNasc = parseInt(partes[1]);
-            }
-            // Formato: "12/08/1990" (string DD/MM/YYYY)
-            else if (dataNasc.includes('/') && dataNasc.length >= 8) {
-                const partes = dataNasc.split('/');
-                diaNasc = parseInt(partes[0]);
-                mesNasc = parseInt(partes[1]);
-            }
-            
-            if (diaNasc === dia && mesNasc === mes) {
+            const parsed = extrairDiaMes(u.data_nasc);
+            if (parsed && parsed.dia === dia && parsed.mes === mes) {
                 aniversariantesHoje.push({
                     nome: u.nome,
                     setor: u.setor || 'Funcionário',
@@ -3352,11 +2895,8 @@ async function carregarRecadosAniversario() {
     } catch (e) { console.error('Erro ao carregar recados:', e); }
 }
 
-// =============================================
-// 🎂 ANIVERSARIANTES POR MÊS (COM IMPRESSÃO)
-// =============================================
+// ANIVERSARIANTES POR MÊS
 function abrirModalAniversarios(event) {
-    // 🆕 Impede que o clique se propague para outros elementos
     if (event) {
         event.stopPropagation();
         event.preventDefault();
@@ -3366,7 +2906,7 @@ function abrirModalAniversarios(event) {
     
     if (!usuarioLogado || parseInt(usuarioLogado.nivel) < 3) {
         mostrarToast('🔒 Acesso restrito ao nível 3 ou superior.', 'erro');
-        return;
+        return false;
     }
     
     const modal = document.getElementById('modal-aniversarios');
@@ -3374,21 +2914,23 @@ function abrirModalAniversarios(event) {
     
     if (!modal || !conteudo) {
         console.error('❌ Modal não encontrado');
-        return;
+        return false;
     }
     
-    // 🆕 Remove e re-adiciona o onclick do modal para evitar conflito
     modal.onclick = null;
-    setTimeout(() => {
-        modal.onclick = function(e) {
-            if (e.target === modal) fecharModalAniversarios(e);
-        };
-    }, 100);
-    
     modal.style.display = 'flex';
     conteudo.innerHTML = '<div style="text-align:center;padding:40px;"><i class="fa-solid fa-spinner fa-spin" style="font-size:40px;"></i><p>Carregando...</p></div>';
     
+    setTimeout(() => {
+        modal.onclick = function(e) {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        };
+    }, 200);
+    
     carregarAniversariosPorMes();
+    return false;
 }
 
 async function carregarAniversariosPorMes() {
@@ -3437,7 +2979,6 @@ async function carregarAniversariosPorMes() {
                 });
             } else {
                 semData++;
-                console.warn('⚠️ Não foi possível interpretar data:', dataOriginal, 'de', u.nome);
             }
         });
         
@@ -3445,11 +2986,10 @@ async function carregarAniversariosPorMes() {
         
         let html = '';
         
-        // Aviso se ninguém tem data
         if (comData === 0) {
             html = '<div style="background:#fef3c7;padding:20px;border-radius:8px;text-align:center;color:#92400e;">';
             html += '<strong>⚠️ Nenhum usuário possui data de nascimento cadastrada.</strong>';
-            html += '<p style="font-size:13px;margin-top:10px;">Cadastre a data no formato <strong>DD/MM</strong> no Painel de Gestão → Usuário → Data de Nascimento.</p>';
+            html += '<p style="font-size:13px;margin-top:10px;">Cadastre a data no formato <strong>DD/MM</strong> no Painel de Gestão.</p>';
             html += '</div>';
             container.innerHTML = html;
             return;
@@ -3473,14 +3013,11 @@ async function carregarAniversariosPorMes() {
             html += ' <span style="font-size:11px;color:#64748b;">(' + mes.aniversariantes.length + ')</span>';
             html += '</h4>';
             
-            // Armazena em window para o botão usar
-            const idBtn = 'btn-imp-' + mesKey;
             window['_aniv_' + mesKey] = mes.aniversariantes;
             
             html += '<button onclick="imprimirMesAniversarioPorId(' + mesKey + ')" style="background:#db2777;color:white;border:none;padding:4px 10px;border-radius:12px;cursor:pointer;font-size:10px;font-weight:bold;">';
             html += '🖨️ Imprimir';
-            html += '</button>';
-            html += '</div>';
+            html += '</button></div>';
             
             mes.aniversariantes.forEach(aniv => {
                 html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #f1f5f9;">';
@@ -3496,40 +3033,39 @@ async function carregarAniversariosPorMes() {
         container.innerHTML = html;
         
     } catch (e) {
-        console.error('❌ Erro ao carregar aniversariantes:', e);
+        console.error('❌ Erro:', e);
         container.innerHTML = '<div style="text-align:center;padding:40px;color:#dc2626;">' +
             '<i class="fa-solid fa-triangle-exclamation" style="font-size:48px;"></i>' +
-            '<p>Erro ao carregar: ' + e.message + '</p>' +
+            '<p>Erro: ' + e.message + '</p>' +
             '<button onclick="carregarAniversariosPorMes()" style="background:#005088;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;margin-top:10px;">🔄 Tentar novamente</button>' +
             '</div>';
     }
 }
 
-// Função auxiliar para extrair dia/mês de qualquer formato
 function extrairDiaMes(dataOriginal) {
     if (!dataOriginal) return null;
     
     const str = dataOriginal.toString().trim();
     
-    // Formato ISO: "2026-08-15" ou "2026-08-15T00:00:00"
+    // ISO: "2026-08-15" ou "2026-08-15T00:00:00"
     if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
         const partes = str.split('T')[0].split('-');
         return { dia: parseInt(partes[2]), mes: parseInt(partes[1]) };
     }
     
-    // Formato brasileiro completo: "15/08/1990" ou "15/08/2026"
+    // BR completo: "15/08/1990"
     if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(str)) {
         const partes = str.split('/');
         return { dia: parseInt(partes[0]), mes: parseInt(partes[1]) };
     }
     
-    // Formato curto: "15/08"
+    // BR curto: "15/08"
     if (/^\d{1,2}\/\d{1,2}$/.test(str)) {
         const partes = str.split('/');
         return { dia: parseInt(partes[0]), mes: parseInt(partes[1]) };
     }
     
-    // Formato Date do Google: "Wed Aug 12 2026 00:00:00 GMT-0300"
+    // Date do Google
     if (str.includes('GMT') || str.includes('00:00:00')) {
         const d = new Date(str);
         if (!isNaN(d.getTime())) {
@@ -3537,7 +3073,6 @@ function extrairDiaMes(dataOriginal) {
         }
     }
     
-    // Última tentativa: tentar Date nativo
     const d = new Date(str);
     if (!isNaN(d.getTime())) {
         return { dia: d.getDate(), mes: d.getMonth() + 1 };
@@ -3546,7 +3081,6 @@ function extrairDiaMes(dataOriginal) {
     return null;
 }
 
-// 🆕 Função para imprimir por ID (evita problemas de aspas no JSON)
 function imprimirMesAniversarioPorId(mesKey) {
     const nomesMeses = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
                         'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
@@ -3570,15 +3104,12 @@ function imprimirMesAniversarioPorId(mesKey) {
     html += 'td { padding: 10px; border-bottom: 1px solid #e2e8f0; font-size: 14px; }';
     html += 'tr:nth-child(even) { background: #fdf2f8; }';
     html += '@media print { body { padding: 10px; } .no-print { display: none; } }';
-    html += '</style>';
-    html += '</head><body>';
+    html += '</style></head><body>';
     html += '<button class="no-print" onclick="window.print()" style="background:#005088;color:white;border:none;padding:10px 30px;border-radius:6px;font-size:16px;cursor:pointer;display:block;margin:0 auto 20px;">🖨️ Imprimir</button>';
     html += '<h1>CCM Anchieta</h1>';
     html += '<h2>📅 Aniversariantes de ' + nomeMes + '</h2>';
     html += '<p style="text-align:center;color:#64748b;font-size:12px;">Total: ' + lista.length + ' aniversariante(s)</p>';
-    html += '<table>';
-    html += '<thead><tr><th>#</th><th>Nome</th><th>Data</th><th>Setor</th></tr></thead>';
-    html += '<tbody>';
+    html += '<table><thead><tr><th>#</th><th>Nome</th><th>Data</th><th>Setor</th></tr></thead><tbody>';
     
     lista.forEach(function(aniv, index) {
         html += '<tr>';
@@ -3602,137 +3133,12 @@ function imprimirMesAniversarioPorId(mesKey) {
     }
 }
 
-function imprimirMesAniversario(nomeMes, aniversariantes) {
-    const lista = typeof aniversariantes === 'string' ? JSON.parse(aniversariantes) : aniversariantes;
-    
-    let html = '<!DOCTYPE html><html><head>';
-    html += '<meta charset="UTF-8">';
-    html += '<title>Aniversariantes - ' + nomeMes + '</title>';
-    html += '<style>';
-    html += 'body { font-family: Arial, sans-serif; padding: 30px; background: white; }';
-    html += 'h1 { text-align: center; color: #db2777; font-size: 22px; margin-bottom: 5px; }';
-    html += 'h2 { text-align: center; color: #005088; font-size: 16px; margin-bottom: 20px; }';
-    html += 'table { width: 100%; border-collapse: collapse; margin-top: 20px; }';
-    html += 'th { background: #db2777; color: white; padding: 10px; text-align: left; font-size: 14px; }';
-    html += 'td { padding: 10px; border-bottom: 1px solid #e2e8f0; font-size: 14px; }';
-    html += 'tr:nth-child(even) { background: #fdf2f8; }';
-    html += '@media print { body { padding: 10px; } button { display: none; } }';
-    html += '</style>';
-    html += '</head><body>';
-    html += '<button onclick="window.print()" style="background:#005088;color:white;border:none;padding:10px 30px;border-radius:6px;font-size:16px;cursor:pointer;display:block;margin:0 auto 20px;">🖨️ Imprimir</button>';
-    html += '<h1>CCM Anchieta</h1>';
-    html += '<h2>📅 Aniversariantes de ' + nomeMes + '</h2>';
-    html += '<p style="text-align:center;color:#64748b;font-size:12px;">Total: ' + lista.length + ' aniversariante(s)</p>';
-    html += '<table>';
-    html += '<thead><tr><th>#</th><th>Nome</th><th>Data</th><th>Setor</th></tr></thead>';
-    html += '<tbody>';
-    
-    lista.forEach(function(aniv, index) {
-        html += '<tr>';
-        html += '<td>' + (index + 1) + '</td>';
-        html += '<td>' + aniv.nome + '</td>';
-        html += '<td>' + String(aniv.dia).padStart(2, '0') + '/' + String(aniv.mes).padStart(2, '0') + '</td>';
-        html += '<td>' + (aniv.setor || 'Funcionário') + '</td>';
-        html += '</tr>';
-    });
-    
-    html += '</tbody></table>';
-    html += '<p style="text-align:center;margin-top:30px;color:#94a3b8;font-size:11px;">Gerado pelo SIGA em ' + new Date().toLocaleDateString('pt-BR') + '</p>';
-    html += '</body></html>';
-    
-    const win = window.open('', '_blank', 'width=800,height=600');
-    if (win) {
-        win.document.write(html);
-        win.document.close();
-    } else {
-        mostrarToast('Por favor, permita pop-ups para impressão.', 'warning');
-    }
-}
-
 function fecharModalAniversarios(e) {
     if (e.target.id === 'modal-aniversarios') {
         document.getElementById('modal-aniversarios').style.display = 'none';
     }
 }
-    
-// =============================================
-// 💡 SUGESTÕES E MELHORIAS
-// =============================================
-function abrirModalSugestoes(event) {
-    // 🆕 Impede propagação
-    if (event) {
-        event.stopPropagation();
-        event.preventDefault();
-    }
-    
-    const modal = document.getElementById('modal-sugestoes');
-    if (!modal) return;
-    
-    // 🆕 Reset do onclick para evitar conflito
-    modal.onclick = null;
-    setTimeout(() => {
-        modal.onclick = function(e) {
-            if (e.target === modal) fecharModalSugestoes(e);
-        };
-    }, 100);
-    
-    modal.style.display = 'flex';
-    document.getElementById('sugestao-texto').value = '';
-    document.getElementById('sugestao-tipo').value = 'Melhoria';
-}
 
-function fecharModalSugestoes(e) {
-    if (e && e.target && e.target.id === 'modal-sugestoes') {
-        document.getElementById('modal-sugestoes').style.display = 'none';
-    }
-}
-
-async function enviarSugestao() {
-    const tipo = document.getElementById('sugestao-tipo').value;
-    const texto = document.getElementById('sugestao-texto').value.trim();
-    const btn = document.getElementById('btn-enviar-sugestao');
-    
-    if (!texto) {
-        alert('Digite sua sugestão.');
-        return;
-    }
-    
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Enviando...';
-    
-    const payload = {
-        operacao: "SALVAR_SUGESTAO",
-        tipo: tipo,
-        texto: texto,
-        autor: usuarioLogado ? usuarioLogado.nome : 'Anônimo',
-        emailAutor: usuarioLogado ? usuarioLogado.email : '',
-        data: new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-    };
-    
-    try {
-        const resp = await fetch(APPS_SCRIPT_V2, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain' },
-            body: JSON.stringify(payload)
-        });
-        
-        const result = await resp.json();
-        
-        if (result.status === 'success') {
-            mostrarToast('✅ Sugestão enviada com sucesso! Obrigado!', 'sucesso');
-            document.getElementById('modal-sugestoes').style.display = 'none';
-            document.getElementById('sugestao-texto').value = '';
-        } else {
-            alert('❌ Erro: ' + (result.message || 'Falha ao enviar.'));
-        }
-    } catch (e) {
-        alert('❌ Erro de conexão.');
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = '📨 Enviar Sugestão';
-    }
-}
-    
 </script>
   
 </body>
