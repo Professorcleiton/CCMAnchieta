@@ -337,7 +337,7 @@
                                 <i class="fa-solid fa-lightbulb" style="font-size: 18px;"></i> Sugestões e Melhorias
                             </button>
 
-                            <button id="btn-aniversarios" class="btn-salvar" style="background-color: #db2777; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: none; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(219, 39, 119, 0.2); margin-bottom: 5px;" onclick="abrirModalAniversarios()">
+                            <button id="btn-aniversarios" class="btn-salvar" style="background-color: #db2777; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: none; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(219, 39, 119, 0.2); margin-bottom: 5px;" onclick="abrirModalAniversarios(event)">
     <i class="fa-solid fa-cake-candles" style="font-size: 18px;"></i> Aniversariantes do Mês
 </button>
                             
@@ -1095,7 +1095,7 @@
 </div>
 
 <!-- Botão flutuante de sugestões -->
-<button id="btn-sugestao-flutuante" onclick="abrirModalSugestoes()" style="position: fixed; bottom: 20px; right: 20px; width: 55px; height: 55px; border-radius: 50%; background: #f59e0b; color: white; border: none; font-size: 22px; cursor: pointer; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.5); z-index: 9990; transition: all 0.3s; display: flex; align-items: center; justify-content: center;" title="Enviar sugestão">
+<button id="btn-sugestao-flutuante" onclick="abrirModalSugestoes(event)" style="position: fixed; bottom: 20px; right: 20px; width: 55px; height: 55px; border-radius: 50%; background: #f59e0b; color: white; border: none; font-size: 22px; cursor: pointer; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.5); z-index: 9990; transition: all 0.3s; display: flex; align-items: center; justify-content: center;" title="Enviar sugestão">
     <i class="fa-solid fa-lightbulb"></i>
 </button>
     
@@ -3355,22 +3355,17 @@ async function carregarRecadosAniversario() {
 // =============================================
 // 🎂 ANIVERSARIANTES POR MÊS (COM IMPRESSÃO)
 // =============================================
-function abrirModalAniversarios() {
-    console.log('🎂 abrirModalAniversarios chamada');
-    console.log('   usuarioLogado:', usuarioLogado);
-    
-    // Verifica nível
-    if (!usuarioLogado) {
-        console.warn('⚠️ usuarioLogado não está definido');
-        alert('Erro: usuário não identificado. Recarregue a página.');
-        return;
+function abrirModalAniversarios(event) {
+    // 🆕 Impede que o clique se propague para outros elementos
+    if (event) {
+        event.stopPropagation();
+        event.preventDefault();
     }
     
-    const nivel = parseInt(usuarioLogado.nivel) || 0;
-    console.log('   Nível do usuário:', nivel);
+    console.log('🎂 abrirModalAniversarios chamada');
     
-    if (nivel < 3) {
-        mostrarToast('🔒 Acesso restrito ao nível 3 ou superior. Seu nível: ' + nivel, 'erro');
+    if (!usuarioLogado || parseInt(usuarioLogado.nivel) < 3) {
+        mostrarToast('🔒 Acesso restrito ao nível 3 ou superior.', 'erro');
         return;
     }
     
@@ -3378,10 +3373,17 @@ function abrirModalAniversarios() {
     const conteudo = document.getElementById('conteudo-aniversarios');
     
     if (!modal || !conteudo) {
-        console.error('❌ Modal de aniversários não encontrado no HTML');
-        alert('Erro: modal não encontrado.');
+        console.error('❌ Modal não encontrado');
         return;
     }
+    
+    // 🆕 Remove e re-adiciona o onclick do modal para evitar conflito
+    modal.onclick = null;
+    setTimeout(() => {
+        modal.onclick = function(e) {
+            if (e.target === modal) fecharModalAniversarios(e);
+        };
+    }, 100);
     
     modal.style.display = 'flex';
     conteudo.innerHTML = '<div style="text-align:center;padding:40px;"><i class="fa-solid fa-spinner fa-spin" style="font-size:40px;"></i><p>Carregando...</p></div>';
@@ -3656,14 +3658,31 @@ function fecharModalAniversarios(e) {
 // =============================================
 // 💡 SUGESTÕES E MELHORIAS
 // =============================================
-function abrirModalSugestoes() {
-    document.getElementById('modal-sugestoes').style.display = 'flex';
+function abrirModalSugestoes(event) {
+    // 🆕 Impede propagação
+    if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+    }
+    
+    const modal = document.getElementById('modal-sugestoes');
+    if (!modal) return;
+    
+    // 🆕 Reset do onclick para evitar conflito
+    modal.onclick = null;
+    setTimeout(() => {
+        modal.onclick = function(e) {
+            if (e.target === modal) fecharModalSugestoes(e);
+        };
+    }, 100);
+    
+    modal.style.display = 'flex';
     document.getElementById('sugestao-texto').value = '';
     document.getElementById('sugestao-tipo').value = 'Melhoria';
 }
 
 function fecharModalSugestoes(e) {
-    if (e.target.id === 'modal-sugestoes') {
+    if (e && e.target && e.target.id === 'modal-sugestoes') {
         document.getElementById('modal-sugestoes').style.display = 'none';
     }
 }
