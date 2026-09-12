@@ -1506,35 +1506,40 @@ async function carregarRegistrosPreConselho() {
 }
 
 function abrirCaixaTexto(setor) {
-    const selectAlunos = document.getElementById('select-alunos');
-    const alunoSelecionado = selectAlunos.options[selectAlunos.selectedIndex]?.text || '';
-    const alunoValor = selectAlunos.value;
-
-    if (!alunoValor || alunoValor === "Selecione uma turma..." || alunoValor === "") {
-        alert("⚠️ Por favor, selecione um ALUNO na barra superior antes de criar um apontamento!");
-        selectAlunos.focus(); 
-        return; 
+    // Mostra o container de abas quando for fazer um apontamento
+    const tabsContainer = document.getElementById('mobile-tabs-container');
+    if (tabsContainer) {
+        tabsContainer.style.display = 'flex';
     }
-
-    const titulos = {
-        'meivs': '<i class="fa-solid fa-shield-halved"></i> MEIV\'S',
-        'pedagogico': '<i class="fa-solid fa-book-open"></i> Pedagógico',
-        'adm': '<i class="fa-solid fa-folder-open"></i> ADM',
-        'direcao': '<i class="fa-solid fa-chalkboard-user"></i> Professores'
-    };
-
-    const h3 = document.querySelector('#overlay-text-' + setor + ' h3');
-    if (h3) {
-        h3.innerHTML = titulos[setor] + '<br><span style="font-size: 16px; color: #475569; display: block; margin-top: 8px; font-weight: normal;">Para o aluno(a): <strong>' + alunoSelecionado + '</strong></span>';
+    
+    // Mostra o overlay de texto do setor correspondente
+    const overlay = document.getElementById('overlay-text-' + setor);
+    if (overlay) {
+        overlay.style.display = 'flex';
+        
+        // Foca no textarea
+        const textarea = document.getElementById('text-' + setor);
+        if (textarea) {
+            setTimeout(() => textarea.focus(), 100);
+        }
     }
-
-    document.getElementById('overlay-text-' + setor).style.display = 'flex';
-    document.getElementById('text-' + setor).focus();
 }
 
 function fecharCaixaTexto(setor) {
-    document.getElementById('overlay-text-' + setor).style.display = 'none';
-    document.getElementById('text-' + setor).value = ''; 
+    // Fecha o overlay
+    const overlay = document.getElementById('overlay-text-' + setor);
+    if (overlay) {
+        overlay.style.display = 'none';
+    }
+    
+    // Esconde as abas se não houver nenhum overlay aberto
+    const abasAbertas = document.querySelectorAll('.overlay-apontamento[style*="display: flex"]');
+    if (abasAbertas.length === 0) {
+        const tabsContainer = document.getElementById('mobile-tabs-container');
+        if (tabsContainer) {
+            tabsContainer.style.display = 'none';
+        }
+    }
 }
 
 // ==== MÓDULO DE OCORRÊNCIAS (SAÍDA ANTECIPADA / ENTRADA ATRASADA) ====
