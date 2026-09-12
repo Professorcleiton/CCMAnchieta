@@ -1830,3 +1830,24 @@ setInterval(atualizarStatusConexao, 10000);
 
 console.log('🔄 SIGA inicializado com sucesso!');
 console.log('📦 Banco de dados local:', db ? '✅ Disponível' : '❌ Indisponível');
+
+// =============================================
+// 🔧 CORREÇÃO: Move modais para fora do #app-interface
+// Isso resolve o problema de position:fixed quebrado
+// =============================================
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function() {
+        const appInterface = document.getElementById('app-interface');
+        if (!appInterface) return;
+        
+        const modais = appInterface.querySelectorAll('.modal-overlay');
+        console.log('🔧 Movendo ' + modais.length + ' modais para fora do #app-interface');
+        
+        modais.forEach(function(modal) {
+            document.body.appendChild(modal);
+            console.log('   → Movido:', modal.id);
+        });
+        
+        console.log('✅ Modais reposicionados com sucesso!');
+    }, 500);
+});
