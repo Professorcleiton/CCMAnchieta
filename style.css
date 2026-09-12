@@ -1703,3 +1703,7 @@ select#select-alunos {
         padding: 4px 10px;
     }
 }
+
+#modal-aniversarios {
+    z-index: 10002 !important;
+}
