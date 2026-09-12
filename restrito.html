@@ -1400,9 +1400,15 @@ function togglePreferenciasProfessor() {
 // CONTROLE DE ACESSO POR NÍVEL
 // =============================================
 function aplicarControleAcesso() {
-    if (!usuarioLogado || !usuarioLogado.nivel) return;
+    if (!usuarioLogado || !usuarioLogado.nivel) {
+        console.warn('⚠️ aplicarControleAcesso: usuarioLogado ainda não está pronto');
+        // Tenta novamente em 500ms
+        setTimeout(aplicarControleAcesso, 500);
+        return;
+    }
     
     const nivel = parseInt(usuarioLogado.nivel);
+    console.log('🔐 Aplicando controle de acesso - Nível:', nivel);
     
     // Nível 4+ (Direção): Progressão, Gestão de Horários, Painel Admin
     const botoesNivel4 = ['btn-progressao', 'btn-gestao-horarios', 'btn-abrir-admin'];
@@ -1411,11 +1417,14 @@ function aplicarControleAcesso() {
         if (btn) btn.style.display = nivel >= 4 ? 'flex' : 'none';
     });
     
-    // Nível 3+ (Admin): Patrimônio, F.O., Central de Alertas, Secretaria
+    // Nível 3+ (Admin): Patrimônio, F.O., Central de Alertas, Secretaria, Aniversários
     const botoesNivel3 = ['btn-patrimonio', 'btn-comunicado-seed', 'btn-central-alertas', 'btn-aba-secretaria', 'btn-aniversarios'];
     botoesNivel3.forEach(id => {
         const btn = document.getElementById(id);
-        if (btn) btn.style.display = nivel >= 3 ? 'flex' : 'none';
+        if (btn) {
+            btn.style.display = nivel >= 3 ? 'flex' : 'none';
+            console.log('  →', id, '=', nivel >= 3 ? 'VISÍVEL' : 'oculto');
+        }
     });
     
     // Nível 1+ (Todos): Meus Horários, Agenda Lab
@@ -3347,14 +3356,35 @@ async function carregarRecadosAniversario() {
 // 🎂 ANIVERSARIANTES POR MÊS (COM IMPRESSÃO)
 // =============================================
 function abrirModalAniversarios() {
-    if (!usuarioLogado || parseInt(usuarioLogado.nivel) < 3) {
-        mostrarToast('🔒 Acesso restrito ao nível 3 ou superior.', 'erro');
+    console.log('🎂 abrirModalAniversarios chamada');
+    console.log('   usuarioLogado:', usuarioLogado);
+    
+    // Verifica nível
+    if (!usuarioLogado) {
+        console.warn('⚠️ usuarioLogado não está definido');
+        alert('Erro: usuário não identificado. Recarregue a página.');
         return;
     }
     
-    document.getElementById('modal-aniversarios').style.display = 'flex';
-    document.getElementById('conteudo-aniversarios').innerHTML = 
-        '<div style="text-align:center;padding:40px;"><i class="fa-solid fa-spinner fa-spin" style="font-size:40px;"></i><p>Carregando...</p></div>';
+    const nivel = parseInt(usuarioLogado.nivel) || 0;
+    console.log('   Nível do usuário:', nivel);
+    
+    if (nivel < 3) {
+        mostrarToast('🔒 Acesso restrito ao nível 3 ou superior. Seu nível: ' + nivel, 'erro');
+        return;
+    }
+    
+    const modal = document.getElementById('modal-aniversarios');
+    const conteudo = document.getElementById('conteudo-aniversarios');
+    
+    if (!modal || !conteudo) {
+        console.error('❌ Modal de aniversários não encontrado no HTML');
+        alert('Erro: modal não encontrado.');
+        return;
+    }
+    
+    modal.style.display = 'flex';
+    conteudo.innerHTML = '<div style="text-align:center;padding:40px;"><i class="fa-solid fa-spinner fa-spin" style="font-size:40px;"></i><p>Carregando...</p></div>';
     
     carregarAniversariosPorMes();
 }
@@ -3363,63 +3393,76 @@ async function carregarAniversariosPorMes() {
     const container = document.getElementById('conteudo-aniversarios');
     
     try {
+        console.log('📥 Buscando usuários...');
         const respUsers = await fetch(APPS_SCRIPT_V2 + '?aba=usuarios');
-        const usuarios = await respUsers.json();
         
-        const meses = {
-            1: { nome: 'Janeiro', aniversariantes: [] },
-            2: { nome: 'Fevereiro', aniversariantes: [] },
-            3: { nome: 'Março', aniversariantes: [] },
-            4: { nome: 'Abril', aniversariantes: [] },
-            5: { nome: 'Maio', aniversariantes: [] },
-            6: { nome: 'Junho', aniversariantes: [] },
-            7: { nome: 'Julho', aniversariantes: [] },
-            8: { nome: 'Agosto', aniversariantes: [] },
-            9: { nome: 'Setembro', aniversariantes: [] },
-            10: { nome: 'Outubro', aniversariantes: [] },
-            11: { nome: 'Novembro', aniversariantes: [] },
-            12: { nome: 'Dezembro', aniversariantes: [] }
-        };
+        if (!respUsers.ok) throw new Error('Falha ao buscar usuários: ' + respUsers.status);
+        
+        const usuarios = await respUsers.json();
+        console.log('📊 Usuários recebidos:', usuarios.length);
+        
+        if (!Array.isArray(usuarios) || usuarios.length === 0) {
+            container.innerHTML = '<p style="text-align:center;color:#64748b;padding:40px;">Nenhum usuário encontrado.</p>';
+            return;
+        }
+        
+        const nomesMeses = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                            'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+        
+        const meses = {};
+        for (let i = 1; i <= 12; i++) {
+            meses[i] = { nome: nomesMeses[i], aniversariantes: [] };
+        }
+        
+        let comData = 0;
+        let semData = 0;
         
         usuarios.forEach(u => {
-            if (!u.data_nasc || u.data_nasc === '') return;
-            
-            let diaNasc, mesNasc;
-            const dataNasc = u.data_nasc.toString().trim();
-            
-            if (dataNasc.includes('GMT') || dataNasc.includes('00:00:00')) {
-                const d = new Date(dataNasc);
-                if (!isNaN(d.getTime())) {
-                    diaNasc = d.getDate();
-                    mesNasc = d.getMonth() + 1;
-                }
-            } else if (dataNasc.includes('/')) {
-                const partes = dataNasc.split('/');
-                diaNasc = parseInt(partes[0]);
-                mesNasc = parseInt(partes[1]);
+            const dataOriginal = u.data_nasc;
+            if (!dataOriginal || dataOriginal.toString().trim() === '') {
+                semData++;
+                return;
             }
             
-            if (diaNasc && mesNasc && meses[mesNasc]) {
-                meses[mesNasc].aniversariantes.push({
+            const parsed = extrairDiaMes(dataOriginal);
+            if (parsed) {
+                comData++;
+                meses[parsed.mes].aniversariantes.push({
                     nome: u.nome,
-                    dia: diaNasc,
-                    mes: mesNasc,
+                    dia: parsed.dia,
+                    mes: parsed.mes,
                     setor: u.setor || 'Funcionário'
                 });
+            } else {
+                semData++;
+                console.warn('⚠️ Não foi possível interpretar data:', dataOriginal, 'de', u.nome);
             }
         });
         
-        let html = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:15px;">';
+        console.log('✅ Com data:', comData, '| Sem data:', semData);
         
-        Object.keys(meses).forEach(mesKey => {
+        let html = '';
+        
+        // Aviso se ninguém tem data
+        if (comData === 0) {
+            html = '<div style="background:#fef3c7;padding:20px;border-radius:8px;text-align:center;color:#92400e;">';
+            html += '<strong>⚠️ Nenhum usuário possui data de nascimento cadastrada.</strong>';
+            html += '<p style="font-size:13px;margin-top:10px;">Cadastre a data no formato <strong>DD/MM</strong> no Painel de Gestão → Usuário → Data de Nascimento.</p>';
+            html += '</div>';
+            container.innerHTML = html;
+            return;
+        }
+        
+        html = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:15px;">';
+        
+        for (let mesKey = 1; mesKey <= 12; mesKey++) {
             const mes = meses[mesKey];
-            
-            if (mes.aniversariantes.length === 0) return;
+            if (mes.aniversariantes.length === 0) continue;
             
             mes.aniversariantes.sort((a, b) => a.dia - b.dia);
             
             const mesAtual = new Date().getMonth() + 1;
-            const isMesAtual = parseInt(mesKey) === mesAtual;
+            const isMesAtual = mesKey === mesAtual;
             
             html += '<div style="background:white;border-radius:8px;padding:15px;border-left:4px solid ' + (isMesAtual ? '#db2777' : '#e2e8f0') + ';">';
             html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">';
@@ -3427,27 +3470,133 @@ async function carregarAniversariosPorMes() {
             html += '📅 ' + mes.nome + (isMesAtual ? ' (Mês Atual)' : '');
             html += ' <span style="font-size:11px;color:#64748b;">(' + mes.aniversariantes.length + ')</span>';
             html += '</h4>';
-            html += '<button onclick="imprimirMesAniversario(\'' + mes.nome + '\', ' + JSON.stringify(mes.aniversariantes).replace(/'/g, "&#39;") + ')" style="background:#db2777;color:white;border:none;padding:4px 10px;border-radius:12px;cursor:pointer;font-size:10px;font-weight:bold;">';
+            
+            // Armazena em window para o botão usar
+            const idBtn = 'btn-imp-' + mesKey;
+            window['_aniv_' + mesKey] = mes.aniversariantes;
+            
+            html += '<button onclick="imprimirMesAniversarioPorId(' + mesKey + ')" style="background:#db2777;color:white;border:none;padding:4px 10px;border-radius:12px;cursor:pointer;font-size:10px;font-weight:bold;">';
             html += '🖨️ Imprimir';
             html += '</button>';
             html += '</div>';
             
             mes.aniversariantes.forEach(aniv => {
                 html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #f1f5f9;">';
-                html += '<span style="font-size:13px;">' + aniv.nome + '</span>';
+                html += '<span style="font-size:13px;">🎂 ' + aniv.nome + '</span>';
                 html += '<span style="font-size:11px;color:#64748b;">' + String(aniv.dia).padStart(2, '0') + '/' + String(aniv.mes).padStart(2, '0') + '</span>';
                 html += '</div>';
             });
             
             html += '</div>';
-        });
+        }
         
         html += '</div>';
         container.innerHTML = html;
         
     } catch (e) {
-        console.error(e);
-        container.innerHTML = '<p style="text-align:center;color:red;">Erro ao carregar aniversariantes.</p>';
+        console.error('❌ Erro ao carregar aniversariantes:', e);
+        container.innerHTML = '<div style="text-align:center;padding:40px;color:#dc2626;">' +
+            '<i class="fa-solid fa-triangle-exclamation" style="font-size:48px;"></i>' +
+            '<p>Erro ao carregar: ' + e.message + '</p>' +
+            '<button onclick="carregarAniversariosPorMes()" style="background:#005088;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;margin-top:10px;">🔄 Tentar novamente</button>' +
+            '</div>';
+    }
+}
+
+// Função auxiliar para extrair dia/mês de qualquer formato
+function extrairDiaMes(dataOriginal) {
+    if (!dataOriginal) return null;
+    
+    const str = dataOriginal.toString().trim();
+    
+    // Formato ISO: "2026-08-15" ou "2026-08-15T00:00:00"
+    if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
+        const partes = str.split('T')[0].split('-');
+        return { dia: parseInt(partes[2]), mes: parseInt(partes[1]) };
+    }
+    
+    // Formato brasileiro completo: "15/08/1990" ou "15/08/2026"
+    if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(str)) {
+        const partes = str.split('/');
+        return { dia: parseInt(partes[0]), mes: parseInt(partes[1]) };
+    }
+    
+    // Formato curto: "15/08"
+    if (/^\d{1,2}\/\d{1,2}$/.test(str)) {
+        const partes = str.split('/');
+        return { dia: parseInt(partes[0]), mes: parseInt(partes[1]) };
+    }
+    
+    // Formato Date do Google: "Wed Aug 12 2026 00:00:00 GMT-0300"
+    if (str.includes('GMT') || str.includes('00:00:00')) {
+        const d = new Date(str);
+        if (!isNaN(d.getTime())) {
+            return { dia: d.getDate(), mes: d.getMonth() + 1 };
+        }
+    }
+    
+    // Última tentativa: tentar Date nativo
+    const d = new Date(str);
+    if (!isNaN(d.getTime())) {
+        return { dia: d.getDate(), mes: d.getMonth() + 1 };
+    }
+    
+    return null;
+}
+
+// 🆕 Função para imprimir por ID (evita problemas de aspas no JSON)
+function imprimirMesAniversarioPorId(mesKey) {
+    const nomesMeses = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                        'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+    const lista = window['_aniv_' + mesKey] || [];
+    const nomeMes = nomesMeses[mesKey];
+    
+    if (lista.length === 0) {
+        alert('Nenhum aniversariante neste mês.');
+        return;
+    }
+    
+    let html = '<!DOCTYPE html><html><head>';
+    html += '<meta charset="UTF-8">';
+    html += '<title>Aniversariantes - ' + nomeMes + '</title>';
+    html += '<style>';
+    html += 'body { font-family: Arial, sans-serif; padding: 30px; background: white; }';
+    html += 'h1 { text-align: center; color: #db2777; font-size: 22px; margin-bottom: 5px; }';
+    html += 'h2 { text-align: center; color: #005088; font-size: 16px; margin-bottom: 20px; }';
+    html += 'table { width: 100%; border-collapse: collapse; margin-top: 20px; }';
+    html += 'th { background: #db2777; color: white; padding: 10px; text-align: left; font-size: 14px; }';
+    html += 'td { padding: 10px; border-bottom: 1px solid #e2e8f0; font-size: 14px; }';
+    html += 'tr:nth-child(even) { background: #fdf2f8; }';
+    html += '@media print { body { padding: 10px; } .no-print { display: none; } }';
+    html += '</style>';
+    html += '</head><body>';
+    html += '<button class="no-print" onclick="window.print()" style="background:#005088;color:white;border:none;padding:10px 30px;border-radius:6px;font-size:16px;cursor:pointer;display:block;margin:0 auto 20px;">🖨️ Imprimir</button>';
+    html += '<h1>CCM Anchieta</h1>';
+    html += '<h2>📅 Aniversariantes de ' + nomeMes + '</h2>';
+    html += '<p style="text-align:center;color:#64748b;font-size:12px;">Total: ' + lista.length + ' aniversariante(s)</p>';
+    html += '<table>';
+    html += '<thead><tr><th>#</th><th>Nome</th><th>Data</th><th>Setor</th></tr></thead>';
+    html += '<tbody>';
+    
+    lista.forEach(function(aniv, index) {
+        html += '<tr>';
+        html += '<td>' + (index + 1) + '</td>';
+        html += '<td>' + aniv.nome + '</td>';
+        html += '<td>' + String(aniv.dia).padStart(2, '0') + '/' + String(aniv.mes).padStart(2, '0') + '</td>';
+        html += '<td>' + (aniv.setor || 'Funcionário') + '</td>';
+        html += '</tr>';
+    });
+    
+    html += '</tbody></table>';
+    html += '<p style="text-align:center;margin-top:30px;color:#94a3b8;font-size:11px;">Gerado pelo SIGA em ' + new Date().toLocaleDateString('pt-BR') + '</p>';
+    html += '</body></html>';
+    
+    const win = window.open('', '_blank', 'width=800,height=600');
+    if (win) {
+        win.document.write(html);
+        win.document.close();
+    } else {
+        mostrarToast('⚠️ Por favor, permita pop-ups para impressão.', 'warning');
     }
 }
 
