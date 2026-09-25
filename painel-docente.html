@@ -34,7 +34,6 @@
       padding-bottom: 80px;
     }
 
-    /* TOPBAR */
     .topbar {
       background: var(--azul);
       color: #fff;
@@ -52,27 +51,34 @@
       background: transparent; border: none; color: #fff;
       font-size: 1.4rem; cursor: pointer;
     }
-    .topbar #professor-nome {
-      font-size: .85rem; opacity: .9; text-align: right;
-    }
+    .topbar #professor-nome { font-size: .85rem; opacity: .9; text-align: right; }
     .topbar .btn-dark {
       background: rgba(255,255,255,.15); border: none; color: #fff;
       padding: .4rem .7rem; border-radius: 8px; cursor: pointer;
     }
 
-    /* CONTAINER */
     .painel-docente { max-width: 1200px; margin: 0 auto; padding: 1.2rem; }
 
-    /* FILTROS */
-    .filtros {
-      display: flex; gap: .6rem; flex-wrap: wrap; margin-bottom: 1rem;
+    .aviso {
+      background: #fef3c7;
+      border-left: 5px solid var(--dourado);
+      padding: .8rem 1rem;
+      border-radius: 8px;
+      font-size: .85rem;
+      color: #78350f;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: flex-start;
+      gap: .6rem;
     }
+    body.dark .aviso { background: #422006; color: #fde68a; }
+
+    .filtros { display: flex; gap: .6rem; flex-wrap: wrap; margin-bottom: 1rem; }
     .filtros select, .filtros input {
       padding: .5rem .7rem; border-radius: 8px; border: 1px solid var(--borda);
       background: var(--bg-card); color: var(--texto); font-size: .9rem;
     }
 
-    /* CARDS */
     .cards-resumo {
       display: grid; grid-template-columns: repeat(4, 1fr);
       gap: 1rem; margin-bottom: 1.5rem;
@@ -94,7 +100,6 @@
     .card.geral { border-left-color: var(--azul); }
     .card.geral i, .card.geral .num { color: var(--azul); }
 
-    /* TABELA */
     .tabela-monitoramento {
       background: var(--bg-card); border-radius: 12px; padding: 1rem;
       box-shadow: 0 2px 6px rgba(0,0,0,.06); margin-bottom: 1.5rem;
@@ -102,7 +107,7 @@
     }
     .tabela-monitoramento h2 { font-size: 1rem; margin-bottom: .8rem; color: var(--azul); }
     body.dark .tabela-monitoramento h2 { color: var(--dourado); }
-    .tabela-monitoramento table { width: 100%; border-collapse: collapse; min-width: 720px; }
+    .tabela-monitoramento table { width: 100%; border-collapse: collapse; min-width: 640px; }
     .tabela-monitoramento th, .tabela-monitoramento td {
       padding: .6rem .5rem; text-align: left; font-size: .88rem;
       border-bottom: 1px solid var(--borda);
@@ -119,14 +124,9 @@
     .status-verde { background: var(--verde); }
     .status-amarelo { background: var(--amarelo); color: #000; }
     .status-vermelho { background: var(--vermelho); }
-    .btn-declarar {
-      background: var(--azul); color: #fff; border: none;
-      padding: .35rem .7rem; border-radius: 6px; cursor: pointer;
-      font-size: .78rem;
-    }
-    .btn-declarar:hover { background: #003a5c; }
+    .icone-universal { color: var(--azul); margin-left: .3rem; font-size: .8rem; }
+    body.dark .icone-universal { color: #93c5fd; }
 
-    /* GRÁFICO */
     .historico {
       background: var(--bg-card); border-radius: 12px; padding: 1rem;
       box-shadow: 0 2px 6px rgba(0,0,0,.06); margin-bottom: 1.5rem;
@@ -135,31 +135,6 @@
     body.dark .historico h2 { color: var(--dourado); }
     .historico canvas { max-height: 320px; }
 
-    /* MODAL */
-    .modal-overlay {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,.5); z-index: 999;
-      align-items: center; justify-content: center;
-    }
-    .modal-overlay.ativo { display: flex; }
-    .modal {
-      background: var(--bg-card); padding: 1.4rem; border-radius: 12px;
-      width: 90%; max-width: 420px;
-    }
-    .modal h3 { margin-bottom: .8rem; color: var(--azul); }
-    .modal input {
-      width: 100%; padding: .6rem; border-radius: 8px;
-      border: 1px solid var(--borda); margin-bottom: .8rem;
-      background: var(--bg-card); color: var(--texto);
-    }
-    .modal .acoes { display: flex; gap: .5rem; justify-content: flex-end; }
-    .modal button {
-      padding: .5rem 1rem; border-radius: 8px; border: none; cursor: pointer;
-    }
-    .modal .cancelar { background: #e5e7eb; color: #333; }
-    .modal .confirmar { background: var(--azul); color: #fff; }
-
-    /* TOAST */
     .toast {
       position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
       background: var(--azul); color: #fff; padding: .7rem 1.2rem;
@@ -168,7 +143,6 @@
     }
     .toast.ativo { opacity: 1; }
 
-    /* RESPONSIVO */
     @media (max-width: 900px) {
       .cards-resumo { grid-template-columns: repeat(2, 1fr); }
     }
@@ -181,7 +155,6 @@
 </head>
 <body>
 
-  <!-- TOPBAR -->
   <header class="topbar">
     <button id="menu-toggle" aria-label="Menu"><i class="fas fa-bars"></i></button>
     <h1><i class="fas fa-chart-line"></i> Meu Painel de Lançamentos</h1>
@@ -191,7 +164,15 @@
 
   <main class="painel-docente">
 
-    <!-- FILTROS -->
+    <div class="aviso">
+      <i class="fas fa-info-circle" style="margin-top:.15rem;"></i>
+      <div>
+        <strong>Painel informativo.</strong>
+        Os números são atualizados semanalmente pela coordenação a partir dos painéis oficiais das plataformas (Super BI, Matific, Redação Paraná, Leia Paraná, Quizizz, Khan Academy e Inglês Paraná).
+        Se você identificou um lançamento que não aparece aqui, procure a coordenação pedagógica.
+      </div>
+    </div>
+
     <section class="filtros">
       <select id="filtro-plataforma">
         <option value="">Todas as plataformas</option>
@@ -200,6 +181,7 @@
         <option value="Leia">Leia Paraná</option>
         <option value="Quizizz">Quizizz</option>
         <option value="Khan">Khan Academy</option>
+        <option value="Inglês Paraná">Inglês Paraná</option>
       </select>
       <select id="filtro-turma">
         <option value="">Todas as turmas</option>
@@ -212,7 +194,6 @@
       </select>
     </section>
 
-    <!-- CARDS -->
     <section class="cards-resumo">
       <div class="card geral">
         <i class="fas fa-list-check"></i>
@@ -236,7 +217,6 @@
       </div>
     </section>
 
-    <!-- TABELA -->
     <section class="tabela-monitoramento">
       <h2><i class="fas fa-table"></i> Minhas disciplinas e plataformas</h2>
       <table>
@@ -249,16 +229,14 @@
             <th>Lançado</th>
             <th>%</th>
             <th>Status</th>
-            <th>Ação</th>
           </tr>
         </thead>
         <tbody id="corpo-tabela">
-          <tr><td colspan="8" style="text-align:center; padding:1.5rem;">Carregando...</td></tr>
+          <tr><td colspan="7" style="text-align:center; padding:1.5rem;">Carregando...</td></tr>
         </tbody>
       </table>
     </section>
 
-    <!-- GRÁFICO -->
     <section class="historico">
       <h2><i class="fas fa-chart-bar"></i> Histórico das últimas 4 semanas</h2>
       <canvas id="grafico-historico"></canvas>
@@ -266,34 +244,18 @@
 
   </main>
 
-  <!-- MODAL DECLARAR -->
-  <div class="modal-overlay" id="modal-declarar">
-    <div class="modal">
-      <h3><i class="fas fa-pen-to-square"></i> Declarar lançamento</h3>
-      <p id="modal-info" style="font-size:.85rem; margin-bottom:.6rem;"></p>
-      <input type="number" id="modal-qtd" min="1" placeholder="Quantidade lançada" />
-      <div class="acoes">
-        <button class="cancelar" onclick="fecharModal()">Cancelar</button>
-        <button class="confirmar" onclick="confirmarDeclaracao()">Confirmar</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- TOAST -->
   <div class="toast" id="toast"></div>
 
   <script>
     // ===== CONFIGURAÇÃO =====
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxEMx6.../exec'; // URL principal
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxEMx6NmZvQqPMmmxsrTaV1DrMHa-F16_ARFR1cjm_5v054lUtF80YWtW88g6MsyhajRg/exec';
     const professorEmail = localStorage.getItem('usuario_email') || '';
     const professorNome = localStorage.getItem('usuario_nome') || 'Professor(a)';
 
     document.getElementById('professor-nome').textContent = professorNome;
 
-    // ===== ESTADO =====
     let dadosOriginais = [];
     let dadosFiltrados = [];
-    let itemSelecionado = null;
 
     // ===== TEMA =====
     const btnTema = document.getElementById('btn-tema');
@@ -317,7 +279,7 @@
         console.error(e);
         mostrarToast('Erro ao carregar dados. Verifique a conexão.');
         document.getElementById('corpo-tabela').innerHTML =
-          '<tr><td colspan="8" style="text-align:center; padding:1.5rem;">Erro ao carregar.</td></tr>';
+          '<tr><td colspan="7" style="text-align:center; padding:1.5rem;">Erro ao carregar.</td></tr>';
       }
     }
 
@@ -358,69 +320,29 @@
       document.getElementById('total-vermelho').textContent = vermelho;
     }
 
-    // ===== TABELA =====
+    // ===== TABELA (somente leitura) =====
     function renderizarTabela() {
       const tbody = document.getElementById('corpo-tabela');
       if (!dadosFiltrados.length) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:1.5rem;">Nenhum item encontrado.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:1.5rem;">Nenhum item encontrado.</td></tr>';
         return;
       }
       tbody.innerHTML = dadosFiltrados.map(d => {
         const pct = d.meta_semanal > 0 ? Math.round((d.qtd_lancada / d.meta_semanal) * 100) : 0;
         const badge = `<span class="status-badge status-${d.status}">${d.status.toUpperCase()}</span>`;
-        const acao = d.status === 'vermelho'
-          ? `<button class="btn-declarar" onclick="abrirModal('${d.id}')"><i class="fas fa-plus"></i> Declarar</button>`
-          : '<span style="opacity:.4;">—</span>';
+        const universal = d.universal
+          ? ' <i class="fas fa-globe icone-universal" title="Meta universal — vale para todas as disciplinas"></i>'
+          : '';
         return `<tr>
           <td>${d.disciplina}</td>
           <td>${d.turma}</td>
-          <td>${d.plataforma}</td>
+          <td>${d.plataforma}${universal}</td>
           <td>${d.meta_semanal}</td>
           <td>${d.qtd_lancada}</td>
           <td>${pct}%</td>
           <td>${badge}</td>
-          <td>${acao}</td>
         </tr>`;
       }).join('');
-    }
-
-    // ===== MODAL =====
-    function abrirModal(id) {
-      itemSelecionado = dadosFiltrados.find(d => d.id === id);
-      if (!itemSelecionado) return;
-      document.getElementById('modal-info').textContent =
-        `${itemSelecionado.disciplina} — ${itemSelecionado.turma} — ${itemSelecionado.plataforma} (meta: ${itemSelecionado.meta_semanal})`;
-      document.getElementById('modal-qtd').value = '';
-      document.getElementById('modal-declarar').classList.add('ativo');
-    }
-    function fecharModal() {
-      document.getElementById('modal-declarar').classList.remove('ativo');
-      itemSelecionado = null;
-    }
-    async function confirmarDeclaracao() {
-      const qtd = parseInt(document.getElementById('modal-qtd').value, 10);
-      if (!qtd || qtd < 1) { mostrarToast('Informe uma quantidade válida.'); return; }
-      try {
-        await fetch(APPS_SCRIPT_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            acao: 'declarar_lancamento',
-            email: professorEmail,
-            disciplina: itemSelecionado.disciplina,
-            turma: itemSelecionado.turma,
-            plataforma: itemSelecionado.plataforma,
-            qtd: qtd
-          })
-        });
-        mostrarToast('Lançamento declarado com sucesso!');
-        fecharModal();
-        setTimeout(carregarPainel, 800);
-      } catch (e) {
-        console.error(e);
-        mostrarToast('Erro ao declarar. Tente novamente.');
-      }
     }
 
     // ===== TOAST =====
@@ -457,7 +379,6 @@
       });
     }
 
-    // ===== CARREGAR HISTÓRICO =====
     async function carregarHistorico() {
       try {
         const resp = await fetch(`${APPS_SCRIPT_URL}?aba=historico_docente&email=${encodeURIComponent(professorEmail)}`);
@@ -468,7 +389,6 @@
       }
     }
 
-    // ===== INIT =====
     carregarPainel();
     carregarHistorico();
   </script>
