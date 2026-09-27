@@ -437,6 +437,7 @@
         const sessao = JSON.parse(localStorage.getItem('sgi_ccma_session') || '{}');
         const resp = await fetch(APPS_SCRIPT_URL, {
           method: 'POST',
+          mode: 'no-cors',
           headers: { 'Content-Type': 'text/plain' },
           body: JSON.stringify({
             operacao: 'IMPORTAR_LANCAMENTOS',
