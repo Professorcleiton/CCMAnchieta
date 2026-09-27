@@ -33,7 +33,6 @@
       color: var(--texto);
       padding-bottom: 80px;
     }
-
     .topbar {
       background: var(--azul);
       color: #fff;
@@ -47,38 +46,24 @@
       box-shadow: 0 2px 8px rgba(0,0,0,.15);
     }
     .topbar h1 { font-size: 1.1rem; flex: 1; }
-    .topbar #menu-toggle {
-      background: transparent; border: none; color: #fff;
-      font-size: 1.4rem; cursor: pointer;
-    }
     .topbar #professor-nome { font-size: .85rem; opacity: .9; text-align: right; }
     .topbar .btn-dark {
       background: rgba(255,255,255,.15); border: none; color: #fff;
       padding: .4rem .7rem; border-radius: 8px; cursor: pointer;
     }
-
     .painel-docente { max-width: 1200px; margin: 0 auto; padding: 1.2rem; }
-
     .aviso {
-      background: #fef3c7;
-      border-left: 5px solid var(--dourado);
-      padding: .8rem 1rem;
-      border-radius: 8px;
-      font-size: .85rem;
-      color: #78350f;
-      margin-bottom: 1rem;
-      display: flex;
-      align-items: flex-start;
-      gap: .6rem;
+      background: #fef3c7; border-left: 5px solid var(--dourado);
+      padding: .8rem 1rem; border-radius: 8px; font-size: .85rem;
+      color: #78350f; margin-bottom: 1rem;
+      display: flex; align-items: flex-start; gap: .6rem;
     }
     body.dark .aviso { background: #422006; color: #fde68a; }
-
     .filtros { display: flex; gap: .6rem; flex-wrap: wrap; margin-bottom: 1rem; }
-    .filtros select, .filtros input {
+    .filtros select {
       padding: .5rem .7rem; border-radius: 8px; border: 1px solid var(--borda);
       background: var(--bg-card); color: var(--texto); font-size: .9rem;
     }
-
     .cards-resumo {
       display: grid; grid-template-columns: repeat(4, 1fr);
       gap: 1rem; margin-bottom: 1.5rem;
@@ -99,7 +84,6 @@
     .card.vermelho i, .card.vermelho .num { color: var(--vermelho); }
     .card.geral { border-left-color: var(--azul); }
     .card.geral i, .card.geral .num { color: var(--azul); }
-
     .tabela-monitoramento {
       background: var(--bg-card); border-radius: 12px; padding: 1rem;
       box-shadow: 0 2px 6px rgba(0,0,0,.06); margin-bottom: 1.5rem;
@@ -126,7 +110,6 @@
     .status-vermelho { background: var(--vermelho); }
     .icone-universal { color: var(--azul); margin-left: .3rem; font-size: .8rem; }
     body.dark .icone-universal { color: #93c5fd; }
-
     .historico {
       background: var(--bg-card); border-radius: 12px; padding: 1rem;
       box-shadow: 0 2px 6px rgba(0,0,0,.06); margin-bottom: 1.5rem;
@@ -134,7 +117,6 @@
     .historico h2 { font-size: 1rem; margin-bottom: .8rem; color: var(--azul); }
     body.dark .historico h2 { color: var(--dourado); }
     .historico canvas { max-height: 320px; }
-
     .toast {
       position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
       background: var(--azul); color: #fff; padding: .7rem 1.2rem;
@@ -142,7 +124,6 @@
       transition: opacity .3s; z-index: 1000;
     }
     .toast.ativo { opacity: 1; }
-
     @media (max-width: 900px) {
       .cards-resumo { grid-template-columns: repeat(2, 1fr); }
     }
@@ -156,7 +137,6 @@
 <body>
 
   <header class="topbar">
-    <button id="menu-toggle" aria-label="Menu"><i class="fas fa-bars"></i></button>
     <h1><i class="fas fa-chart-line"></i> Meu Painel de Lançamentos</h1>
     <span id="professor-nome"></span>
     <button class="btn-dark" id="btn-tema" title="Alternar tema"><i class="fas fa-moon"></i></button>
@@ -168,8 +148,8 @@
       <i class="fas fa-info-circle" style="margin-top:.15rem;"></i>
       <div>
         <strong>Painel informativo.</strong>
-        Os números são atualizados semanalmente pela coordenação a partir dos painéis oficiais das plataformas (Super BI, Matific, Redação Paraná, Leia Paraná, Quizizz, Khan Academy e Inglês Paraná).
-        Se você identificou um lançamento que não aparece aqui, procure a coordenação pedagógica.
+        Os índices são atualizados semanalmente pela coordenação a partir dos painéis oficiais (Super BI).
+        <strong>Meta:</strong> índice ≥ 0,70 na semana. Se você identificou um lançamento que não aparece aqui, procure a coordenação pedagógica.
       </div>
     </div>
 
@@ -179,9 +159,10 @@
         <option value="Matific">Matific</option>
         <option value="Redação">Redação Paraná</option>
         <option value="Leia">Leia Paraná</option>
-        <option value="Quizizz">Quizizz</option>
+        <option value="Quizizz">Quizizz / Desafio</option>
         <option value="Khan">Khan Academy</option>
         <option value="Inglês Paraná">Inglês Paraná</option>
+        <option value="Alura">Alura</option>
       </select>
       <select id="filtro-turma">
         <option value="">Todas as turmas</option>
@@ -225,8 +206,8 @@
             <th>Disciplina</th>
             <th>Turma</th>
             <th>Plataforma</th>
-            <th>Meta Semanal</th>
-            <th>Lançado</th>
+            <th>Meta</th>
+            <th>Índice</th>
             <th>%</th>
             <th>Status</th>
           </tr>
@@ -247,10 +228,8 @@
   <div class="toast" id="toast"></div>
 
   <script>
-    // ===== CONFIGURAÇÃO =====
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxEMx6NmZvQqPMmmxsrTaV1DrMHa-F16_ARFR1cjm_5v054lUtF80YWtW88g6MsyhajRg/exec';
 
-    // 🆕 Lê a sessão do SIGA
     let sessao = null;
     try { sessao = JSON.parse(localStorage.getItem('sgi_ccma_session') || 'null'); } catch (e) {}
 
@@ -262,7 +241,6 @@
     let dadosOriginais = [];
     let dadosFiltrados = [];
 
-    // ===== TEMA =====
     const btnTema = document.getElementById('btn-tema');
     if (localStorage.getItem('tema') === 'dark') document.body.classList.add('dark');
     btnTema.addEventListener('click', () => {
@@ -272,7 +250,6 @@
       btnTema.innerHTML = dark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
     });
 
-    // ===== CARREGAR DADOS =====
     async function carregarPainel() {
       try {
         const url = `${APPS_SCRIPT_URL}?aba=meus_lancamentos&email=${encodeURIComponent(professorEmail)}&nome=${encodeURIComponent(professorNome)}`;
@@ -289,7 +266,6 @@
       }
     }
 
-    // ===== FILTROS =====
     function popularFiltroTurmas() {
       const turmas = [...new Set(dadosOriginais.map(d => d.turma))].sort();
       const sel = document.getElementById('filtro-turma');
@@ -302,11 +278,14 @@
       const turma = document.getElementById('filtro-turma').value;
       const status = document.getElementById('filtro-status').value;
 
-      dadosFiltrados = dadosOriginais.filter(d =>
-        (!plat || d.plataforma === plat) &&
-        (!turma || d.turma === turma) &&
-        (!status || d.status === status)
-      );
+      dadosFiltrados = dadosOriginais.filter(d => {
+        const plataformaIgual = !plat ||
+          d.plataforma === plat ||
+          (plat === 'Quizizz' && (d.plataforma === 'Quizizz' || d.plataforma === 'Desafio'));
+        return plataformaIgual &&
+          (!turma || d.turma === turma) &&
+          (!status || d.status === status);
+      });
       renderizarCards();
       renderizarTabela();
     }
@@ -315,7 +294,6 @@
       document.getElementById(id).addEventListener('change', aplicarFiltros);
     });
 
-    // ===== CARDS =====
     function renderizarCards() {
       const verde = dadosFiltrados.filter(d => d.status === 'verde').length;
       const amarelo = dadosFiltrados.filter(d => d.status === 'amarelo').length;
@@ -326,7 +304,6 @@
       document.getElementById('total-vermelho').textContent = vermelho;
     }
 
-    // ===== TABELA (somente leitura) =====
     function renderizarTabela() {
       const tbody = document.getElementById('corpo-tabela');
       if (!dadosFiltrados.length) {
@@ -334,6 +311,12 @@
         return;
       }
       tbody.innerHTML = dadosFiltrados.map(d => {
+        // Normaliza o nome da plataforma para o professor
+        let nomePlataforma = d.plataforma;
+        if (d.plataforma === 'Quizizz' || d.plataforma === 'Desafio') {
+          nomePlataforma = 'Quizizz / Desafio';
+        }
+
         const pct = d.meta_semanal > 0 ? Math.round((d.qtd_lancada / d.meta_semanal) * 100) : 0;
         const badge = `<span class="status-badge status-${d.status}">${d.status.toUpperCase()}</span>`;
         const universal = d.universal
@@ -342,16 +325,15 @@
         return `<tr>
           <td>${d.disciplina}</td>
           <td>${d.turma}</td>
-          <td>${d.plataforma}${universal}</td>
-          <td>${d.meta_semanal}</td>
-          <td>${d.qtd_lancada}</td>
+          <td>${nomePlataforma}${universal}</td>
+          <td>${d.meta_semanal.toFixed(2)}</td>
+          <td>${d.qtd_lancada.toFixed(4)}</td>
           <td>${pct}%</td>
           <td>${badge}</td>
         </tr>`;
       }).join('');
     }
 
-    // ===== TOAST =====
     function mostrarToast(msg) {
       const t = document.getElementById('toast');
       t.textContent = msg;
@@ -359,7 +341,6 @@
       setTimeout(() => t.classList.remove('ativo'), 2800);
     }
 
-    // ===== GRÁFICO =====
     let grafico = null;
     function renderizarGrafico(historico) {
       const ctx = document.getElementById('grafico-historico').getContext('2d');
@@ -371,7 +352,7 @@
         data: {
           labels: semanas,
           datasets: [{
-            label: 'Lançamentos',
+            label: 'Índice médio',
             data: valores,
             backgroundColor: '#005088',
             borderRadius: 6
@@ -380,14 +361,14 @@
         options: {
           responsive: true,
           plugins: { legend: { display: false } },
-          scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+          scales: { y: { beginAtZero: true, max: 1 } }
         }
       });
     }
 
     async function carregarHistorico() {
       try {
-        const url = `${APPS_SCRIPT_URL}?aba=historico_docente&email=${encodeURIComponent(professorEmail)}`;
+        const url = `${APPS_SCRIPT_URL}?aba=historico_docente&email=${encodeURIComponent(professorEmail)}&nome=${encodeURIComponent(professorNome)}`;
         const resp = await fetch(url);
         const json = await resp.json();
         renderizarGrafico(json);
