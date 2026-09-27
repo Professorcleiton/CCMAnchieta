@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Importar Super BI — SIGA CCM Anchieta</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="manifest" href="manifest.json">
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <style>
+    :root {
+      --azul: #005088;
+      --verde: #16a34a;
+      --amarelo: #eab308;
+      --vermelho: #dc2626;
+      --bg-card: #ffffff;
+      --texto: #1f2937;
+      --borda: #e5e7eb;
+    }
+    body.dark {
+      --bg-card: #1e293b;
+      --texto: #f1f5f9;
+      --borda: #334155;
+      background: #0f172a;
+      color: var(--texto);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Roboto, sans-serif;
+      background: #f3f4f6;
+      color: var(--texto);
+      padding-bottom: 80px;
+    }
+
+    .topbar {
+      background: var(--azul);
+      color: #fff;
+      padding: 0.9rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,.15);
+    }
+    .topbar h1 { font-size: 1.1rem; flex: 1; }
+    .topbar a {
+      color: #fff; text-decoration: none; background: rgba(255,255,255,.15);
+      padding: .4rem .8rem; border-radius: 8px; font-size: .85rem;
+    }
+    .topbar .btn-dark {
+      background: rgba(255,255,255,.15); border: none; color: #fff;
+      padding: .4rem .7rem; border-radius: 8px; cursor: pointer;
+    }
+
+    .container { max-width: 1200px; margin: 0 auto; padding: 1.2rem; }
+
+    .aviso {
+      background: #fef3c7;
+      border-left: 5px solid var(--amarelo);
+      padding: .9rem 1rem;
+      border-radius: 8px;
+      font-size: .85rem;
+      color: #78350f;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: flex-start;
+      gap: .6rem;
+    }
+    body.dark .aviso { background: #422006; color: #fde68a; }
+
+    .dropzone {
+      background: var(--bg-card);
+      border: 3px dashed var(--borda);
+      border-radius: 12px;
+      padding: 2.5rem 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all .2s;
+      margin-bottom: 1.5rem;
+    }
+    .dropzone:hover, .dropzone.ativo {
+      border-color: var(--azul);
+      background: rgba(0,80,136,.05);
+    }
+    .dropzone i { font-size: 2.5rem; color: var(--azul); margin-bottom: .8rem; }
+    .dropzone p { font-size: .95rem; color: var(--texto); }
+    .dropzone small { display: block; margin-top: .5rem; color: #64748b; font-size: .8rem; }
+    .dropzone img {
+      max-width: 100%; max-height: 320px; margin-top: 1rem;
+      border-radius: 8px; border: 1px solid var(--borda);
+    }
+
+    .progresso {
+      background: var(--bg-card); border-radius: 8px; padding: 1rem;
+      margin-bottom: 1rem; display: none;
+    }
+    .progresso.ativo { display: block; }
+    .progresso p { font-size: .85rem; margin-bottom: .5rem; }
+    .progresso .barra {
+      background: var(--borda); height: 8px; border-radius: 4px; overflow: hidden;
+    }
+    .progresso .barra div {
+      background: var(--azul); height: 100%; width: 0%; transition: width .3s;
+    }
+
+    .status {
+      padding: 1rem; border-radius: 8px; margin-bottom: 1rem;
+      font-size: .9rem; display: none;
+    }
+    .status.ativo { display: block; }
+    .status.sucesso { background: #dcfce7; color: #166534; border-left: 5px solid var(--verde); }
+    .status.erro { background: #fee2e2; color: #991b1b; border-left: 5px solid var(--vermelho); }
+    .status.info { background: #dbeafe; color: #1e40af; border-left: 5px solid var(--azul); }
+
+    .resultado {
+      background: var(--bg-card); border-radius: 12px; padding: 1rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,.06); display: none;
+      margin-bottom: 1.5rem;
+    }
+    .resultado.ativo { display: block; }
+    .resultado h2 { font-size: 1rem; color: var(--azul); margin-bottom: .5rem; }
+    body.dark .resultado h2 { color: #93c5fd; }
+    .resultado p.instrucao { font-size: .85rem; color: #64748b; margin-bottom: 1rem; }
+
+    .tabela-wrap { overflow-x: auto; margin-bottom: 1rem; }
+    table { width: 100%; border-collapse: collapse; min-width: 900px; font-size: .85rem; }
+    th, td { padding: .5rem; border: 1px solid var(--borda); text-align: left; }
+    th { background: var(--azul); color: #fff; font-weight: 600; position: sticky; top: 0; }
+    td input, td select {
+      width: 100%; padding: .4rem; border: 1px solid var(--borda);
+      border-radius: 4px; font-size: .85rem; background: var(--bg-card); color: var(--texto);
+    }
+    td input.valor-campo { max-width: 90px; }
+    .linha-remover {
+      background: transparent; border: none; color: var(--vermelho);
+      cursor: pointer; font-size: 1rem;
+    }
+
+    .acoes { display: flex; gap: .6rem; flex-wrap: wrap; justify-content: flex-end; }
+    .btn {
+      padding: .7rem 1.2rem; border-radius: 8px; border: none;
+      font-weight: 600; cursor: pointer; font-size: .9rem;
+      display: inline-flex; align-items: center; gap: .5rem;
+    }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-primario { background: var(--azul); color: #fff; }
+    .btn-sucesso { background: var(--verde); color: #fff; }
+    .btn-secundario { background: var(--borda); color: var(--texto); }
+
+    @media (max-width: 600px) {
+      .topbar h1 { font-size: .9rem; }
+      .dropzone { padding: 1.5rem 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <h1><i class="fas fa-camera"></i> Importar Super BI</h1>
+    <a href="restrito.html"><i class="fas fa-arrow-left"></i> Voltar</a>
+    <button class="btn-dark" id="btn-tema" title="Alternar tema"><i class="fas fa-moon"></i></button>
+  </header>
+
+  <main class="container">
+
+    <div class="aviso">
+      <i class="fas fa-info-circle" style="margin-top:.15rem;"></i>
+      <div>
+        <strong>Como funciona:</strong>
+        Tire um print da tabela do Super BI (só a parte com as turmas e os índices), suba aqui. O sistema lê os valores por OCR e você <strong>confere e ajusta</strong> antes de gravar na planilha.
+        Os valores são <strong>índices</strong> (0 a 1). <strong>Desafio = Quizizz</strong>.
+      </div>
+    </div>
+
+    <div class="dropzone" id="dropzone">
+      <i class="fas fa-cloud-upload-alt"></i>
+      <p>Clique aqui ou arraste o print do Super BI</p>
+      <small>Formatos aceitos: PNG, JPG, JPEG. Prefira prints nítidos e com a tabela inteira visível.</small>
+      <input type="file" id="fileInput" accept="image/*" hidden>
+      <img id="preview" style="display:none;" alt="Pré-visualização do print">
+    </div>
+
+    <div class="progresso" id="progresso">
+      <p id="progresso-texto">Processando...</p>
+      <div class="barra"><div id="progresso-barra"></div></div>
+    </div>
+
+    <div class="status" id="status"></div>
+
+    <div class="resultado" id="resultado">
+      <h2><i class="fas fa-check-circle"></i> Confira os dados lidos</h2>
+      <p class="instrucao">
+        O OCR pode errar. Corrija os campos abaixo se necessário e depois clique em <strong>Gravar na planilha</strong>.
+        A data da semana é preenchida automaticamente (segunda-feira da semana atual).
+      </p>
+
+      <div class="tabela-wrap">
+        <table id="tabela">
+          <thead>
+            <tr>
+              <th>Turma</th>
+              <th>Disciplina</th>
+              <th>Plataforma</th>
+              <th>Índice</th>
+              <th>Professor (opcional)</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tabela-corpo"></tbody>
+        </table>
+      </div>
+
+      <div class="acoes">
+        <button class="btn btn-secundario" id="btnAdicionarLinha">
+          <i class="fas fa-plus"></i> Adicionar linha
+        </button>
+        <button class="btn btn-secundario" id="btnLimpar">
+          <i class="fas fa-trash"></i> Limpar
+        </button>
+        <button class="btn btn-sucesso" id="btnGravar">
+          <i class="fas fa-save"></i> Gravar na planilha
+        </button>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxEMx6NmZvQqPMmmxsrTaV1DrMHa-F16_ARFR1cjm_5v054lUtF80YWtW88g6MsyhajRg/exec';
+
+    // ===== TEMA =====
+    const btnTema = document.getElementById('btn-tema');
+    if (localStorage.getItem('tema') === 'dark') document.body.classList.add('dark');
+    btnTema.addEventListener('click', () => {
+      document.body.classList.toggle('dark');
+      const dark = document.body.classList.contains('dark');
+      localStorage.setItem('tema', dark ? 'dark' : 'light');
+      btnTema.innerHTML = dark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+    });
+
+    // ===== REFERÊNCIAS =====
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('fileInput');
+    const preview = document.getElementById('preview');
+    const progresso = document.getElementById('progresso');
+    const progressoTexto = document.getElementById('progresso-texto');
+    const progressoBarra = document.getElementById('progresso-barra');
+    const status = document.getElementById('status');
+    const resultado = document.getElementById('resultado');
+    const tabelaCorpo = document.getElementById('tabela-corpo');
+
+    let arquivoSelecionado = null;
+
+    // ===== UPLOAD =====
+    dropzone.addEventListener('click', () => fileInput.click());
+    dropzone.addEventListener('dragover', e => {
+      e.preventDefault();
+      dropzone.classList.add('ativo');
+    });
+    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('ativo'));
+    dropzone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropzone.classList.remove('ativo');
+      if (e.dataTransfer.files.length) {
+        fileInput.files = e.dataTransfer.files;
+        carregarArquivo();
+      }
+    });
+    fileInput.addEventListener('change', carregarArquivo);
+
+    function carregarArquivo() {
+      const file = fileInput.files[0];
+      if (!file) return;
+      arquivoSelecionado = file;
+      const reader = new FileReader();
+      reader.onload = e => {
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+        processarImagem();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // ===== OCR =====
+    async function processarImagem() {
+      if (!arquivoSelecionado) return;
+
+      progresso.classList.add('ativo');
+      status.classList.remove('ativo');
+      resultado.classList.remove('ativo');
+      progressoTexto.textContent = 'Iniciando OCR...';
+      progressoBarra.style.width = '0%';
+
+      try {
+        const { data: { text } } = await Tesseract.recognize(arquivoSelecionado, 'por', {
+          logger: m => {
+            if (m.status === 'recognizing text') {
+              const pct = Math.round(m.progress * 100);
+              progressoTexto.textContent = `Lendo o print... ${pct}%`;
+              progressoBarra.style.width = pct + '%';
+            }
+          }
+        });
+
+        progressoTexto.textContent = 'Processando dados...';
+        const linhas = parsearTexto(text);
+
+        progresso.classList.remove('ativo');
+
+        if (linhas.length === 0) {
+          mostrarStatus('erro', 'Não consegui identificar nenhuma linha de dados no print. Tente um print mais nítido, com a tabela inteira visível.');
+          return;
+        }
+
+        renderizarTabela(linhas);
+        resultado.classList.add('ativo');
+        mostrarStatus('info', `Foram identificadas ${linhas.length} linha(s). Confira e edite antes de gravar.`);
+      } catch (e) {
+        progresso.classList.remove('ativo');
+        mostrarStatus('erro', 'Erro no OCR: ' + e.message);
+      }
+    }
+
+    // ===== PARSER =====
+    // Colunas esperadas na ordem em que aparecem no Super BI
+    const COLUNAS_ESPERADAS = [
+      { disciplina: 'Redação',      plataforma: 'Redação' },
+      { disciplina: 'Inglês',       plataforma: 'Inglês Paraná' },
+      { disciplina: 'Desafio',      plataforma: 'Quizizz' },
+      { disciplina: 'Leia',         plataforma: 'Leia' },
+      { disciplina: 'Programação',  plataforma: 'Alura' },
+      { disciplina: 'Matemática',   plataforma: 'Matific' },
+      { disciplina: 'Matemática',   plataforma: 'Khan' }
+    ];
+
+    function parsearTexto(texto) {
+      // Normaliza quebras de linha
+      const linhas = texto
+        .split('\n')
+        .map(l => l.replace(/\s+/g, ' ').trim())
+        .filter(l => l.length > 0);
+
+      const resultado = [];
+
+      for (const linha of linhas) {
+        // Detecta o padrão de turma: "6º Série A Manhã - 2624496"
+        const matchTurma = linha.match(/(\d+[º°]?\s*(?:Série|Ano)\s*[A-Z])\s*(Manhã|Tarde)?/i);
+        if (!matchTurma) continue;
+
+        const turma = matchTurma[1].trim();
+
+        // Extrai todos os números com decimais
+        const numerosStr = linha.match(/\d+[.,]\d+/g) || [];
+        const numeros = numerosStr.map(n => parseFloat(n.replace(',', '.')));
+
+        // Filtra valores que fazem sentido como índice (0 a 1.5)
+        const valoresValidos = numeros.filter(n => !isNaN(n) && n >= 0 && n <= 1.5);
+
+        // Associa cada valor a uma coluna esperada
+        COLUNAS_ESPERADAS.forEach((col, i) => {
+          if (valoresValidos[i] === undefined) return;
+          resultado.push({
+            turma: turma,
+            disciplina: col.disciplina,
+            plataforma: col.plataforma,
+            valor: valoresValidos[i],
+            professor: ''
+          });
+        });
+      }
+
+      return resultado;
+    }
+
+    // ===== RENDERIZAÇÃO DA TABELA =====
+    function renderizarTabela(linhas) {
+      tabelaCorpo.innerHTML = '';
+      linhas.forEach(l => adicionarLinhaTabela(l));
+    }
+
+    function adicionarLinhaTabela(l = {}) {
+      const tr = document.createElement('tr');
+
+      tr.innerHTML = `
+        <td><input type="text" class="campo-turma" value="${escapeHtml(l.turma || '')}"></td>
+        <td><input type="text" class="campo-disciplina" value="${escapeHtml(l.disciplina || '')}"></td>
+        <td><input type="text" class="campo-plataforma" value="${escapeHtml(l.plataforma || '')}"></td>
+        <td><input type="number" step="0.0001" min="0" max="2" class="campo-valor valor-campo" value="${l.valor ?? ''}"></td>
+        <td><input type="text" class="campo-professor" placeholder="email ou nome (opcional)" value="${escapeHtml(l.professor || '')}"></td>
+        <td style="text-align:center;">
+          <button class="linha-remover" title="Remover linha"><i class="fas fa-trash"></i></button>
+        </td>
+      `;
+
+      tr.querySelector('.linha-remover').addEventListener('click', () => tr.remove());
+      tabelaCorpo.appendChild(tr);
+    }
+
+    document.getElementById('btnAdicionarLinha').addEventListener('click', () => adicionarLinhaTabela());
+    document.getElementById('btnLimpar').addEventListener('click', () => {
+      if (confirm('Limpar todas as linhas da tabela?')) {
+        tabelaCorpo.innerHTML = '';
+        resultado.classList.remove('ativo');
+        status.classList.remove('ativo');
+      }
+    });
+
+    // ===== GRAVAR =====
+    document.getElementById('btnGravar').addEventListener('click', async () => {
+      const linhas = [];
+      document.querySelectorAll('#tabela-corpo tr').forEach(tr => {
+        const turma = tr.querySelector('.campo-turma').value.trim();
+        const disciplina = tr.querySelector('.campo-disciplina').value.trim();
+        const plataforma = tr.querySelector('.campo-plataforma').value.trim();
+        const valor = parseFloat(tr.querySelector('.campo-valor').value);
+        const professor = tr.querySelector('.campo-professor').value.trim();
+
+        if (!turma || !plataforma || isNaN(valor)) return;
+        linhas.push({ turma, disciplina, plataforma, valor, professor });
+      });
+
+      if (linhas.length === 0) {
+        mostrarStatus('erro', 'Nenhuma linha válida para gravar.');
+        return;
+      }
+
+      if (!confirm(`Gravar ${linhas.length} lançamento(s) na planilha?\n\nOs valores serão salvos como ÍNDICES (0 a 1).`)) return;
+
+      const btnGravar = document.getElementById('btnGravar');
+      btnGravar.disabled = true;
+      btnGravar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gravando...';
+
+      try {
+        const sessao = JSON.parse(localStorage.getItem('sgi_ccma_session') || '{}');
+        const resp = await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({
+            operacao: 'IMPORTAR_LANCAMENTOS',
+            emailOperador: sessao.email || 'sistema',
+            lancamentos: linhas
+          })
+        });
+        const result = await resp.json();
+
+        if (result.status === 'success') {
+          mostrarStatus('sucesso', `${result.inseridos} lançamento(s) gravado(s) com sucesso!`);
+          tabelaCorpo.innerHTML = '';
+          resultado.classList.remove('ativo');
+        } else {
+          mostrarStatus('erro', 'Erro: ' + (result.message || 'Tente novamente.'));
+        }
+      } catch (e) {
+        mostrarStatus('erro', 'Erro de conexão: ' + e.message);
+      } finally {
+        btnGravar.disabled = false;
+        btnGravar.innerHTML = '<i class="fas fa-save"></i> Gravar na planilha';
+      }
+    });
+
+    // ===== HELPERS =====
+    function mostrarStatus(tipo, msg) {
+      status.className = 'status ativo ' + tipo;
+      status.innerHTML = msg;
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+  </script>
+</body>
+</html>
