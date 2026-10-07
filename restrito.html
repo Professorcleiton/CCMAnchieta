@@ -286,6 +286,10 @@
                         <div class="dash-panel" style="display: flex; flex-direction: column; gap: 15px; max-height: calc(100vh - 220px); overflow-y: auto; padding-right: 8px;">
                             <div class="dash-panel-title"><i class="fa-solid fa-bolt"></i> Ações Rápidas</div>
 
+                            <button id="btn-imprimir-apontamentos" class="btn-salvar" style="background-color: #0891b2; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: none; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(8, 145, 178, 0.2); margin-bottom: 5px;" onclick="abrirModalImpressao()">
+                                    <i class="fa-solid fa-print" style="font-size: 18px;"></i> Imprimir Apontamentos
+                            </button>
+
                             <button id="btn-central-alertas" class="btn-salvar" style="background-color: #dc2626; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: none; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(220, 38, 38, 0.2); margin-bottom: 5px;" onclick="abrirCentralAlertas()">
                                 <i class="fa-solid fa-triangle-exclamation" style="font-size: 18px;"></i> Central de Alertas
                             </button>
@@ -1312,7 +1316,7 @@ function aplicarControleAcesso() {
         if (btn) btn.style.display = nivel >= 4 ? 'flex' : 'none';
     });
     
-    const botoesNivel3 = ['btn-patrimonio', 'btn-comunicado-seed', 'btn-central-alertas', 'btn-aba-secretaria', 'btn-aniversarios'];
+    const botoesNivel3 = ['btn-patrimonio', 'btn-comunicado-seed', 'btn-central-alertas', 'btn-aba-secretaria', 'btn-aniversarios', 'btn-imprimir-apontamentos'];
     botoesNivel3.forEach(id => {
         const btn = document.getElementById(id);
         if (btn) {
@@ -1452,6 +1456,76 @@ function renderizarHorariosNoModal(horarios, container) {
     
     container.innerHTML = html;
 }
+
+        <!-- MODAL DE IMPRESSÃO DE APONTAMENTOS -->
+<div class="modal-overlay" id="modal-imprimir-apontamentos" onclick="fecharModalImpressao(event)">
+    <div class="modal-content" style="max-width: 700px;">
+        <div class="modal-header" style="background-color: #0891b2;">
+            <h3><i class="fa-solid fa-print"></i> Imprimir Apontamentos</h3>
+            <button onclick="document.getElementById('modal-imprimir-apontamentos').style.display='none'" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;">&times;</button>
+        </div>
+        <div class="modal-body" style="padding: 25px;">
+            
+            <!-- Período -->
+            <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 150px;">
+                    <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 5px;">Data Início:</label>
+                    <input type="date" id="impr-data-inicio" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                </div>
+                <div style="flex: 1; min-width: 150px;">
+                    <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 5px;">Data Fim:</label>
+                    <input type="date" id="impr-data-fim" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                </div>
+            </div>
+            
+            <!-- Filtro de Turma -->
+            <div style="margin-bottom: 15px;">
+                <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 5px;">Turma:</label>
+                <select id="impr-turma" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                    <option value="">Todas as turmas</option>
+                </select>
+            </div>
+            
+            <!-- Filtro de Aluno -->
+            <div style="margin-bottom: 15px;">
+                <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 5px;">Aluno:</label>
+                <select id="impr-aluno" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;" onchange="atualizarAlunosFiltro()">
+                    <option value="">Todos os alunos</option>
+                </select>
+            </div>
+            
+            <!-- Filtro de Setor -->
+            <div style="margin-bottom: 15px;">
+                <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 5px;">Setor:</label>
+                <select id="impr-setor" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                    <option value="">Todos os setores</option>
+                    <option value="meivs">MEIV'S</option>
+                    <option value="pedagogico">Pedagógico</option>
+                    <option value="adm">ADM</option>
+                    <option value="professores">Professores</option>
+                </select>
+            </div>
+            
+            <!-- Filtro de Professor -->
+            <div style="margin-bottom: 20px;">
+                <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 5px;">Professor/Funcionário:</label>
+                <select id="impr-professor" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                    <option value="">Todos os funcionários</option>
+                </select>
+            </div>
+            
+            <!-- Botões -->
+            <div style="display: flex; gap: 10px;">
+                <button onclick="gerarPDFApontamentos()" id="btn-gerar-pdf-apontamentos" style="background: #0891b2; color: white; border: none; padding: 14px; border-radius: 6px; font-weight: bold; cursor: pointer; flex: 1; font-size: 15px;">
+                    <i class="fa-solid fa-file-pdf"></i> Gerar PDF
+                </button>
+                <button onclick="document.getElementById('modal-imprimir-apontamentos').style.display='none'" style="background: #e2e8f0; color: #475569; border: none; padding: 14px 24px; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
 // AGENDA DO LABORATÓRIO
 let turnoLabModal = 'Manhã';
@@ -3137,6 +3211,235 @@ function fecharModalAniversarios(e) {
     }
 }
 
+// =============================================
+// 🆕 IMPRESSÃO DE APONTAMENTOS
+// =============================================
+function abrirModalImpressao() {
+    if (!usuarioLogado || parseInt(usuarioLogado.nivel) < 3) {
+        mostrarToast('🔒 Acesso restrito ao nível 3 ou superior.', 'erro');
+        return;
+    }
+    
+    document.getElementById('modal-imprimir-apontamentos').style.display = 'flex';
+    
+    // Preenche data padrão (últimos 30 dias)
+    const hoje = new Date();
+    const ha30dias = new Date();
+    ha30dias.setDate(hoje.getDate() - 30);
+    
+    document.getElementById('impr-data-fim').value = hoje.toISOString().split('T')[0];
+    document.getElementById('impr-data-inicio').value = ha30dias.toISOString().split('T')[0];
+    
+    // Popula turmas
+    const selectTurma = document.getElementById('impr-turma');
+    selectTurma.innerHTML = '<option value="">Todas as turmas</option>';
+    Object.keys(cacheAlunosPorTurma).sort().forEach(t => {
+        selectTurma.innerHTML += '<option value="' + t + '">' + t + '</option>';
+    });
+    
+    // Popula professor
+    const selectProf = document.getElementById('impr-professor');
+    const professores = new Set();
+    todosOsRegistros.forEach(r => {
+        if (r.funcionario) professores.add(r.funcionario);
+    });
+    selectProf.innerHTML = '<option value="">Todos os funcionários</option>';
+    [...professores].sort().forEach(p => {
+        selectProf.innerHTML += '<option value="' + p + '">' + p + '</option>';
+    });
+    
+    // Limpa aluno
+    document.getElementById('impr-aluno').innerHTML = '<option value="">Todos os alunos</option>';
+    
+    // Eventos
+    document.getElementById('impr-turma').onchange = atualizarAlunosFiltro;
+}
+
+function atualizarAlunosFiltro() {
+    const turma = document.getElementById('impr-turma').value;
+    const selectAluno = document.getElementById('impr-aluno');
+    
+    selectAluno.innerHTML = '<option value="">Todos os alunos</option>';
+    
+    if (turma && cacheAlunosPorTurma[turma]) {
+        cacheAlunosPorTurma[turma].sort().forEach(a => {
+            selectAluno.innerHTML += '<option value="' + a + '">' + a + '</option>';
+        });
+    }
+}
+
+function fecharModalImpressao(e) {
+    if (e.target.id === 'modal-imprimir-apontamentos') {
+        document.getElementById('modal-imprimir-apontamentos').style.display = 'none';
+    }
+}
+
+function parseDataBRImpressao(dataStr) {
+    if (!dataStr) return null;
+    const partes = dataStr.toString().trim().split(' ')[0].split('/');
+    if (partes.length === 3) {
+        return new Date(parseInt(partes[2]), parseInt(partes[1]) - 1, parseInt(partes[0]));
+    }
+    return null;
+}
+
+async function gerarPDFApontamentos() {
+    const btn = document.getElementById('btn-gerar-pdf-apontamentos');
+    const dataInicio = document.getElementById('impr-data-inicio').value;
+    const dataFim = document.getElementById('impr-data-fim').value;
+    const turma = document.getElementById('impr-turma').value;
+    const aluno = document.getElementById('impr-aluno').value;
+    const setor = document.getElementById('impr-setor').value;
+    const professor = document.getElementById('impr-professor').value;
+    
+    if (!dataInicio || !dataFim) {
+        mostrarToast('Preencha o período.', 'aviso');
+        return;
+    }
+    
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Gerando...';
+    
+    try {
+        // Converte datas
+        const dtInicio = new Date(dataInicio + 'T00:00:00');
+        const dtFim = new Date(dataFim + 'T23:59:59');
+        
+        // Filtra registros
+        let registros = todosOsRegistros.filter(r => {
+            if (r.tipo !== 'apontamento') return false;
+            
+            const dtReg = parseDataBRImpressao(r.dataAtual);
+            if (!dtReg || dtReg < dtInicio || dtReg > dtFim) return false;
+            
+            if (turma && encontrarTurmaDoAluno(r.aluno) !== turma) return false;
+            if (aluno && r.aluno !== aluno) return false;
+            if (setor) {
+                const setorReg = r.setor === 'professores' ? 'professores' : r.setor;
+                if (setorReg !== setor) return false;
+            }
+            if (professor && r.funcionario !== professor) return false;
+            
+            return true;
+        });
+        
+        // Ordena por data
+        registros.sort((a, b) => {
+            const dA = parseDataBRImpressao(a.dataAtual);
+            const dB = parseDataBRImpressao(b.dataAtual);
+            return dB - dA;
+        });
+        
+        if (registros.length === 0) {
+            mostrarToast('Nenhum apontamento encontrado no período.', 'aviso');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-file-pdf"></i> Gerar PDF';
+            return;
+        }
+        
+        // Monta o HTML do PDF
+        const dataBRIni = dataInicio.split('-').reverse().join('/');
+        const dataBRFim = dataFim.split('-').reverse().join('/');
+        
+        let html = '<div style="padding:25px;font-family:Arial,sans-serif;color:#000;background:#fff;">';
+        
+        // Cabeçalho
+        html += '<div style="border-bottom:3px double #005088;padding-bottom:12px;margin-bottom:20px;">';
+        html += '<h4 style="margin:0;font-size:13px;color:#475569;">SECRETARIA DE ESTADO DA EDUCAÇÃO - SEED</h4>';
+        html += '<h4 style="margin:2px 0 0;font-size:12px;color:#64748b;">NÚCLEO REGIONAL DE EDUCAÇÃO DE UMUARAMA</h4>';
+        html += '<h2 style="margin:5px 0 0;color:#005088;font-size:18px;">COLÉGIO CÍVICO-MILITAR ANCHIETA</h2>';
+        html += '</div>';
+        
+        html += '<h3 style="text-align:center;margin-bottom:5px;">Relatório de Apontamentos</h3>';
+        html += '<p style="text-align:center;font-size:12px;color:#64748b;margin:0 0 20px;">';
+        html += 'Período: <strong>' + dataBRIni + '</strong> a <strong>' + dataBRFim + '</strong>';
+        html += ' | Total: <strong>' + registros.length + '</strong> apontamento(s)';
+        html += '</p>';
+        
+        // Filtros aplicados
+        const filtrosAplicados = [];
+        if (turma) filtrosAplicados.push('Turma: ' + turma);
+        if (aluno) filtrosAplicados.push('Aluno: ' + aluno);
+        if (setor) filtrosAplicados.push('Setor: ' + setor.toUpperCase());
+        if (professor) filtrosAplicados.push('Funcionário: ' + professor);
+        
+        if (filtrosAplicados.length > 0) {
+            html += '<p style="font-size:11px;color:#64748b;background:#f1f5f9;padding:8px;border-radius:4px;margin-bottom:15px;">';
+            html += '<strong>Filtros:</strong> ' + filtrosAplicados.join(' | ');
+            html += '</p>';
+        }
+        
+        // Registros
+        let alunoAtual = '';
+        
+        registros.forEach(r => {
+            // Cabeçalho do aluno quando muda
+            if (r.aluno !== alunoAtual) {
+                alunoAtual = r.aluno;
+                const turmaAluno = encontrarTurmaDoAluno(r.aluno);
+                html += '<div style="background:#005088;color:white;padding:8px 12px;border-radius:4px;margin-top:15px;margin-bottom:10px;font-size:13px;">';
+                html += '<strong>' + alunoAtual + '</strong>';
+                if (turmaAluno && turmaAluno !== 'Sem Turma') {
+                    html += ' <span style="font-size:11px;opacity:0.9;">(' + turmaAluno + ')</span>';
+                }
+                html += '</div>';
+            }
+            
+            const setorNome = r.setor === 'meivs' ? 'MEIV\'S' : 
+                              r.setor === 'pedagogico' ? 'Pedagógico' : 
+                              r.setor === 'adm' ? 'ADM' : 'Professores';
+            
+            const corSetor = r.setor === 'meivs' ? '#0284c7' : 
+                             r.setor === 'pedagogico' ? '#0d9488' : 
+                             r.setor === 'adm' ? '#4f46e5' : '#b91c1c';
+            
+            html += '<div style="margin:8px 0;padding:10px 12px;background:#fff;border-left:4px solid ' + corSetor + ';border-bottom:1px solid #e2e8f0;page-break-inside:avoid;">';
+            html += '<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:5px;">';
+            html += '<span style="color:' + corSetor + ';font-weight:bold;text-transform:uppercase;">' + setorNome + '</span>';
+            html += '<span style="color:#64748b;">' + formatarDataEHora(r.dataAtual) + '</span>';
+            html += '</div>';
+            html += '<div style="font-size:12px;line-height:1.4;">' + r.texto + '</div>';
+            html += '<div style="font-size:10px;color:#64748b;text-align:right;margin-top:5px;font-style:italic;">';
+            html += 'Registrado por: ' + (r.funcionario || 'SIGA');
+            html += '</div>';
+            html += '</div>';
+        });
+        
+        // Rodapé
+        html += '<div style="margin-top:30px;padding-top:10px;border-top:1px dashed #cbd5e1;text-align:center;font-size:10px;color:#94a3b8;">';
+        html += 'Documento gerado pelo SIGA em ' + new Date().toLocaleDateString('pt-BR') + ' às ' + new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+        html += '</div>';
+        
+        html += '</div>';
+        
+        // Gera PDF
+        const elemento = document.createElement('div');
+        elemento.innerHTML = html;
+        
+        const opcoes = {
+            margin: 12,
+            filename: 'Apontamentos_' + dataBRIni.replace(/\//g, '-') + '_a_' + dataBRFim.replace(/\//g, '-') + '.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        
+        await html2pdf().set(opcoes).from(elemento).save();
+        
+        mostrarToast('✅ PDF gerado com sucesso!', 'sucesso');
+        
+        // Fecha o modal
+        document.getElementById('modal-imprimir-apontamentos').style.display = 'none';
+        
+    } catch (e) {
+        console.error('Erro ao gerar PDF:', e);
+        mostrarToast('❌ Erro ao gerar PDF.', 'erro');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-file-pdf"></i> Gerar PDF';
+    }
+}
+        
 </script>
   
 </body>
