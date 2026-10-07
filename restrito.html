@@ -6,6 +6,7 @@
     <title>SIGA - Central Pedagógica CCM Anchieta</title>
     <meta name="theme-color" content="#005088">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="SIGA Anchieta">
     <link rel="apple-touch-icon" href="img/SIG.png">
@@ -92,7 +93,6 @@
         <i class="fa-solid fa-arrow-left"></i> Voltar
     </button>
 
-    <!-- ✅ INDICADOR DE STATUS DE CONEXÃO (movido para cá) -->
     <div id="status-conexao" style="display: none; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; background: white; box-shadow: 0 2px 6px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; align-items: center; gap: 6px;">
         <i class="fa-solid fa-circle" id="status-icone" style="color: #22c55e; font-size: 8px;"></i>
         <span id="status-texto" style="color: #334155;">Online</span>
@@ -106,18 +106,13 @@
                     </div>
                 </header>
 
-                <!-- Banner de Aniversariantes -->
                 <div id="banner-aniversario" style="display:none; background: linear-gradient(135deg, #fef3c7, #fde68a); padding: 10px 20px; text-align: center; font-size: 14px; font-weight: 600; color: #92400e; border-bottom: 3px solid #f59e0b; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap;">
                     <span id="texto-banner-aniversario">🎂 Hoje é aniversário de: </span>
                     <button onclick="fecharBannerAniversario()" style="background:#92400e;color:white;border:none;padding:4px 12px;border-radius:15px;cursor:pointer;font-size:12px;font-weight:bold;">OK 🎉</button>
                 </div>
                 
-                <!-- ========================================== -->
-                <!-- CAIXA PRINCIPAL DOS APONTAMENTOS -->
-                <!-- ========================================== -->
                 <div id="aba-apontamentos" style="display: block; width: 100%;">
                     
-                    <!-- Barra de Resumo -->
                     <div class="summary-dashboard-bar" id="student-mini-dash" style="display: none;">
                         <div class="metric-mini-card"><i class="fa-solid fa-chart-line"></i> Apontamentos: <span class="count-number" id="dash-total-count">0</span></div>
                         <div class="mini-chart-bar-container">
@@ -131,7 +126,6 @@
                         </div>
                     </div>
 
-                    <!-- Cabeçalho para Impressão PDF -->
                     <div id="pdf-header" style="display:none; text-align:center; margin-bottom: 30px; color: #000; padding: 20px; font-family: Arial, sans-serif;">
                         <h2 style="margin: 0; font-size: 20px;">Colégio Cívico Militar Anchieta</h2>
                         <p style="margin: 5px 0; font-size: 14px;">Cruzeiro do Oeste - PR</p>
@@ -140,7 +134,6 @@
                         <h3 style="margin-top: 15px; font-size: 18px;">Relatório de Apontamentos</h3>
                     </div>
 
-                    <!-- Filtro de Período -->
                     <div id="filtro-periodo" style="margin-bottom: 10px; background: white; padding: 12px 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
                         <span style="font-weight: bold; color: #0f172a; font-size: 13px;">
                             <i class="fa-solid fa-calendar"></i> Período:
@@ -162,7 +155,6 @@
                         </button>
                     </div>
                     
-                    <!-- Seletor Único -->
                     <div class="aluno-selector-wrapper" style="margin-bottom: 15px; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
                         <div class="aluno-selector" id="aluno-selector-container" style="display: flex; justify-content: space-between; align-items: center; gap: 15px; flex-wrap: wrap; width: 100%;">
                             
@@ -220,7 +212,6 @@
                         </div>
                     </div>
 
-                    <!-- Card de Aniversariantes -->
                     <div id="card-aniversariantes" style="display:none; background: linear-gradient(135deg, #fef3c7, #fde68a); border-radius: 12px; padding: 20px; margin-bottom: 15px; border-left: 5px solid #f59e0b; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.2);">
                         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
                             <h3 style="color:#92400e;margin:0;font-size:16px;">
@@ -230,7 +221,6 @@
                         <div id="lista-aniversariantes" style="display:flex;flex-direction:column;gap:15px;"></div>
                     </div>
 
-                    <!-- Cards de Métricas -->
                     <div class="dash-container" id="welcome-dashboard-mural" style="overflow-y: auto;">
                         <div class="dash-cards-grid">
                             <div class="dash-card total" style="cursor: pointer;" onclick="abrirModalRelatorio('geral')">
@@ -271,7 +261,6 @@
                         </div>
                     </div>
 
-                    <!-- Painéis de Distribuição e Ações -->
                     <div class="dash-lower-grid">
                         <div class="dash-panel" id="painel-ranking">
                             <div class="dash-panel-title" id="titulo-ranking">
@@ -350,7 +339,6 @@
                         </div>
                     </div>
 
-                   <!-- Abas mobile - OCULTAS por padrão -->
 <div id="mobile-tabs-container" style="display: none;">
     <button class="tab-button active" onclick="alternarAbaMobile('meivs', this)">MEIV'S</button>
     <button class="tab-button" onclick="alternarAbaMobile('pedagogico', this)">PEDAG.</button>
@@ -515,7 +503,6 @@
             </main>
         </div>
 
-    <!-- Footer simplificado -->
 <footer style="background: #005088; color: #cbd5e1; padding: 12px 20px; text-align: center; font-size: 12px; border-top: 3px solid #eab308;">
     &copy; 2026 – CCM Anchieta – Todos os direitos reservados
 </footer>
@@ -523,7 +510,6 @@
 
     <!-- ========================================== -->
     <!-- TODOS OS MODAIS FORA DO #app-interface -->
-    <!-- Isso é essencial para o position:fixed funcionar -->
     <!-- ========================================== -->
     
     <!-- MODAL DE GESTÃO DE HORÁRIOS -->
@@ -930,7 +916,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE NOVO FATO (sub-modal) -->
+    <!-- MODAL DE NOVO FATO -->
     <div class="modal-overlay" id="modal-novo-fato-seed" onclick="fecharModalNovoFatoEvent(event)" style="z-index:10001;">
         <div class="modal-content" style="max-width:500px;">
             <div class="modal-header" style="background-color:#f59e0b;">
@@ -1005,7 +991,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE DETALHES DO ALUNO (CENTRAL DE ALERTAS) -->
+    <!-- MODAL DE DETALHES DO ALUNO -->
     <div class="modal-overlay" id="modal-detalhes-aluno-alerta" onclick="fecharModalDetalhesAlerta(event)">
         <div class="modal-content" style="max-width: 800px; height: 85vh; display: flex; flex-direction: column;">
             <div class="modal-header" style="background-color: #991b1b;">
@@ -1021,10 +1007,80 @@
         </div>
     </div>
 
+    <!-- ============================================= -->
+    <!-- ✅ MODAL DE IMPRESSÃO DE APONTAMENTOS (AGORA FORA DO SCRIPT!) -->
+    <!-- ============================================= -->
+    <div class="modal-overlay" id="modal-imprimir-apontamentos" onclick="fecharModalImpressao(event)">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header" style="background-color: #0891b2;">
+                <h3><i class="fa-solid fa-print"></i> Imprimir Apontamentos</h3>
+                <button onclick="document.getElementById('modal-imprimir-apontamentos').style.display='none'" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 25px;">
+                
+                <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 150px;">
+                        <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 5px;">Data Início:</label>
+                        <input type="date" id="impr-data-inicio" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                    </div>
+                    <div style="flex: 1; min-width: 150px;">
+                        <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 5px;">Data Fim:</label>
+                        <input type="date" id="impr-data-fim" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 5px;">Turma:</label>
+                    <select id="impr-turma" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                        <option value="">Todas as turmas</option>
+                    </select>
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 5px;">Aluno:</label>
+                    <select id="impr-aluno" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;" onchange="atualizarAlunosFiltro()">
+                        <option value="">Todos os alunos</option>
+                    </select>
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 5px;">Setor:</label>
+                    <select id="impr-setor" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                        <option value="">Todos os setores</option>
+                        <option value="meivs">MEIV'S</option>
+                        <option value="pedagogico">Pedagógico</option>
+                        <option value="adm">ADM</option>
+                        <option value="professores">Professores</option>
+                    </select>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 5px;">Professor/Funcionário:</label>
+                    <select id="impr-professor" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                        <option value="">Todos os funcionários</option>
+                    </select>
+                </div>
+                
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="gerarPDFApontamentos()" id="btn-gerar-pdf-apontamentos" style="background: #0891b2; color: white; border: none; padding: 14px; border-radius: 6px; font-weight: bold; cursor: pointer; flex: 1; font-size: 15px;">
+                        <i class="fa-solid fa-file-pdf"></i> Gerar PDF
+                    </button>
+                    <button onclick="document.getElementById('modal-imprimir-apontamentos').style.display='none'" style="background: #e2e8f0; color: #475569; border: none; padding: 14px 24px; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================= -->
+    <!-- SCRIPTS EXTERNOS -->
+    <!-- ============================================= -->
     <script src="db.js"></script>
     <script src="script.js"></script>
-    <script>
 
+<!-- PARTE 2 CONTINUA ABAIXO -->
+        <script>
 // ========== COMUNICADO SEED (MODAL INTEGRADO) ==========
 let comunicadosModal = [];
 let listaAlunosCache = [];
@@ -1044,9 +1100,12 @@ function abrirModalComunicadoSEED() {
 
 function verificarBotaoComunicado() {
     const btn = document.getElementById('btn-comunicado-seed');
-    if (!btn || !usuarioLogado) return;
-    if (usuarioLogado.setor === 'meivs' || (usuarioLogado.nivel && usuarioLogado.nivel >= 4)) {
+    if (!btn || typeof usuarioLogado === 'undefined' || !usuarioLogado) return;
+    const nivel = parseInt(usuarioLogado.nivel) || 0;
+    if (usuarioLogado.setor === 'meivs' || nivel >= 4) {
         btn.style.display = 'flex';
+    } else {
+        btn.style.display = 'none';
     }
 }
 
@@ -1265,7 +1324,6 @@ function checarSeUsuarioExisteParaEditar() {
         .catch(e => console.error('Erro ao buscar usuários:', e));
 }
 
-// GARANTIR PREFERÊNCIAS DO PROFESSOR
 document.addEventListener('DOMContentLoaded', function() {
     const selectSetor = document.getElementById('admin-user-setor');
     if (selectSetor) {
@@ -1301,13 +1359,13 @@ function togglePreferenciasProfessor() {
 
 // CONTROLE DE ACESSO POR NÍVEL
 function aplicarControleAcesso() {
-    if (!usuarioLogado || !usuarioLogado.nivel) {
+    if (typeof usuarioLogado === 'undefined' || !usuarioLogado || !usuarioLogado.nivel) {
         console.warn('⚠️ aplicarControleAcesso: usuarioLogado ainda não está pronto');
         setTimeout(aplicarControleAcesso, 500);
         return;
     }
     
-    const nivel = parseInt(usuarioLogado.nivel);
+    const nivel = parseInt(usuarioLogado.nivel) || 0;
     console.log('🔐 Aplicando controle de acesso - Nível:', nivel);
     
     const botoesNivel4 = ['btn-progressao', 'btn-gestao-horarios', 'btn-abrir-admin'];
@@ -1321,7 +1379,6 @@ function aplicarControleAcesso() {
         const btn = document.getElementById(id);
         if (btn) {
             btn.style.display = nivel >= 3 ? 'flex' : 'none';
-            console.log('  →', id, '=', nivel >= 3 ? 'VISÍVEL' : 'oculto');
         }
     });
     
@@ -1456,76 +1513,6 @@ function renderizarHorariosNoModal(horarios, container) {
     
     container.innerHTML = html;
 }
-
-        <!-- MODAL DE IMPRESSÃO DE APONTAMENTOS -->
-<div class="modal-overlay" id="modal-imprimir-apontamentos" onclick="fecharModalImpressao(event)">
-    <div class="modal-content" style="max-width: 700px;">
-        <div class="modal-header" style="background-color: #0891b2;">
-            <h3><i class="fa-solid fa-print"></i> Imprimir Apontamentos</h3>
-            <button onclick="document.getElementById('modal-imprimir-apontamentos').style.display='none'" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;">&times;</button>
-        </div>
-        <div class="modal-body" style="padding: 25px;">
-            
-            <!-- Período -->
-            <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
-                <div style="flex: 1; min-width: 150px;">
-                    <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 5px;">Data Início:</label>
-                    <input type="date" id="impr-data-inicio" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
-                </div>
-                <div style="flex: 1; min-width: 150px;">
-                    <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 5px;">Data Fim:</label>
-                    <input type="date" id="impr-data-fim" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
-                </div>
-            </div>
-            
-            <!-- Filtro de Turma -->
-            <div style="margin-bottom: 15px;">
-                <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 5px;">Turma:</label>
-                <select id="impr-turma" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
-                    <option value="">Todas as turmas</option>
-                </select>
-            </div>
-            
-            <!-- Filtro de Aluno -->
-            <div style="margin-bottom: 15px;">
-                <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 5px;">Aluno:</label>
-                <select id="impr-aluno" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;" onchange="atualizarAlunosFiltro()">
-                    <option value="">Todos os alunos</option>
-                </select>
-            </div>
-            
-            <!-- Filtro de Setor -->
-            <div style="margin-bottom: 15px;">
-                <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 5px;">Setor:</label>
-                <select id="impr-setor" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
-                    <option value="">Todos os setores</option>
-                    <option value="meivs">MEIV'S</option>
-                    <option value="pedagogico">Pedagógico</option>
-                    <option value="adm">ADM</option>
-                    <option value="professores">Professores</option>
-                </select>
-            </div>
-            
-            <!-- Filtro de Professor -->
-            <div style="margin-bottom: 20px;">
-                <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 5px;">Professor/Funcionário:</label>
-                <select id="impr-professor" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
-                    <option value="">Todos os funcionários</option>
-                </select>
-            </div>
-            
-            <!-- Botões -->
-            <div style="display: flex; gap: 10px;">
-                <button onclick="gerarPDFApontamentos()" id="btn-gerar-pdf-apontamentos" style="background: #0891b2; color: white; border: none; padding: 14px; border-radius: 6px; font-weight: bold; cursor: pointer; flex: 1; font-size: 15px;">
-                    <i class="fa-solid fa-file-pdf"></i> Gerar PDF
-                </button>
-                <button onclick="document.getElementById('modal-imprimir-apontamentos').style.display='none'" style="background: #e2e8f0; color: #475569; border: none; padding: 14px 24px; border-radius: 6px; cursor: pointer; font-weight: bold;">
-                    Cancelar
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
 
 // AGENDA DO LABORATÓRIO
 let turnoLabModal = 'Manhã';
@@ -2974,8 +2961,6 @@ function abrirModalAniversarios(event) {
         event.preventDefault();
     }
     
-    console.log('🎂 abrirModalAniversarios chamada');
-    
     if (!usuarioLogado || parseInt(usuarioLogado.nivel) < 3) {
         mostrarToast('🔒 Acesso restrito ao nível 3 ou superior.', 'erro');
         return false;
@@ -2984,10 +2969,7 @@ function abrirModalAniversarios(event) {
     const modal = document.getElementById('modal-aniversarios');
     const conteudo = document.getElementById('conteudo-aniversarios');
     
-    if (!modal || !conteudo) {
-        console.error('❌ Modal não encontrado');
-        return false;
-    }
+    if (!modal || !conteudo) return false;
     
     modal.onclick = null;
     modal.style.display = 'flex';
@@ -3009,13 +2991,11 @@ async function carregarAniversariosPorMes() {
     const container = document.getElementById('conteudo-aniversarios');
     
     try {
-        console.log('📥 Buscando usuários...');
         const respUsers = await fetch(APPS_SCRIPT_V2 + '?aba=usuarios');
         
         if (!respUsers.ok) throw new Error('Falha ao buscar usuários: ' + respUsers.status);
         
         const usuarios = await respUsers.json();
-        console.log('📊 Usuários recebidos:', usuarios.length);
         
         if (!Array.isArray(usuarios) || usuarios.length === 0) {
             container.innerHTML = '<p style="text-align:center;color:#64748b;padding:40px;">Nenhum usuário encontrado.</p>';
@@ -3053,8 +3033,6 @@ async function carregarAniversariosPorMes() {
                 semData++;
             }
         });
-        
-        console.log('✅ Com data:', comData, '| Sem data:', semData);
         
         let html = '';
         
@@ -3119,25 +3097,21 @@ function extrairDiaMes(dataOriginal) {
     
     const str = dataOriginal.toString().trim();
     
-    // ISO: "2026-08-15" ou "2026-08-15T00:00:00"
     if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
         const partes = str.split('T')[0].split('-');
         return { dia: parseInt(partes[2]), mes: parseInt(partes[1]) };
     }
     
-    // BR completo: "15/08/1990"
     if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(str)) {
         const partes = str.split('/');
         return { dia: parseInt(partes[0]), mes: parseInt(partes[1]) };
     }
     
-    // BR curto: "15/08"
     if (/^\d{1,2}\/\d{1,2}$/.test(str)) {
         const partes = str.split('/');
         return { dia: parseInt(partes[0]), mes: parseInt(partes[1]) };
     }
     
-    // Date do Google
     if (str.includes('GMT') || str.includes('00:00:00')) {
         const d = new Date(str);
         if (!isNaN(d.getTime())) {
@@ -3222,7 +3196,6 @@ function abrirModalImpressao() {
     
     document.getElementById('modal-imprimir-apontamentos').style.display = 'flex';
     
-    // Preenche data padrão (últimos 30 dias)
     const hoje = new Date();
     const ha30dias = new Date();
     ha30dias.setDate(hoje.getDate() - 30);
@@ -3230,14 +3203,12 @@ function abrirModalImpressao() {
     document.getElementById('impr-data-fim').value = hoje.toISOString().split('T')[0];
     document.getElementById('impr-data-inicio').value = ha30dias.toISOString().split('T')[0];
     
-    // Popula turmas
     const selectTurma = document.getElementById('impr-turma');
     selectTurma.innerHTML = '<option value="">Todas as turmas</option>';
     Object.keys(cacheAlunosPorTurma).sort().forEach(t => {
         selectTurma.innerHTML += '<option value="' + t + '">' + t + '</option>';
     });
     
-    // Popula professor
     const selectProf = document.getElementById('impr-professor');
     const professores = new Set();
     todosOsRegistros.forEach(r => {
@@ -3248,10 +3219,8 @@ function abrirModalImpressao() {
         selectProf.innerHTML += '<option value="' + p + '">' + p + '</option>';
     });
     
-    // Limpa aluno
     document.getElementById('impr-aluno').innerHTML = '<option value="">Todos os alunos</option>';
     
-    // Eventos
     document.getElementById('impr-turma').onchange = atualizarAlunosFiltro;
 }
 
@@ -3301,11 +3270,9 @@ async function gerarPDFApontamentos() {
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Gerando...';
     
     try {
-        // Converte datas
         const dtInicio = new Date(dataInicio + 'T00:00:00');
         const dtFim = new Date(dataFim + 'T23:59:59');
         
-        // Filtra registros
         let registros = todosOsRegistros.filter(r => {
             if (r.tipo !== 'apontamento') return false;
             
@@ -3323,7 +3290,6 @@ async function gerarPDFApontamentos() {
             return true;
         });
         
-        // Ordena por data
         registros.sort((a, b) => {
             const dA = parseDataBRImpressao(a.dataAtual);
             const dB = parseDataBRImpressao(b.dataAtual);
@@ -3337,13 +3303,11 @@ async function gerarPDFApontamentos() {
             return;
         }
         
-        // Monta o HTML do PDF
         const dataBRIni = dataInicio.split('-').reverse().join('/');
         const dataBRFim = dataFim.split('-').reverse().join('/');
         
         let html = '<div style="padding:25px;font-family:Arial,sans-serif;color:#000;background:#fff;">';
         
-        // Cabeçalho
         html += '<div style="border-bottom:3px double #005088;padding-bottom:12px;margin-bottom:20px;">';
         html += '<h4 style="margin:0;font-size:13px;color:#475569;">SECRETARIA DE ESTADO DA EDUCAÇÃO - SEED</h4>';
         html += '<h4 style="margin:2px 0 0;font-size:12px;color:#64748b;">NÚCLEO REGIONAL DE EDUCAÇÃO DE UMUARAMA</h4>';
@@ -3356,7 +3320,6 @@ async function gerarPDFApontamentos() {
         html += ' | Total: <strong>' + registros.length + '</strong> apontamento(s)';
         html += '</p>';
         
-        // Filtros aplicados
         const filtrosAplicados = [];
         if (turma) filtrosAplicados.push('Turma: ' + turma);
         if (aluno) filtrosAplicados.push('Aluno: ' + aluno);
@@ -3369,11 +3332,9 @@ async function gerarPDFApontamentos() {
             html += '</p>';
         }
         
-        // Registros
         let alunoAtual = '';
         
         registros.forEach(r => {
-            // Cabeçalho do aluno quando muda
             if (r.aluno !== alunoAtual) {
                 alunoAtual = r.aluno;
                 const turmaAluno = encontrarTurmaDoAluno(r.aluno);
@@ -3405,14 +3366,12 @@ async function gerarPDFApontamentos() {
             html += '</div>';
         });
         
-        // Rodapé
         html += '<div style="margin-top:30px;padding-top:10px;border-top:1px dashed #cbd5e1;text-align:center;font-size:10px;color:#94a3b8;">';
         html += 'Documento gerado pelo SIGA em ' + new Date().toLocaleDateString('pt-BR') + ' às ' + new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
         html += '</div>';
         
         html += '</div>';
         
-        // Gera PDF
         const elemento = document.createElement('div');
         elemento.innerHTML = html;
         
@@ -3428,7 +3387,6 @@ async function gerarPDFApontamentos() {
         
         mostrarToast('✅ PDF gerado com sucesso!', 'sucesso');
         
-        // Fecha o modal
         document.getElementById('modal-imprimir-apontamentos').style.display = 'none';
         
     } catch (e) {
@@ -3439,8 +3397,7 @@ async function gerarPDFApontamentos() {
         btn.innerHTML = '<i class="fa-solid fa-file-pdf"></i> Gerar PDF';
     }
 }
-        
-</script>
+    </script>
   
 </body>
 </html>
