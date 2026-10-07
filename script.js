@@ -668,6 +668,11 @@ function filtrarRegistrosPorAluno() {
     let cm = 0, cp = 0, ca = 0, cf = 0;
     let docs = 0, ocorr = 0, atas = 0;
 
+    // 🆕 Nível do usuário para controle de acesso ao conteúdo
+    const nivelUser = (typeof usuarioLogado !== 'undefined' && usuarioLogado) ? parseInt(usuarioLogado.nivel) : 0;
+    const nomeUser = (typeof usuarioLogado !== 'undefined' && usuarioLogado) ? usuarioLogado.nome : '';
+    const nomeUserNorm = nomeUser.trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
     // 5. Filtro e renderização dos cards
     if (typeof todosOsRegistros !== 'undefined' && Array.isArray(todosOsRegistros)) {
         todosOsRegistros.forEach(r => {
@@ -700,13 +705,21 @@ function filtrarRegistrosPorAluno() {
                     const card = document.createElement('div'); 
                     card.className = 'post-card';
                     
-                    const nivelUser = (typeof usuarioLogado !== 'undefined' && usuarioLogado) ? usuarioLogado.nivel : 0;
                     const botoes = (nivelUser >= 3) ? 
                         `<div class="card-actions"><button class="btn-action-card btn-edit-card" onclick="editarRegistroServidor(${r.idLinha}, '${r.setor}')"><i class="fa-solid fa-pen-to-square"></i> Editar</button><button class="btn-action-card btn-delete-card" onclick="excluirRegistroServidor(${r.idLinha})"><i class="fa-solid fa-trash-can"></i> Apagar</button></div>` : '';
                     
                     const dataStr = (typeof formatarDataEHora === 'function') ? formatarDataEHora(r.dataAtual) : r.dataAtual;
+                    const autorApontamento = r.funcionario || '';
 
-                    card.innerHTML = `<p class="post-text" id="text-card-${r.idLinha}">${r.texto}</p><div class="post-footer"><span><i class="fa-solid fa-user"></i>${r.funcionario || 'SIGA'}</span><span><i class="fa-solid fa-clock"></i>${dataStr}</span></div>${botoes}`;
+                    // 🆕 Controle de visualização: nível < 3 só vê os próprios apontamentos
+                    const autorNorm = autorApontamento.trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+                    const podeVerConteudo = (nivelUser >= 3) || (autorNorm === nomeUserNorm);
+
+                    const textoExibido = podeVerConteudo 
+                        ? r.texto 
+                        : '<span style="display:inline-flex;align-items:center;gap:6px;background:#f1f5f9;color:#64748b;padding:8px 14px;border-radius:6px;font-style:italic;font-size:13px;"><i class="fa-solid fa-lock"></i> Conteúdo restrito — apontamento de outro setor/professor</span>';
+
+                    card.innerHTML = `<p class="post-text" id="text-card-${r.idLinha}">${textoExibido}</p><div class="post-footer"><span><i class="fa-solid fa-user"></i>${autorApontamento || 'SIGA'}</span><span><i class="fa-solid fa-clock"></i>${dataStr}</span></div>${botoes}`;
                     feed.appendChild(card);
                 }
             }
