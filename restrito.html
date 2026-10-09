@@ -282,6 +282,10 @@
                             <button id="btn-central-alertas" class="btn-salvar" style="background-color: #dc2626; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: none; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(220, 38, 38, 0.2); margin-bottom: 5px;" onclick="abrirCentralAlertas()">
                                 <i class="fa-solid fa-triangle-exclamation" style="font-size: 18px;"></i> Central de Alertas
                             </button>
+
+                                <button id="btn-certificados" class="btn-salvar" style="background-color: #059669; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: none; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(5, 150, 105, 0.2); margin-bottom: 5px;" onclick="abrirCertificados()">
+    <i class="fa-solid fa-award" style="font-size: 18px;"></i> Certificados de Honra ao Mérito
+</button>
                             
                             <button id="btn-progressao" class="btn-salvar" style="background-color: #059669; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: none; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(5, 150, 105, 0.2); margin-bottom: 5px;" onclick="abrirProgressao()">
                                 <i class="fa-solid fa-arrow-right-arrow-left" style="font-size: 18px;"></i> Progressão de Turmas
@@ -1374,7 +1378,7 @@ function aplicarControleAcesso() {
         if (btn) btn.style.display = nivel >= 4 ? 'flex' : 'none';
     });
     
-    const botoesNivel3 = ['btn-patrimonio', 'btn-comunicado-seed', 'btn-central-alertas', 'btn-aba-secretaria', 'btn-aniversarios', 'btn-imprimir-apontamentos'];
+    const botoesNivel3 = ['btn-patrimonio', 'btn-comunicado-seed', 'btn-central-alertas', 'btn-aba-secretaria', 'btn-aniversarios', 'btn-imprimir-apontamentos', 'btn-certificados'];
     botoesNivel3.forEach(id => {
         const btn = document.getElementById(id);
         if (btn) {
@@ -3605,6 +3609,20 @@ async function gerarPDFApontamentos() {
         iniciar();
     }
 })();
+
+// =============================================
+// 🏆 CERTIFICADOS DE HONRA AO MÉRITO
+// =============================================
+function abrirCertificados() {
+    // Verifica nível de acesso (3+)
+    if (!usuarioLogado || parseInt(usuarioLogado.nivel) < 3) {
+        mostrarToast('🔒 Acesso restrito ao nível 3 ou superior.', 'erro');
+        return;
+    }
+    
+    // Abre em nova aba
+    window.open('https://certificados-mencao-honrosa.vercel.app/', '_blank');
+}
             
     </script>
   
