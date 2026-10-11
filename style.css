@@ -3,12 +3,15 @@
     margin: 0;
     padding: 0;
 }
+
+/* 🆕 BODY — flex column para empilhar app + footer */
 body {
     font-family: 'Segoe UI', Arial, sans-serif;
     background-color: #f1f5f9;
     display: flex;
-    flex-direction: column;    /* 🆕 footer empilha abaixo */
+    flex-direction: column;
     height: 100vh;
+    overflow: hidden;
     color: #1e293b;
 }
 
@@ -117,14 +120,17 @@ body {
     text-decoration: underline;
 }
 
-/* PAINEL PRINCIPAL */
+/* 🆕 PAINEL PRINCIPAL — agora é flex:1 (compartilha com footer) */
 #app-interface {
     display: none;
     width: 100%;
-    height: 100vh;
+    flex: 1;
     flex-direction: column;
-    overflow: hidden;          /* 🆕 evita scroll duplo */
+    overflow: hidden;
+    min-height: 0;
 }
+
+/* 🆕 SIDEBAR — altura 100% do wrapper (vai até o footer) */
 .sidebar {
     width: 275px;
     background-color: #005088;
@@ -135,13 +141,14 @@ body {
     justify-content: space-between;
     z-index: 10;
     transition: transform 0.3s ease;
-    height: 100%;              /* 🆕 */
+    height: 100%;
 }
 .sidebar-top {
     display: flex;
     flex-direction: column;
     overflow-y: auto;
     flex: 1;
+    min-height: 0;
 }
 .sidebar-header {
     padding: 15px;
@@ -150,6 +157,7 @@ body {
     align-items: center;
     justify-content: flex-start;
     gap: 15px;
+    flex-shrink: 0;
 }
 .sidebar-logo {
     width: 70px;
@@ -210,7 +218,6 @@ body {
     background-color: #eab308;
     color: #1e293b;
 }
-/* 🗑️ .sidebar-footer REMOVIDO (botão Sair foi para o footer) */
 
 .btn-logout {
     width: 100%;
@@ -232,14 +239,15 @@ body {
     background-color: #991b1b;
 }
 
+/* 🆕 MAIN-CONTENT — sem height:100vh, ocupa o wrapper */
 .main-content {
     flex: 1;
     display: flex;
     flex-direction: column;
-    min-height: 0;             /* 🆕 */
+    min-height: 0;
     overflow-y: auto;
-    /* ❌ height: 100vh removido */
 }
+
 .top-bar-app {
     background-color: white;
     padding: 10px 20px;
@@ -251,6 +259,7 @@ body {
     min-height: 65px;
     height: auto !important;
     gap: 10px;
+    flex-shrink: 0;
 }
 
 /* 🆕 REGRA ÚNICA — aluno selector */
@@ -293,9 +302,7 @@ select#select-alunos {
     align-items: center;
     gap: 6px;
 }
-.btn-pdf:hover {
-    background-color: #991b1b;
-}
+.btn-pdf:hover { background-color: #991b1b; }
 .btn-patrimonio {
     padding: 6px 14px;
     background-color: #0284c7;
@@ -311,9 +318,7 @@ select#select-alunos {
     margin-left: 8px;
     transition: background 0.2s;
 }
-.btn-patrimonio:hover {
-    background-color: #0369a1;
-}
+.btn-patrimonio:hover { background-color: #0369a1; }
 .user-and-nre-wrapper {
     display: flex;
     align-items: center;
@@ -401,6 +406,7 @@ select#select-alunos {
     padding: 10px 15px;
     flex: 1;
     background-color: #f8fafc;
+    min-height: 0;
 }
 .dash-cards-grid {
     display: grid;
@@ -428,26 +434,15 @@ select#select-alunos {
 .dash-card.pedagogico { border-left-color: #0d9488; }
 .dash-card.adm { border-left-color: #4f46e5; }
 .dash-card.professores { border-left-color: #b91c1c; }
-.dash-card-icon {
-    font-size: 22px;
-    margin-right: 8px;
-}
+.dash-card-icon { font-size: 22px; margin-right: 8px; }
 .dash-card.total .dash-card-icon { color: #475569; }
 .dash-card.meivs .dash-card-icon { color: #0284c7; }
 .dash-card.pedagogico .dash-card-icon { color: #0d9488; }
 .dash-card.adm .dash-card-icon { color: #4f46e5; }
 .dash-card.professores .dash-card-icon { color: #b91c1c; }
-.dash-card-info {
-    display: flex;
-    flex-direction: column;
-}
-.dash-card-title {
-    font-size: 10px;
-}
-.dash-card-value {
-    font-size: 20px;
-    margin-top: 2px;
-}
+.dash-card-info { display: flex; flex-direction: column; }
+.dash-card-title { font-size: 10px; }
+.dash-card-value { font-size: 20px; margin-top: 2px; }
 
 .dash-lower-grid {
     display: grid;
@@ -1009,7 +1004,9 @@ select#select-alunos {
     visibility: visible !important;
     opacity: 1 !important;
     overflow-y: auto !important;
-    max-height: 70vh !important;
+    max-height: none !important;
+    flex: 1 !important;
+    min-height: 0 !important;
 }
 #lista-turmas-sidebar .turma-item {
     display: flex !important;
@@ -1055,6 +1052,7 @@ select#select-alunos {
         flex-direction: column !important;
         height: auto !important;
         min-height: 100vh !important;
+        flex: none !important;
     }
     #app-sidebar {
         position: fixed;
@@ -1132,27 +1130,27 @@ select#select-alunos {
         gap: 6px;
     }
     #conteudo-ranking > div {
-        padding: 10px 8px !important;
+        padding: 8px !important;
         flex-direction: column !important;
         text-align: center;
-        gap: 4px !important;
-        min-height: 90px;
+        gap: 2px !important;
+        min-height: 70px !important;
     }
     #conteudo-ranking > div span:first-child {
-        font-size: 20px !important;
-        margin-bottom: 2px;
+        font-size: 18px !important;
+        margin-bottom: 0 !important;
     }
     #conteudo-ranking > div span:nth-child(2) {
-        font-size: 11px !important;
+        font-size: 10px !important;
         white-space: normal !important;
         text-align: center;
-        line-height: 1.2;
+        line-height: 1.1;
         overflow: visible !important;
         text-overflow: clip !important;
     }
     #conteudo-ranking > div span:last-child {
-        font-size: 18px !important;
-        margin-top: 2px;
+        font-size: 16px !important;
+        margin-top: 0 !important;
     }
 
     .dash-lower-grid {
@@ -1213,7 +1211,7 @@ select#select-alunos {
         max-width: 90% !important;
     }
 
-    /* 🆕 AÇÕES RÁPIDAS no mobile — 3 colunas */
+    /* AÇÕES RÁPIDAS no mobile — 3 colunas */
     .acoes-grid {
         grid-template-columns: repeat(3, 1fr) !important;
         gap: 6px !important;
@@ -1223,9 +1221,7 @@ select#select-alunos {
         padding: 8px 5px !important;
         font-size: 9px !important;
     }
-    .btn-acao i {
-        font-size: 15px !important;
-    }
+    .btn-acao i { font-size: 15px !important; }
     .btn-acao span {
         font-size: 8.5px !important;
         -webkit-line-clamp: 3 !important;
@@ -1312,8 +1308,7 @@ select#select-alunos {
         min-height: 100px !important;
     }
     .pat-sidebar .room-list { max-height: 60px !important; }
-    
-    /* 🆕 Ações no celular pequeno — 2 colunas */
+
     .acoes-grid {
         grid-template-columns: repeat(2, 1fr) !important;
         gap: 5px !important;
@@ -1522,12 +1517,14 @@ select#select-alunos {
 
 .main-content { flex: 1; }
 
+/* 🆕 CONTENT-WRAPPER com min-height:0 para o footer caber */
 .content-wrapper {
     display: flex;
     flex: 1;
-    min-height: 0;             /* 🆕 */
-    overflow: hidden;          /* 🆕 */
+    min-height: 0;
+    overflow: hidden;
 }
+
 @media (max-width: 768px) {
     #btn-sugestao-flutuante {
         width: 45px;
@@ -1548,12 +1545,12 @@ select#select-alunos {
 #modal-aniversarios { z-index: 10002 !important; }
 
 /* =============================================
-   RANKING TOP 3 — LAYOUT EM GRID
+   RANKING TOP 3 — COMPACTO
    ============================================= */
 #conteudo-ranking {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 6px;
 }
 
 @media (max-width: 768px) {
@@ -1563,39 +1560,39 @@ select#select-alunos {
         gap: 6px;
     }
     #conteudo-ranking > div {
-        padding: 10px 8px !important;
+        padding: 8px !important;
         flex-direction: column !important;
         text-align: center;
-        gap: 4px !important;
-        min-height: 90px;
+        gap: 2px !important;
+        min-height: 70px !important;
     }
     #conteudo-ranking > div span:first-child {
-        font-size: 20px !important;
-        margin-bottom: 2px;
+        font-size: 18px !important;
+        margin-bottom: 0 !important;
     }
     #conteudo-ranking > div span:nth-child(2) {
-        font-size: 11px !important;
+        font-size: 10px !important;
         white-space: normal !important;
         text-align: center;
-        line-height: 1.2;
+        line-height: 1.1;
         overflow: visible !important;
         text-overflow: clip !important;
     }
     #conteudo-ranking > div span:last-child {
-        font-size: 18px !important;
-        margin-top: 2px;
+        font-size: 16px !important;
+        margin-top: 0 !important;
     }
 }
 
 @media (max-width: 400px) {
     #conteudo-ranking { gap: 4px; }
     #conteudo-ranking > div {
-        padding: 8px 4px !important;
-        min-height: 80px;
+        padding: 6px 4px !important;
+        min-height: 65px !important;
     }
-    #conteudo-ranking > div span:first-child { font-size: 18px !important; }
-    #conteudo-ranking > div span:nth-child(2) { font-size: 10px !important; }
-    #conteudo-ranking > div span:last-child { font-size: 16px !important; }
+    #conteudo-ranking > div span:first-child { font-size: 16px !important; }
+    #conteudo-ranking > div span:nth-child(2) { font-size: 9px !important; }
+    #conteudo-ranking > div span:last-child { font-size: 14px !important; }
 }
 
 /* =============================================
@@ -1612,7 +1609,7 @@ select#select-alunos {
 
 .acoes-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);   /* 5 colunas no desktop */
+    grid-template-columns: repeat(5, 1fr);
     gap: 8px;
 }
 
@@ -1663,7 +1660,6 @@ select#select-alunos {
     line-height: 1.1;
 }
 
-/* Tablet — 4 colunas */
 @media (max-width: 1024px) {
     .acoes-grid {
         grid-template-columns: repeat(4, 1fr);
@@ -1671,7 +1667,6 @@ select#select-alunos {
     }
 }
 
-/* Mobile — 3 colunas */
 @media (max-width: 768px) {
     .acoes-grid {
         grid-template-columns: repeat(3, 1fr) !important;
@@ -1689,7 +1684,6 @@ select#select-alunos {
     }
 }
 
-/* Celular pequeno — 2 colunas */
 @media (max-width: 400px) {
     .acoes-grid {
         grid-template-columns: repeat(2, 1fr) !important;
@@ -1704,7 +1698,7 @@ select#select-alunos {
 }
 
 /* =============================================
-   FILTROS DE PERÍODO DENTRO DO HEADER (OPÇÃO A)
+   FILTROS DE PERÍODO DENTRO DO HEADER
    ============================================= */
 .top-bar-app > div {
     display: flex;
@@ -1737,13 +1731,12 @@ select#select-alunos {
     flex-shrink: 0;
 }
 
-/* No mobile, os filtros voltam para uma linha própria */
 @media (max-width: 768px) {
     .top-bar-app > div {
         flex-wrap: wrap;
         gap: 10px;
     }
-    
+
     #filtro-periodo {
         order: 3;
         width: 100%;
@@ -1751,14 +1744,14 @@ select#select-alunos {
         padding: 6px 0;
         margin-top: 6px;
     }
-    
+
     .user-and-nre-wrapper {
         margin-left: auto;
     }
 }
 
 /* =============================================
-   FOOTER COM BOTÃO SAIR (OPÇÃO C)
+   FOOTER COM BOTÃO SAIR
    ============================================= */
 
 .app-footer {
@@ -1802,7 +1795,6 @@ select#select-alunos {
     color: #cbd5e1;
 }
 
-/* Mobile — empilha */
 @media (max-width: 768px) {
     .app-footer {
         flex-direction: column;
