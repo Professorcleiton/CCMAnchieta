@@ -2545,46 +2545,93 @@ function mostrarRankingGeral() {
         return;
     }
     
+    // Conta apontamentos por turma
     const contagem = {};
     todosOsRegistros.forEach(r => {
         if (r.tipo === 'apontamento') {
             const turma = encontrarTurmaDoAluno(r.aluno);
-            if (turma && turma !== 'Sem Turma') contagem[turma] = (contagem[turma] || 0) + 1;
+            if (turma && turma !== 'Sem Turma') {
+                contagem[turma] = (contagem[turma] || 0) + 1;
+            }
         }
     });
     
-    const ranking = Object.entries(contagem).sort((a, b) => b[1] - a[1]).slice(0, 8);
+    // Pega só as 3 primeiras (e só as que têm apontamentos)
+    const ranking = Object.entries(contagem)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 3);
     
     if (ranking.length === 0) {
         container.innerHTML = '<div style="text-align:center;padding:20px;color:#94a3b8;">Nenhum apontamento registrado.</div>';
         return;
     }
     
-    const maxValor = ranking[0][1];
-    const total = Object.values(contagem).reduce((s, v) => s + v, 0);
-    const coresRanking = ['#f59e0b', '#94a3b8', '#cd853f', '#64748b', '#64748b', '#64748b', '#64748b', '#64748b'];
-    const medalhas = ['🥇', '🥈', '🥉', '4º', '5º', '6º', '7º', '8º'];
+    const medalhas = ['🥇', '🥈', '🥉'];
+    const coresBorda = ['#f59e0b', '#94a3b8', '#cd853f'];
+    const coresFundo = ['#fef3c7', '#f1f5f9', '#fed7aa'];
+    const coresTexto = ['#92400e', '#475569', '#7c2d12'];
     
     let html = '';
     ranking.forEach(([turma, qtd], idx) => {
-        const pct = Math.round((qtd / maxValor) * 100);
-        const cor = coresRanking[idx] || '#64748b';
+        // Escapa aspas simples no nome da turma (para o onclick)
+        const turmaEscapada = turma.replace(/'/g, "\\'");
         
-        html += '<div class="dash-bar-item" style="margin-bottom:12px;">';
-        html += '<div class="dash-bar-header">';
-        html += '<span>' + medalhas[idx] + ' <strong>' + turma + '</strong></span>';
-        html += '<span style="font-weight:bold;color:' + cor + ';">' + qtd + '</span>';
-        html += '</div>';
-        html += '<div class="dash-bar-track">';
-        html += '<div class="dash-bar-fill" style="background:' + cor + ';width:' + pct + '%;"></div>';
-        html += '</div></div>';
+        html += `
+            <div onclick="filtrarPorTurmaRanking('${turmaEscapada}')" 
+                 style="
+                    background: ${coresFundo[idx]};
+                    border-left: 5px solid ${coresBorda[idx]};
+                    border-radius: 10px;
+                    padding: 14px 16px;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    gap: 10px;
+                    min-height: 70px;
+                    cursor: pointer;
+                    transition: transform 0.15s ease, box-shadow 0.15s ease;
+                 "
+                 onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';"
+                 onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='none';">
+                <div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1;">
+                    <span style="font-size:26px;flex-shrink:0;">${medalhas[idx]}</span>
+                    <span style="font-weight:bold;font-size:14px;color:${coresTexto[idx]};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${turma}</span>
+                </div>
+                <span style="font-size:22px;font-weight:bold;color:${coresBorda[idx]};flex-shrink:0;">${qtd}</span>
+            </div>
+        `;
     });
     
-    html += '<div style="text-align:center;font-size:11px;color:#64748b;margin-top:8px;border-top:1px solid #e2e8f0;padding-top:8px;">';
-    html += '📊 Total: <strong>' + total + '</strong> apontamentos em <strong>' + Object.keys(contagem).length + '</strong> turmas';
-    html += '</div>';
-    
     container.innerHTML = html;
+}
+
+// 🆕 Nova função: clicar no card da turma filtra os apontamentos dela
+function filtrarPorTurmaRanking(turma) {
+    // 1. Seleciona a turma na sidebar
+    const itemTurma = Array.from(document.querySelectorAll('.turma-item'))
+        .find(el => el.textContent.trim().includes(turma));
+    
+    if (itemTurma) {
+        // Remove active de todos
+        document.querySelectorAll('.turma-item').forEach(el => el.classList.remove('active'));
+        itemTurma.classList.add('active');
+        
+        // Chama a seleção de turma
+        selecionarTurma(turma);
+        
+        // Rola para o topo do dashboard
+        const dashboard = document.getElementById('welcome-dashboard-mural');
+        if (dashboard) dashboard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        
+        // Feedback visual
+        if (typeof mostrarToast === 'function') {
+            mostrarToast('🔍 Filtrando apontamentos da turma ' + turma, 'sucesso');
+        }
+    } else {
+        if (typeof mostrarToast === 'function') {
+            mostrarToast('⚠️ Turma não encontrada na sidebar', 'aviso');
+        }
+    }
 }
 
 function mostrarGraficoTurma() {
