@@ -1712,10 +1712,9 @@ select#select-alunos {
    RANKING TOP 3 — LAYOUT EM GRID
    ============================================= */
 #conteudo-ranking {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    align-items: stretch;
+    display: flex;
+    flex-direction: column;   /* ← empilhado */
+    gap: 10px;
 }
 
 /* Mobile — 3 colunas compactas */
