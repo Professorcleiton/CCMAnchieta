@@ -1707,3 +1707,76 @@ select#select-alunos {
 #modal-aniversarios {
     z-index: 10002 !important;
 }
+
+/* =============================================
+   RANKING TOP 3 — LAYOUT EM GRID
+   ============================================= */
+#conteudo-ranking {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    align-items: stretch;
+}
+
+/* Mobile — 3 colunas compactas */
+@media (max-width: 768px) {
+    #conteudo-ranking {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+    }
+    
+    /* Cards viram coluna vertical no mobile */
+    #conteudo-ranking > div {
+        padding: 10px 8px !important;
+        flex-direction: column !important;
+        text-align: center;
+        gap: 4px !important;
+        min-height: 90px;
+    }
+    
+    /* Medalha menor */
+    #conteudo-ranking > div span:first-child {
+        font-size: 20px !important;
+        margin-bottom: 2px;
+    }
+    
+    /* Nome da turma menor e com quebra permitida */
+    #conteudo-ranking > div span:nth-child(2) {
+        font-size: 11px !important;
+        white-space: normal !important;
+        text-align: center;
+        line-height: 1.2;
+        overflow: visible !important;
+        text-overflow: clip !important;
+    }
+    
+    /* Número menor */
+    #conteudo-ranking > div span:last-child {
+        font-size: 18px !important;
+        margin-top: 2px;
+    }
+}
+
+/* Telas muito pequenas (< 400px) — mais compacto ainda */
+@media (max-width: 400px) {
+    #conteudo-ranking {
+        gap: 4px;
+    }
+    
+    #conteudo-ranking > div {
+        padding: 8px 4px !important;
+        min-height: 80px;
+    }
+    
+    #conteudo-ranking > div span:first-child {
+        font-size: 18px !important;
+    }
+    
+    #conteudo-ranking > div span:nth-child(2) {
+        font-size: 10px !important;
+    }
+    
+    #conteudo-ranking > div span:last-child {
+        font-size: 16px !important;
+    }
+}
