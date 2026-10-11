@@ -79,6 +79,27 @@
                 <header class="top-bar-app">
                     <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                         <button class="menu-toggle" onclick="alternarMenuLateral()"><i class="fa-solid fa-bars"></i></button>
+
+                         <div id="filtro-periodo" style="margin-bottom: 10px; background: white; padding: 12px 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                        <span style="font-weight: bold; color: #0f172a; font-size: 13px;">
+                            <i class="fa-solid fa-calendar"></i> Período:
+                        </span>
+                        <span id="label-periodo" style="font-size: 13px; color: #005088; font-weight: 600;">Hoje</span>
+                        
+                        <input type="date" id="filtro-data-inicio" style="padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; display: none;" onchange="aplicarFiltroPeriodo()">
+                        <span id="separador-ate" style="display: none; font-size: 12px; color: #64748b;">até</span>
+                        <input type="date" id="filtro-data-fim" style="padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; display: none;" onchange="aplicarFiltroPeriodo()">
+                        
+                        <button onclick="filtrarHoje()" style="background: #005088; color: white; border: none; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 11px; font-weight: bold;">Hoje</button>
+                        <button onclick="filtrarSemana()" style="background: #e2e8f0; color: #475569; border: none; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 11px;">Esta Semana</button>
+                        <button onclick="filtrarMes()" style="background: #e2e8f0; color: #475569; border: none; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 11px;">Este Mês</button>
+                        <button onclick="mostrarSeletorPeriodo()" style="background: #e2e8f0; color: #475569; border: none; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 11px;">
+                            <i class="fa-solid fa-calendar-days"></i> Personalizado
+                        </button>
+                        <button onclick="limparFiltro()" style="background: #fee2e2; color: #dc2626; border: none; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 11px; display: none;" id="btn-limpar-filtro">
+                            <i class="fa-solid fa-xmark"></i> Limpar
+                        </button>
+                    </div>
                         
                         <div class="user-and-nre-wrapper" style="display: flex; align-items: center; gap: 12px; margin-left: auto;">
     <button class="btn-tema" onclick="alternarTema()" id="btn-icone-tema">
@@ -132,27 +153,6 @@
                         <p style="margin: 5px 0; font-size: 14px;">Direção e Secretaria Escolar</p>
                         <hr style="border: 1px solid #000; margin-top: 15px;">
                         <h3 style="margin-top: 15px; font-size: 18px;">Relatório de Apontamentos</h3>
-                    </div>
-
-                    <div id="filtro-periodo" style="margin-bottom: 10px; background: white; padding: 12px 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                        <span style="font-weight: bold; color: #0f172a; font-size: 13px;">
-                            <i class="fa-solid fa-calendar"></i> Período:
-                        </span>
-                        <span id="label-periodo" style="font-size: 13px; color: #005088; font-weight: 600;">Hoje</span>
-                        
-                        <input type="date" id="filtro-data-inicio" style="padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; display: none;" onchange="aplicarFiltroPeriodo()">
-                        <span id="separador-ate" style="display: none; font-size: 12px; color: #64748b;">até</span>
-                        <input type="date" id="filtro-data-fim" style="padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; display: none;" onchange="aplicarFiltroPeriodo()">
-                        
-                        <button onclick="filtrarHoje()" style="background: #005088; color: white; border: none; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 11px; font-weight: bold;">Hoje</button>
-                        <button onclick="filtrarSemana()" style="background: #e2e8f0; color: #475569; border: none; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 11px;">Esta Semana</button>
-                        <button onclick="filtrarMes()" style="background: #e2e8f0; color: #475569; border: none; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 11px;">Este Mês</button>
-                        <button onclick="mostrarSeletorPeriodo()" style="background: #e2e8f0; color: #475569; border: none; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 11px;">
-                            <i class="fa-solid fa-calendar-days"></i> Personalizado
-                        </button>
-                        <button onclick="limparFiltro()" style="background: #fee2e2; color: #dc2626; border: none; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 11px; display: none;" id="btn-limpar-filtro">
-                            <i class="fa-solid fa-xmark"></i> Limpar
-                        </button>
                     </div>
                     
                     <div class="aluno-selector-wrapper" style="margin-bottom: 15px; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
