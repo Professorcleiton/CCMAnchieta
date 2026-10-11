@@ -2596,29 +2596,29 @@ function mostrarRankingGeral() {
         const turmaEscapada = turma.replace(/'/g, "\\'");
         
         html += `
-            <div onclick="filtrarPorTurmaRanking('${turmaEscapada}')" 
-                 style="
-                    background: ${coresFundo[idx]};
-                    border-left: 5px solid ${coresBorda[idx]};
-                    border-radius: 10px;
-                    padding: 14px 16px;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    gap: 10px;
-                    min-height: 70px;
-                    cursor: pointer;
-                    transition: transform 0.15s ease, box-shadow 0.15s ease;
-                 "
-                 onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';"
-                 onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='none';">
-                <div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1;">
-                    <span style="font-size:26px;flex-shrink:0;">${medalhas[idx]}</span>
-                    <span style="font-weight:bold;font-size:14px;color:${coresTexto[idx]};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${turma}</span>
-                </div>
-                <span style="font-size:22px;font-weight:bold;color:${coresBorda[idx]};flex-shrink:0;">${qtd}</span>
-            </div>
-        `;
+    <div onclick="filtrarPorTurmaRanking('${turmaEscapada}')" 
+         style="
+            background: ${coresFundo[idx]};
+            border-left: 5px solid ${coresBorda[idx]};
+            border-radius: 8px;
+            padding: 8px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            min-height: 48px;
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+         "
+         onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';"
+         onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='none';">
+        <div style="display:flex;align-items:center;gap:8px;min-width:0;flex:1;">
+            <span style="font-size:20px;flex-shrink:0;">${medalhas[idx]}</span>
+            <span style="font-weight:bold;font-size:13px;color:${coresTexto[idx]};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${turma}</span>
+        </div>
+        <span style="font-size:18px;font-weight:bold;color:${coresBorda[idx]};flex-shrink:0;">${qtd}</span>
+    </div>
+`;
     });
     
     container.innerHTML = html;
