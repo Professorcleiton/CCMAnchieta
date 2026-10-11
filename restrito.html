@@ -1011,9 +1011,7 @@
         </div>
     </div>
 
-    <!-- ============================================= -->
-    <!-- ✅ MODAL DE IMPRESSÃO DE APONTAMENTOS (AGORA FORA DO SCRIPT!) -->
-    <!-- ============================================= -->
+    <!-- MODAL DE IMPRESSÃO DE APONTAMENTOS -->
     <div class="modal-overlay" id="modal-imprimir-apontamentos" onclick="fecharModalImpressao(event)">
         <div class="modal-content" style="max-width: 700px;">
             <div class="modal-header" style="background-color: #0891b2;">
@@ -1116,7 +1114,7 @@ function verificarBotaoComunicado() {
 async function preencherDatalistModal() {
     if (listaAlunosCache.length === 0) {
         try {
-            const resp = await fetch(APPS_SCRIPT_V2 + '?aba=alunos');
+            const resp = await fetch(APPS_SCRIPT_URL + '?aba=alunos');
             const data = await resp.json();
             listaAlunosCache = data.map(a => a.nome).sort();
         } catch (e) {
@@ -1146,7 +1144,7 @@ async function carregarFatosModal(numero) {
     msgErro.innerText = 'Buscando...';
     
     try {
-        const resp = await fetch(APPS_SCRIPT_V2 + '?aba=fatos_aluno&aluno=' + encodeURIComponent(aluno));
+        const resp = await fetch(APPS_SCRIPT_URL + '?aba=fatos_aluno&aluno=' + encodeURIComponent(aluno));
         const data = await resp.json();
         
         if (data.error) { msgErro.innerText = data.error; return; }
@@ -1202,10 +1200,10 @@ async function emitirEImprimirModal() {
     btn.disabled = true; btn.innerText = '⏳ Emitindo...';
     
     try {
-        const resp = await fetch(APPS_SCRIPT_V2, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain' },
-            body: JSON.stringify({ operacao: "marcar_fatos_emitidos", aluno: comunicadosModal[0].aluno, emailOperador: usuarioLogado?.email || 'sistema', ids: ids })
+        const resp = await fetchAutenticado(APPS_SCRIPT_URL, {
+            operacao: "marcar_fatos_emitidos",
+            aluno: comunicadosModal[0].aluno,
+            ids: ids
         });
         const result = await resp.json();
         
@@ -1245,10 +1243,9 @@ async function salvarNovoFatoModal() {
     if (!aluno || !descricao || !data) { alert('Preencha todos os campos.'); return; }
     
     try {
-        const resp = await fetch(APPS_SCRIPT_V2, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain' },
-            body: JSON.stringify({ operacao: "SALVAR_FATO_SEED", aluno, tipo, descricao, data, funcionario: usuarioLogado?.email || 'Sistema', emailOperador: usuarioLogado?.email || 'sistema' })
+        const resp = await fetchAutenticado(APPS_SCRIPT_URL, {
+            operacao: "SALVAR_FATO_SEED", aluno, tipo, descricao, data,
+            funcionario: usuarioLogado?.email || 'Sistema'
         });
         const result = await resp.json();
         if (result.status === 'success') {
@@ -1266,9 +1263,6 @@ function fecharModalComunicado(e) {
     if (e.target.id === 'modal-comunicado-seed') document.getElementById('modal-comunicado-seed').style.display = 'none';
 }
 
-// URL secundária
-const APPS_SCRIPT_V2 = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
-
 // Verificar se o email já existe
 document.addEventListener('DOMContentLoaded', function() {
     const emailInput = document.getElementById('admin-user-email');
@@ -1283,7 +1277,7 @@ function checarSeUsuarioExisteParaEditar() {
     const emailDigitado = document.getElementById('admin-user-email').value.trim().toLowerCase();
     if (!emailDigitado || !emailDigitado.includes('@')) return;
     
-    fetch(APPS_SCRIPT_V2 + '?aba=usuarios')
+    fetch(APPS_SCRIPT_URL + '?aba=usuarios')
         .then(r => r.json())
         .then(usuarios => {
             const usuarioEncontrado = usuarios.find(u => u.email === emailDigitado);
@@ -1410,7 +1404,7 @@ async function carregarHorariosProfessor() {
         }
         
         let nomeProfessor = usuarioLogado.nome;
-        let url = APPS_SCRIPT_V2 + '?aba=horarios';
+        let url = APPS_SCRIPT_URL + '?aba=horarios';
         let response = await fetch(url);
         let data = await response.json();
         let todos = (data.status === 'success' && data.horarios) ? data.horarios : [];
@@ -1427,7 +1421,7 @@ async function carregarHorariosProfessor() {
         });
         
         try {
-            const respHA = await fetch(APPS_SCRIPT_V2 + '?aba=horas_atividade');
+            const respHA = await fetch(APPS_SCRIPT_URL + '?aba=horas_atividade');
             const dataHA = await respHA.json();
             
             dataHA.forEach(h => {
@@ -1560,7 +1554,7 @@ async function carregarAgendaLabModal() {
     const container = document.getElementById('conteudo-lab');
     try {
         if (todosHorariosLab.length === 0) {
-            const resp = await fetch(APPS_SCRIPT_V2 + '?aba=horarios');
+            const resp = await fetch(APPS_SCRIPT_URL + '?aba=horarios');
             const data = await resp.json();
             todosHorariosLab = (data.status === 'success' && data.horarios) ? data.horarios : [];
         }
@@ -1681,8 +1675,8 @@ async function carregarAlertasModal() {
     const container = document.getElementById('conteudo-alertas');
     try {
         const [respDados, respAlunos] = await Promise.all([
-            fetch(APPS_SCRIPT_V2 + '?aba=todos_os_dados'),
-            fetch(APPS_SCRIPT_V2 + '?aba=alunos')
+            fetch(APPS_SCRIPT_URL + '?aba=todos_os_dados'),
+            fetch(APPS_SCRIPT_URL + '?aba=alunos')
         ]);
         
         const data = await respDados.json();
@@ -1793,7 +1787,7 @@ async function carregarDetalhesAlunoAlerta(nomeAluno) {
     const container = document.getElementById('conteudo-detalhes-alerta');
     
     try {
-        const resp = await fetch(APPS_SCRIPT_V2 + '?aba=todos_os_dados');
+        const resp = await fetch(APPS_SCRIPT_URL + '?aba=todos_os_dados');
         const data = await resp.json();
         
         const hoje = new Date();
@@ -1899,7 +1893,7 @@ function abrirProgressao() {
 
 async function carregarDadosProgressao() {
     try {
-        const resp = await fetch(APPS_SCRIPT_V2 + '?aba=alunos');
+        const resp = await fetch(APPS_SCRIPT_URL + '?aba=alunos');
         const alunos = await resp.json();
         
         const turmas = {};
@@ -2037,16 +2031,11 @@ async function executarProgressao() {
     try {
         const payload = {
             operacao: "PROGRESSAO_TURMAS",
-            emailOperador: usuarioLogado.email,
             automaticas: dadosProgressao.automaticas,
             comEscolha: dadosProgressao.comEscolha
         };
         
-        const resp = await fetch(APPS_SCRIPT_V2, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain' },
-            body: JSON.stringify(payload)
-        });
+        const resp = await fetchAutenticado(APPS_SCRIPT_URL, payload);
         
         const result = await resp.json();
         
@@ -2088,7 +2077,7 @@ function abrirGestaoHorarios() {
 
 async function carregarTurmasGestao() {
     try {
-        const resp = await fetch(APPS_SCRIPT_V2 + '?aba=alunos');
+        const resp = await fetch(APPS_SCRIPT_URL + '?aba=alunos');
         const alunos = await resp.json();
         const turmas = [...new Set(alunos.map(a => a.turma_codigo).filter(Boolean))].sort();
         
@@ -2104,7 +2093,7 @@ async function carregarTurmasGestao() {
 
 async function carregarDisciplinas() {
     try {
-        const resp = await fetch(APPS_SCRIPT_V2 + '?aba=horarios&turno=' + turnoEditando);
+        const resp = await fetch(APPS_SCRIPT_URL + '?aba=horarios&turno=' + turnoEditando);
         const data = await resp.json();
         
         if (data.status === 'success' && data.horarios) {
@@ -2159,7 +2148,7 @@ async function carregarGradeEdicao() {
     });
     
     try {
-        const resp = await fetch(APPS_SCRIPT_V2 + '?aba=horarios&turma=' + turmaEditando + '&turno=' + turnoEditando);
+        const resp = await fetch(APPS_SCRIPT_URL + '?aba=horarios&turma=' + turmaEditando + '&turno=' + turnoEditando);
         const data = await resp.json();
         
         if (data.status === 'success' && data.horarios) {
@@ -2255,16 +2244,11 @@ async function salvarGradeAtual() {
         operacao: "SALVAR_GRADE",
         turma: turmaEditando,
         turno: turnoEditando,
-        grade: gradeAtual,
-        emailOperador: usuarioLogado.email
+        grade: gradeAtual
     };
     
     try {
-        const resp = await fetch(APPS_SCRIPT_V2, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain' },
-            body: JSON.stringify(payload)
-        });
+        const resp = await fetchAutenticado(APPS_SCRIPT_URL, payload);
         
         const result = await resp.json();
         
@@ -2286,7 +2270,7 @@ async function autoPreencherGrade() {
     if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Preenchendo...'; }
     
     try {
-        const resp = await fetch(APPS_SCRIPT_V2 + '?aba=resumo_disciplinas');
+        const resp = await fetch(APPS_SCRIPT_URL + '?aba=resumo_disciplinas');
         const data = await resp.json();
         
         if (data.status !== 'success' || !data.resumo || !data.resumo[turmaEditando]) {
@@ -2825,7 +2809,7 @@ async function verificarAniversariantes() {
         
         aniversariantesHoje = [];
         
-        const respUsers = await fetch(APPS_SCRIPT_V2 + '?aba=usuarios');
+        const respUsers = await fetch(APPS_SCRIPT_URL + '?aba=usuarios');
         const usuarios = await respUsers.json();
         
         usuarios.forEach(u => {
@@ -2929,13 +2913,9 @@ async function enviarRecadoAniversario() {
     if (!mensagem) { alert('Escreva uma mensagem.'); return; }
     
     try {
-        await fetch(APPS_SCRIPT_V2, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain' },
-            body: JSON.stringify({
-                operacao: "SALVAR_RECADO_ANIVERSARIO",
-                aniversariante, autor: usuarioLogado.nome, mensagem
-            })
+        await fetchAutenticado(APPS_SCRIPT_URL, {
+            operacao: "SALVAR_RECADO_ANIVERSARIO",
+            aniversariante, autor: usuarioLogado.nome, mensagem
         });
         document.getElementById('modal-recado-aniversario').style.display = 'none';
         mostrarToast('✅ Recado enviado!', 'sucesso');
@@ -2948,7 +2928,7 @@ async function carregarRecadosAniversario() {
     try {
         const hoje = new Date();
         const dataHoje = String(hoje.getDate()).padStart(2, '0') + '/' + String(hoje.getMonth() + 1).padStart(2, '0');
-        const resp = await fetch(APPS_SCRIPT_V2 + '?aba=recados_aniversario&data=' + dataHoje);
+        const resp = await fetch(APPS_SCRIPT_URL + '?aba=recados_aniversario&data=' + dataHoje);
         const recados = await resp.json();
         recadosAniversario = {};
         recados.forEach(r => {
@@ -2995,7 +2975,7 @@ async function carregarAniversariosPorMes() {
     const container = document.getElementById('conteudo-aniversarios');
     
     try {
-        const respUsers = await fetch(APPS_SCRIPT_V2 + '?aba=usuarios');
+        const respUsers = await fetch(APPS_SCRIPT_URL + '?aba=usuarios');
         
         if (!respUsers.ok) throw new Error('Falha ao buscar usuários: ' + respUsers.status);
         
@@ -3190,7 +3170,7 @@ function fecharModalAniversarios(e) {
 }
 
 // =============================================
-// 🆕 IMPRESSÃO DE APONTAMENTOS
+// IMPRESSÃO DE APONTAMENTOS
 // =============================================
 function abrirModalImpressao() {
     if (!usuarioLogado || parseInt(usuarioLogado.nivel) < 3) {
@@ -3405,7 +3385,6 @@ async function gerarPDFApontamentos() {
 
 // =============================================
 // 🔒 BLOQUEIO UNIVERSAL DE APONTAMENTOS
-// Aplica em QUALQUER lugar que mostre conteúdo de apontamentos
 // =============================================
 (function ativarBloqueioUniversal() {
     
@@ -3417,7 +3396,6 @@ async function gerarPDFApontamentos() {
         
         const nivelUser = parseInt(usuarioLogado.nivel) || 0;
         
-        // Nível 3+ vê tudo — não precisa bloquear
         if (nivelUser >= 3) {
             console.log('🔓 Bloqueio universal: nível', nivelUser, '→ sem bloqueio');
             return;
@@ -3428,7 +3406,6 @@ async function gerarPDFApontamentos() {
         
         console.log('🔒 Bloqueio universal ATIVO | Nível:', nivelUser, '| Nome:', nomeUser, '| Setor:', setorUser);
         
-        // Normaliza nomes removendo "Prof", "Monitor", etc.
         const normalizarNome = (nome) => {
             return (nome || '')
                 .toLowerCase()
@@ -3440,7 +3417,6 @@ async function gerarPDFApontamentos() {
         
         const nomeUserNorm = normalizarNome(nomeUser);
         
-        // Verifica se um texto de autor pertence ao usuário logado
         function ehDoProprioAutor(texto) {
             if (!texto) return false;
             const autorNorm = normalizarNome(texto);
@@ -3451,53 +3427,26 @@ async function gerarPDFApontamentos() {
                    nomeUserNorm.includes(autorNorm);
         }
         
-        // Detecta se um texto parece ser de um apontamento (com autor conhecido)
-        function pareceApontamento(texto) {
-            if (!texto) return false;
-            // Detecta padrões de autor de apontamento
-            const padroes = [
-                /Prof(?:ª|essor|essora)?\s+[A-ZÁÉÍÓÚÂÊÔÃÕÇ][a-záéíóúâêôãõç]+/i,
-                /Monitor(?:a)?\s+[A-ZÁÉÍÓÚÂÊÔÃÕÇ][a-záéíóúâêôãõç]+/i,
-                /Viviane/,
-                /Meiv\s+David/,
-                /Francielle/,
-                /Hariana/,
-                /Cleiton/,
-                /Valdirene/,
-                /Vanusa/,
-                /Lidia/,
-                /Ana\s+Paula/
-            ];
-            return padroes.some(p => p.test(texto));
-        }
-        
-        // Aplica bloqueio em um elemento
         function aplicarBloqueio(el) {
             if (!el || el.dataset.bloqueioAplicado === 'sim') return false;
             
-            // Ignora se for o card do próprio usuário (verifica em qualquer filho)
             const textoCompleto = el.innerText || '';
             
-            // Tenta achar o nome do autor
             const matchAutor = textoCompleto.match(/(?:^|\n)\s*(Prof(?:ª|essor|essora)?\s+[^\n]+|Monitor(?:a)?\s+[^\n]+|Viviane|Meiv\s+David|Francielle[^\n]*|Hariana[^\n]*|Cleiton[^\n]*|Valdirene[^\n]*|Vanusa[^\n]*|Lidia[^\n]*|Ana\s+Paula[^\n]*)/i);
             
             if (!matchAutor) return false;
             
             const autorDetectado = matchAutor[1].trim();
             
-            // É do próprio autor? Não bloqueia
             if (ehDoProprioAutor(autorDetectado)) {
                 return false;
             }
             
-            // Marca como bloqueado
             el.dataset.bloqueioAplicado = 'sim';
             
-            // Aplica o filtro visual (blur)
             el.style.position = el.style.position || 'relative';
             el.style.overflow = 'hidden';
             
-            // Cria overlay com o cadeado
             const overlay = document.createElement('div');
             overlay.className = 'bloqueio-overlay-universal';
             overlay.style.cssText = `
@@ -3529,11 +3478,9 @@ async function gerarPDFApontamentos() {
             return true;
         }
         
-        // Aplica em TODOS os elementos suspeitos
         function aplicarEmTodos() {
             let total = 0;
             
-            // Seletores que podem conter apontamentos em qualquer lugar
             const seletores = [
                 '.post-card',
                 '.modal-body > div',
@@ -3545,10 +3492,7 @@ async function gerarPDFApontamentos() {
             
             seletores.forEach(sel => {
                 document.querySelectorAll(sel).forEach(el => {
-                    // Ignora elementos muito pequenos (não são cards)
                     if (el.offsetHeight < 40) return;
-                    
-                    // Ignora se já tem overlay
                     if (el.querySelector('.bloqueio-overlay-universal')) return;
                     
                     if (aplicarBloqueio(el)) total++;
@@ -3558,26 +3502,21 @@ async function gerarPDFApontamentos() {
             return total;
         }
         
-        // Aplica agora
         aplicarEmTodos();
         
-        // Observa mudanças no DOM (novos cards, modais abrindo)
         const observer = new MutationObserver((mutations) => {
             let novasAplicacoes = 0;
             mutations.forEach(m => {
                 m.addedNodes.forEach(node => {
                     if (node.nodeType === 1) {
-                        // Se for um modal que abriu
                         if (node.classList && (
                             node.classList.contains('modal-overlay') ||
                             node.id?.includes('modal')
                         )) {
-                            // Aguarda um pouco para o modal renderizar
                             setTimeout(() => {
                                 aplicarEmTodos();
                             }, 100);
                         } else {
-                            // Verifica o próprio nó e filhos
                             if (aplicarBloqueio(node)) novasAplicacoes++;
                             if (node.querySelectorAll) {
                                 node.querySelectorAll('.post-card, [class*="apontamento"], [class*="card"]').forEach(el => {
@@ -3595,7 +3534,6 @@ async function gerarPDFApontamentos() {
             subtree: true
         });
         
-        // Reaplica a cada 2 segundos (fallback)
         setInterval(() => {
             aplicarEmTodos();
         }, 2000);
@@ -3614,13 +3552,11 @@ async function gerarPDFApontamentos() {
 // 🏆 CERTIFICADOS DE HONRA AO MÉRITO
 // =============================================
 function abrirCertificados() {
-    // Verifica nível de acesso (3+)
     if (!usuarioLogado || parseInt(usuarioLogado.nivel) < 3) {
         mostrarToast('🔒 Acesso restrito ao nível 3 ou superior.', 'erro');
         return;
     }
     
-    // Abre em nova aba
     window.open('https://certificados-mencao-honrosa.vercel.app/', '_blank');
 }
             
