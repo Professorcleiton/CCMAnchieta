@@ -1893,3 +1893,9 @@ select#select-alunos {
         font-size: 9px;
     }
 }
+
+@media (max-width: 768px) {
+    .dash-lower-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
