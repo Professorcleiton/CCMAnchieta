@@ -1,8 +1,10 @@
-// ========== GLOBAIS ==========
-// let db = null;  ← REMOVA ESTA LINHA (db já está declarado no db.js)
+// =============================================
+// 🆕 SIGA - script.js (FASE 2 - TOKEN DE SESSÃO)
+// =============================================
 
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxEMx6NmZvQqPMmmxsrTaV1DrMHa-F16_ARFR1cjm_5v054lUtF80YWtW88g6MsyhajRg/exec';
-const APPS_SCRIPT_PAT_URL = APPS_SCRIPT_URL; 
+// ========== GLOBAIS ==========
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
+const APPS_SCRIPT_PAT_URL = APPS_SCRIPT_URL;
 const SHEET_ID = '1UUiVcCaSb_9Lx7gdEpmBzeRQPlBwDZRouQC2pf1q8Vg';
 const COLS_ALUNOS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=Alunos`;
 let usuarioLogado = null, todosOsRegistros = [], cacheAlunosPorTurma = {}, turmaSelecionadaAtiva = '';
@@ -11,11 +13,27 @@ let totalRegistrosAnterior = 0;
 let ultimoCarregamento = 0;
 const CACHE_TEMPO = 30000;
 
+// 🆕 Expiração da sessão (mesmo valor do backend)
+const SESSAO_DURACAO_MS = 8 * 60 * 60 * 1000;
+
+// =============================================
+// 🆕 FETCH AUTENTICADO (envia token em toda chamada POST)
+// =============================================
+async function fetchAutenticado(url, payload) {
+    if (typeof payload !== 'object' || payload === null) payload = {};
+    if (usuarioLogado && usuarioLogado.token) {
+        payload.token = usuarioLogado.token;
+    }
+    return fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify(payload)
+    });
+}
+
 // =============================================
 // BANCO DE DADOS LOCAL - VERIFICAÇÃO
 // =============================================
-
-// db já está declarado no db.js - apenas verifica se está disponível
 if (typeof db !== 'undefined' && db && db.db) {
     console.log('✅ Banco de dados local disponível');
 } else {
@@ -36,10 +54,25 @@ function mostrarToast(mensagem, tipo = 'sucesso') {
 
 // ========== SESSÃO E INICIALIZAÇÃO ==========
 window.addEventListener('DOMContentLoaded', () => {
-    const sessao = localStorage.getItem('sgi_ccma_session');
-    if (sessao) { 
-        usuarioLogado = JSON.parse(sessao); 
-        inicializarPainel(); 
+    const sessao = sessionStorage.getItem('sgi_ccma_session') || localStorage.getItem('sgi_ccma_session');
+    if (sessao) {
+        try {
+            const user = JSON.parse(sessao);
+            const agora = Date.now();
+            if (user.loginTime && (agora - user.loginTime) > SESSAO_DURACAO_MS) {
+                // Sessão expirada
+                sessionStorage.removeItem('sgi_ccma_session');
+                localStorage.removeItem('sgi_ccma_session');
+                mostrarToast('⏰ Sessão expirada. Faça login novamente.', 'aviso');
+                return;
+            }
+            usuarioLogado = user;
+            inicializarPainel();
+        } catch (e) {
+            console.error('Erro ao ler sessão:', e);
+            sessionStorage.removeItem('sgi_ccma_session');
+            localStorage.removeItem('sgi_ccma_session');
+        }
     }
 });
 
@@ -48,35 +81,61 @@ async function autenticarUsuario() {
     const senha = document.getElementById('user-password').value.trim().replace(/\D/g, '');
     const err = document.getElementById('error-message'), btn = document.getElementById('btn-entrar-login');
     if (!email || !senha) return;
-    
+
     btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
-    
+
     try {
-        const r = await fetch(APPS_SCRIPT_URL, { 
-            method: 'POST', 
-            headers: { 'Content-Type': 'text/plain' }, 
-            body: JSON.stringify({ operacao: "LOGIN", email, senha }) 
+        const r = await fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify({ operacao: "LOGIN", email, senha })
         });
-        
+
         const data = await r.json();
-        
+
         if (data.status === "success") {
             let setor = data.setor.toString().trim().toLowerCase();
             if (setor === 'direcao' || setor === 'professor' || setor === 'professores') setor = 'professores';
-            
-            usuarioLogado = { email, nome: data.nome, setorExibicao: 'PROFESSORES', setor, nivel: data.nivel };
+
+            usuarioLogado = {
+                email,
+                nome: data.nome,
+                setorExibicao: 'PROFESSORES',
+                setor,
+                nivel: data.nivel,
+                token: data.token,       // 🆕
+                loginTime: Date.now()     // 🆕
+            };
+            sessionStorage.setItem('sgi_ccma_session', JSON.stringify(usuarioLogado));
             localStorage.setItem('sgi_ccma_session', JSON.stringify(usuarioLogado));
             inicializarPainel();
-        } else { 
-            err.style.display = 'block'; btn.disabled = false; btn.innerHTML = 'Entrar no Sistema'; 
+        } else if (data.status === "blocked") {
+            err.style.display = 'block';
+            err.innerHTML = data.message || 'Conta temporariamente bloqueada.';
+            btn.disabled = false; btn.innerHTML = 'Entrar no Sistema';
+        } else {
+            err.style.display = 'block'; btn.disabled = false; btn.innerHTML = 'Entrar no Sistema';
         }
-    } catch (e) { 
-        err.style.display = 'block'; btn.disabled = false; btn.innerHTML = 'Entrar no Sistema'; 
+    } catch (e) {
+        err.style.display = 'block'; btn.disabled = false; btn.innerHTML = 'Entrar no Sistema';
         console.error('Erro no login:', e);
     }
 }
 
-function fazerLogout() { localStorage.removeItem('sgi_ccma_session'); location.reload(); }
+async function fazerLogout() {
+    if (usuarioLogado && usuarioLogado.token) {
+        try {
+            await fetch(APPS_SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify({ operacao: "LOGOUT", token: usuarioLogado.token })
+            });
+        } catch (e) { console.warn('Erro no logout remoto:', e); }
+    }
+    sessionStorage.removeItem('sgi_ccma_session');
+    localStorage.removeItem('sgi_ccma_session');
+    location.reload();
+}
 
 // ========== NAVEGAÇÃO ENTRE ABAS ==========
 function mostrarTab(tabSelecionada) {
@@ -93,7 +152,7 @@ function mostrarTab(tabSelecionada) {
         document.getElementById('aba-documentos').style.display = 'block';
         document.getElementById('btn-aba-secretaria').style.display = 'none';
         document.getElementById('btn-voltar-apontamentos').style.display = 'inline-block';
-        carregarDocumentos(); 
+        carregarDocumentos();
     }
 }
 
@@ -124,27 +183,23 @@ function salvarDocumento() {
         data: new Date().toLocaleDateString('pt-BR')
     };
 
-    fetch(APPS_SCRIPT_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify(dadosParaEnviar)
-    })
+    fetchAutenticado(APPS_SCRIPT_URL, dadosParaEnviar)
     .then(() => {
         msgDoc.innerText = "✅ Documento salvo!";
         msgDoc.style.display = "block";
-        alunoInput.value = ""; 
-        carregarDocumentos(); 
-        
-        const payloadADM = { 
-            operacao: "SALVAR", 
-            aluno: aluno, 
-            setor: 'adm', 
-            texto: `📄 Documento solicitado: ${documento} | Status: ${status}`, 
-            funcionario: usuarioLogado.nome, 
+        alunoInput.value = "";
+        carregarDocumentos();
+
+        const payloadADM = {
+            operacao: "SALVAR",
+            aluno: aluno,
+            setor: 'adm',
+            texto: `📄 Documento solicitado: ${documento} | Status: ${status}`,
+            funcionario: usuarioLogado.nome,
             dataAtual: new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
         };
-        fetch(APPS_SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payloadADM) })
-        .then(() => carregarRegistrosDoServidor()); 
+        fetchAutenticado(APPS_SCRIPT_URL, payloadADM)
+        .then(() => carregarRegistrosDoServidor());
     })
     .finally(() => {
         btnSalvar.innerText = "Salvar no Sistema";
@@ -158,14 +213,10 @@ async function carregarDocumentos() {
     tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Carregando...</td></tr>';
 
     try {
-        const resposta = await fetch(APPS_SCRIPT_URL, { 
-            method: 'POST', 
-            headers: { 'Content-Type': 'text/plain' }, 
-            body: JSON.stringify({ operacao: "listar_documentos" }) 
-        });
-        
+        const resposta = await fetchAutenticado(APPS_SCRIPT_URL, { operacao: "listar_documentos" });
+
         const linhasPlanilha = await resposta.json();
-        tbody.innerHTML = ''; 
+        tbody.innerHTML = '';
 
         if (linhasPlanilha.length <= 1) {
             tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Nenhum documento registrado.</td></tr>';
@@ -175,7 +226,7 @@ async function carregarDocumentos() {
         let htmlRows = '';
         for (let i = linhasPlanilha.length - 1; i > 0; i--) {
             let linha = linhasPlanilha[i];
-            
+
             let dataFormatada = 'Data inválida';
             if (linha[4]) {
                 const d = new Date(linha[4]);
@@ -185,17 +236,17 @@ async function carregarDocumentos() {
                     dataFormatada = linha[4];
                 }
             }
-            
+
             const linkArquivo = linha[5] ? linha[5].toString().trim() : '';
             const status = linha[3] ? linha[3].toString().trim() : 'Pendente';
-            
+
             let botaoDownload = '-';
             if (linkArquivo && (status === 'Enviado' || status === 'Verificado')) {
                 botaoDownload = `<a href="${linkArquivo}" target="_blank" style="color:#4f46e5;text-decoration:underline;font-weight:bold;">📎 Baixar</a>`;
             } else if (status === 'Pendente') {
                 botaoDownload = '<span style="color:#d97706;">Pendente</span>';
             }
-            
+
             htmlRows += `<tr>
                 <td>${linha[1] || '-'}</td>
                 <td>${linha[0] || '-'}</td>
@@ -206,10 +257,10 @@ async function carregarDocumentos() {
             </tr>`;
         }
         tbody.innerHTML = htmlRows;
-        
-    } catch (e) { 
+
+    } catch (e) {
         console.error("Erro ao carregar documentos:", e);
-        tbody.innerHTML = '<tr><td colspan="6" style="color: red; text-align: center;">Erro ao carregar documentos.</td></tr>'; 
+        tbody.innerHTML = '<tr><td colspan="6" style="color: red; text-align: center;">Erro ao carregar documentos.</td></tr>';
     }
 }
 
@@ -221,7 +272,7 @@ function inicializarPainel() {
     const displayUser = document.getElementById('user-display');
     if (displayUser) displayUser.innerHTML = `<i class="fa-solid fa-user-check"></i> ${usuarioLogado.nome}`;
     aplicarBloqueioSetores(usuarioLogado.setor, usuarioLogado.nivel);
-    
+
     const btnGestao = document.getElementById('btn-abrir-admin');
     if (btnGestao) btnGestao.style.display = (usuarioLogado.nivel >= 4) ? 'inline-flex' : 'none';
 
@@ -237,7 +288,7 @@ function inicializarPainel() {
         }
     }
     verificarBotaoComunicado();
-    carregarAlunosETurmas(); 
+    carregarAlunosETurmas();
     carregarRegistrosDoServidor();
     aplicarControleAcesso();
     setTimeout(atualizarStatusConexao, 2000);
@@ -246,7 +297,7 @@ function inicializarPainel() {
 
 // ==== ALERTA EM TEMPO REAL ====
 setInterval(async () => {
-    if (usuarioLogado) { 
+    if (usuarioLogado) {
         try {
             const r = await fetch(APPS_SCRIPT_URL, { method: 'GET', cache: 'no-cache' });
             const data = await r.json();
@@ -263,39 +314,39 @@ setInterval(async () => {
 // ==== CARREGAMENTO DE ALUNOS ====
 async function carregarAlunosETurmas() {
     cacheAlunosPorTurma = {};
-    
+
     try {
         let turmasPermitidas = null;
-        
+
         if (usuarioLogado && usuarioLogado.setor === 'professores' && usuarioLogado.nivel < 4) {
             console.log('🔍 Verificando turmas para professor:', usuarioLogado.email);
             const respTurmas = await fetch(APPS_SCRIPT_URL + '?aba=turmas_professor&email=' + encodeURIComponent(usuarioLogado.email));
             turmasPermitidas = await respTurmas.json();
             console.log('📋 Turmas permitidas:', turmasPermitidas);
-            
+
             if (turmasPermitidas.length === 0) {
                 console.log('⚠️ Nenhuma turma encontrada. Mostrando todas.');
                 turmasPermitidas = null;
             }
         }
-        
+
         const response = await fetch(COLS_ALUNOS_URL);
         const text = await response.text();
         const jsonText = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
         const data = JSON.parse(jsonText);
-        
+
         data.table.rows.forEach(r => {
             if (r.c && r.c[1] && r.c[1].v) {
                 const nome = r.c[1].v.toString().trim();
                 const turma = (r.c[2] && r.c[2].v) ? r.c[2].v.toString().trim() : 'Sem Turma';
-                
+
                 if (turmasPermitidas && !turmasPermitidas.includes(turma)) return;
-                
+
                 if (!cacheAlunosPorTurma[turma]) cacheAlunosPorTurma[turma] = [];
                 if (!cacheAlunosPorTurma[turma].includes(nome)) cacheAlunosPorTurma[turma].push(nome);
             }
         });
-        
+
         console.log('📊 Turmas carregadas:', Object.keys(cacheAlunosPorTurma));
         renderizarSidebarTurmas();
     } catch (e) { console.error(e); }
@@ -323,16 +374,14 @@ function alternarAbaMobile(setor, btn) {
     btn.classList.add('active');
     document.querySelectorAll('.sector-column').forEach(c => { c.classList.remove('active'); });
     const col = document.getElementById(`col-${setor}`);
-    if (col) col.classList.add('active'); 
+    if (col) col.classList.add('active');
 }
 
 function renderizarSidebarTurmas() {
     const ul = document.getElementById('lista-turmas-sidebar');
-    
-    // VERIFICA SE O ELEMENTO EXISTE
+
     if (!ul) {
         console.error('❌ Elemento #lista-turmas-sidebar não encontrado!');
-        // Tenta criar o elemento se não existir
         const sidebarTop = document.querySelector('#app-sidebar .sidebar-top');
         if (sidebarTop) {
             const newUl = document.createElement('ul');
@@ -341,17 +390,16 @@ function renderizarSidebarTurmas() {
             newUl.innerHTML = '<li class="turma-item">Nenhuma turma</li>';
             sidebarTop.appendChild(newUl);
             console.log('✅ Elemento #lista-turmas-sidebar recriado!');
-            // Tenta novamente
             setTimeout(renderizarSidebarTurmas, 100);
         }
         return;
     }
-    
+
     ul.innerHTML = '';
     const turmas = Object.keys(cacheAlunosPorTurma).sort();
-    if (!turmas.length) { 
-        ul.innerHTML = '<li class="turma-item">Nenhuma turma</li>'; 
-        return; 
+    if (!turmas.length) {
+        ul.innerHTML = '<li class="turma-item">Nenhuma turma</li>';
+        return;
     }
     turmas.forEach((turma, idx) => {
         const li = document.createElement('li');
@@ -363,9 +411,9 @@ function renderizarSidebarTurmas() {
             selecionarTurma(turma);
         };
         ul.appendChild(li);
-        if (idx === 0 && !turmaSelecionadaAtiva) { 
-            li.classList.add('active'); 
-            selecionarTurma(turma); 
+        if (idx === 0 && !turmaSelecionadaAtiva) {
+            li.classList.add('active');
+            selecionarTurma(turma);
         }
     });
 }
@@ -373,10 +421,9 @@ function selecionarTurma(turma) {
     turmaSelecionadaAtiva = turma;
     const select = document.getElementById('select-alunos');
     select.innerHTML = '<option value="">-- Escolha o Aluno --</option>';
-    
+
     const alunos = cacheAlunosPorTurma[turma] || [];
-    
-    // 🆕 Cria um mapa de contagem de apontamentos por aluno
+
     const contagem = {};
     todosOsRegistros.forEach(r => {
         if (r.tipo === 'apontamento' && r.aluno) {
@@ -384,38 +431,32 @@ function selecionarTurma(turma) {
             contagem[nomeAluno] = (contagem[nomeAluno] || 0) + 1;
         }
     });
-    
+
     alunos.sort().forEach(a => {
         const opt = document.createElement('option');
         opt.value = a;
         const qtd = contagem[a] || 0;
-        // 🆕 Mostra o nome + quantidade de apontamentos
         opt.textContent = a + ' (' + qtd + ')';
         select.appendChild(opt);
     });
-    
+
     select.value = '';
     filtrarRegistrosPorAluno();
-    
-    // TORNA O BOTÃO DO PRÉ-CONSELHO VISÍVEL
+
     const btnPreConselho = document.getElementById('btn-gerar-pdf-pre-conselho');
     if (btnPreConselho) {
         btnPreConselho.style.display = 'inline-flex';
     }
 
-    // Mostrar botão de seleção múltipla
     const btnMultiplo = document.getElementById('btn-selecionar-varios');
     if (btnMultiplo) btnMultiplo.style.display = 'inline-flex';
-    
-    // Esconder botão de voltar
+
     const btnVoltar = document.getElementById('btn-voltar-seletor');
     if (btnVoltar) btnVoltar.style.display = 'none';
-    
-    // Esconder área de checkboxes
+
     const areaMultipla = document.getElementById('selecao-multipla');
     if (areaMultipla) areaMultipla.style.display = 'none';
-    
-    // Mostrar seletor normal
+
     if (select) select.style.display = 'inline-block';
 
     document.getElementById('app-sidebar').classList.remove('open');
@@ -430,11 +471,11 @@ async function carregarRegistrosDoServidor() {
         return;
     }
     ultimoCarregamento = agora;
-    
+
     try {
-        const resposta = await fetch(APPS_SCRIPT_URL + "?aba=todos_os_dados"); 
-        const data = await resposta.json(); 
-        
+        const resposta = await fetch(APPS_SCRIPT_URL + "?aba=todos_os_dados");
+        const data = await resposta.json();
+
         todosOsRegistros = [];
 
         (data.apontamentos || []).forEach(row => {
@@ -479,10 +520,9 @@ async function carregarRegistrosDoServidor() {
         }
 
         if (data.atas) {
-            // 🆕 Remove duplicatas antes de exibir
             const atasUnicas = [];
             const chavesAtas = new Set();
-            
+
             data.atas.forEach(ata => {
                 const chave = ata.aluno + '|' + ata.numero + '|' + ata.data;
                 if (!chavesAtas.has(chave)) {
@@ -490,7 +530,7 @@ async function carregarRegistrosDoServidor() {
                     atasUnicas.push(ata);
                 }
             });
-            
+
             atasUnicas.forEach(ata => {
                 var linkHtml = (usuarioLogado && usuarioLogado.nivel >= 3) ?
                     ' <a href="' + ata.link + '" target="_blank" style="color:#4f46e5;text-decoration:underline;">📎 Ver Ata</a>' : '';
@@ -526,28 +566,25 @@ async function carregarRegistrosDoServidor() {
         }
 
         atualizarGraficosMural();
-        // 🆕 Atualiza o painel de ranking/gráfico
         setTimeout(atualizarPainelRanking, 500);
         if (document.getElementById('select-alunos').value) filtrarRegistrosPorAluno();
 
-    } catch (e) { 
-        console.error("Erro ao carregar dados:", e); 
+    } catch (e) {
+        console.error("Erro ao carregar dados:", e);
     }
 }
 
 function atualizarGraficosMural() {
-    // 🆕 Usa registros filtrados por período (se houver filtro ativo)
     const registros = (typeof filtroDataInicio !== 'undefined' && filtroDataInicio)
         ? todosOsRegistros.filter(r => registroEstaNoPeriodo(r.dataAtual))
         : todosOsRegistros;
-    
+
     const total = registros.length;
     const meivs = registros.filter(r => r.setor.toLowerCase() === 'meivs').length;
     const pedagogico = registros.filter(r => r.setor.toLowerCase() === 'pedagogico').length;
     const adm = registros.filter(r => r.setor.toLowerCase() === 'adm').length;
     const professores = registros.filter(r => r.setor.toLowerCase() === 'professores' || r.setor.toLowerCase() === 'direcao').length;
 
-    // Verifica se os elementos existem antes de acessar
     const valTotal = document.getElementById('dash-val-total');
     const valMeivs = document.getElementById('dash-val-meivs');
     const valPedagogico = document.getElementById('dash-val-pedagogico');
@@ -565,12 +602,11 @@ function atualizarGraficosMural() {
     const pctAdm = total === 0 ? 0 : Math.round((adm / total) * 100);
     const pctProf = total === 0 ? 0 : Math.round((professores / total) * 100);
 
-    // Barras do gráfico antigo (podem não existir mais)
     const barMeivs = document.getElementById('dash-bar-meivs');
     const barPedagogico = document.getElementById('dash-bar-pedagogico');
     const barAdm = document.getElementById('dash-bar-adm');
     const barProfessores = document.getElementById('dash-bar-professores');
-    
+
     const pctMeivsEl = document.getElementById('dash-pct-meivs');
     const pctPedEl = document.getElementById('dash-pct-pedagogico');
     const pctAdmEl = document.getElementById('dash-pct-adm');
@@ -601,28 +637,25 @@ function formatarDataEHora(s) {
     return s;
 }
 
-
 function filtrarRegistrosPorAluno() {
     const select = document.getElementById('select-alunos');
     const mural = document.getElementById('welcome-dashboard-mural');
     const mini = document.getElementById('student-mini-dash');
-    const grid = document.getElementById('siga-columns-grid'); 
+    const grid = document.getElementById('siga-columns-grid');
     const pdf = document.getElementById('btn-gerar-pdf-oficial');
     const tabs = document.getElementById('mobile-tabs-container');
 
-    // 1. Validação segura da seleção de aluno
     const aluno = select ? select.value : '';
     const valorInvalido = !aluno || aluno === "" || aluno === "Selecione uma turma..." || aluno === "Selecione um aluno...";
 
     if (valorInvalido) {
         if (mural) mural.style.display = 'flex';
         if (mini) mini.style.display = 'none';
-        if (grid) grid.style.display = ''; 
+        if (grid) grid.style.display = '';
         if (pdf) pdf.style.display = 'none';
         if (tabs) tabs.style.display = 'none';
-        // 🆕 Força a atualização do painel
         setTimeout(() => {
-            if (document.getElementById('select-alunos').value && 
+            if (document.getElementById('select-alunos').value &&
                 !document.getElementById('select-alunos').value.includes('Selecione')) {
                 mostrarGraficoTurma();
             } else {
@@ -632,17 +665,14 @@ function filtrarRegistrosPorAluno() {
         return;
     }
 
-    // Normaliza o nome do aluno selecionado (remove acentos e espaços, converte para minúsculas)
     const alunoNormalizado = aluno.trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 
-    // 2. Exibição segura dos elementos da tela
     if (mural) mural.style.display = 'none';
     if (mini) mini.style.display = 'flex';
     if (grid) grid.style.display = 'grid';
     if (pdf) pdf.style.display = 'inline-flex';
-    if (tabs) tabs.style.display = 'flex'; 
+    if (tabs) tabs.style.display = 'flex';
 
-    // 3. Verificação segura do setor do usuário
     const setorUser = (typeof usuarioLogado !== 'undefined' && usuarioLogado && usuarioLogado.setor) ? usuarioLogado.setor : 'meivs';
     let abaPadrao = setorUser === 'professores' ? 'direcao' : setorUser;
     if (!['meivs', 'pedagogico', 'adm', 'direcao'].includes(abaPadrao)) abaPadrao = 'meivs';
@@ -652,14 +682,13 @@ function filtrarRegistrosPorAluno() {
         document.querySelectorAll('.sector-column').forEach(c => c.classList.remove('active'));
         colAtiva.classList.add('active');
     }
-    
+
     const btnAtivo = document.querySelector(`.tab-button[onclick*="'${abaPadrao}'"]`);
     if (btnAtivo) {
         document.querySelectorAll('#mobile-tabs-container .tab-button').forEach(b => b.classList.remove('active'));
         btnAtivo.classList.add('active');
     }
 
-    // 4. Limpeza dos feeds por setor
     ['meivs','pedagogico','adm','direcao'].forEach(s => {
         const feed = document.getElementById(`feed-${s}`);
         if (feed) feed.innerHTML = '';
@@ -668,20 +697,16 @@ function filtrarRegistrosPorAluno() {
     let cm = 0, cp = 0, ca = 0, cf = 0;
     let docs = 0, ocorr = 0, atas = 0;
 
-    // 🆕 Nível do usuário para controle de acesso ao conteúdo
     const nivelUser = (typeof usuarioLogado !== 'undefined' && usuarioLogado) ? parseInt(usuarioLogado.nivel) : 0;
     const nomeUser = (typeof usuarioLogado !== 'undefined' && usuarioLogado) ? usuarioLogado.nome : '';
     const nomeUserNorm = nomeUser.trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 
-    // 5. Filtro e renderização dos cards
     if (typeof todosOsRegistros !== 'undefined' && Array.isArray(todosOsRegistros)) {
         todosOsRegistros.forEach(r => {
-            // Normaliza o nome do registro para comparação
             const nomeRegistro = (r.aluno || '').trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-            
-            // 🆕 Respeita o filtro de período
+
             if (typeof filtroDataInicio !== 'undefined' && filtroDataInicio && !registroEstaNoPeriodo(r.dataAtual)) return;
-            
+
             if (nomeRegistro === alunoNormalizado) {
                 if (r.tipo === 'documento') {
                     docs++;
@@ -696,27 +721,26 @@ function filtrarRegistrosPorAluno() {
                     else if (setor === 'adm') ca++;
                     else if (setor === 'professores' || setor === 'direcao') cf++;
                 }
-                
+
                 let setorExibicao = r.setor;
                 if (setorExibicao === 'professores') setorExibicao = 'direcao';
-                
+
                 const feed = document.getElementById(`feed-${setorExibicao}`);
                 if (feed) {
-                    const card = document.createElement('div'); 
+                    const card = document.createElement('div');
                     card.className = 'post-card';
-                    
-                    const botoes = (nivelUser >= 3) ? 
+
+                    const botoes = (nivelUser >= 3) ?
                         `<div class="card-actions"><button class="btn-action-card btn-edit-card" onclick="editarRegistroServidor(${r.idLinha}, '${r.setor}')"><i class="fa-solid fa-pen-to-square"></i> Editar</button><button class="btn-action-card btn-delete-card" onclick="excluirRegistroServidor(${r.idLinha})"><i class="fa-solid fa-trash-can"></i> Apagar</button></div>` : '';
-                    
+
                     const dataStr = (typeof formatarDataEHora === 'function') ? formatarDataEHora(r.dataAtual) : r.dataAtual;
                     const autorApontamento = r.funcionario || '';
 
-                    // 🆕 Controle de visualização: nível < 3 só vê os próprios apontamentos
                     const autorNorm = autorApontamento.trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
                     const podeVerConteudo = (nivelUser >= 3) || (autorNorm === nomeUserNorm);
 
-                    const textoExibido = podeVerConteudo 
-                        ? r.texto 
+                    const textoExibido = podeVerConteudo
+                        ? r.texto
                         : '<span style="display:inline-flex;align-items:center;gap:6px;background:#f1f5f9;color:#64748b;padding:8px 14px;border-radius:6px;font-style:italic;font-size:13px;"><i class="fa-solid fa-lock"></i> Conteúdo restrito — apontamento de outro setor/professor</span>';
 
                     card.innerHTML = `<p class="post-text" id="text-card-${r.idLinha}">${textoExibido}</p><div class="post-footer"><span><i class="fa-solid fa-user"></i>${autorApontamento || 'SIGA'}</span><span><i class="fa-solid fa-clock"></i>${dataStr}</span></div>${botoes}`;
@@ -726,11 +750,10 @@ function filtrarRegistrosPorAluno() {
         });
     }
 
-    // 6. Atualização de contadores e barras com verificação de elemento
     const total = cm + cp + ca + cf + docs + ocorr + atas;
     const elTotal = document.getElementById('dash-total-count');
     if (elTotal) elTotal.innerText = total;
-    
+
     const atualizarContador = (idBar, label, cor, valor) => {
         const bar = document.querySelector('.' + idBar);
         if (bar) bar.style.width = '0%';
@@ -752,20 +775,17 @@ function filtrarRegistrosPorAluno() {
     atualizarContador('docs-bar', 'DOCS', '#8b5cf6', docs);
     atualizarContador('ocorr-bar', 'OCORR', '#f59e0b', ocorr);
     atualizarContador('atas-bar', 'ATAS', '#dc2626', atas);
-    
-    // 🆕 Atualiza painel de ranking/gráfico
+
     atualizarPainelRanking();
 }
 
-function verificarTeclaEnter(e, setor) { 
-    // Enter agora apenas quebra a linha, não salva mais
+function verificarTeclaEnter(e, setor) {
     return;
 }
 
 // =============================================
 // SALVAR APONTAMENTO (COM SUPORTE OFFLINE)
 // =============================================
-
 async function salvarPost(setor) {
     const textarea = document.getElementById(`text-${setor}`);
     const texto = textarea.value.trim();
@@ -776,7 +796,6 @@ async function salvarPost(setor) {
         return;
     }
 
-    // 🆕 Verifica se há múltiplos alunos selecionados
     const listaAlunos = (typeof alunosSelecionados !== 'undefined' && alunosSelecionados.length > 0)
         ? alunosSelecionados
         : [document.getElementById('select-alunos').value];
@@ -787,13 +806,13 @@ async function salvarPost(setor) {
     }
 
     btn.disabled = true;
-    
+
     const agora = new Date();
-    const data = agora.toLocaleDateString('pt-BR') + ' ' + 
+    const data = agora.toLocaleDateString('pt-BR') + ' ' +
                  agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-    
+
     let salvos = 0;
-    
+
     for (const aluno of listaAlunos) {
         const dadosApontamento = {
             aluno: aluno,
@@ -817,12 +836,12 @@ async function salvarPost(setor) {
             console.error('Erro ao salvar para ' + aluno, error);
         }
     }
-    
+
     if (salvos > 0) {
         mostrarToast('✅ Apontamento salvo para ' + salvos + ' aluno(s)!', 'sucesso');
         textarea.value = '';
         fecharCaixaTexto(setor);
-        alunosSelecionados = []; // Limpa a seleção múltipla
+        alunosSelecionados = [];
         await carregarRegistrosDoServidor();
         if (document.getElementById('select-alunos').value) {
             filtrarRegistrosPorAluno();
@@ -830,7 +849,7 @@ async function salvarPost(setor) {
     } else {
         mostrarToast('❌ Erro ao salvar. Tente novamente.', 'erro');
     }
-    
+
     btn.disabled = false;
 }
 async function salvarNoServidor(dados) {
@@ -842,25 +861,21 @@ async function salvarNoServidor(dados) {
         funcionario: dados.funcionario,
         dataAtual: dados.dataAtual
     };
-    
+
     console.log('📤 Enviando para o servidor:', payload);
-    
+
     try {
-        const response = await fetch(APPS_SCRIPT_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain' },
-            body: JSON.stringify(payload)
-        });
-        
+        const response = await fetchAutenticado(APPS_SCRIPT_URL, payload);
+
         const resultado = await response.json();
         console.log('📥 Resposta do servidor:', resultado);
-        
+
         if (resultado.status === 'success') {
             console.log('✅ Apontamento salvo no servidor!');
         } else {
             console.error('❌ Erro no servidor:', resultado);
         }
-        
+
         return resultado;
     } catch (error) {
         console.error('❌ Erro de rede:', error);
@@ -871,11 +886,11 @@ async function salvarNoServidor(dados) {
 async function excluirRegistroServidor(id) {
     if (!id || !confirm('Apagar?')) return;
     try {
-        await fetch(APPS_SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ operacao: "EXCLUIR", idLinha: id }) });
+        await fetchAutenticado(APPS_SCRIPT_URL, { operacao: "EXCLUIR", idLinha: id });
         todosOsRegistros = todosOsRegistros.filter(r => r.idLinha !== id); filtrarRegistrosPorAluno();
         mostrarToast('Registro apagado com sucesso.', 'sucesso');
-    } catch (e) { 
-        mostrarToast('Erro ao tentar apagar o registro.', 'erro'); 
+    } catch (e) {
+        mostrarToast('Erro ao tentar apagar o registro.', 'erro');
     }
 }
 
@@ -885,12 +900,12 @@ async function editarRegistroServidor(id, setor) {
     const novo = prompt('Editar:', el.innerText);
     if (!novo || !novo.trim()) return;
     try {
-        await fetch(APPS_SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ operacao: "EDITAR", idLinha: id, texto: novo.trim() }) });
+        await fetchAutenticado(APPS_SCRIPT_URL, { operacao: "EDITAR", idLinha: id, texto: novo.trim() });
         const reg = todosOsRegistros.find(r => r.idLinha === id); if (reg) reg.texto = novo.trim();
         filtrarRegistrosPorAluno();
         mostrarToast('Registro editado com sucesso!', 'sucesso');
-    } catch (e) { 
-        mostrarToast('Erro ao tentar editar.', 'erro'); 
+    } catch (e) {
+        mostrarToast('Erro ao tentar editar.', 'erro');
     }
 }
 
@@ -898,9 +913,9 @@ async function editarRegistroServidor(id, setor) {
 function alternarTema() {
     const body = document.body;
     const btnIcone = document.getElementById('btn-icone-tema');
-    
+
     body.classList.toggle('dark-mode');
-    
+
     if (body.classList.contains('dark-mode')) {
         btnIcone.innerHTML = '<i class="fa-solid fa-sun" style="color: #eab308;"></i>';
         localStorage.setItem('sgi_ccma_tema', 'escuro');
@@ -922,7 +937,7 @@ window.addEventListener('DOMContentLoaded', () => {
 function gerarFichaIndividualConselho() {
     const aluno = document.getElementById('select-alunos').value;
     if (!aluno) return;
-    
+
     let html = `<div style="padding:25px;font-family:'Segoe UI',Arial;color:#000;background:#fff;">
         <div style="display:flex;justify-content:space-between;border-bottom:3px double #005088;padding-bottom:12px;margin-bottom:20px;">
             <div><h4 style="margin:0;font-size:13px;color:#475569;">SECRETARIA DE ESTADO DA EDUCAÇÃO - SEED</h4><h4 style="margin:2px 0 0;font-size:12px;color:#64748b;">NÚCLEO REGIONAL DE EDUCAÇÃO DE UMUARAMA</h4><h2 style="margin:5px 0 0;color:#005088;font-size:18px;">COLÉGIO CÍVICO-MILITAR ANCHIETA</h2></div>
@@ -933,8 +948,7 @@ function gerarFichaIndividualConselho() {
             <tr><td style="padding:6px;border:1px solid #94a3b8;background:#f8fafc;font-weight:bold;">Estudante:</td><td style="padding:6px;border:1px solid #94a3b8;">${aluno}</td><td style="padding:6px;border:1px solid #94a3b8;background:#f8fafc;font-weight:bold;">Turma:</td><td style="padding:6px;border:1px solid #94a3b8;">${turmaSelecionadaAtiva}</td></tr>
         </table>
         <h4 style="font-size:13px;color:#005088;margin-top:15px;">Histórico de Apontamentos</h4>`;
-        
-    // Normaliza o nome do aluno (ignora acentos e maiúsculas/minúsculas)
+
 const alunoNormalizado = aluno.trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 
 ['meivs','pedagogico','adm','direcao'].forEach(setor => {
@@ -947,18 +961,18 @@ const alunoNormalizado = aluno.trim().normalize('NFD').replace(/[\u0300-\u036f]/
             registros.forEach(p => html += `<div style="margin:8px 0;padding:8px 12px;background:#fff;border-bottom:1px solid #e2e8f0;"><div>${p.texto}</div><div style="font-size:10px;color:#64748b;text-align:right;">${p.funcionario} | ${formatarDataEHora(p.dataAtual)}</div></div>`);
         }
     });
-    
+
     html += `</div>`;
-    
+
     const elementoParaImprimir = document.createElement('div');
     elementoParaImprimir.innerHTML = html;
 
-    const opcoesPdf = { 
-        margin: 12, 
-        filename: `Ficha_Conselho_${aluno.replace(/ /g,'_')}.pdf`, 
-        image: { type: 'jpeg', quality: 0.98 }, 
-        html2canvas: { scale: 2 }, 
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
+    const opcoesPdf = {
+        margin: 12,
+        filename: `Ficha_Conselho_${aluno.replace(/ /g,'_')}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
     html2pdf().set(opcoesPdf).from(elementoParaImprimir).toPdf().get('pdf').then(function (pdf) {
@@ -967,18 +981,18 @@ const alunoNormalizado = aluno.trim().normalize('NFD').replace(/[\u0300-\u036f]/
 }
 
 function aplicarBloqueioSetores(setor, nivel) {
-    const setoresDefinidos = ['meivs', 'pedagogico', 'adm', 'direcao']; // "direcao" = Professores
-    
+    const setoresDefinidos = ['meivs', 'pedagogico', 'adm', 'direcao'];
+
     setoresDefinidos.forEach(s => {
         const ta = document.getElementById(`text-${s}`);
         const btn = document.getElementById(`btn-${s}`);
         const tabBtn = document.querySelector(`.tab-button[onclick*="'${s}'"]`);
-        
+
         let liberado = false;
-        
+
         if (nivel >= 4) {
             liberado = true;
-        } 
+        }
         else if (nivel >= 3 && (setor === 'adm' || setor === 'secretaria' || setor === 'direcao')) {
             liberado = true;
         }
@@ -986,16 +1000,14 @@ function aplicarBloqueioSetores(setor, nivel) {
             if (setor === s) {
                 liberado = true;
             }
-            // Professores (setor "professores") acessam a coluna "direcao" (que exibe Professores)
             if (setor === 'professores' && s === 'direcao') {
                 liberado = true;
             }
-            // Se o setor do usuário for "direcao", também acessa "direcao"
             if (setor === 'direcao' && s === 'direcao') {
                 liberado = true;
             }
         }
-        
+
         if (liberado) {
             if (ta) ta.disabled = false;
             if (btn) btn.disabled = false;
@@ -1010,21 +1022,19 @@ function aplicarBloqueioSetores(setor, nivel) {
 
 // ==== MODAL RELATÓRIO ====
 function abrirModalRelatorio(setorFiltrado) {
-    modalSetorAtivo = setorFiltrado; 
+    modalSetorAtivo = setorFiltrado;
     modalItensExibidos = 50;
     document.getElementById('modal-relatorio-setor').style.display = 'flex';
     document.getElementById('modal-relatorio-titulo').innerHTML = setorFiltrado === 'geral' ? 'Relatório Geral' : setorFiltrado.toUpperCase();
-    
-    // 🆕 Filtra por período primeiro
+
     let registrosBase = (typeof filtroDataInicio !== 'undefined' && filtroDataInicio)
         ? todosOsRegistros.filter(r => registroEstaNoPeriodo(r.dataAtual))
         : todosOsRegistros;
-    
-    // Depois filtra por setor
-    let registros = setorFiltrado === 'geral' 
-        ? registrosBase 
+
+    let registros = setorFiltrado === 'geral'
+        ? registrosBase
         : registrosBase.filter(r => r.setor === setorFiltrado || (setorFiltrado === 'direcao' && (r.setor === 'professores' || r.setor === 'direcao')));
-    
+
     modalRegistrosFiltrados = [...registros].reverse();
     const container = document.getElementById('modal-relatorio-lista');
     container.innerHTML = `<div style="padding:10px;"><input type="text" id="busca-modal" placeholder="Filtrar..." oninput="filtrarBuscaModal(false)" style="width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:6px;"></div><div id="modal-lista-itens-scroll" style="max-height:420px;overflow-y:auto;"></div><div id="modal-container-botao-mais" style="text-align:center;padding:15px;"></div>`;
@@ -1065,18 +1075,16 @@ function fecharModalSelecaoEvent(e) { if (e.target.id === 'modal-selecionar-turm
 // ==== PAINEL DE ADMINISTRAÇÃO ====
 function abrirPainelAdmin() {
     document.getElementById('modal-admin').style.display = 'flex';
-    
-    // 🆕 Popular seletor de turmas para REMANEJAMENTO
+
     const select = document.getElementById('admin-nova-turma');
     if (select) {
         select.innerHTML = '<option value="">-- Escolha a nova turma --</option><option value="EXCLUIR" style="color: red; font-weight: bold;">❌ EXCLUIR ALUNO DO SISTEMA</option>';
-        
+
         Object.keys(cacheAlunosPorTurma).sort().forEach(t => {
             select.innerHTML += `<option value="${t}">${t}</option>`;
         });
     }
-    
-    // 🆕 Popular seletor de turmas para NOVO ALUNO
+
     const selectNovaTurma = document.getElementById('admin-novo-aluno-turma');
     if (selectNovaTurma) {
         selectNovaTurma.innerHTML = '<option value="">-- Selecione a turma --</option>';
@@ -1084,16 +1092,14 @@ function abrirPainelAdmin() {
             selectNovaTurma.innerHTML += `<option value="${t}">${t}</option>`;
         });
     }
-    
-    // 🆕 Limpar campos de novo aluno
+
     if (document.getElementById('admin-novo-aluno-id')) {
         document.getElementById('admin-novo-aluno-id').value = '';
     }
     if (document.getElementById('admin-novo-aluno-nome')) {
         document.getElementById('admin-novo-aluno-nome').value = '';
     }
-    
-    // Limpar campo de busca de aluno
+
     if (document.getElementById('admin-nome-aluno')) {
         document.getElementById('admin-nome-aluno').value = '';
     }
@@ -1105,24 +1111,21 @@ function abrirPainelAdmin() {
 function fecharModalAdmin() { document.getElementById('modal-admin').style.display = 'none'; }
 function fecharModalAdminEvent(e) { if (e.target.id === 'modal-admin') fecharModalAdmin(); }
 
-// 🆕 Função para adicionar novo aluno
 async function adicionarNovoAluno() {
     const id = document.getElementById('admin-novo-aluno-id').value.trim();
     const nome = document.getElementById('admin-novo-aluno-nome').value.trim();
     const turmaSelect = document.getElementById('admin-novo-aluno-turma');
     const turma = turmaSelect ? turmaSelect.value : '';
     const btn = document.getElementById('btn-add-aluno');
-    
+
     if (!id || !nome || !turma) {
         mostrarToast('Preencha ID, Nome e Turma do aluno.', 'aviso');
         return;
     }
-    
-    // Deriva o código da turma (ex: "6º Ano A" -> "6A")
+
     const turmaTexto = turmaSelect.options[turmaSelect.selectedIndex].text;
-    let turmaCodigo = turma; // Por padrão usa o valor do select
-    
-    // Tenta derivar se o valor for o nome completo
+    let turmaCodigo = turma;
+
     const match = turmaTexto.match(/(\d+)[º°]?\s*Ano\s*([A-C])/i);
     if (match) {
         turmaCodigo = match[1] + match[2].toUpperCase();
@@ -1135,30 +1138,24 @@ async function adicionarNovoAluno() {
     } else if (turmaTexto.includes('AGRO')) {
         turmaCodigo = '1AGRO';
     }
-    
+
     btn.disabled = true;
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Adicionando...';
-    
+
     const payload = {
         operacao: "ALUNO_ADICIONAR",
-        emailOperador: usuarioLogado.email,
         aluno_id: id,
         nome_aluno: nome.toUpperCase(),
         turma_ref: turmaTexto,
         turma_codigo: turmaCodigo
     };
-    
+
     try {
-        const response = await fetch(APPS_SCRIPT_URL, { 
-            method: 'POST', 
-            headers: { 'Content-Type': 'text/plain' },
-            body: JSON.stringify(payload) 
-        });
+        const response = await fetchAutenticado(APPS_SCRIPT_URL, payload);
         const result = await response.json();
-        
+
         if (result.status === 'success') {
             mostrarToast('✅ Aluno adicionado com sucesso!', 'sucesso');
-            // Limpar campos
             document.getElementById('admin-novo-aluno-id').value = '';
             document.getElementById('admin-novo-aluno-nome').value = '';
             document.getElementById('admin-novo-aluno-turma').value = '';
@@ -1175,35 +1172,29 @@ async function adicionarNovoAluno() {
     }
 }
 
-// Função existente de remanejar/excluir (mantida)
 async function executarAcaoAluno() {
     const nomeAluno = document.getElementById('admin-nome-aluno').value.trim();
     const novaTurma = document.getElementById('admin-nova-turma').value;
     const btn = document.getElementById('btn-exec-admin');
 
     if (!nomeAluno || !novaTurma) return mostrarToast('Preencha o nome do aluno e escolha uma ação.', 'aviso');
-    
+
     const operacao = novaTurma === 'EXCLUIR' ? 'ALUNO_EXCLUIR' : 'ALUNO_TRANSFERIR';
     if (operacao === 'ALUNO_EXCLUIR' && !confirm(`Tem certeza que deseja EXCLUIR ${nomeAluno} do sistema?`)) return;
-    
+
     btn.disabled = true;
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processando...';
 
     const payload = {
         operacao: operacao,
         nome_aluno: nomeAluno,
-        nova_turma: novaTurma,
-        emailOperador: usuarioLogado.email 
+        nova_turma: novaTurma
     };
 
     try {
-        const response = await fetch(APPS_SCRIPT_URL, { 
-            method: 'POST', 
-            headers: { 'Content-Type': 'text/plain' },
-            body: JSON.stringify(payload) 
-        });
+        const response = await fetchAutenticado(APPS_SCRIPT_URL, payload);
         const result = await response.json();
-        
+
         if (result.status === 'success') {
             mostrarToast('Ação concluída com sucesso! Atualizando base...', 'sucesso');
             document.getElementById('admin-nome-aluno').value = '';
@@ -1237,7 +1228,6 @@ async function salvarUsuarioAdmin() {
 
     const payload = {
         operacao: 'USER_SALVAR',
-        emailOperador: usuarioLogado.email,
         email: email,
         nome: nome,
         setor: setor,
@@ -1247,13 +1237,13 @@ async function salvarUsuarioAdmin() {
         max_aulas: document.getElementById('admin-pref-max-aulas')?.value || 5,
         geminadas: document.getElementById('admin-pref-geminadas')?.value || 'Não',
         restricoes: document.getElementById('admin-pref-restricoes')?.value || '',
-        data_nasc: document.getElementById('admin-data-nasc')?.value || '' // 🆕
+        data_nasc: document.getElementById('admin-data-nasc')?.value || ''
     };
 
     try {
-        const resp = await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+        const resp = await fetchAutenticado(APPS_SCRIPT_URL, payload);
         const result = await resp.json();
-        
+
         if (result.status === 'success' || result.status === 'updated') {
             mostrarToast(result.status === 'success' ? 'Novo usuário cadastrado!' : 'Usuário atualizado!', 'sucesso');
             document.getElementById('admin-user-email').value = '';
@@ -1263,7 +1253,7 @@ async function salvarUsuarioAdmin() {
             if (document.getElementById('admin-pref-turno')) document.getElementById('admin-pref-turno').value = 'Ambos';
             if (document.getElementById('admin-pref-max-aulas')) document.getElementById('admin-pref-max-aulas').value = 5;
             if (document.getElementById('admin-pref-geminadas')) document.getElementById('admin-pref-geminadas').value = 'Não';
-            if (document.getElementById('admin-data-nasc')) document.getElementById('admin-data-nasc').value = ''; // 🆕
+            if (document.getElementById('admin-data-nasc')) document.getElementById('admin-data-nasc').value = '';
             document.getElementById('preferencias-professor').style.display = 'none';
         } else {
             mostrarToast('Você não tem permissão para esta ação.', 'erro');
@@ -1278,19 +1268,16 @@ async function salvarUsuarioAdmin() {
 async function deletarUsuarioAdmin() {
     const email = document.getElementById('admin-user-email').value.trim();
     if (!email) return mostrarToast('Digite o E-mail do usuário que deseja excluir.', 'aviso');
-    
+
     if (!confirm(`ALERTA: Tem certeza que deseja REVOGAR O ACESSO de ${email}?`)) return;
 
     const btn = document.getElementById('btn-del-user');
     btn.disabled = true; btn.innerHTML = 'Excluindo...';
 
     try {
-        const resp = await fetch(APPS_SCRIPT_URL, { 
-            method: 'POST', 
-            body: JSON.stringify({ operacao: 'USER_DELETAR', emailOperador: usuarioLogado.email, email: email }) 
-        });
+        const resp = await fetchAutenticado(APPS_SCRIPT_URL, { operacao: 'USER_DELETAR', email: email });
         const result = await resp.json();
-        
+
         if (result.status === 'success') {
             mostrarToast('Acesso revogado com sucesso.', 'sucesso');
             document.getElementById('admin-user-email').value = '';
@@ -1311,7 +1298,7 @@ async function deletarUsuarioAdmin() {
 function abrirPreConselho() {
     document.getElementById('modal-pre-conselho').style.display = 'flex';
     document.getElementById('pc-professor').value = usuarioLogado.nome;
-    
+
     const selectTurma = document.getElementById('pc-turma');
     selectTurma.innerHTML = '<option value="">Selecione a Turma...</option>';
     Object.keys(cacheAlunosPorTurma).sort().forEach(t => {
@@ -1322,13 +1309,13 @@ function abrirPreConselho() {
 async function enviarPreConselho() {
     const turma = document.getElementById('pc-turma').value;
     const disciplina = document.getElementById('pc-disciplina').value.trim();
-    
+
     if (!turma || !disciplina) {
         return mostrarToast('Preencha a Disciplina e selecione a Turma.', 'aviso');
     }
 
     const btn = document.getElementById('btn-save-conselho');
-    btn.disabled = true; 
+    btn.disabled = true;
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Enviando...';
 
     const checkboxes = document.querySelectorAll('#pc-q12-checkboxes input:checked');
@@ -1357,22 +1344,18 @@ async function enviarPreConselho() {
     q14: document.getElementById('pc-q14').value,
     q16: document.getElementById('pc-q16').value.trim(),
     q17: document.getElementById('pc-q17').value,
-    q17_justificativa: document.getElementById('pc-q17-justificativa').value.trim(), // 🆕
+    q17_justificativa: document.getElementById('pc-q17-justificativa').value.trim(),
     q18: document.getElementById('pc-q18').value.trim()
 };
 
     try {
-        const resp = await fetch(APPS_SCRIPT_URL, { 
-            method: 'POST', 
-            headers: { 'Content-Type': 'text/plain' }, 
-            body: JSON.stringify(payload) 
-        });
-        
+        const resp = await fetchAutenticado(APPS_SCRIPT_URL, payload);
+
         const result = await resp.json();
-        
+
         if (result.status === 'success') {
             mostrarToast('Avaliação enviada com sucesso!', 'sucesso');
-            
+
             document.querySelectorAll('#modal-pre-conselho input, #modal-pre-conselho textarea').forEach(el => {
                 if(el.type === 'checkbox') el.checked = false;
                 else el.value = '';
@@ -1383,7 +1366,7 @@ async function enviarPreConselho() {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Enviar Avaliação da Turma';
             }, 1000);
-            
+
         } else {
             throw new Error(result.message || 'Erro no servidor');
         }
@@ -1395,10 +1378,10 @@ async function enviarPreConselho() {
 }
 
 async function gerarRelatorioPreConselho(turmaSelecionada) {
-    const todosRegistrosPC = await carregarRegistrosPreConselho(); 
+    const todosRegistrosPC = await carregarRegistrosPreConselho();
     const turmaLimpa = turmaSelecionada.toString().trim().toLowerCase();
 
-    const dadosTurma = todosRegistrosPC.filter(r => 
+    const dadosTurma = todosRegistrosPC.filter(r =>
         r.turma && r.turma.toString().trim().toLowerCase() === turmaLimpa
     );
 
@@ -1410,34 +1393,34 @@ async function gerarRelatorioPreConselho(turmaSelecionada) {
     let html = `
         <div style="font-family: Arial, sans-serif; padding: 40px; color: #000;">
             <h2 style="text-align:center; border-bottom: 2px solid #000; padding-bottom: 10px;">Relatório de Pré-Conselho - ${turmaSelecionada}</h2>
-            
+
             ${dadosTurma.map(r => `
                 <div style="margin-bottom: 40px; border: 1px solid #ccc; padding: 20px; border-radius: 8px; page-break-inside: avoid;">
                     <h3 style="background: #e9ecef; padding: 10px; margin-top: 0; border-radius: 5px;">
                         Disciplina: ${r.disciplina || 'N/A'} | Professor: ${r.professor || 'N/A'}
                     </h3>
                     <p style="font-size: 14px; color: #555;"><strong>Trimestre:</strong> ${r.trimestre || 'N/A'} | <strong>Data de Envio:</strong> ${r.data || 'N/A'}</p>
-                    
+
                     <hr style="border-top: 1px dashed #ccc; margin: 15px 0;">
-                    
+
                     <h4 style="color: #2c3e50; margin-bottom: 8px;">1. Rendimento da Turma (Quantitativo)</h4>
                     <p style="margin: 5px 0;"><strong>Abaixo da Média:</strong> ${r.q1 || '0'} | <strong>Básico:</strong> ${r.q2 || '0'} | <strong>Adequado:</strong> ${r.q3 || '0'} | <strong>Avançado:</strong> ${r.q4 || '0'}</p>
-                    
+
                     <h4 style="color: #2c3e50; margin-bottom: 8px; margin-top: 15px;">2. Análise da Turma</h4>
                     <p style="margin: 5px 0;"><strong>Comprometimento:</strong> ${r.q5 || 'N/A'}</p>
                     <p style="margin: 5px 0;"><strong>Pontos Positivos:</strong> ${r.q6 || 'N/A'}</p>
                     <p style="margin: 5px 0;"><strong>Pontos Negativos/Dificuldades:</strong> ${r.q7 || 'N/A'}</p>
                     <p style="margin: 5px 0;"><strong>Sugestões de Melhoria:</strong> ${r.q8 || 'N/A'}</p>
-                    
+
                     <h4 style="color: #2c3e50; margin-bottom: 8px; margin-top: 15px;">3. Alunos em Destaque Negativo</h4>
                     <p style="margin: 5px 0;"><strong>Alunos Abaixo da Média e Motivos:</strong> ${r.q9 || 'N/A'}</p>
-                    
+
                     <h4 style="color: #2c3e50; margin-bottom: 8px; margin-top: 15px;">4. Metodologia e Avaliação</h4>
                     <p style="margin: 5px 0;"><strong>Metodologia Aplicada:</strong> ${r.q10 || 'N/A'}</p>
                     <p style="margin: 5px 0;"><strong>Recursos Utilizados:</strong> ${r.q11 || 'N/A'}</p>
                     <p style="margin: 5px 0;"><strong>Instrumentos de Avaliação:</strong> ${r.q12 || 'N/A'}</p>
                     <p style="margin: 5px 0;"><strong>Houve Avaliação Específica?</strong> ${r.q14 || 'N/A'}</p>
-                    
+
                     <h4 style="color: #2c3e50; margin-bottom: 8px; margin-top: 15px;">5. Recuperação de Estudos</h4>
                     <p style="margin: 5px 0;"><strong>Como foi a Recuperação:</strong> ${r.q16 || 'N/A'}</p>
                     <p style="margin: 5px 0;"><strong>Usou Instrumentos Diferenciados?</strong> ${r.q17 || 'N/A'}</p>
@@ -1458,14 +1441,14 @@ async function gerarRelatorioPreConselho(turmaSelecionada) {
 function abrirModalTurmasPreConselho() {
     const select = document.getElementById('select-turma-relatorio');
     select.innerHTML = '<option value="">-- Escolha uma Turma --</option>';
-    
+
     Object.keys(cacheAlunosPorTurma).sort().forEach(turma => {
         const opt = document.createElement('option');
         opt.value = turma;
         opt.textContent = turma;
         select.appendChild(opt);
     });
-    
+
     document.getElementById('modal-selecionar-turma').style.display = 'flex';
 }
 
@@ -1476,18 +1459,18 @@ function confirmarGeracaoRelatorio() {
         return;
     }
     document.getElementById('modal-selecionar-turma').style.display = 'none';
-    gerarRelatorioPreConselho(turma); 
+    gerarRelatorioPreConselho(turma);
 }
 
 async function carregarRegistrosPreConselho() {
-    const SHEET_PRE_CONSELHO_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=Pre_Conselho`; 
+    const SHEET_PRE_CONSELHO_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=Pre_Conselho`;
 
     try {
         const response = await fetch(SHEET_PRE_CONSELHO_URL);
         const text = await response.text();
         const jsonText = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
         const data = JSON.parse(jsonText);
-        
+
         return data.table.rows.map(r => ({
             data: r.c[0]?.v || '',
             professor: r.c[1]?.v || '',
@@ -1509,8 +1492,8 @@ async function carregarRegistrosPreConselho() {
             q14: r.c[17]?.v || '',
             q16: r.c[18]?.v || '',
             q17: r.c[19]?.v || '',
-            q17_justificativa: r.c[20]?.v || '', // 🆕
-            q18: r.c[21]?.v || '' 
+            q17_justificativa: r.c[20]?.v || '',
+            q18: r.c[21]?.v || ''
         }));
     } catch (e) {
         console.error("Erro ao carregar Pré-Conselho:", e);
@@ -1519,18 +1502,15 @@ async function carregarRegistrosPreConselho() {
 }
 
 function abrirCaixaTexto(setor) {
-    // Mostra o container de abas quando for fazer um apontamento
     const tabsContainer = document.getElementById('mobile-tabs-container');
     if (tabsContainer) {
         tabsContainer.style.display = 'flex';
     }
-    
-    // Mostra o overlay de texto do setor correspondente
+
     const overlay = document.getElementById('overlay-text-' + setor);
     if (overlay) {
         overlay.style.display = 'flex';
-        
-        // Foca no textarea
+
         const textarea = document.getElementById('text-' + setor);
         if (textarea) {
             setTimeout(() => textarea.focus(), 100);
@@ -1539,13 +1519,11 @@ function abrirCaixaTexto(setor) {
 }
 
 function fecharCaixaTexto(setor) {
-    // Fecha o overlay
     const overlay = document.getElementById('overlay-text-' + setor);
     if (overlay) {
         overlay.style.display = 'none';
     }
-    
-    // Esconde as abas se não houver nenhum overlay aberto
+
     const abasAbertas = document.querySelectorAll('.overlay-apontamento[style*="display: flex"]');
     if (abasAbertas.length === 0) {
         const tabsContainer = document.getElementById('mobile-tabs-container');
@@ -1555,19 +1533,19 @@ function fecharCaixaTexto(setor) {
     }
 }
 
-// ==== MÓDULO DE OCORRÊNCIAS (SAÍDA ANTECIPADA / ENTRADA ATRASADA) ====
+// ==== MÓDULO DE OCORRÊNCIAS ====
 function abrirModalSaida() {
     const modal = document.getElementById('modal-saida');
     const selectAluno = document.getElementById('saida-aluno');
-    
+
     document.getElementById('saida-motivo').value = '';
     document.getElementById('ocorrencia-tipo').value = 'Saída Antecipada';
-    
+
     const agora = new Date();
     const hora = String(agora.getHours()).padStart(2, '0');
     const minutos = String(agora.getMinutes()).padStart(2, '0');
     document.getElementById('ocorrencia-horario').value = hora + ':' + minutos;
-    
+
     selectAluno.innerHTML = '<option value="">-- Selecione o Aluno --</option>';
     let todosAlunos = [];
     for (let turma in cacheAlunosPorTurma) {
@@ -1625,11 +1603,7 @@ async function registrarSaidaAntecipada() {
     };
 
     try {
-        await fetch(APPS_SCRIPT_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain' },
-            body: JSON.stringify(payload)
-        });
+        await fetchAutenticado(APPS_SCRIPT_URL, payload);
         mostrarToast(tipo + ' registrada com sucesso!', 'sucesso');
         fecharModalSaida();
         await carregarRegistrosDoServidor();
@@ -1639,32 +1613,29 @@ async function registrarSaidaAntecipada() {
 }
 
 // =============================================
-// FUNÇÕES OFFLINE E SINCRONIZAÇÃO (VERSÃO LIMPA)
+// FUNÇÕES OFFLINE E SINCRONIZAÇÃO
 // =============================================
-
-// Mostra apontamento local na tela
 function mostrarApontamentoLocal(apontamento) {
     const setorExibicao = apontamento.setor === 'professores' ? 'direcao' : apontamento.setor;
     const feed = document.getElementById(`feed-${setorExibicao}`);
-    
+
     if (feed) {
-        // Verifica se já existe um card com este idLocal
         const existente = feed.querySelector(`.post-card-local[data-id-local="${apontamento.idLocal}"]`);
         if (existente) {
             existente.remove();
         }
-        
+
         const card = document.createElement('div');
         card.className = 'post-card post-card-local';
         card.dataset.idLocal = apontamento.idLocal;
         card.style.borderLeft = '4px solid #f59e0b';
         card.style.background = '#fffbeb';
-        
+
         card.innerHTML = `
             <p class="post-text">${apontamento.texto}</p>
             <div class="post-footer">
                 <span><i class="fa-solid fa-user"></i> ${apontamento.funcionario || 'SIGA'}</span>
-                <span><i class="fa-solid fa-clock"></i> ${apontamento.dataAtual} 
+                <span><i class="fa-solid fa-clock"></i> ${apontamento.dataAtual}
                     <span style="font-size: 10px; color: #f59e0b; margin-left: 5px;">
                         ⏳ pendente
                     </span>
@@ -1692,31 +1663,29 @@ function atualizarStatusApontamento(idLocal, sincronizado) {
 
 let estaSincronizando = false;
 
-
 async function sincronizarApontamentos() {
     if (!db || !db.db || estaSincronizando || !navigator.onLine) {
         console.log('ℹ️ Sincronização ignorada');
         return;
     }
     estaSincronizando = true;
-    
+
     try {
         const pendentes = await db.getApontamentosNaoSincronizados();
         console.log(`📤 ${pendentes.length} apontamentos pendentes de sincronização`);
-        
+
         if (!pendentes || pendentes.length === 0) {
             estaSincronizando = false;
             return;
         }
-        
+
         let sincronizados = 0;
         let erros = 0;
-        
+
         for (const apontamento of pendentes) {
             console.log(`🔄 Sincronizando:`, apontamento);
-            
+
             try {
-                // Remove campos que não devem ir para o servidor
                 const dadosParaEnviar = {
                     aluno: apontamento.aluno,
                     setor: apontamento.setor,
@@ -1724,15 +1693,14 @@ async function sincronizarApontamentos() {
                     funcionario: apontamento.funcionario,
                     dataAtual: apontamento.dataAtual
                 };
-                
+
                 const result = await salvarNoServidor(dadosParaEnviar);
                 console.log(`📥 Resultado:`, result);
-                
+
                 if (result.status === 'success') {
                     await db.marcarApontamentoSincronizado(apontamento.idLocal);
                     sincronizados++;
                     console.log(`✅ Apontamento ${apontamento.idLocal} sincronizado!`);
-                    // Atualiza o card visual
                     atualizarStatusApontamento(apontamento.idLocal, true);
                 } else {
                     erros++;
@@ -1743,20 +1711,19 @@ async function sincronizarApontamentos() {
                 console.error(`❌ Erro ao sincronizar apontamento:`, error);
             }
         }
-        
+
         if (sincronizados > 0) {
             mostrarToast(`📡 ${sincronizados} apontamento(s) sincronizado(s)!`, 'sucesso');
-            // Recarrega os dados para mostrar os apontamentos salvos
             await carregarRegistrosDoServidor();
             if (document.getElementById('select-alunos').value) {
                 filtrarRegistrosPorAluno();
             }
         }
-        
+
         if (erros > 0) {
             console.warn(`⚠️ ${erros} apontamento(s) falharam na sincronização`);
         }
-        
+
     } catch (error) {
         console.error('❌ Erro na sincronização:', error);
     } finally {
@@ -1768,23 +1735,21 @@ async function sincronizarApontamentos() {
 // =============================================
 // INDICADOR DE CONEXÃO
 // =============================================
-
 function atualizarStatusConexao() {
     const statusDiv = document.getElementById('status-conexao');
     const statusTexto = document.getElementById('status-texto');
     const statusIcone = document.getElementById('status-icone');
     const statusPendentes = document.getElementById('status-pendentes');
-    
+
     if (!statusDiv) return;
-    
+
     if (navigator.onLine) {
         statusDiv.style.display = 'block';
         statusDiv.style.background = '#f0fdf4';
         statusDiv.style.border = '1px solid #22c55e';
         statusIcone.style.color = '#22c55e';
         statusTexto.textContent = 'Online';
-        
-        // Verifica se tem pendentes
+
         if (db && db.db) {
             db.getApontamentosNaoSincronizados().then(pendentes => {
                 if (pendentes && pendentes.length > 0) {
@@ -1812,7 +1777,6 @@ function atualizarStatusConexao() {
 // =============================================
 // EVENTOS DE CONEXÃO
 // =============================================
-
 window.addEventListener('online', function() {
     console.log('📡 Internet voltou! Sincronizando...');
     mostrarToast('📡 Conexão restabelecida! Sincronizando...', 'sucesso');
@@ -1826,14 +1790,12 @@ window.addEventListener('offline', function() {
     setTimeout(atualizarStatusConexao, 500);
 });
 
-// Sincroniza a cada 30 segundos
 setInterval(() => {
     if (navigator.onLine) {
         sincronizarApontamentos();
     }
 }, 30000);
 
-// Sincroniza ao carregar
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
         if (navigator.onLine) {
@@ -1843,29 +1805,27 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 3000);
 });
 
-// Atualiza status a cada 10 segundos
 setInterval(atualizarStatusConexao, 10000);
 
 console.log('🔄 SIGA inicializado com sucesso!');
 console.log('📦 Banco de dados local:', db ? '✅ Disponível' : '❌ Indisponível');
 
 // =============================================
-// 🔧 CORREÇÃO: Move modais para fora do #app-interface
-// Isso resolve o problema de position:fixed quebrado
+// 🔧 Move modais para fora do #app-interface
 // =============================================
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(function() {
         const appInterface = document.getElementById('app-interface');
         if (!appInterface) return;
-        
+
         const modais = appInterface.querySelectorAll('.modal-overlay');
         console.log('🔧 Movendo ' + modais.length + ' modais para fora do #app-interface');
-        
+
         modais.forEach(function(modal) {
             document.body.appendChild(modal);
             console.log('   → Movido:', modal.id);
         });
-        
+
         console.log('✅ Modais reposicionados com sucesso!');
     }, 500);
 });
