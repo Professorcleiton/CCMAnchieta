@@ -1651,3 +1651,58 @@ select#select-alunos {
     .btn-acao i { font-size: 15px; }
     .btn-acao span { font-size: 9px; }
 }
+
+/* =============================================
+   FILTROS DE PERÍODO DENTRO DO HEADER (OPÇÃO A)
+   ============================================= */
+
+.top-bar-app > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    gap: 15px;
+}
+
+#filtro-periodo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+#filtro-periodo::-webkit-scrollbar {
+    display: none;
+}
+
+#filtro-periodo button {
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* No mobile, os filtros voltam para uma linha própria */
+@media (max-width: 768px) {
+    .top-bar-app > div {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    #filtro-periodo {
+        order: 3;
+        width: 100%;
+        overflow-x: auto;
+        padding: 6px 0;
+        margin-top: 6px;
+    }
+    
+    .user-and-nre-wrapper {
+        margin-left: auto;
+    }
+}
