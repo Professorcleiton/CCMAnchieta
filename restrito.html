@@ -272,74 +272,90 @@
                             </div>
                         </div>
 
-                        <div class="dash-panel" style="display: flex; flex-direction: column; gap: 15px; max-height: calc(100vh - 220px); overflow-y: auto; padding-right: 8px;">
+                        <div class="dash-panel dash-panel-acoes">
                             <div class="dash-panel-title"><i class="fa-solid fa-bolt"></i> Ações Rápidas</div>
 
-                            <button id="btn-imprimir-apontamentos" class="btn-salvar" style="background-color: #0891b2; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: none; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(8, 145, 178, 0.2); margin-bottom: 5px;" onclick="abrirModalImpressao()">
-                                    <i class="fa-solid fa-print" style="font-size: 18px;"></i> Imprimir Apontamentos
-                            </button>
+                            <div class="acoes-grid">
+                                <button id="btn-imprimir-apontamentos" class="btn-acao" style="display: none; background-color: #0891b2;" onclick="abrirModalImpressao()">
+                                    <i class="fa-solid fa-print"></i>
+                                    <span>Imprimir Apontamentos</span>
+                                </button>
 
-                            <button id="btn-central-alertas" class="btn-salvar" style="background-color: #dc2626; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: none; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(220, 38, 38, 0.2); margin-bottom: 5px;" onclick="abrirCentralAlertas()">
-                                <i class="fa-solid fa-triangle-exclamation" style="font-size: 18px;"></i> Central de Alertas
-                            </button>
+                                <button id="btn-central-alertas" class="btn-acao" style="display: none; background-color: #dc2626;" onclick="abrirCentralAlertas()">
+                                    <i class="fa-solid fa-triangle-exclamation"></i>
+                                    <span>Central de Alertas</span>
+                                </button>
 
-                                <button id="btn-certificados" class="btn-salvar" style="background-color: #059669; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: none; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(5, 150, 105, 0.2); margin-bottom: 5px;" onclick="abrirCertificados()">
-    <i class="fa-solid fa-award" style="font-size: 18px;"></i> Certificados de Honra ao Mérito
-</button>
-                            
-                            <button id="btn-progressao" class="btn-salvar" style="background-color: #059669; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: none; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(5, 150, 105, 0.2); margin-bottom: 5px;" onclick="abrirProgressao()">
-                                <i class="fa-solid fa-arrow-right-arrow-left" style="font-size: 18px;"></i> Progressão de Turmas
-                            </button>
+                                <button id="btn-certificados" class="btn-acao" style="display: none; background-color: #059669;" onclick="abrirCertificados()">
+                                    <i class="fa-solid fa-award"></i>
+                                    <span>Certificados de Honra ao Mérito</span>
+                                </button>
 
-                            <button id="btn-gestao-horarios" class="btn-salvar" style="background-color: #7c3aed; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: none; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(124, 58, 237, 0.2); margin-bottom: 5px;" onclick="abrirGestaoHorarios()">
-                                <i class="fa-solid fa-table" style="font-size: 18px;"></i> Gestão de Horários
-                            </button>
-                            
-                            <button id="btn-agenda-lab" class="btn-salvar" style="background-color: #0f172a; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: none; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(15, 23, 42, 0.2); margin-bottom: 5px;" onclick="abrirAgendaLab()">
-                                <i class="fa-solid fa-desktop" style="font-size: 18px; color: #eab308;"></i> Agenda do Laboratório
-                            </button>
-                            
-                            <button id="btn-aba-secretaria" class="btn-salvar" onclick="mostrarTab('documentos')" style="display: none; background-color: #64748b; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(100, 116, 139, 0.2); margin-bottom: 5px;">
-                                <i class="fa-solid fa-folder-open" style="font-size: 18px;"></i> Secretaria / Docs
-                            </button>
-                            
-                            <button class="btn-salvar" style="background-color: #0d9488; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(13, 148, 136, 0.2); margin-bottom: 5px;" onclick="abrirPreConselho()">
-                                <i class="fa-solid fa-clipboard-check" style="font-size: 18px;"></i> Preencher Pré-Conselho
-                            </button>
-                            
-                            <button class="btn-salvar" style="background-color: #f59e0b; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(245, 158, 11, 0.2); margin-bottom: 5px;" onclick="abrirModalSaida()">
-                                <i class="fa-solid fa-sign-out" style="font-size: 18px;"></i> Registrar Saída Antecipada
-                            </button>
+                                <button id="btn-progressao" class="btn-acao" style="display: none; background-color: #059669;" onclick="abrirProgressao()">
+                                    <i class="fa-solid fa-arrow-right-arrow-left"></i>
+                                    <span>Progressão de Turmas</span>
+                                </button>
 
-                            <a id="btn-patrimonio" href="patrimonio.html" class="btn-salvar" style="background-color: #005088; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(0, 80, 136, 0.2); margin-bottom: 5px;">
-                                <i class="fa-solid fa-boxes-stacked" style="font-size: 18px;"></i> Módulo Patrimônio
-                            </a>
+                                <button id="btn-gestao-horarios" class="btn-acao" style="display: none; background-color: #7c3aed;" onclick="abrirGestaoHorarios()">
+                                    <i class="fa-solid fa-table"></i>
+                                    <span>Gestão de Horários</span>
+                                </button>
 
-                            <button id="btn-comunicado-seed" class="btn-salvar" style="background-color: #8b5cf6; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: none; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(139, 92, 246, 0.2); margin-bottom: 5px;" onclick="abrirModalComunicadoSEED()">
-                                <i class="fa-solid fa-file-lines" style="font-size: 18px;"></i> Fatos Observados (F.O.)
-                            </button>
+                                <button id="btn-agenda-lab" class="btn-acao" style="display: none; background-color: #0f172a;" onclick="abrirAgendaLab()">
+                                    <i class="fa-solid fa-desktop" style="color: #eab308;"></i>
+                                    <span>Agenda do Laboratório</span>
+                                </button>
 
-                            <button id="btn-meus-horarios" class="btn-salvar" style="background-color: #6366f1; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: none; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(99, 102, 241, 0.2); margin-bottom: 5px;" onclick="abrirMeusHorarios()">
-                                <i class="fa-solid fa-clock" style="font-size: 18px;"></i> Meus Horários
-                            </button>
+                                <button id="btn-aba-secretaria" class="btn-acao" style="display: none; background-color: #64748b;" onclick="mostrarTab('documentos')">
+                                    <i class="fa-solid fa-folder-open"></i>
+                                    <span>Secretaria / Docs</span>
+                                </button>
 
-                            <a id="btn-importar-superbi" href="importar-superbi.html" class="btn-salvar" 
-   style="background-color: #7c3aed; width: 100%; padding: 15px; font-size: 15px; 
-          border-radius: 8px; display: none; align-items: center; justify-content: center; 
-          gap: 10px; box-shadow: 0 4px 6px rgba(124, 58, 237, 0.2); margin-bottom: 5px;">
-   <i class="fa-solid fa-camera" style="font-size: 18px;"></i> Importar Super BI
-</a>
-                            <button id="btn-aniversarios" class="btn-salvar" style="background-color: #db2777; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: none; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(219, 39, 119, 0.2); margin-bottom: 5px;" onclick="abrirModalAniversarios(event)">
-                                <i class="fa-solid fa-cake-candles" style="font-size: 18px;"></i> Aniversariantes do Mês
-                            </button>
-                            
-                            <a href="https://rco.paas.pr.gov.br" target="_blank" class="btn-salvar" style="background-color: #0284c7; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(2, 132, 199, 0.2); margin-bottom: 5px;">
-                                <i class="fa-solid fa-book-open" style="font-size: 18px;"></i> RCO - Registro de Classe Online
-                            </a>
+                                <button class="btn-acao" style="background-color: #0d9488;" onclick="abrirPreConselho()">
+                                    <i class="fa-solid fa-clipboard-check"></i>
+                                    <span>Preencher Pré-Conselho</span>
+                                </button>
 
-                            <a href="https://registrofrequenciaseed.paas.pr.gov.br" target="_blank" class="btn-salvar" style="background-color: #059669; width: 100%; padding: 15px; font-size: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(5, 150, 105, 0.2); margin-bottom: 5px;">
-                                <i class="fa-solid fa-clock" style="font-size: 18px;"></i> Registro de Ponto
-                            </a>
+                                <button class="btn-acao" style="background-color: #f59e0b;" onclick="abrirModalSaida()">
+                                    <i class="fa-solid fa-sign-out"></i>
+                                    <span>Registrar Saída Antecipada</span>
+                                </button>
+
+                                <a id="btn-patrimonio" href="patrimonio.html" class="btn-acao" style="background-color: #005088;">
+                                    <i class="fa-solid fa-boxes-stacked"></i>
+                                    <span>Módulo Patrimônio</span>
+                                </a>
+
+                                <button id="btn-comunicado-seed" class="btn-acao" style="display: none; background-color: #8b5cf6;" onclick="abrirModalComunicadoSEED()">
+                                    <i class="fa-solid fa-file-lines"></i>
+                                    <span>Fatos Observados (F.O.)</span>
+                                </button>
+
+                                <button id="btn-meus-horarios" class="btn-acao" style="display: none; background-color: #6366f1;" onclick="abrirMeusHorarios()">
+                                    <i class="fa-solid fa-clock"></i>
+                                    <span>Meus Horários</span>
+                                </button>
+
+                                <a id="btn-importar-superbi" href="importar-superbi.html" class="btn-acao" style="display: none; background-color: #7c3aed;">
+                                    <i class="fa-solid fa-camera"></i>
+                                    <span>Importar Super BI</span>
+                                </a>
+
+                                <button id="btn-aniversarios" class="btn-acao" style="display: none; background-color: #db2777;" onclick="abrirModalAniversarios(event)">
+                                    <i class="fa-solid fa-cake-candles"></i>
+                                    <span>Aniversariantes do Mês</span>
+                                </button>
+
+                                <a href="https://rco.paas.pr.gov.br" target="_blank" class="btn-acao" style="background-color: #0284c7;">
+                                    <i class="fa-solid fa-book-open"></i>
+                                    <span>RCO - Registro de Classe Online</span>
+                                </a>
+
+                                <a href="https://registrofrequenciaseed.paas.pr.gov.br" target="_blank" class="btn-acao" style="background-color: #059669;">
+                                    <i class="fa-solid fa-clock"></i>
+                                    <span>Registro de Ponto</span>
+                                </a>
+                            </div>
                         </div>
                     </div>
 
