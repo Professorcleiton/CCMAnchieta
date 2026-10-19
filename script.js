@@ -812,6 +812,7 @@ async function salvarPost(setor) {
                  agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
     let salvos = 0;
+    let mensagemErro = '';
 
     for (const aluno of listaAlunos) {
         const dadosApontamento = {
@@ -825,14 +826,23 @@ async function salvarPost(setor) {
         try {
             if (navigator.onLine) {
                 const result = await salvarNoServidor(dadosApontamento);
-                if (result.status === 'success') salvos++;
-            } else {
-                if (db && db.db) {
-                    await db.salvarApontamento(dadosApontamento);
+                if (result.status === 'success') {
                     salvos++;
+                } else {
+                    mensagemErro = result.message || result.error || 'Erro desconhecido no servidor';
+                    // 🆕 Se for sessão inválida, desloga
+                    if (result.status === 'unauthorized') {
+                        mostrarToast('⏰ Sessão expirada. Fazendo login novamente...', 'erro');
+                        setTimeout(() => fazerLogout(), 2000);
+                        return;
+                    }
                 }
+            } else {
+                if (db && db.db) { await db.salvarApontamento(dadosApontamento); salvos++; }
+                else { mensagemErro = 'Offline e banco local indisponível'; }
             }
         } catch (error) {
+            mensagemErro = error.message || 'Erro de rede';
             console.error('Erro ao salvar para ' + aluno, error);
         }
     }
@@ -847,7 +857,7 @@ async function salvarPost(setor) {
             filtrarRegistrosPorAluno();
         }
     } else {
-        mostrarToast('❌ Erro ao salvar. Tente novamente.', 'erro');
+        mostrarToast('❌ Erro ao salvar: ' + (mensagemErro || 'Tente novamente.'), 'erro');
     }
 
     btn.disabled = false;
