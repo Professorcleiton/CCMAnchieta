@@ -120,7 +120,7 @@ body {
     text-decoration: underline;
 }
 
-/* 🆕 PAINEL PRINCIPAL — agora é flex:1 (compartilha com footer) */
+/* 🆕 PAINEL PRINCIPAL */
 #app-interface {
     display: none;
     width: 100%;
@@ -130,7 +130,7 @@ body {
     min-height: 0;
 }
 
-/* 🆕 SIDEBAR — altura 100% do wrapper (vai até o footer) */
+/* 🆕 SIDEBAR */
 .sidebar {
     width: 275px;
     background-color: #005088;
@@ -239,7 +239,7 @@ body {
     background-color: #991b1b;
 }
 
-/* 🆕 MAIN-CONTENT — sem height:100vh, ocupa o wrapper */
+/* 🆕 MAIN-CONTENT */
 .main-content {
     flex: 1;
     display: flex;
@@ -262,7 +262,7 @@ body {
     flex-shrink: 0;
 }
 
-/* 🆕 REGRA ÚNICA — aluno selector */
+/* 🆕 SELETOR DE ALUNOS */
 .aluno-selector-wrapper {
     background: white;
     padding: 8px 15px;
@@ -280,8 +280,11 @@ body {
     overflow: visible;
 }
 select#select-alunos {
-    display: block;
-    width: 250px;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 220px !important;
+    min-width: 150px !important;
     padding: 8px 12px;
     border: 1px solid #94a3b8;
     border-radius: 6px;
@@ -444,11 +447,14 @@ select#select-alunos {
 .dash-card-title { font-size: 10px; }
 .dash-card-value { font-size: 20px; margin-top: 2px; }
 
+/* 🆕 LAYOUT DO DASHBOARD INFERIOR (DESKTOP - LADO A LADO) */
 .dash-lower-grid {
     display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 20px;
+    grid-template-columns: 3fr 7fr;
+    gap: 15px;
+    align-items: start;
 }
+
 .dash-panel {
     background: white;
     padding: 20px;
@@ -985,9 +991,73 @@ select#select-alunos {
 }
 
 /* =============================================
+   AÇÕES RÁPIDAS — DESKTOP (5 COLUNAS)
+   ============================================= */
+.dash-panel-acoes {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: none;
+    overflow: visible;
+    padding-right: 0;
+}
+
+.acoes-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+}
+
+.btn-acao {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 8px 6px;
+    border: none;
+    border-radius: 7px;
+    color: white;
+    cursor: pointer;
+    font-size: 10px;
+    font-weight: bold;
+    text-align: center;
+    text-decoration: none;
+    line-height: 1.15;
+    min-height: 68px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+    word-break: break-word;
+}
+
+.btn-acao:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    filter: brightness(1.1);
+}
+
+.btn-acao:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.btn-acao i {
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.btn-acao span {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-size: 9px;
+    line-height: 1.1;
+}
+
+/* =============================================
    RESPONSIVIDADE E CELULAR
    ============================================= */
-
 .menu-toggle {
     background: none;
     border: none;
@@ -1037,10 +1107,40 @@ select#select-alunos {
     padding: 10px 15px !important;
 }
 
-/* =============================================
-   CELULAR (≤ 768px)
-   ============================================= */
+@media (min-width: 768px) {
+    #aluno-selector-container {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+    }
+}
 
+@media (max-width: 900px) {
+    .dash-cards-grid {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    }
+    .dash-card { padding: 10px; }
+    .dash-card-icon { font-size: 20px; }
+    .dash-card-value { font-size: 18px; }
+}
+
+.main-content { flex: 1; }
+
+.content-wrapper {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+#modal-aniversarios { z-index: 10002 !important; }
+
+/* =============================================
+   CELULAR (≤ 768px) - MUDANÇAS ESTRUTURAIS
+   ============================================= */
 @media (max-width: 768px) {
     body, .main-content, .pat-main {
         height: auto !important;
@@ -1153,20 +1253,51 @@ select#select-alunos {
         margin-top: 0 !important;
     }
 
+    /* 1. Empilha o Ranking e as Ações Rápidas no celular */
     .dash-lower-grid {
-        display: grid;
-        grid-template-columns: 1fr !important;
-        gap: 10px;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 15px !important;
     }
     .dash-panel {
         padding: 12px !important;
         max-height: none !important;
         overflow-y: visible !important;
+        width: 100% !important;
     }
     .dash-panel .btn-salvar {
         font-size: 13px !important;
         padding: 12px !important;
     }
+    
+    /* 2. Transforma os botões em uma lista no celular */
+    .acoes-grid {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 10px !important;
+    }
+    .btn-acao {
+        flex-direction: row !important;
+        justify-content: flex-start !important;
+        padding: 12px 16px !important;
+        min-height: 50px !important; 
+        gap: 15px !important;
+        text-align: left !important;
+    }
+    .btn-acao i {
+        font-size: 20px !important;
+        margin-bottom: 0 !important;
+        width: 24px; 
+        text-align: center;
+        flex-shrink: 0;
+    }
+    .btn-acao span {
+        font-size: 14px !important;
+        -webkit-line-clamp: 2 !important;
+        white-space: normal !important;
+        line-height: 1.3 !important;
+    }
+
     .board-container {
         grid-template-columns: 1fr !important;
         gap: 15px !important;
@@ -1209,6 +1340,28 @@ select#select-alunos {
         font-size: 12px !important;
         padding: 10px 14px !important;
         max-width: 90% !important;
+    }
+
+    /* MODAL DE APONTAMENTO NO CELULAR */
+    .overlay-apontamento {
+        align-items: flex-start !important;
+        overflow-y: auto !important;
+    }
+    .caixa-dialogo {
+        margin: auto !important;
+        max-height: calc(100vh - 40px) !important;
+        overflow-y: auto !important;
+    }
+    .caixa-dialogo textarea {
+        height: 30vh !important;
+        min-height: 140px !important;
+    }
+    .botoes-dialogo {
+        position: sticky !important;
+        bottom: 0 !important;
+        background: white !important;
+        padding: 10px 0 !important;
+        z-index: 10 !important;
     }
 
     /* PATRIMÔNIO */
@@ -1268,6 +1421,20 @@ select#select-alunos {
         font-size: 11px !important;
     }
     .pat-table-wrapper { overflow-x: auto !important; }
+
+    .app-footer {
+        flex-direction: column;
+        gap: 8px;
+        padding: 10px 15px;
+    }
+    .app-footer .btn-logout {
+        width: 100%;
+        justify-content: center;
+    }
+    .footer-texto {
+        text-align: center;
+        font-size: 11px;
+    }
 }
 
 /* =============================================
@@ -1450,199 +1617,7 @@ select#select-alunos {
     background-color: #1e293b !important;
 }
 
-/* =============================================
-   FORÇA A EXIBIÇÃO DO SELETOR DE ALUNOS
-   ============================================= */
-#aluno-selector-container select,
-.aluno-selector select {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-}
-
-@media (min-width: 768px) {
-    #aluno-selector-container {
-        display: flex !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        height: auto !important;
-        max-height: none !important;
-        overflow: visible !important;
-    }
-}
-
-select#select-alunos {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    width: 220px !important;
-    min-width: 150px !important;
-}
-
-@media (max-width: 900px) {
-    .dash-cards-grid {
-        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    }
-    .dash-card { padding: 10px; }
-    .dash-card-icon { font-size: 20px; }
-    .dash-card-value { font-size: 18px; }
-}
-
-.main-content { flex: 1; }
-
-/* 🆕 CONTENT-WRAPPER com min-height:0 para o footer caber */
-.content-wrapper {
-    display: flex;
-    flex: 1;
-    min-height: 0;
-    overflow: hidden;
-}
-
-@media (max-width: 768px) {
-    #btn-sugestao-flutuante {
-        width: 45px;
-        height: 45px;
-        font-size: 18px;
-        bottom: 15px;
-        right: 15px;
-    }
-    #banner-sugestoes {
-        font-size: 11px;
-        padding: 6px 10px;
-    }
-    #banner-sugestoes button {
-        font-size: 10px;
-        padding: 4px 10px;
-    }
-}
-#modal-aniversarios { z-index: 10002 !important; }
-
-/* =============================================
-   RANKING TOP 3 — COMPACTO
-   ============================================= */
-#conteudo-ranking {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-@media (max-width: 768px) {
-    #conteudo-ranking {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 6px;
-    }
-    #conteudo-ranking > div {
-        padding: 8px !important;
-        flex-direction: column !important;
-        text-align: center;
-        gap: 2px !important;
-        min-height: 70px !important;
-    }
-    #conteudo-ranking > div span:first-child {
-        font-size: 18px !important;
-        margin-bottom: 0 !important;
-    }
-    #conteudo-ranking > div span:nth-child(2) {
-        font-size: 10px !important;
-        white-space: normal !important;
-        text-align: center;
-        line-height: 1.1;
-        overflow: visible !important;
-        text-overflow: clip !important;
-    }
-    #conteudo-ranking > div span:last-child {
-        font-size: 16px !important;
-        margin-top: 0 !important;
-    }
-}
-
-@media (max-width: 400px) {
-    #conteudo-ranking { gap: 4px; }
-    #conteudo-ranking > div {
-        padding: 6px 4px !important;
-        min-height: 65px !important;
-    }
-    #conteudo-ranking > div span:first-child { font-size: 16px !important; }
-    #conteudo-ranking > div span:nth-child(2) { font-size: 9px !important; }
-    #conteudo-ranking > div span:last-child { font-size: 14px !important; }
-}
-
-/* =============================================
-   AÇÕES RÁPIDAS — 5 COLUNAS (PC)
-   ============================================= */
-.dash-panel-acoes {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    max-height: none;
-    overflow: visible;
-    padding-right: 0;
-}
-
-.acoes-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 8px;
-}
-
-.btn-acao {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    padding: 8px 6px;
-    border: none;
-    border-radius: 7px;
-    color: white;
-    cursor: pointer;
-    font-size: 10px;
-    font-weight: bold;
-    text-align: center;
-    text-decoration: none;
-    line-height: 1.15;
-    min-height: 68px;
-    transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
-    word-break: break-word;
-}
-
-.btn-acao:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    filter: brightness(1.1);
-}
-
-.btn-acao:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-}
-
-.btn-acao i {
-    font-size: 16px;
-    flex-shrink: 0;
-}
-
-.btn-acao span {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    font-size: 9px;
-    line-height: 1.1;
-}
-
-@media (max-width: 1024px) {
-    .acoes-grid {
-        grid-template-columns: repeat(4, 1fr);
-        gap: 8px;
-    }
-}
-
-/* =============================================
-   FILTROS DE PERÍODO DENTRO DO HEADER
-   ============================================= */
+/* FILTROS DE PERÍODO */
 .top-bar-app > div {
     display: flex;
     justify-content: space-between;
@@ -1665,21 +1640,14 @@ select#select-alunos {
     scrollbar-width: none;
 }
 
-#filtro-periodo::-webkit-scrollbar {
-    display: none;
-}
-
-#filtro-periodo button {
-    white-space: nowrap;
-    flex-shrink: 0;
-}
+#filtro-periodo::-webkit-scrollbar { display: none; }
+#filtro-periodo button { white-space: nowrap; flex-shrink: 0; }
 
 @media (max-width: 768px) {
     .top-bar-app > div {
         flex-wrap: wrap;
         gap: 10px;
     }
-
     #filtro-periodo {
         order: 3;
         width: 100%;
@@ -1687,16 +1655,12 @@ select#select-alunos {
         padding: 6px 0;
         margin-top: 6px;
     }
-
     .user-and-nre-wrapper {
         margin-left: auto;
     }
 }
 
-/* =============================================
-   FOOTER COM BOTÃO SAIR
-   ============================================= */
-
+/* FOOTER COM BOTÃO SAIR */
 .app-footer {
     background: #005088;
     color: #cbd5e1;
@@ -1736,107 +1700,4 @@ select#select-alunos {
     text-align: right;
     font-size: 11px;
     color: #cbd5e1;
-}
-
-@media (max-width: 768px) {
-    .app-footer {
-        flex-direction: column;
-        gap: 8px;
-        padding: 10px 15px;
-    }
-
-    .app-footer .btn-logout {
-        width: 100%;
-        justify-content: center;
-    }
-
-    .footer-texto {
-        text-align: center;
-        font-size: 11px;
-    }
-}
-
-/* =============================================
-   CORREÇÕES FINAIS MOBILE
-   ============================================= */
-
-/* 1. Modal de apontamento rolável no celular */
-.overlay-apontamento {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(15, 23, 42, 0.85);
-    z-index: 999999;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    overflow-y: auto;
-    padding: 20px;
-    box-sizing: border-box;
-    backdrop-filter: blur(4px);
-}
-
-.caixa-dialogo {
-    margin: auto;
-    background: white;
-    width: 100%;
-    max-width: 600px;
-    max-height: calc(100vh - 40px);
-    overflow-y: auto;
-    border-radius: 12px;
-    padding: 25px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-@/* =============================================
-   CORREÇÕES DEFINITIVAS MOBILE (EMPILHAR E LISTA)
-   ============================================= */
-
-@media (max-width: 768px) {
-    /* 1. Empilha o Ranking e as Ações Rápidas */
-    .dash-lower-grid {
-        display: flex !important;
-        flex-direction: column !important; /* Um embaixo do outro */
-        grid-template-columns: none !important; /* Remove a grade antiga */
-        gap: 15px !important;
-        width: 100% !important;
-    }
-
-    /* 2. Transforma os botões em uma lista */
-    .acoes-grid {
-        display: flex !important;
-        flex-direction: column !important;
-        gap: 10px !important;
-        width: 100% !important;
-    }
-
-    .btn-acao {
-        flex-direction: row !important; /* Ícone na esquerda, texto na direita */
-        justify-content: flex-start !important;
-        padding: 12px 16px !important;
-        min-height: 50px !important; 
-        gap: 15px !important;
-        text-align: left !important;
-        width: 100% !important;
-        font-size: 14px !important;
-    }
-    
-    .btn-acao i {
-        font-size: 20px !important;
-        margin-bottom: 0 !important;
-        width: 24px; 
-        text-align: center;
-        flex-shrink: 0;
-    }
-    
-    .btn-acao span {
-        font-size: 14px !important;
-        -webkit-line-clamp: 2 !important;
-        white-space: normal !important;
-        line-height: 1.3 !important;
-    }
 }
