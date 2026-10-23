@@ -1792,25 +1792,28 @@ select#select-alunos {
     gap: 15px;
 }
 
+@/* =============================================
+   CORREÇÕES DEFINITIVAS MOBILE (EMPILHAR E LISTA)
+   ============================================= */
+
 @media (max-width: 768px) {
-    .caixa-dialogo textarea {
-        height: 30vh;
-        min-height: 140px;
+    /* 1. Empilha o Ranking e as Ações Rápidas */
+    .dash-lower-grid {
+        display: flex !important;
+        flex-direction: column !important; /* Um embaixo do outro */
+        grid-template-columns: none !important; /* Remove a grade antiga */
+        gap: 15px !important;
+        width: 100% !important;
     }
-    .botoes-dialogo {
-        position: sticky;
-        bottom: 0;
-        background: white;
-        padding: 10px 0;
-        z-index: 10;
-    }
-    
-    /* 2. AÇÕES RÁPIDAS NO CELULAR (LISTA - 1 COLUNA) */
+
+    /* 2. Transforma os botões em uma lista */
     .acoes-grid {
-        grid-template-columns: 1fr !important; /* 1 coluna (um embaixo do outro) */
+        display: flex !important;
+        flex-direction: column !important;
         gap: 10px !important;
+        width: 100% !important;
     }
-    
+
     .btn-acao {
         flex-direction: row !important; /* Ícone na esquerda, texto na direita */
         justify-content: flex-start !important;
@@ -1818,12 +1821,14 @@ select#select-alunos {
         min-height: 50px !important; 
         gap: 15px !important;
         text-align: left !important;
+        width: 100% !important;
+        font-size: 14px !important;
     }
     
     .btn-acao i {
-        font-size: 22px !important;
+        font-size: 20px !important;
         margin-bottom: 0 !important;
-        width: 28px; 
+        width: 24px; 
         text-align: center;
         flex-shrink: 0;
     }
