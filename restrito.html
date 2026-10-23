@@ -2509,19 +2509,25 @@ async function salvarApontamentoMultiplo() {
                     salvos++;
                 } else {
                     mensagemErro = result.message || result.error || 'Erro desconhecido no servidor';
-                    // 🆕 Se for sessão inválida, desloga
                     if (result.status === 'unauthorized') {
+                        if (btnSalvar) { btnSalvar.disabled = false; btnSalvar.style.opacity = '1'; btnSalvar.style.cursor = 'pointer'; btnSalvar.innerHTML = '💾 Salvar Apontamento'; }
                         mostrarToast('⏰ Sessão expirada. Fazendo login novamente...', 'erro');
                         setTimeout(() => fazerLogout(), 2000);
                         return;
                     }
                 }
             } else {
-                if (db && db.db) { await db.salvarApontamento(dadosApontamento); salvos++; }
-                else { mensagemErro = 'Offline e banco local indisponível'; }
+                if (typeof db !== 'undefined' && db) {
+                    await db.pronto();
+                    if (db.db) { await db.salvarApontamento(dadosApontamento); salvos++; }
+                    else { mensagemErro = 'Banco local indisponível'; }
+                } else {
+                    mensagemErro = 'Banco local não carregado';
+                }
             }
         } catch (error) { 
-            mensagemErro = error.message || 'Erro de rede';
+            if (error.name === 'AbortError') { mensagemErro = 'Tempo esgotado. Verifique sua conexão.'; }
+            else { mensagemErro = error.message || 'Erro de rede'; }
             console.error('Erro ao salvar para ' + aluno, error); 
         }
     }
@@ -2551,6 +2557,7 @@ async function salvarApontamentoMultiplo() {
         mostrarToast('❌ Erro ao salvar: ' + (mensagemErro || 'Tente novamente.'), 'erro');
     }
 }
+
 
 // RANKING DE TURMAS
 let turmaSelecionadaGrafico = null;
