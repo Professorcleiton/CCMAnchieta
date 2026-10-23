@@ -69,6 +69,14 @@ class SIGADatabase {
         }
     }
 
+
+    // 🆕 ADICIONE ESTA FUNÇÃO AQUI
+    async pronto() {
+        if (this.inicializado && this.db) return;
+        if (!this._promessaInit) this._promessaInit = this.init();
+        await this._promessaInit;
+    }
+    
     // =============================================
     // APONTAMENTOS
     // =============================================
