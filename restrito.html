@@ -14,19 +14,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <link rel="stylesheet" href="style.css">
-    <style>
-    #mobile-tabs-container {
-        display: none !important;
-    }
-    @media (max-width: 768px) {
-        #mobile-tabs-container {
-            display: none !important;
-        }
-    }
-</style>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
-   
 </head>
 <body>
 
@@ -78,7 +68,7 @@
                     <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                         <button class="menu-toggle" onclick="alternarMenuLateral()"><i class="fa-solid fa-bars"></i></button>
 
-                         <div id="filtro-periodo" style="margin-bottom: 10px; background: white; padding: 12px 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                         <div id="filtro-periodo">
                         <span style="font-weight: bold; color: #0f172a; font-size: 13px;">
                             <i class="fa-solid fa-calendar"></i> Período:
                         </span>
@@ -378,7 +368,7 @@
                                     <textarea id="text-meivs" placeholder="Descreva os detalhes aqui..." onkeydown="verificarTeclaEnter(event, 'meivs')"></textarea>
                                     <div class="botoes-dialogo">
                                         <button class="btn-cancelar" onclick="fecharCaixaTexto('meivs')">Cancelar</button>
-                                        <button id="btn-meivs" class="btn-salvar-modal" style="background:#0284c7;" onclick="salvarPost('meivs'); fecharCaixaTexto('meivs');">Salvar</button>
+                                        <button id="btn-meivs" class="btn-salvar-modal" style="background:#0284c7;" onclick="salvarPost('meivs')">Salvar</button>
                                     </div>
                                 </div>
                             </div>
@@ -398,7 +388,7 @@
                                     <textarea id="text-pedagogico" placeholder="Descreva os detalhes aqui..." onkeydown="verificarTeclaEnter(event, 'pedagogico')"></textarea>
                                     <div class="botoes-dialogo">
                                         <button class="btn-cancelar" onclick="fecharCaixaTexto('pedagogico')">Cancelar</button>
-                                        <button id="btn-pedagogico" class="btn-salvar-modal" style="background:#0d9488;" onclick="salvarPost('pedagogico'); fecharCaixaTexto('pedagogico');">Salvar</button>
+                                        <button id="btn-pedagogico" class="btn-salvar-modal" style="background:#0d9488;" onclick="salvarPost('pedagogico')">Salvar</button>
                                     </div>
                                 </div>
                             </div>
@@ -418,7 +408,7 @@
                                     <textarea id="text-adm" placeholder="Descreva os detalhes aqui..." onkeydown="verificarTeclaEnter(event, 'adm')"></textarea>
                                     <div class="botoes-dialogo">
                                         <button class="btn-cancelar" onclick="fecharCaixaTexto('adm')">Cancelar</button>
-                                        <button id="btn-adm" class="btn-salvar-modal" style="background:#4f46e5;" onclick="salvarPost('adm'); fecharCaixaTexto('adm');">Salvar</button>
+                                        <button id="btn-adm" class="btn-salvar-modal" style="background:#4f46e5;" onclick="salvarPost('adm')">Salvar</button>
                                     </div>
                                 </div>
                             </div>
@@ -438,7 +428,7 @@
                                     <textarea id="text-direcao" placeholder="Descreva os detalhes aqui..." onkeydown="verificarTeclaEnter(event, 'direcao')"></textarea>
                                     <div class="botoes-dialogo">
                                         <button class="btn-cancelar" onclick="fecharCaixaTexto('direcao')">Cancelar</button>
-                                        <button id="btn-direcao" class="btn-salvar-modal" style="background:#b91c1c;" onclick="salvarPost('direcao'); fecharCaixaTexto('direcao');">Salvar</button>
+                                        <button id="btn-direcao" class="btn-salvar-modal" style="background:#b91c1c;" onclick="salvarPost('direcao')">Salvar</button>
                                     </div>
                                 </div>
                             </div>
@@ -1097,8 +1087,8 @@
     <!-- ============================================= -->
     <!-- SCRIPTS EXTERNOS -->
     <!-- ============================================= -->
-    <script src="db.js"></script>
-    <script src="script.js"></script>
+    <script src="db.js?v=12"></script>
+    <script src="script.js?v=12"></script>
 
 <!-- PARTE 2 CONTINUA ABAIXO -->
         <script>
