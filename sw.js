@@ -1,62 +1,47 @@
-const CACHE_NAME = 'siga-cache-v10'; // Incremente para v7, v8... a cada nova alteração no site
+const CACHE_NAME = 'siga-cache-v12'; // Versão atualizada
 
 const urlsToCache = [
-    '/',
-    '/index.html',
-    '/restrito.html',
-    '/responsaveis.html',
-    '/painel-responsavel.html',
-    '/style.css',
-    '/script.js',
-    '/db.js',
-    '/img/SIGA.png',
-    '/img/logoA.png'
+    '/', '/index.html', '/restrito.html', '/responsaveis.html',
+    '/painel-responsavel.html', '/style.css', '/script.js', '/db.js',
+    '/img/SIGA.png', '/img/logoA.png'
 ];
 
-// Instala e faz cache dos arquivos essenciais
 self.addEventListener('install', event => {
-    event.waitUntil(
-        caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
-    );
-    self.skipWaiting(); // Ativa o novo SW imediatamente
+    event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache)));
+    self.skipWaiting();
 });
 
-// Ativa: remove caches antigos
 self.addEventListener('activate', event => {
-    event.waitUntil(
-        caches.keys().then(cacheNames => {
-            return Promise.all(
-                cacheNames.filter(cache => cache !== CACHE_NAME).map(cache => caches.delete(cache))
-            );
-        })
-    );
-    self.clients.claim(); // Assume o controle de todas as abas abertas
+    event.waitUntil(caches.keys().then(cacheNames => {
+        return Promise.all(cacheNames.filter(cache => cache !== CACHE_NAME).map(cache => caches.delete(cache)));
+    }));
+    self.clients.claim();
 });
 
-// Estratégia: Network First, cache apenas como fallback
 self.addEventListener('fetch', event => {
     const url = new URL(event.request.url);
-    // Ignora chamadas ao Google Apps Script
     if (url.hostname.includes('script.google.com')) return;
+
+    // 🆕 Código do app NUNCA vem do cache (evita tela travada no mobile)
+    if (/\.(js|css|html)$/i.test(url.pathname)) {
+        event.respondWith(fetch(event.request).catch(() => caches.match(event.request)));
+        return;
+    }
 
     event.respondWith(
         fetch(event.request)
             .then(response => {
-                // Atualiza o cache com a resposta nova (se for sucesso)
                 if (response && response.status === 200) {
                     const clone = response.clone();
                     caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
                 }
                 return response;
             })
-            .catch(() => {
-                // Se offline, serve do cache
-                return caches.match(event.request);
-            })
+            .catch(() => caches.match(event.request))
     );
 });
 
-// Push notification (mantido o código existente, apenas ajustado)
+// Manter as funções de push notification iguais (não precisa mexer)
 self.addEventListener('push', event => {
     let data = {};
     if (event.data) {
