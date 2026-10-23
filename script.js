@@ -24,11 +24,20 @@ async function fetchAutenticado(url, payload) {
     if (usuarioLogado && usuarioLogado.token) {
         payload.token = usuarioLogado.token;
     }
-    return fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify(payload)
-    });
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 20000); // 🆕 Timeout de 20s
+
+    try {
+        return await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify(payload),
+            signal: controller.signal
+        });
+    } finally {
+        clearTimeout(timeoutId);
+    }
 }
 
 // =============================================
@@ -59,8 +68,16 @@ window.addEventListener('DOMContentLoaded', () => {
         try {
             const user = JSON.parse(sessao);
             const agora = Date.now();
+            
+            // 🆕 Sessão antiga sem token (Fase 1) → Força novo login
+            if (!user.token) {
+                console.warn('⚠️ Sessão sem token — limpando e forçando login');
+                sessionStorage.removeItem('sgi_ccma_session');
+                localStorage.removeItem('sgi_ccma_session');
+                return;
+            }
+
             if (user.loginTime && (agora - user.loginTime) > SESSAO_DURACAO_MS) {
-                // Sessão expirada
                 sessionStorage.removeItem('sgi_ccma_session');
                 localStorage.removeItem('sgi_ccma_session');
                 mostrarToast('⏰ Sessão expirada. Faça login novamente.', 'aviso');
@@ -806,10 +823,10 @@ async function salvarPost(setor) {
     }
 
     btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando...';
 
     const agora = new Date();
-    const data = agora.toLocaleDateString('pt-BR') + ' ' +
-                 agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    const data = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
     let salvos = 0;
     let mensagemErro = '';
@@ -830,22 +847,36 @@ async function salvarPost(setor) {
                     salvos++;
                 } else {
                     mensagemErro = result.message || result.error || 'Erro desconhecido no servidor';
-                    // 🆕 Se for sessão inválida, desloga
                     if (result.status === 'unauthorized') {
+                        btn.disabled = false;
+                        btn.innerHTML = 'Salvar';
                         mostrarToast('⏰ Sessão expirada. Fazendo login novamente...', 'erro');
                         setTimeout(() => fazerLogout(), 2000);
                         return;
                     }
                 }
             } else {
-                if (db && db.db) { await db.salvarApontamento(dadosApontamento); salvos++; }
-                else { mensagemErro = 'Offline e banco local indisponível'; }
+                // 🆕 Correção do erro de IndexedDB não pronto
+                if (typeof db !== 'undefined' && db) {
+                    await db.pronto(); 
+                    if (db.db) { await db.salvarApontamento(dadosApontamento); salvos++; }
+                    else { mensagemErro = 'Banco local indisponível'; }
+                } else {
+                    mensagemErro = 'Banco local não carregado (db.js)';
+                }
             }
         } catch (error) {
-            mensagemErro = error.message || 'Erro de rede';
+            if (error.name === 'AbortError') {
+                mensagemErro = 'Tempo esgotado. Verifique sua conexão.';
+            } else {
+                mensagemErro = error.message || 'Erro de rede';
+            }
             console.error('Erro ao salvar para ' + aluno, error);
         }
     }
+
+    btn.disabled = false;
+    btn.innerHTML = 'Salvar';
 
     if (salvos > 0) {
         mostrarToast('✅ Apontamento salvo para ' + salvos + ' aluno(s)!', 'sucesso');
@@ -859,8 +890,6 @@ async function salvarPost(setor) {
     } else {
         mostrarToast('❌ Erro ao salvar: ' + (mensagemErro || 'Tente novamente.'), 'erro');
     }
-
-    btn.disabled = false;
 }
 async function salvarNoServidor(dados) {
     const payload = {
