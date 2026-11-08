@@ -182,6 +182,13 @@
       </div>
     </div>
 
+    <!-- BOTÃO MEUS RASCUNHOS -->
+    <div style="display: flex; justify-content: flex-end; margin-bottom: 1rem;">
+      <button onclick="abrirMeusRascunhos()" style="background: #f1f5f9; color: #0f172a; border: 1px solid #cbd5e1; padding: .6rem 1.2rem; border-radius: 8px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: .5rem;">
+        <i class="fas fa-folder-open"></i> Ver Meus Rascunhos
+      </button>
+    </div>
+
     <!-- CARD 1: CABEÇALHO -->
     <section class="card">
       <h2><i class="fas fa-id-card"></i> Cabeçalho da Prova</h2>
@@ -248,8 +255,6 @@
     <!-- CARD 3: ANEXOS -->
     <section class="card">
       <h2><i class="fas fa-paperclip"></i> Anexos (imagens/PDFs) — opcional</h2>
-      
-      <!-- 🆕 CORREÇÃO DO BOTÃO DE ANEXO -->
       <div class="upload-area" onclick="document.getElementById('fileInput').click()">
         <p style="margin:0; color: var(--azul); font-weight: bold; font-size:.95rem;">
           📎 Clique aqui para anexar imagens ou PDFs
@@ -259,7 +264,6 @@
         </p>
       </div>
       <input type="file" id="fileInput" multiple accept="image/*,application/pdf" style="display:none" onchange="adicionarAnexos(event)">
-      
       <div id="listaAnexos"></div>
     </section>
 
@@ -290,7 +294,6 @@
       <i class="fas fa-eye"></i> Visualizar Prévia
     </button>
     
-    <!-- 🆕 BOTÃO DE SALVAR RASCUNHO -->
     <button class="btn-rascunho" onclick="enviarPedido('Rascunho')">
       <i class="fas fa-save"></i> Salvar como Rascunho
     </button>
@@ -306,6 +309,19 @@
     </div>
 
   </main>
+
+  <!-- MODAL DE RASCUNHOS -->
+  <div id="modalRascunhos" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 2000; align-items: center; justify-content: center; padding: 1rem;">
+    <div style="background: var(--bg-card); border-radius: 12px; padding: 1.5rem; max-width: 600px; width: 100%; max-height: 80vh; overflow-y: auto; box-shadow: 0 8px 24px rgba(0,0,0,.3);">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--borda); padding-bottom: 1rem; margin-bottom: 1rem;">
+        <h3 style="margin: 0; color: var(--azul);"><i class="fas fa-folder-open"></i> Meus Rascunhos</h3>
+        <button onclick="fecharModalRascunhos()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--texto);">&times;</button>
+      </div>
+      <div id="listaRascunhos">
+        <!-- Preenchido via JS -->
+      </div>
+    </div>
+  </div>
 
   <div class="toast" id="toast"></div>
   <div class="loading-overlay" id="loadingOverlay">
@@ -450,7 +466,6 @@
       } catch (e) { console.error(e); }
     }
 
-    // 🆕 FUNÇÃO DE ANEXO CORRIGIDA
     function adicionarAnexos(event) {
       const files = Array.from(event.target.files);
       const MAX_MB = 5;
@@ -485,7 +500,7 @@
 
     function removerAnexo(idx) { anexos.splice(idx, 1); renderizarAnexos(); }
 
-    // 🆕 FUNÇÃO DE ENVIO (Aceita Rascunho ou Pendente)
+    // FUNÇÃO DE ENVIO (Aceita Rascunho ou Pendente)
     async function enviarPedido(statusEnvio) {
       const disciplina = document.getElementById('selectDisciplina').value;
       const turma = document.getElementById('selectTurma').value;
@@ -520,7 +535,7 @@
         valor: valorProva, conteudo: conteudoHTML, qtdCopias: qtdCopias || 30, observacoes,
         anexos: anexos.map(a => ({ nome: a.nome, tipo: a.tipo, base64: a.base64 })),
         personalizar: personalizar,
-        status: statusEnvio // 🆕 Envia 'Rascunho' ou 'Pendente'
+        status: statusEnvio
       };
 
       try {
@@ -676,6 +691,69 @@ ${paginasHTML}
       if (!win) return toast('Permita pop-ups para visualizar a prévia.', 'erro');
       win.document.write(html);
       win.document.close();
+    }
+
+    // =============================================
+    // RASCUNHOS
+    // =============================================
+    async function abrirMeusRascunhos() {
+      document.getElementById('modalRascunhos').style.display = 'flex';
+      const container = document.getElementById('listaRascunhos');
+      container.innerHTML = '<p style="text-align:center; color:#64748b;"><i class="fas fa-spinner fa-spin"></i> Carregando...</p>';
+
+      try {
+        const url = APPS_SCRIPT_URL + '?aba=avaliacoes_rascunhos&email=' + encodeURIComponent(usuarioLogado.email);
+        const resp = await fetch(url);
+        const rascunhos = await resp.json();
+
+        if (!Array.isArray(rascunhos) || rascunhos.length === 0) {
+          container.innerHTML = '<p style="text-align:center; color:#64748b;">Nenhum rascunho salvo.</p>';
+          return;
+        }
+
+        container.innerHTML = rascunhos.map(r => `
+          <div style="background: #f8fafc; border: 1px solid var(--borda); border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: .5rem;">
+              <strong style="color: var(--azul);">${r.disciplina} - ${r.turma}</strong>
+              <span style="font-size: .75rem; background: #e2e8f0; padding: .2rem .5rem; border-radius: 4px;">${r.trimestre}</span>
+            </div>
+            <div style="font-size: .85rem; color: #64748b; margin-bottom: 1rem;">
+              Data da Prova: ${r.dataProva ? r.dataProva.split('-').reverse().join('/') : 'Não informada'} | Valor: ${r.valor || '—'}
+            </div>
+            <button onclick="carregarRascunho('${r.idPedido}')" style="background: var(--dourado); color: #000; border: none; padding: .5rem 1rem; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: .85rem;">
+              <i class="fas fa-edit"></i> Abrir e Editar
+            </button>
+          </div>
+        `).join('');
+        
+        window._rascunhosCache = rascunhos;
+
+      } catch (e) {
+        console.error(e);
+        container.innerHTML = '<p style="text-align:center; color:red;">Erro ao carregar rascunhos.</p>';
+      }
+    }
+
+    function fecharModalRascunhos() {
+      document.getElementById('modalRascunhos').style.display = 'none';
+    }
+
+    function carregarRascunho(idPedido) {
+      const r = window._rascunhosCache.find(x => x.idPedido === idPedido);
+      if (!r) return;
+
+      document.getElementById('selectDisciplina').value = r.disciplina;
+      document.getElementById('selectTurma').value = r.turma;
+      document.getElementById('selectTrimestre').value = r.trimestre;
+      document.getElementById('dataProva').value = r.dataProva;
+      document.getElementById('valorProva').value = r.valor;
+      document.getElementById('qtdCopias').value = r.qtdCopias;
+      document.getElementById('observacoes').value = (r.observacoes || '').replace('[PERSONALIZADA] ', '');
+      document.getElementById('editorConteudo').innerHTML = r.conteudo;
+
+      fecharModalRascunhos();
+      toast('Rascunho carregado! Edite se precisar e envie.', 'sucesso');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   </script>
 </body>
