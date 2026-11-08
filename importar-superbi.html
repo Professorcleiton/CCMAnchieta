@@ -20,7 +20,6 @@
     .topbar { background: var(--azul); color: #fff; padding: 0.9rem 1rem; display: flex; align-items: center; gap: 1rem; position: sticky; top: 0; z-index: 100; }
     .topbar h1 { font-size: 1.1rem; flex: 1; margin: 0; }
     .topbar a { color: #fff; text-decoration: none; background: rgba(255,255,255,.15); padding: .4rem .8rem; border-radius: 8px; font-size: .85rem; }
-    .topbar .btn-dark { background: rgba(255,255,255,.15); border: none; color: #fff; padding: .4rem .7rem; border-radius: 8px; cursor: pointer; }
 
     .container { max-width: 1000px; margin: 0 auto; padding: 1.2rem; }
 
@@ -98,13 +97,7 @@
         <div class="form-group">
           <label>Disciplina:</label>
           <select id="add-disciplina">
-            <option value="">Selecione...</option>
-            <option value="Matemática">Matemática</option>
-            <option value="Português">Português</option>
-            <option value="Ciências">Ciências</option>
-            <option value="História">História</option>
-            <option value="Geografia">Geografia</option>
-            <option value="Inglês">Inglês</option>
+            <option value="">Carregando...</option>
           </select>
         </div>
 
@@ -150,14 +143,19 @@
     let listaDeLancamentos = [];
 
     document.addEventListener('DOMContentLoaded', async () => {
-      usuarioLogado = JSON.parse(localStorage.getItem('sgi_ccma_session') || sessionStorage.getItem('sgi_ccma_session'));
+      // 1. Verifica a sessão
+      const sessaoRaw = localStorage.getItem('sgi_ccma_session') || sessionStorage.getItem('sgi_ccma_session');
+      if (!sessaoRaw) { alert('Sessão não encontrada. Faça login novamente.'); window.location.href = 'index.html'; return; }
+      
+      usuarioLogado = JSON.parse(sessaoRaw);
+      
       if (!usuarioLogado || usuarioLogado.nivel < 4) {
         alert('Acesso restrito à Direção/Admin (Nível 4).');
         window.location.href = 'restrito.html';
         return;
       }
 
-      // Busca todos os professores e suas turmas
+      // 2. Busca a lista de professores
       try {
         const resp = await fetch(APPS_SCRIPT_URL + '?aba=usuarios');
         const users = await resp.json();
@@ -170,9 +168,35 @@
           selectProf.innerHTML += `<option value="${p.email}">${p.nome}</option>`;
         });
       } catch (e) {
-        console.error(e);
+        console.error('Erro ao carregar professores:', e);
       }
+
+      // 3. Busca as disciplinas únicas da aba Horarios e preenche o select
+      await carregarDisciplinasDaPlanilha();
     });
+
+    // 🆕 Função que puxa as disciplinas da planilha sem repetir
+    async function carregarDisciplinasDaPlanilha() {
+      try {
+        const resp = await fetch(APPS_SCRIPT_URL + '?aba=disciplinas_todas');
+        const disciplinas = await resp.json();
+        
+        const select = document.getElementById('add-disciplina');
+        select.innerHTML = '<option value="">Selecione...</option>';
+        
+        if (Array.isArray(disciplinas) && disciplinas.length > 0) {
+          disciplinas.forEach(d => {
+            select.innerHTML += `<option value="${d}">${d}</option>`;
+          });
+        } else {
+          select.innerHTML = '<option value="">Nenhuma disciplina na grade</option>';
+        }
+      } catch (e) {
+        console.error('Erro ao buscar disciplinas:', e);
+        const select = document.getElementById('add-disciplina');
+        select.innerHTML = '<option value="">Erro ao carregar</option>';
+      }
+    }
 
     async function filtrarTurmas() {
       const emailProf = document.getElementById('add-professor').value;
@@ -198,7 +222,7 @@
       }
     }
 
-       function filtrarPlataformas() {
+    function filtrarPlataformas() {
       const turma = document.getElementById('add-turma').value;
       const selectPlataforma = document.getElementById('add-plataforma');
       
@@ -222,8 +246,6 @@
       plataformasDisponiveis.push({ nome: 'Redação Paraná', disciplina: 'Português' });
       plataformasDisponiveis.push({ nome: 'Leia Paraná', disciplina: 'Todas' });
       plataformasDisponiveis.push({ nome: 'Inglês Paraná', disciplina: 'Inglês' });
-      
-      // 🆕 QUIZIZZ (Aplica a Todas as disciplinas)
       plataformasDisponiveis.push({ nome: 'Quizizz', disciplina: 'Todas' });
 
       plataformasDisponiveis.forEach(p => {
@@ -235,73 +257,90 @@
       });
     }
 
-        function filtrarDisciplina() {
+    function filtrarDisciplina() {
       const selectPlataforma = document.getElementById('add-plataforma');
       const selectDisciplina = document.getElementById('add-disciplina');
       
       const optionSelecionada = selectPlataforma.options[selectPlataforma.selectedIndex];
       const disciplinaSugerida = optionSelecionada.getAttribute('data-disciplina');
 
-      // Se a disciplina for 'Todas' (como Quizizz, Leia), deixa o professor escolher qual matéria foi
+      // Se a disciplina for 'Todas' (como Quizizz, Leia), destrava para o professor escolher
       if (disciplinaSugerida && disciplinaSugerida !== 'Todas') {
         selectDisciplina.value = disciplinaSugerida;
-        selectDisciplina.disabled = true; // Trava o campo (ex: Matific é sempre Matemática)
+        selectDisciplina.disabled = true; // Trava o campo
       } else {
         selectDisciplina.value = ''; 
-        selectDisciplina.disabled = false; // 🆕 Destrava o campo para ele escolher
+        selectDisciplina.disabled = false; // Destrava o campo
       }
     }
 
-       function adicionarLinha() {
+    function adicionarLinha() {
       const profEmail = document.getElementById('add-professor') ? document.getElementById('add-professor').value : '';
-      let turmaDigitada = document.getElementById('add-turma').value.trim().toUpperCase(); // Pega o que foi digitado/selecionado
+      const profNome = document.getElementById('add-professor').options[document.getElementById('add-professor').selectedIndex].text;
+      let turmaDigitada = document.getElementById('add-turma').value.trim().toUpperCase();
       const plataforma = document.getElementById('add-plataforma').value;
       const disciplina = document.getElementById('add-disciplina').value;
       let indiceStr = document.getElementById('add-indice').value.replace(',', '.');
       const indice = parseFloat(indiceStr);
 
-      if (!turmaDigitada || !plataforma || !disciplina || isNaN(indice)) {
+      if (!profEmail || !turmaDigitada || !plataforma || !disciplina || isNaN(indice)) {
         alert('Preencha todos os campos corretamente.');
         return;
       }
 
-      // 🆕 TRADUTOR DE TURMA (Padroniza para 6A, 7B, etc.)
+      // TRADUTOR DE TURMA (Padroniza para 6A, 7B, etc.)
       let turmaFormatada = turmaDigitada;
-      
-      // Se a pessoa digitar "6º ANO A" ou "6 ANO A"
       const matchAno = turmaDigitada.match(/(\d+)[º°]?\s*(?:ANO|SÉRIE)?\s*([A-D])/i);
       if (matchAno) {
-        turmaFormatada = matchAno[1] + matchAno[2].toUpperCase(); // Vira "6A"
-      } 
-      // Se for NEM, FD ou AGRO
-      else if (turmaDigitada.includes('NEM')) {
+        turmaFormatada = matchAno[1] + matchAno[2].toUpperCase(); 
+      } else if (turmaDigitada.includes('NEM')) {
         turmaFormatada = turmaDigitada.replace(/[^0-9]/g, '') + 'NEM';
-      }
-      else if (turmaDigitada.includes('FD')) {
+      } else if (turmaDigitada.includes('FD')) {
         turmaFormatada = turmaDigitada.replace(/[^0-9]/g, '') + 'FD';
-      }
-      else if (turmaDigitada.includes('AGRO')) {
+      } else if (turmaDigitada.includes('AGRO')) {
         turmaFormatada = '1AGRO';
       }
 
-      // Adiciona na lista (agora com a turma padronizada)
       listaDeLancamentos.push({ 
-        profEmail: profEmail, 
-        turma: turmaFormatada, // 🆕 Salva "6A" em vez de "6º Ano A"
-        plataforma, 
-        disciplina, 
-        indice 
+        profEmail, profNome, turma: turmaFormatada, plataforma, disciplina, indice 
       });
       
       renderizarTabela();
+      
+      // 🆕 Limpa os campos e DESTRAVA a disciplina para o próximo lançamento
       document.getElementById('add-indice').value = '';
+      document.getElementById('add-disciplina').disabled = false; 
       document.getElementById('add-indice').focus();
     }
 
-    function remover(index) {
+    // 🆕 Função para renderizar a tabela (sem recarregar a página)
+    function renderizarTabela() {
+      const tbody = document.getElementById('corpo-tabela');
+      tbody.innerHTML = '';
+
+      if (listaDeLancamentos.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#94a3b8; padding:2rem;">Nenhum lançamento adicionado.</td></tr>';
+        return;
+      }
+
+      listaDeLancamentos.forEach((item, index) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${item.profNome}</strong></td>
+          <td>${item.turma}</td>
+          <td>${item.plataforma}</td>
+          <td>${item.disciplina}</td>
+          <td style="color: var(--azul); font-weight: bold;">${item.indice.toFixed(3)}</td>
+          <td><button class="linha-remover" onclick="removerLinha(${index})"><i class="fas fa-trash"></i></button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // 🆕 Correção do botão de remover (não recarrega a página)
+    function removerLinha(index) {
       listaDeLancamentos.splice(index, 1);
-      // Redesenha a tabela (simples)
-      location.reload(); // Ou faça uma função de re-renderizar tabela
+      renderizarTabela();
     }
 
     async function salvarNaPlanilha() {
@@ -315,7 +354,7 @@
         operacao: 'IMPORTAR_LANCAMENTOS',
         token: usuarioLogado.token,
         lancamentos: listaDeLancamentos.map(l => ({
-          professor: l.profEmail, // Salva no nome do professor escolhido
+          professor: l.profEmail,
           turma: l.turma,
           plataforma: l.plataforma,
           disciplina: l.disciplina,
@@ -331,7 +370,8 @@
 
         if (result.status === 'success') {
           alert(`✅ ${result.inseridos} lançamento(s) salvo(s)!`);
-          location.reload();
+          listaDeLancamentos = [];
+          renderizarTabela();
         } else {
           alert('❌ Erro: ' + result.message);
         }
