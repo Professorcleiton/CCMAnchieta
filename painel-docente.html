@@ -344,8 +344,10 @@ function renderizarTabela() {
     const lancado = Number(d.qtd_lancada) || 0;
     const pct = meta > 0 ? Math.round((lancado / meta) * 100) : 0;
 
-    // Status seguro
-    const statusSeguro = (d.status || 'vermelho').toLowerCase();
+    // Status seguro (protege contra undefined/null)
+    const statusRaw = d.status ? String(d.status).toLowerCase() : 'vermelho';
+    const statusValidos = ['verde', 'amarelo', 'vermelho'];
+    const statusSeguro = statusValidos.includes(statusRaw) ? statusRaw : 'vermelho';
     const badge = `<span class="status-badge status-${statusSeguro}">${statusSeguro.toUpperCase()}</span>`;
 
     const universal = d.universal
@@ -363,7 +365,6 @@ function renderizarTabela() {
     </tr>`;
   }).join('');
 }
-
     function mostrarToast(msg) {
       const t = document.getElementById('toast');
       t.textContent = msg;
