@@ -289,11 +289,19 @@
     }
 
     function popularFiltroTurmas() {
-      const turmas = [...new Set(dadosOriginais.map(d => d.turma))].sort();
-      const sel = document.getElementById('filtro-turma');
-      sel.innerHTML = '<option value="">Todas as turmas</option>';
-      turmas.forEach(t => sel.innerHTML += `<option value="${t}">${t}</option>`);
-    }
+  // Filtra valores undefined/null/vazios antes de criar o Set
+  const turmas = [...new Set(
+    dadosOriginais
+      .map(d => d.turma)
+      .filter(t => t && t !== 'undefined' && t !== 'null' && String(t).trim() !== '')
+  )].sort();
+  
+  const sel = document.getElementById('filtro-turma');
+  sel.innerHTML = '<option value="">Todas as turmas</option>';
+  turmas.forEach(t => sel.innerHTML += `<option value="${t}">${t}</option>`);
+  
+  console.log('✅ Turmas encontradas:', turmas);
+}
 
     function aplicarFiltros() {
       const plat = document.getElementById('filtro-plataforma').value;
