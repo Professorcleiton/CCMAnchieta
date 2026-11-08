@@ -20,6 +20,7 @@
     .topbar { background: var(--azul); color: #fff; padding: 0.9rem 1rem; display: flex; align-items: center; gap: 1rem; position: sticky; top: 0; z-index: 100; }
     .topbar h1 { font-size: 1.1rem; flex: 1; margin: 0; }
     .topbar a { color: #fff; text-decoration: none; background: rgba(255,255,255,.15); padding: .4rem .8rem; border-radius: 8px; font-size: .85rem; }
+    .topbar .btn-dark { background: rgba(255,255,255,.15); border: none; color: #fff; padding: .4rem .7rem; border-radius: 8px; cursor: pointer; }
 
     .container { max-width: 1000px; margin: 0 auto; padding: 1.2rem; }
 
@@ -143,7 +144,6 @@
     let listaDeLancamentos = [];
 
     document.addEventListener('DOMContentLoaded', async () => {
-      // 1. Verifica a sessão
       const sessaoRaw = localStorage.getItem('sgi_ccma_session') || sessionStorage.getItem('sgi_ccma_session');
       if (!sessaoRaw) { alert('Sessão não encontrada. Faça login novamente.'); window.location.href = 'index.html'; return; }
       
@@ -155,7 +155,7 @@
         return;
       }
 
-      // 2. Busca a lista de professores
+      // Busca a lista de professores
       try {
         const resp = await fetch(APPS_SCRIPT_URL + '?aba=usuarios');
         const users = await resp.json();
@@ -171,11 +171,10 @@
         console.error('Erro ao carregar professores:', e);
       }
 
-      // 3. Busca as disciplinas únicas da aba Horarios e preenche o select
+      // Busca as disciplinas da planilha
       await carregarDisciplinasDaPlanilha();
     });
 
-    // 🆕 Função que puxa as disciplinas da planilha sem repetir
     async function carregarDisciplinasDaPlanilha() {
       try {
         const resp = await fetch(APPS_SCRIPT_URL + '?aba=disciplinas_todas');
@@ -235,14 +234,12 @@
 
       let plataformasDisponiveis = [];
       
-      // Regra de Matemática (Matific para 6/7, Khan para 8/9)
       if (turma.startsWith('6') || turma.startsWith('7')) {
         plataformasDisponiveis.push({ nome: 'Matific', disciplina: 'Matemática' });
       } else {
         plataformasDisponiveis.push({ nome: 'Khan Academy', disciplina: 'Matemática' });
       }
 
-      // Outras plataformas
       plataformasDisponiveis.push({ nome: 'Redação Paraná', disciplina: 'Português' });
       plataformasDisponiveis.push({ nome: 'Leia Paraná', disciplina: 'Todas' });
       plataformasDisponiveis.push({ nome: 'Inglês Paraná', disciplina: 'Inglês' });
@@ -264,19 +261,19 @@
       const optionSelecionada = selectPlataforma.options[selectPlataforma.selectedIndex];
       const disciplinaSugerida = optionSelecionada.getAttribute('data-disciplina');
 
-      // Se a disciplina for 'Todas' (como Quizizz, Leia), destrava para o professor escolher
       if (disciplinaSugerida && disciplinaSugerida !== 'Todas') {
         selectDisciplina.value = disciplinaSugerida;
-        selectDisciplina.disabled = true; // Trava o campo
+        selectDisciplina.disabled = true;
       } else {
         selectDisciplina.value = ''; 
-        selectDisciplina.disabled = false; // Destrava o campo
+        selectDisciplina.disabled = false;
       }
     }
 
     function adicionarLinha() {
-      const profEmail = document.getElementById('add-professor') ? document.getElementById('add-professor').value : '';
-      const profNome = document.getElementById('add-professor').options[document.getElementById('add-professor').selectedIndex].text;
+      const selectProf = document.getElementById('add-professor');
+      const profEmail = selectProf.value;
+      const profNome = selectProf.options[selectProf.selectedIndex].text;
       let turmaDigitada = document.getElementById('add-turma').value.trim().toUpperCase();
       const plataforma = document.getElementById('add-plataforma').value;
       const disciplina = document.getElementById('add-disciplina').value;
@@ -288,7 +285,6 @@
         return;
       }
 
-      // TRADUTOR DE TURMA (Padroniza para 6A, 7B, etc.)
       let turmaFormatada = turmaDigitada;
       const matchAno = turmaDigitada.match(/(\d+)[º°]?\s*(?:ANO|SÉRIE)?\s*([A-D])/i);
       if (matchAno) {
@@ -306,14 +302,11 @@
       });
       
       renderizarTabela();
-      
-      // 🆕 Limpa os campos e DESTRAVA a disciplina para o próximo lançamento
       document.getElementById('add-indice').value = '';
       document.getElementById('add-disciplina').disabled = false; 
       document.getElementById('add-indice').focus();
     }
 
-    // 🆕 Função para renderizar a tabela (sem recarregar a página)
     function renderizarTabela() {
       const tbody = document.getElementById('corpo-tabela');
       tbody.innerHTML = '';
@@ -337,7 +330,6 @@
       });
     }
 
-    // 🆕 Correção do botão de remover (não recarrega a página)
     function removerLinha(index) {
       listaDeLancamentos.splice(index, 1);
       renderizarTabela();
