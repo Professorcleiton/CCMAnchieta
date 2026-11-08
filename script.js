@@ -69,7 +69,7 @@ window.addEventListener('DOMContentLoaded', () => {
             const user = JSON.parse(sessao);
             const agora = Date.now();
             
-            // 🆕 Sessão antiga sem token (Fase 1) → Força novo login
+            // Sessão antiga sem token → Força novo login
             if (!user.token) {
                 console.warn('⚠️ Sessão sem token — limpando e forçando login');
                 sessionStorage.removeItem('sgi_ccma_session');
@@ -77,13 +77,22 @@ window.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            // Expiração da sessão (8 horas)
             if (user.loginTime && (agora - user.loginTime) > SESSAO_DURACAO_MS) {
                 sessionStorage.removeItem('sgi_ccma_session');
                 localStorage.removeItem('sgi_ccma_session');
                 mostrarToast('⏰ Sessão expirada. Faça login novamente.', 'aviso');
                 return;
             }
+            
             usuarioLogado = user;
+            
+            // 🆕 REDIRECIONAMENTO MASTER (Nível 5)
+            if (usuarioLogado.nivel >= 5) {
+                window.location.href = 'admin.html';
+                return;
+            }
+
             inicializarPainel();
         } catch (e) {
             console.error('Erro ao ler sessão:', e);
@@ -120,12 +129,21 @@ async function autenticarUsuario() {
                 setorExibicao: 'PROFESSORES',
                 setor,
                 nivel: data.nivel,
-                token: data.token,       // 🆕
-                loginTime: Date.now()     // 🆕
+                token: data.token,
+                loginTime: Date.now()
             };
+            
             sessionStorage.setItem('sgi_ccma_session', JSON.stringify(usuarioLogado));
             localStorage.setItem('sgi_ccma_session', JSON.stringify(usuarioLogado));
+            
+            // 🆕 REDIRECIONAMENTO MASTER (Nível 5)
+            if (usuarioLogado.nivel >= 5) {
+                window.location.href = 'admin.html';
+                return;
+            }
+
             inicializarPainel();
+            
         } else if (data.status === "blocked") {
             err.style.display = 'block';
             err.innerHTML = data.message || 'Conta temporariamente bloqueada.';
