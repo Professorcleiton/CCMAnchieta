@@ -141,15 +141,7 @@
     <span id="professor-nome"></span>
     <button class="btn-dark" id="btn-tema" title="Alternar tema"><i class="fas fa-moon"></i></button>
   </header>
-<!-- Cole isto logo após </header> e antes de <main class="painel-docente"> -->
-<div style="max-width:1200px;margin:1rem auto 0;padding:0 1.2rem;">
-  <a href="avaliacoes.html"
-     style="display:inline-flex;align-items:center;gap:.6rem;background:#005088;color:#fff;
-            padding:.8rem 1.4rem;border-radius:10px;text-decoration:none;font-weight:bold;
-            box-shadow:0 2px 6px rgba(0,0,0,.1);">
-    <i class="fas fa-file-pen"></i> Criar Avaliação
-  </a>
-</div>
+
   <main class="painel-docente">
 
     <div class="aviso">
@@ -160,6 +152,28 @@
         <strong>Meta:</strong> índice ≥ 0,70 na semana. Se você identificou um lançamento que não aparece aqui, procure a coordenação pedagógica.
       </div>
     </div>
+
+    <!-- 🆕 BOTÃO NOVA AVALIAÇÃO — destaque -->
+    <section style="background: linear-gradient(135deg, #005088 0%, #003d66 100%); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; box-shadow: 0 4px 12px rgba(0,80,136,.25);">
+      <div style="color: #fff; flex: 1; min-width: 240px;">
+        <h2 style="margin: 0 0 .3rem; font-size: 1.2rem; color: #fff;">
+          <i class="fas fa-file-pen"></i> Criar Avaliação
+        </h2>
+        <p style="margin: 0; font-size: .85rem; opacity: .85;">
+          Elabore provas com cabeçalho automático, personalize com nome dos alunos e envie para a secretaria imprimir.
+        </p>
+      </div>
+      <a href="avaliacoes.html"
+         style="display: inline-flex; align-items: center; gap: .6rem;
+                background: #eab308; color: #000; padding: .9rem 1.8rem;
+                border-radius: 10px; text-decoration: none; font-weight: bold;
+                font-size: 1rem; box-shadow: 0 3px 8px rgba(0,0,0,.2);
+                transition: all .2s; white-space: nowrap;"
+         onmouseover="this.style.background='#fff'; this.style.transform='scale(1.05)'"
+         onmouseout="this.style.background='#eab308'; this.style.transform='scale(1)'">
+        <i class="fas fa-plus-circle"></i> Nova Avaliação
+      </a>
+    </section>
 
     <section class="filtros">
       <select id="filtro-plataforma">
@@ -319,12 +333,10 @@
         return;
       }
       tbody.innerHTML = dadosFiltrados.map(d => {
-        // Normaliza o nome da plataforma para o professor
         let nomePlataforma = d.plataforma;
         if (d.plataforma === 'Quizizz' || d.plataforma === 'Desafio') {
           nomePlataforma = 'Quizizz / Desafio';
         }
-
         const pct = d.meta_semanal > 0 ? Math.round((d.qtd_lancada / d.meta_semanal) * 100) : 0;
         const badge = `<span class="status-badge status-${d.status}">${d.status.toUpperCase()}</span>`;
         const universal = d.universal
