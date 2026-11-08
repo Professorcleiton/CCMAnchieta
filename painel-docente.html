@@ -326,33 +326,43 @@
       document.getElementById('total-vermelho').textContent = vermelho;
     }
 
-    function renderizarTabela() {
-      const tbody = document.getElementById('corpo-tabela');
-      if (!dadosFiltrados.length) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:1.5rem;">Nenhum item encontrado.</td></tr>';
-        return;
-      }
-      tbody.innerHTML = dadosFiltrados.map(d => {
-        let nomePlataforma = d.plataforma;
-        if (d.plataforma === 'Quizizz' || d.plataforma === 'Desafio') {
-          nomePlataforma = 'Quizizz / Desafio';
-        }
-        const pct = d.meta_semanal > 0 ? Math.round((d.qtd_lancada / d.meta_semanal) * 100) : 0;
-        const badge = `<span class="status-badge status-${d.status}">${d.status.toUpperCase()}</span>`;
-        const universal = d.universal
-          ? ' <i class="fas fa-globe icone-universal" title="Meta universal — vale para todas as disciplinas"></i>'
-          : '';
-        return `<tr>
-          <td>${d.disciplina}</td>
-          <td>${d.turma}</td>
-          <td>${nomePlataforma}${universal}</td>
-          <td>${d.meta_semanal.toFixed(2)}</td>
-          <td>${d.qtd_lancada.toFixed(4)}</td>
-          <td>${pct}%</td>
-          <td>${badge}</td>
-        </tr>`;
-      }).join('');
+function renderizarTabela() {
+  const tbody = document.getElementById('corpo-tabela');
+  if (!dadosFiltrados.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:1.5rem;">Nenhum item encontrado.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = dadosFiltrados.map(d => {
+    // Nome da plataforma
+    let nomePlataforma = d.plataforma || '—';
+    if (d.plataforma === 'Quizizz' || d.plataforma === 'Desafio') {
+      nomePlataforma = 'Quizizz / Desafio';
     }
+
+    // Cálculos seguros
+    const meta = Number(d.meta_semanal) || 0;
+    const lancado = Number(d.qtd_lancada) || 0;
+    const pct = meta > 0 ? Math.round((lancado / meta) * 100) : 0;
+
+    // Status seguro
+    const statusSeguro = (d.status || 'vermelho').toLowerCase();
+    const badge = `<span class="status-badge status-${statusSeguro}">${statusSeguro.toUpperCase()}</span>`;
+
+    const universal = d.universal
+      ? ' <i class="fas fa-globe icone-universal" title="Meta universal — vale para todas as disciplinas"></i>'
+      : '';
+
+    return `<tr>
+      <td>${d.disciplina || '—'}</td>
+      <td>${d.turma || '—'}</td>
+      <td>${nomePlataforma}${universal}</td>
+      <td>${meta.toFixed(2)}</td>
+      <td>${lancado.toFixed(4)}</td>
+      <td>${pct}%</td>
+      <td>${badge}</td>
+    </tr>`;
+  }).join('');
+}
 
     function mostrarToast(msg) {
       const t = document.getElementById('toast');
