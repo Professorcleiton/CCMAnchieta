@@ -27,11 +27,17 @@
       color: var(--texto);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* 🆕 Força a barra de rolagem a aparecer sempre */
+    html {
+      overflow-y: scroll;
+    }
+
     body {
       font-family: 'Segoe UI', Roboto, sans-serif;
       background: #f3f4f6;
       color: var(--texto);
-      padding-bottom: 90px;
+      padding-bottom: 2rem;
     }
     .topbar {
       background: var(--azul);
@@ -85,26 +91,31 @@
     .card.geral { border-left-color: var(--azul); }
     .card.geral i, .card.geral .num { color: var(--azul); }
 
-    /* ✅ Tabela com rolagem na página inteira (sem rolagem interna) */
+    /* Tabela */
     .tabela-monitoramento {
       background: var(--bg-card); border-radius: 12px; padding: 1rem;
       box-shadow: 0 2px 6px rgba(0,0,0,.06); margin-bottom: 1.5rem;
-      user-select: none; /* evita a seleção de texto azul */
     }
     .tabela-monitoramento h2 {
       font-size: 1rem; margin-bottom: .8rem; color: var(--azul);
     }
     body.dark .tabela-monitoramento h2 { color: var(--dourado); }
     .tabela-monitoramento table { width: 100%; border-collapse: collapse; min-width: 640px; }
+
+    /* 🆕 Fundo branco forçado para evitar a "barra azul" de seleção/repaint do navegador */
     .tabela-monitoramento th, .tabela-monitoramento td {
       padding: .6rem .5rem; text-align: left; font-size: .88rem;
       border-bottom: 1px solid var(--borda);
+      background-color: var(--bg-card);
     }
-    /* Cabeçalho normal (rola junto com a página) */
     .tabela-monitoramento th {
-      background: var(--azul); color: #fff; font-weight: 600;
+      background-color: var(--azul); color: #fff; font-weight: 600;
     }
-    .tabela-monitoramento tr:hover { background: rgba(0,80,136,.05); }
+    body.dark .tabela-monitoramento th {
+      background-color: #0f172a;
+    }
+    .tabela-monitoramento tr:hover td { background-color: rgba(0,80,136,.05); }
+    body.dark .tabela-monitoramento tr:hover td { background-color: rgba(234,179,8,.05); }
 
     .status-badge {
       display: inline-block; padding: .2rem .6rem; border-radius: 999px;
@@ -132,30 +143,22 @@
     }
     .toast.ativo { opacity: 1; }
 
-    /* Botão Voltar ao SIGA */
+    /* 🆕 Botão Voltar normal no final da página */
     .footer-voltar-siga {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: var(--azul);
-      color: #fff;
-      padding: .7rem 1.5rem;
-      border-radius: 999px;
-      text-decoration: none;
-      font-weight: bold;
-      display: flex;
+      display: inline-flex;
       align-items: center;
       gap: .5rem;
-      box-shadow: 0 4px 12px rgba(0,0,0,.2);
+      background: var(--azul);
+      color: #fff;
+      padding: .8rem 1.5rem;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: bold;
       font-size: .9rem;
-      z-index: 100;
-      transition: background .2s, transform .2s;
+      margin-top: 1rem;
+      transition: background .2s;
     }
-    .footer-voltar-siga:hover {
-      background: #003d66;
-      transform: translateX(-50%) translateY(-2px);
-    }
+    .footer-voltar-siga:hover { background: #003d66; }
 
     @media (max-width: 900px) {
       .cards-resumo { grid-template-columns: repeat(2, 1fr); }
@@ -182,7 +185,7 @@
       <div>
         <strong>Painel informativo.</strong>
         Os índices são atualizados semanalmente pela coordenação a partir dos painéis oficiais (Super BI).
-        <strong>Meta:</strong> índice ≥ 0,70 na semana. Se você identificou um lançamento que não aparece aqui, procure a coordenação pedagógica.
+        <strong>Meta:</strong> índice ≥ 0,70 na semana.
       </div>
     </div>
 
@@ -278,16 +281,18 @@
       <canvas id="grafico-historico"></canvas>
     </section>
 
-  </main>
+    <!-- 🆕 Botão de voltar normal, no fluxo da página -->
+    <div style="text-align: center; margin-top: 1rem; margin-bottom: 2rem;">
+      <a href="restrito.html" class="footer-voltar-siga">
+        <i class="fas fa-arrow-left"></i> Voltar ao SIGA
+      </a>
+    </div>
 
-  <a href="restrito.html" class="footer-voltar-siga">
-    <i class="fas fa-arrow-left"></i> Voltar ao SIGA
-  </a>
+  </main>
 
   <div class="toast" id="toast"></div>
 
   <script>
-    // ✅ URL correta do Apps Script
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
 
     let sessao = null;
@@ -327,7 +332,6 @@
     }
 
     function popularFiltroTurmas() {
-      // Filtra valores undefined/null/vazios antes de criar o Set
       const turmas = [...new Set(
         dadosOriginais
           .map(d => d.turma)
@@ -337,8 +341,6 @@
       const sel = document.getElementById('filtro-turma');
       sel.innerHTML = '<option value="">Todas as turmas</option>';
       turmas.forEach(t => sel.innerHTML += `<option value="${t}">${t}</option>`);
-
-      console.log('✅ Turmas encontradas:', turmas);
     }
 
     function aplicarFiltros() {
@@ -394,7 +396,7 @@
         const badge = `<span class="status-badge status-${statusSeguro}">${statusSeguro.toUpperCase()}</span>`;
 
         const universal = d.universal
-          ? ' <i class="fas fa-globe icone-universal" title="Meta universal — vale para todas as disciplinas"></i>'
+          ? ' <i class="fas fa-globe icone-universal" title="Meta universal"></i>'
           : '';
 
         return `<tr>
