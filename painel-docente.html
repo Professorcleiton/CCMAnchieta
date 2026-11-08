@@ -530,5 +530,21 @@
       });
     }, 2000); // Espera 2 segundos (tempo do painel carregar) e executa
   </script>
+    <script>
+    // 🧹 VASSOURA DE HTML: Remove qualquer div fixa que não seja o topbar
+    setTimeout(() => {
+      const fixos = document.querySelectorAll('body > div, body > section');
+      fixos.forEach(el => {
+        const style = window.getComputedStyle(el);
+        // Se for fixo, e não for o toast nem o topbar, esconde
+        if (style.position === 'fixed' && 
+            !el.classList.contains('toast') && 
+            !el.classList.contains('topbar')) {
+          console.log('Deletando elemento fantasma:', el.id || el.className);
+          el.style.display = 'none';
+        }
+      });
+    }, 1500);
+  </script>
 </body>
 </html>
