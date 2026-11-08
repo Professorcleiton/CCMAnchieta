@@ -85,25 +85,14 @@
     .card.geral { border-left-color: var(--azul); }
     .card.geral i, .card.geral .num { color: var(--azul); }
 
-    /* 🆕 Tabela com rolagem vertical e sem seleção azul */
+    /* ✅ Tabela com rolagem na página inteira (sem rolagem interna) */
     .tabela-monitoramento {
       background: var(--bg-card); border-radius: 12px; padding: 1rem;
       box-shadow: 0 2px 6px rgba(0,0,0,.06); margin-bottom: 1.5rem;
-      max-height: 500px;
-      overflow-y: auto;
-      overflow-x: auto;
-      user-select: none;
+      user-select: none; /* evita a seleção de texto azul */
     }
-    .tabela-monitoramento::-webkit-scrollbar { width: 10px; height: 10px; }
-    .tabela-monitoramento::-webkit-scrollbar-thumb {
-      background: #94a3b8; border-radius: 5px;
-    }
-    .tabela-monitoramento::-webkit-scrollbar-thumb:hover { background: #64748b; }
-
     .tabela-monitoramento h2 {
       font-size: 1rem; margin-bottom: .8rem; color: var(--azul);
-      position: sticky; top: 0; background: var(--bg-card);
-      z-index: 3; padding-top: .2rem;
     }
     body.dark .tabela-monitoramento h2 { color: var(--dourado); }
     .tabela-monitoramento table { width: 100%; border-collapse: collapse; min-width: 640px; }
@@ -111,9 +100,9 @@
       padding: .6rem .5rem; text-align: left; font-size: .88rem;
       border-bottom: 1px solid var(--borda);
     }
+    /* Cabeçalho normal (rola junto com a página) */
     .tabela-monitoramento th {
       background: var(--azul); color: #fff; font-weight: 600;
-      position: sticky; top: 40px; z-index: 2;
     }
     .tabela-monitoramento tr:hover { background: rgba(0,80,136,.05); }
 
@@ -143,7 +132,7 @@
     }
     .toast.ativo { opacity: 1; }
 
-    /* 🆕 Botão Voltar ao SIGA */
+    /* Botão Voltar ao SIGA */
     .footer-voltar-siga {
       position: fixed;
       bottom: 20px;
@@ -298,7 +287,7 @@
   <div class="toast" id="toast"></div>
 
   <script>
-    // ✅ URL correta do Apps Script (a mesma do avaliacoes.html)
+    // ✅ URL correta do Apps Script
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
 
     let sessao = null;
@@ -338,7 +327,7 @@
     }
 
     function popularFiltroTurmas() {
-      // ✅ Filtra valores undefined/null/vazios antes de criar o Set
+      // Filtra valores undefined/null/vazios antes de criar o Set
       const turmas = [...new Set(
         dadosOriginais
           .map(d => d.turma)
@@ -390,18 +379,15 @@
         return;
       }
       tbody.innerHTML = dadosFiltrados.map(d => {
-        // Nome da plataforma
         let nomePlataforma = d.plataforma || '—';
         if (d.plataforma === 'Quizizz' || d.plataforma === 'Desafio') {
           nomePlataforma = 'Quizizz / Desafio';
         }
 
-        // Cálculos seguros
         const meta = Number(d.meta_semanal) || 0;
         const lancado = Number(d.qtd_lancada) || 0;
         const pct = meta > 0 ? Math.round((lancado / meta) * 100) : 0;
 
-        // Status seguro (protege contra undefined/null)
         const statusRaw = d.status ? String(d.status).toLowerCase() : 'vermelho';
         const statusValidos = ['verde', 'amarelo', 'vermelho'];
         const statusSeguro = statusValidos.includes(statusRaw) ? statusRaw : 'vermelho';
