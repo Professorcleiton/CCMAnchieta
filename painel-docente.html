@@ -288,8 +288,7 @@
       }
     }
 
-    function popularFiltroTurmas() {
-  // Filtra valores undefined/null/vazios antes de criar o Set
+ function popularFiltroTurmas() {
   const turmas = [...new Set(
     dadosOriginais
       .map(d => d.turma)
