@@ -3,126 +3,95 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lançar Índices — Super BI</title>
+  <title>Lançar Índices (Admin) — Super BI</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     :root {
-      --azul: #005088;
-      --verde: #16a34a;
-      --amarelo: #eab308;
-      --vermelho: #dc2626;
-      --bg-card: #ffffff;
-      --texto: #1f2937;
-      --borda: #e5e7eb;
+      --azul: #005088; --verde: #16a34a; --amarelo: #eab308; --vermelho: #dc2626;
+      --bg-card: #ffffff; --texto: #1f2937; --borda: #e5e7eb;
     }
     body.dark {
-      --bg-card: #1e293b;
-      --texto: #f1f5f9;
-      --borda: #334155;
-      background: #0f172a;
-      color: var(--texto);
+      --bg-card: #1e293b; --texto: #f1f5f9; --borda: #334155; background: #0f172a; color: var(--texto);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { overflow-y: auto !important; height: auto !important; }
-    body {
-      font-family: 'Segoe UI', Roboto, sans-serif;
-      background: #f3f4f6;
-      color: var(--texto);
-      padding-bottom: 80px;
-    }
+    body { font-family: 'Segoe UI', Roboto, sans-serif; background: #f3f4f6; color: var(--texto); padding-bottom: 80px; }
 
-    .topbar {
-      background: var(--azul); color: #fff; padding: 0.9rem 1rem;
-      display: flex; align-items: center; gap: 1rem;
-      position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,.15);
-    }
+    .topbar { background: var(--azul); color: #fff; padding: 0.9rem 1rem; display: flex; align-items: center; gap: 1rem; position: sticky; top: 0; z-index: 100; }
     .topbar h1 { font-size: 1.1rem; flex: 1; margin: 0; }
     .topbar a { color: #fff; text-decoration: none; background: rgba(255,255,255,.15); padding: .4rem .8rem; border-radius: 8px; font-size: .85rem; }
     .topbar .btn-dark { background: rgba(255,255,255,.15); border: none; color: #fff; padding: .4rem .7rem; border-radius: 8px; cursor: pointer; }
 
-    .container { max-width: 900px; margin: 0 auto; padding: 1.2rem; }
+    .container { max-width: 1000px; margin: 0 auto; padding: 1.2rem; }
 
-    .aviso {
-      background: #e0f2fe; border-left: 5px solid var(--azul);
-      padding: .9rem 1rem; border-radius: 8px; font-size: .85rem;
-      color: #0369a1; margin-bottom: 1.5rem; display: flex; align-items: flex-start; gap: .6rem;
-    }
+    .aviso { background: #e0f2fe; border-left: 5px solid var(--azul); padding: .9rem 1rem; border-radius: 8px; font-size: .85rem; color: #0369a1; margin-bottom: 1.5rem; }
     body.dark .aviso { background: #0c4a6e; color: #bae6fd; }
 
     .card { background: var(--bg-card); border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 6px rgba(0,0,0,.06); margin-bottom: 1.5rem; }
     
-    .form-row { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr auto; gap: 1rem; align-items: end; }
-    @media (max-width: 768px) { .form-row { grid-template-columns: 1fr; } }
+    .form-row { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr auto; gap: 1rem; align-items: end; }
+    @media (max-width: 900px) { .form-row { grid-template-columns: 1fr; } }
     
     .form-group { display: flex; flex-direction: column; }
     label { font-weight: 600; font-size: .85rem; margin-bottom: .3rem; }
     select, input { padding: .6rem; border: 1px solid var(--borda); border-radius: 6px; background: var(--bg-card); color: var(--texto); font-size: .9rem; }
     
-    .btn-add { background: var(--azul); color: #fff; border: none; padding: .6rem 1.2rem; border-radius: 6px; font-weight: bold; cursor: pointer; height: 40px; display: flex; align-items: center; gap: .5rem; }
-    .btn-add:hover { background: #003d66; }
-
+    .btn-add { background: var(--azul); color: #fff; border: none; padding: .6rem 1.2rem; border-radius: 6px; font-weight: bold; cursor: pointer; height: 40px; }
+    
     .tabela-wrap { overflow-x: auto; margin-bottom: 1.5rem; }
-    table { width: 100%; border-collapse: collapse; min-width: 700px; font-size: .9rem; }
+    table { width: 100%; border-collapse: collapse; min-width: 800px; font-size: .9rem; }
     th, td { padding: .7rem; border-bottom: 1px solid var(--borda); text-align: left; }
     th { background: #f8fafc; color: var(--azul); font-weight: 600; }
     body.dark th { background: #1e293b; }
     
     .linha-remover { background: transparent; border: none; color: var(--vermelho); cursor: pointer; font-size: 1.1rem; }
-
     .acoes { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1rem; }
-    .btn { padding: .8rem 1.5rem; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; font-size: .95rem; display: flex; align-items: center; gap: .5rem; }
-    .btn:disabled { opacity: .5; cursor: not-allowed; }
+    .btn { padding: .8rem 1.5rem; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; }
     .btn-salvar { background: var(--verde); color: #fff; }
-    .btn-salvar:hover { background: #15803d; }
-    .btn-limpar { background: #e2e8f0; color: #475569; }
     
-    .status { padding: 1rem; border-radius: 8px; margin-bottom: 1rem; font-size: .9rem; display: none; }
-    .status.ativo { display: block; }
-    .status.sucesso { background: #dcfce7; color: #166534; border-left: 5px solid var(--verde); }
-    .status.erro { background: #fee2e2; color: #991b1b; border-left: 5px solid var(--vermelho); }
-
-    .superbi-btn { background: #dc2626; color: white; text-decoration: none; padding: .8rem 1.2rem; border-radius: 8px; font-weight: bold; display: inline-flex; align-items: center; gap: .5rem; margin-bottom: 1rem; }
-    .superbi-btn:hover { background: #b91c1c; }
+    .superbi-btn { background: #dc2626; color: white; text-decoration: none; padding: .8rem 1.2rem; border-radius: 8px; font-weight: bold; display: inline-block; margin-bottom: 1rem; }
   </style>
 </head>
 <body>
 
   <header class="topbar">
-    <h1><i class="fas fa-chart-line"></i> Lançar Índices do BI</h1>
-    <a href="painel-docente.html"><i class="fas fa-arrow-left"></i> Voltar</a>
-    <button class="btn-dark" id="btn-tema" title="Alternar tema"><i class="fas fa-moon"></i></button>
+    <h1><i class="fas fa-chart-line"></i> Lançamento Centralizado (Admin)</h1>
+    <a href="restrito.html"><i class="fas fa-arrow-left"></i> Voltar</a>
   </header>
 
   <main class="container">
 
-    <a href="https://app.powerbi.com/groups/me/apps/3ba3686c-1e6b-43f3-b15b-533d58c91f91/reports/0cfca010-1d76-4778-a002-931211beb87a/ReportSectiona0ea065d0d3b7878ed40?language=pt-BR&experience=power-bi" target="_blank" class="superbi-btn">
+    <a href="https://app.powerbi.com/" target="_blank" class="superbi-btn">
       <i class="fas fa-external-link-alt"></i> Abrir Relatório do Power BI
     </a>
 
     <div class="aviso">
-      <i class="fas fa-info-circle" style="margin-top:.15rem;"></i>
-      <div>
-        <strong>Como usar:</strong> Abra o Power BI acima, olhe os índices da sua turma, e preencha a tabela abaixo. 
-        O sistema salva os dados com a <strong>data de hoje</strong> automaticamente.
-      </div>
+      <i class="fas fa-info-circle"></i>
+      <strong>MODO ADMIN:</strong> Como coordenação/direção, você pode lançar os índices para qualquer professor da escola.
     </div>
 
-    <!-- Formulário de Adição Rápida -->
     <div class="card">
       <h2 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--azul);">Adicionar Lançamento</h2>
       
       <div class="form-row">
         <div class="form-group">
+          <label>Professor(a):</label>
+          <select id="add-professor" onchange="filtrarTurmas()">
+            <option value="">Carregando professores...</option>
+          </select>
+        </div>
+
+        <div class="form-group">
           <label>Turma:</label>
           <select id="add-turma" onchange="filtrarPlataformas()">
-            <option value="">Carregando turmas...</option>
+            <option value="">Selecione o Prof. primeiro...</option>
           </select>
         </div>
 
         <div class="form-group">
           <label>Plataforma:</label>
           <select id="add-plataforma" onchange="filtrarDisciplina()">
-            <option value="">Selecione a Turma primeiro...</option>
+            <option value="">Selecione...</option>
           </select>
         </div>
 
@@ -136,50 +105,39 @@
             <option value="História">História</option>
             <option value="Geografia">Geografia</option>
             <option value="Inglês">Inglês</option>
-            <option value="Arte">Arte</option>
-            <option value="Educação Física">Educação Física</option>
           </select>
         </div>
 
         <div class="form-group">
-          <label>Índice (Ex: 1,100):</label>
-          <input type="text" id="add-indice" placeholder="Ex: 2,937 ou 1,100">
+          <label>Índice:</label>
+          <input type="text" id="add-indice" placeholder="Ex: 2,937">
         </div>
 
-        <button class="btn-add" onclick="adicionarLinha()">
-          <i class="fas fa-plus"></i> Add
-        </button>
+        <button class="btn-add" onclick="adicionarLinha()">+ Add</button>
       </div>
     </div>
 
-    <!-- Tabela de Lançamentos -->
-    <div class="card" style="padding: 1rem;">
-      <div class="status" id="status"></div>
-      
+    <div class="card">
       <div class="tabela-wrap">
-        <table id="tabela-lancamentos">
+        <table>
           <thead>
             <tr>
+              <th>Professor</th>
+              <th>Turma</th>
               <th>Plataforma</th>
               <th>Disciplina</th>
-              <th>Turma</th>
               <th>Índice</th>
-              <th style="width: 50px;"></th>
+              <th></th>
             </tr>
           </thead>
           <tbody id="corpo-tabela">
-            <tr><td colspan="5" style="text-align:center; color:#94a3b8; padding: 2rem;">Nenhum lançamento adicionado.</td></tr>
+            <tr><td colspan="6" style="text-align:center; color:#94a3b8; padding:2rem;">Nenhum lançamento adicionado.</td></tr>
           </tbody>
         </table>
       </div>
 
       <div class="acoes">
-        <button class="btn btn-limpar" onclick="limparTabela()">
-          <i class="fas fa-trash"></i> Limpar
-        </button>
-        <button class="btn btn-salvar" id="btnSalvar" onclick="salvarNaPlanilha()">
-          <i class="fas fa-cloud-upload-alt"></i> Salvar na Planilha
-        </button>
+        <button class="btn btn-salvar" onclick="salvarNaPlanilha()">Salvar na Planilha</button>
       </div>
     </div>
 
@@ -187,73 +145,79 @@
 
   <script>
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
-    
     let usuarioLogado = null;
-    let todasAsTurmasDoProfessor = [];
+    let professoresList = [];
     let listaDeLancamentos = [];
 
     document.addEventListener('DOMContentLoaded', async () => {
-      const sessaoRaw = localStorage.getItem('sgi_ccma_session') || sessionStorage.getItem('sgi_ccma_session');
-      if (!sessaoRaw) { alert('Sessão não encontrada.'); window.location.href = 'index.html'; return; }
-      usuarioLogado = JSON.parse(sessaoRaw);
+      usuarioLogado = JSON.parse(localStorage.getItem('sgi_ccma_session') || sessionStorage.getItem('sgi_ccma_session'));
+      if (!usuarioLogado || usuarioLogado.nivel < 4) {
+        alert('Acesso restrito à Direção/Admin (Nível 4).');
+        window.location.href = 'restrito.html';
+        return;
+      }
 
-      const btnTema = document.getElementById('btn-tema');
-      if (localStorage.getItem('tema') === 'dark') document.body.classList.add('dark');
-      btnTema.addEventListener('click', () => {
-        document.body.classList.toggle('dark');
-        const dark = document.body.classList.contains('dark');
-        localStorage.setItem('tema', dark ? 'dark' : 'light');
-        btnTema.innerHTML = dark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
-      });
-
-      await carregarTurmasDoProfessor();
-    });
-
-    async function carregarTurmasDoProfessor() {
+      // Busca todos os professores e suas turmas
       try {
-        const url = APPS_SCRIPT_URL + '?aba=alunos';
-        const resp = await fetch(url);
-        const todosAlunos = await resp.json();
-        const turmasUnicas = [...new Set(todosAlunos.map(a => a.turma_codigo).filter(Boolean))].sort();
+        const resp = await fetch(APPS_SCRIPT_URL + '?aba=usuarios');
+        const users = await resp.json();
         
-        const select = document.getElementById('add-turma');
-        select.innerHTML = '<option value="">Selecione a Turma...</option>';
-        turmasUnicas.forEach(turma => {
-          select.innerHTML += `<option value="${turma}">${turma}</option>`;
+        professoresList = users.filter(u => u.setor === 'professores' || u.setor === 'direcao');
+        
+        const selectProf = document.getElementById('add-professor');
+        selectProf.innerHTML = '<option value="">Selecione o Professor...</option>';
+        professoresList.forEach(p => {
+          selectProf.innerHTML += `<option value="${p.email}">${p.nome}</option>`;
         });
       } catch (e) {
-        console.error('Erro ao buscar turmas', e);
+        console.error(e);
+      }
+    });
+
+    async function filtrarTurmas() {
+      const emailProf = document.getElementById('add-professor').value;
+      const selectTurma = document.getElementById('add-turma');
+      selectTurma.innerHTML = '<option value="">Carregando turmas...</option>';
+
+      if (!emailProf) return;
+
+      try {
+        const resp = await fetch(APPS_SCRIPT_URL + '?aba=avaliacoes_turmas_professor&email=' + encodeURIComponent(emailProf));
+        const turmas = await resp.json();
+        
+        selectTurma.innerHTML = '<option value="">Selecione a Turma...</option>';
+        if (turmas.length === 0) {
+           selectTurma.innerHTML = '<option value="">Nenhuma turma p/ este prof.</option>';
+        } else {
+           turmas.forEach(t => {
+             selectTurma.innerHTML += `<option value="${t}">${t}</option>`;
+           });
+        }
+      } catch (e) {
+        console.error(e);
       }
     }
 
-    // 🆕 Filtro Inteligente: Mostra Matific para 6º/7º e Khan para as outras
     function filtrarPlataformas() {
       const turma = document.getElementById('add-turma').value;
       const selectPlataforma = document.getElementById('add-plataforma');
+      selectPlataforma.innerHTML = '<option value="">Selecione...</option>';
       
-      selectPlataforma.innerHTML = '<option value="">Selecione a Plataforma...</option>';
-      
-      if (!turma) {
-         selectPlataforma.innerHTML = '<option value="">Selecione a Turma primeiro...</option>';
-         return;
-      }
+      if (!turma) return;
 
-      let plataformasDisponiveis = [];
-      
-      // Regra: 6º e 7º ano usam Matific, as demais usam Khan.
+      let plataformas = [];
       if (turma.startsWith('6') || turma.startsWith('7')) {
-        plataformasDisponiveis.push({ nome: 'Matific', disciplina: 'Matemática' });
+        plataformas.push({ nome: 'Matific', disciplina: 'Matemática' });
       } else {
-        plataformasDisponiveis.push({ nome: 'Khan Academy', disciplina: 'Matemática' });
+        plataformas.push({ nome: 'Khan Academy', disciplina: 'Matemática' });
       }
 
-      // Adiciona as outras plataformas gerais
-      plataformasDisponiveis.push({ nome: 'Redação Paraná', disciplina: 'Português' });
-      plataformasDisponiveis.push({ nome: 'Leia Paraná', disciplina: 'Todas' });
-      plataformasDisponiveis.push({ nome: 'Quizizz', disciplina: 'Todas' });
-      plataformasDisponiveis.push({ nome: 'Inglês Paraná', disciplina: 'Inglês' });
+      plataformas.push({ nome: 'Redação Paraná', disciplina: 'Português' });
+      plataformas.push({ nome: 'Leia Paraná', disciplina: 'Todas' });
+      plataformas.push({ nome: 'Quizizz', disciplina: 'Todas' });
+      plataformas.push({ nome: 'Inglês Paraná', disciplina: 'Inglês' });
 
-      plataformasDisponiveis.forEach(p => {
+      plataformas.forEach(p => {
         const opt = document.createElement('option');
         opt.value = p.nome;
         opt.textContent = p.nome;
@@ -262,138 +226,89 @@
       });
     }
 
-    // Preenche a disciplina automaticamente ao escolher a plataforma
     function filtrarDisciplina() {
-      const selectPlataforma = document.getElementById('add-plataforma');
-      const selectDisciplina = document.getElementById('add-disciplina');
-      
-      const optionSelecionada = selectPlataforma.options[selectPlataforma.selectedIndex];
-      const disciplinaSugerida = optionSelecionada.getAttribute('data-disciplina');
-
-      if (disciplinaSugerida && disciplinaSugerida !== 'Todas') {
-        selectDisciplina.value = disciplinaSugerida;
-      } else {
-        selectDisciplina.value = ''; 
-      }
+      const sel = document.getElementById('add-plataforma');
+      const disc = sel.options[sel.selectedIndex].getAttribute('data-disciplina');
+      document.getElementById('add-disciplina').value = (disc && disc !== 'Todas') ? disc : '';
     }
 
-    // Adiciona na tabela convertendo vírgula para ponto
     function adicionarLinha() {
+      const profEmail = document.getElementById('add-professor').value;
+      const profNome = document.getElementById('add-professor').options[document.getElementById('add-professor').selectedIndex].text;
       const turma = document.getElementById('add-turma').value;
       const plataforma = document.getElementById('add-plataforma').value;
       const disciplina = document.getElementById('add-disciplina').value;
-      let indiceStr = document.getElementById('add-indice').value.trim();
-
-      indiceStr = indiceStr.replace(',', '.');
+      let indiceStr = document.getElementById('add-indice').value.replace(',', '.');
       const indice = parseFloat(indiceStr);
 
-      if (!turma || !plataforma || !disciplina || isNaN(indice)) {
-        alert('Preencha todos os campos corretamente. Use vírgula para os decimais (ex: 2,937).');
+      if (!profEmail || !turma || !plataforma || !disciplina || isNaN(indice)) {
+        alert('Preencha todos os campos corretamente.');
         return;
       }
 
-      listaDeLancamentos.push({ plataforma, disciplina, turma, indice });
-      renderizarTabela();
+      listaDeLancamentos.push({ profEmail, profNome, turma, plataforma, disciplina, indice });
+      
+      // Atualiza tabela visual
+      const tbody = document.getElementById('corpo-tabela');
+      if (listaDeLancamentos.length === 1) tbody.innerHTML = '';
+      
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${profNome}</td>
+        <td>${turma}</td>
+        <td>${plataforma}</td>
+        <td>${disciplina}</td>
+        <td><strong>${indice.toFixed(3)}</strong></td>
+        <td><button class="linha-remover" onclick="remover(${listaDeLancamentos.length - 1})"><i class="fas fa-trash"></i></button></td>
+      `;
+      tbody.appendChild(tr);
 
       document.getElementById('add-indice').value = '';
-      document.getElementById('add-indice').focus();
     }
 
-    function renderizarTabela() {
-      const tbody = document.getElementById('corpo-tabela');
-      tbody.innerHTML = '';
-
-      if (listaDeLancamentos.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding: 2rem;">Nenhum lançamento adicionado.</td></tr>';
-        return;
-      }
-
-      listaDeLancamentos.forEach((item, index) => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><strong>${item.plataforma}</strong></td>
-          <td>${item.disciplina}</td>
-          <td>${item.turma}</td>
-          <td style="color: var(--azul); font-weight: bold;">${item.indice.toFixed(3)}</td>
-          <td><button class="linha-remover" onclick="removerLinha(${index})"><i class="fas fa-trash"></i></button></td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function removerLinha(index) {
+    function remover(index) {
       listaDeLancamentos.splice(index, 1);
-      renderizarTabela();
-    }
-
-    function limparTabela() {
-      if (confirm('Apagar todos os lançamentos da lista?')) {
-        listaDeLancamentos = [];
-        renderizarTabela();
-      }
+      // Redesenha a tabela (simples)
+      location.reload(); // Ou faça uma função de re-renderizar tabela
     }
 
     async function salvarNaPlanilha() {
-      if (listaDeLancamentos.length === 0) {
-        alert('Adicione pelo menos um lançamento antes de salvar.');
-        return;
-      }
-
-      const btn = document.getElementById('btnSalvar');
+      if (listaDeLancamentos.length === 0) return alert('Adicione pelo menos um lançamento.');
+      
+      const btn = event.target;
       btn.disabled = true;
-      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+      btn.innerHTML = 'Salvando...';
 
       const payload = {
         operacao: 'IMPORTAR_LANCAMENTOS',
         token: usuarioLogado.token,
-        emailOperador: usuarioLogado.email,
         lancamentos: listaDeLancamentos.map(l => ({
-          professor: usuarioLogado.email,
-          disciplina: l.disciplina,
+          professor: l.profEmail, // Salva no nome do professor escolhido
           turma: l.turma,
           plataforma: l.plataforma,
+          disciplina: l.disciplina,
           valor: l.indice
         }))
       };
 
       try {
         const resp = await fetch(APPS_SCRIPT_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain' },
-          body: JSON.stringify(payload)
+          method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload)
         });
-        
-        const textoResposta = await resp.text();
-        console.log("Resposta do servidor:", textoResposta); 
-
-        let result;
-        try {
-          result = JSON.parse(textoResposta);
-        } catch(e) {
-          throw new Error("O servidor não respondeu com JSON válido. Reimplante o Apps Script.");
-        }
+        const result = await resp.json();
 
         if (result.status === 'success') {
-          mostrarStatus('sucesso', `✅ ${result.inseridos} lançamento(s) salvo(s) com sucesso!`);
-          listaDeLancamentos = [];
-          renderizarTabela();
+          alert(`✅ ${result.inseridos} lançamento(s) salvo(s)!`);
+          location.reload();
         } else {
-          mostrarStatus('erro', '❌ Erro do Google: ' + (result.message || 'Tente novamente.'));
+          alert('❌ Erro: ' + result.message);
         }
       } catch (e) {
-        console.error(e);
-        mostrarStatus('erro', '❌ Erro de conexão: ' + e.message);
+        alert('❌ Erro de conexão.');
       } finally {
         btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Salvar na Planilha';
+        btn.innerHTML = 'Salvar na Planilha';
       }
-    }
-
-    function mostrarStatus(tipo, msg) {
-      const el = document.getElementById('status');
-      el.className = 'status ativo ' + tipo;
-      el.innerHTML = msg;
-      setTimeout(() => { el.classList.remove('ativo'); }, 5000);
     }
   </script>
 </body>
