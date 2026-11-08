@@ -4,17 +4,21 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Painel Docente — SIGA CCM Anchieta</title>
-  <link rel="stylesheet" href="style.css">
+  
+  <!-- 🆕 Removido o <link rel="stylesheet" href="style.css"> para parar os bugs -->
+  
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="manifest" href="manifest.json">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  
   <style>
-    /* 1. FORÇA ROLAGEM NA PÁGINA INTEIRA */
+    /* Força a rolagem na página inteira */
     html, body {
       overflow-y: auto !important;
       overflow-x: hidden !important;
       height: auto !important;
-      min-height: 100% !important;
+      margin: 0;
+      padding: 0;
     }
 
     :root {
@@ -27,6 +31,7 @@
       --texto: #1f2937;
       --borda: #e5e7eb;
     }
+    
     body.dark {
       --bg-card: #1e293b;
       --texto: #f1f5f9;
@@ -34,7 +39,8 @@
       background: #0f172a;
       color: var(--texto);
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    * { box-sizing: border-box; }
     
     body {
       font-family: 'Segoe UI', Roboto, sans-serif;
@@ -55,7 +61,7 @@
       z-index: 100;
       box-shadow: 0 2px 8px rgba(0,0,0,.15);
     }
-    .topbar h1 { font-size: 1.1rem; flex: 1; }
+    .topbar h1 { font-size: 1.1rem; flex: 1; margin: 0; }
     .topbar #professor-nome { font-size: .85rem; opacity: .9; text-align: right; }
     .topbar .btn-dark {
       background: rgba(255,255,255,.15); border: none; color: #fff;
@@ -63,26 +69,14 @@
     }
     
     .painel-docente { max-width: 1200px; margin: 0 auto; padding: 1.2rem; }
-    
-    /* 🆕 FORÇA BRUTAL: Tira qualquer fundo azul de elementos soltos no meio da página */
-    .painel-docente > div, 
-    .painel-docente > section,
-    .tabela-monitoramento, 
-    .historico {
-      background-color: var(--bg-card) !important;
-      background-image: none !important;
-      border: none !important;
-      box-shadow: 0 2px 6px rgba(0,0,0,.06) !important;
-    }
 
     .aviso {
-      background: #fef3c7 !important; 
-      border-left: 5px solid var(--dourado) !important;
+      background: #fef3c7; border-left: 5px solid var(--dourado);
       padding: .8rem 1rem; border-radius: 8px; font-size: .85rem;
       color: #78350f; margin-bottom: 1rem;
       display: flex; align-items: flex-start; gap: .6rem;
     }
-    body.dark .aviso { background: #422006 !important; color: #fde68a; }
+    body.dark .aviso { background: #422006; color: #fde68a; }
     
     .filtros { display: flex; gap: .6rem; flex-wrap: wrap; margin-bottom: 1rem; }
     .filtros select {
@@ -111,54 +105,45 @@
     .card.geral { border-left-color: var(--azul); }
     .card.geral i, .card.geral .num { color: var(--azul); }
 
-    /* Tabela */
     .tabela-monitoramento {
-      border-radius: 12px; padding: 1rem;
-      margin-bottom: 1.5rem;
+      background: var(--bg-card); border-radius: 12px; padding: 1rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,.06); margin-bottom: 1.5rem;
     }
     .tabela-monitoramento h2 {
-      font-size: 1rem; margin-bottom: .8rem; color: var(--azul) !important;
+      font-size: 1rem; margin-top: 0; margin-bottom: .8rem; color: var(--azul);
     }
-    body.dark .tabela-monitoramento h2 { color: var(--dourado) !important; }
+    body.dark .tabela-monitoramento h2 { color: var(--dourado); }
     
     .tabela-monitoramento table { width: 100%; border-collapse: collapse; min-width: 640px; }
     .tabela-monitoramento th, .tabela-monitoramento td {
       padding: .6rem .5rem; text-align: left; font-size: .88rem;
       border-bottom: 1px solid var(--borda);
-      background-color: var(--bg-card) !important;
-      background-image: none !important;
-      box-shadow: none !important;
-      animation: none !important;
-      transition: none !important;
+      background-color: var(--bg-card);
     }
     .tabela-monitoramento th {
-      background-color: var(--azul) !important; color: #fff !important; font-weight: 600;
+      background-color: var(--azul); color: #fff; font-weight: 600;
     }
-    body.dark .tabela-monitoramento th { background-color: #0f172a !important; }
-    .tabela-monitoramento tr:hover td { background-color: rgba(0,80,136,.05) !important; }
-    body.dark .tabela-monitoramento tr:hover td { background-color: rgba(234,179,8,.05) !important; }
+    body.dark .tabela-monitoramento th { background-color: #0f172a; }
+    .tabela-monitoramento tr:hover td { background-color: rgba(0,80,136,.05); }
+    body.dark .tabela-monitoramento tr:hover td { background-color: rgba(234,179,8,.05); }
 
     .status-badge {
       display: inline-block; padding: .2rem .6rem; border-radius: 999px;
       font-size: .75rem; font-weight: 600; color: #fff;
     }
-    .status-verde { background: var(--verde) !important; }
-    .status-amarelo { background: var(--amarelo) !important; color: #000; }
-    .status-vermelho { background: var(--vermelho) !important; }
+    .status-verde { background: var(--verde); }
+    .status-amarelo { background: var(--amarelo); color: #000; }
+    .status-vermelho { background: var(--vermelho); }
     .icone-universal { color: var(--azul); margin-left: .3rem; font-size: .8rem; }
     body.dark .icone-universal { color: #93c5fd; }
 
-    /* Gráfico */
     .historico {
-      border-radius: 12px; padding: 1rem;
-      margin-bottom: 1.5rem;
+      background: var(--bg-card); border-radius: 12px; padding: 1rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,.06); margin-bottom: 1.5rem;
     }
-    .historico h2 { font-size: 1rem; margin-bottom: .8rem; color: var(--azul) !important; }
-    body.dark .historico h2 { color: var(--dourado) !important; }
-    #grafico-historico {
-      background: transparent !important;
-      max-height: 320px;
-    }
+    .historico h2 { font-size: 1rem; margin-top: 0; margin-bottom: .8rem; color: var(--azul); }
+    body.dark .historico h2 { color: var(--dourado); }
+    #grafico-historico { max-height: 320px; background: transparent; }
 
     .toast {
       position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
@@ -182,28 +167,6 @@
       .card .num { font-size: 1.5rem; }
       .topbar h1 { font-size: .95rem; }
     }
-    /* 🚨 DESTRUIDOR DE OVERLAYS FANTASMAS 🚨 */
-    /* Desativa qualquer ::before ou ::after em posição fixa ou absoluta no painel */
-    .painel-docente *::before,
-    .painel-docente *::after {
-      position: static !important;
-      display: none !important;
-      content: none !important;
-      background: transparent !important;
-    }
-
-    /* Se o fantasma for o body/html tentando carregar algo */
-    body::before, body::after,
-    html::before, html::after {
-      display: none !important;
-      content: none !important;
-    }
-
-    /* Garante que só o topbar (barra de cima) fique fixo */
-    body > *:not(.topbar):not(.toast) {
-      position: relative !important;
-    }
-    
   </style>
 </head>
 <body>
@@ -226,7 +189,7 @@
     </div>
 
     <!-- BOTÃO NOVA AVALIAÇÃO -->
-    <section style="background: linear-gradient(135deg, #005088 0%, #003d66 100%) !important; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; box-shadow: 0 4px 12px rgba(0,80,136,.25);">
+    <section style="background: linear-gradient(135deg, #005088 0%, #003d66 100%); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; box-shadow: 0 4px 12px rgba(0,80,136,.25);">
       <div style="color: #fff; flex: 1; min-width: 240px;">
         <h2 style="margin: 0 0 .3rem; font-size: 1.2rem; color: #fff;">
           <i class="fas fa-file-pen"></i> Criar Avaliação
@@ -247,7 +210,7 @@
       </a>
     </section>
 
-    <section class="filtros" style="background: transparent !important; box-shadow: none !important;">
+    <section class="filtros">
       <select id="filtro-plataforma">
         <option value="">Todas as plataformas</option>
         <option value="Matific">Matific</option>
@@ -312,13 +275,12 @@
       </table>
     </section>
 
-    <!-- 🆕 Gráfico isolado -->
-    <section class="historico" style="background: transparent !important; box-shadow: none !important; padding: 0 !important;">
+    <section class="historico">
       <h2><i class="fas fa-chart-bar"></i> Histórico das últimas 4 semanas</h2>
       <canvas id="grafico-historico"></canvas>
     </section>
 
-    <div style="text-align: center; margin-top: 1rem; margin-bottom: 2rem; background: transparent !important;">
+    <div style="text-align: center; margin-top: 1rem; margin-bottom: 2rem;">
       <a href="restrito.html" class="footer-voltar-siga">
         <i class="fas fa-arrow-left"></i> Voltar ao SIGA
       </a>
@@ -461,7 +423,6 @@
       const valores = historico?.valores || [0, 0, 0, 0];
       if (grafico) grafico.destroy();
       
-      // Se todos os valores forem 0, esconde o gráfico para não ficar vazio com cara de erro
       const todosZeros = valores.every(v => v === 0);
       document.getElementById('grafico-historico').style.display = todosZeros ? 'none' : 'block';
 
@@ -499,52 +460,6 @@
 
     carregarPainel();
     carregarHistorico();
-  </script>
-    <script>
-    // 🚨 CAÇA-FANTASMA: Remove qualquer elemento fixo azul que estiver sobrando na tela
-    setTimeout(() => {
-      // Pega todos os elementos da página
-      const todos = document.querySelectorAll('*');
-      todos.forEach(el => {
-        const style = window.getComputedStyle(el);
-        
-        // Se o elemento for fixo ou sticky E tiver fundo azul (rgb(0, 80, 136) ou similar)
-        if ((style.position === 'fixed' || style.position === 'sticky') && 
-            (style.backgroundColor === 'rgb(0, 80, 136)' || 
-             style.backgroundColor === 'rgb(0, 61, 102)' ||
-             style.backgroundColor === 'rgba(0, 80, 136, 1)')) {
-          
-          // Não remove o topbar (a barra de cima que tem o título e o botão de tema)
-          if (el.classList.contains('topbar') || el.closest('.topbar')) return;
-          
-          // Se for o botão Nova Avaliação, não remove
-          if (el.tagName === 'A' && el.href.includes('avaliacoes.html')) return;
-
-          // Se for uma div gigante (> 100px de altura e largura > 50%), é o fantasma!
-          const rect = el.getBoundingClientRect();
-          if (rect.height > 30 && rect.width > 300) {
-            console.log('🗑️ Removendo elemento fantasma:', el.tagName, el.className);
-            el.style.display = 'none'; // Esconde em vez de remover para não quebrar o JS
-          }
-        }
-      });
-    }, 2000); // Espera 2 segundos (tempo do painel carregar) e executa
-  </script>
-    <script>
-    // 🧹 VASSOURA DE HTML: Remove qualquer div fixa que não seja o topbar
-    setTimeout(() => {
-      const fixos = document.querySelectorAll('body > div, body > section');
-      fixos.forEach(el => {
-        const style = window.getComputedStyle(el);
-        // Se for fixo, e não for o toast nem o topbar, esconde
-        if (style.position === 'fixed' && 
-            !el.classList.contains('toast') && 
-            !el.classList.contains('topbar')) {
-          console.log('Deletando elemento fantasma:', el.id || el.className);
-          el.style.display = 'none';
-        }
-      });
-    }, 1500);
   </script>
 </body>
 </html>
