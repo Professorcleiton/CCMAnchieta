@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Criar Avaliação — SIGA CCM Anchieta</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="manifest" href="manifest.json">
+  <style>
+    :root {
+      --azul: #005088;
+      --dourado: #eab308;
+      --verde: #0d9488;
+      --vermelho: #b91c1c;
+      --bg-card: #ffffff;
+      --texto: #1f2937;
+      --borda: #e5e7eb;
+    }
+    body.dark {
+      --bg-card: #1e293b;
+      --texto: #f1f5f9;
+      --borda: #334155;
+      background: #0f172a;
+      color: var(--texto);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Roboto, sans-serif;
+      background: #f3f4f6;
+      color: var(--texto);
+      padding-bottom: 80px;
+    }
+    .topbar {
+      background: var(--azul);
+      color: #fff;
+      padding: 0.9rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,.15);
+    }
+    .topbar h1 { font-size: 1.1rem; flex: 1; }
+    .topbar #professor-nome { font-size: .85rem; opacity: .9; text-align: right; }
+    .topbar .btn-dark {
+      background: rgba(255,255,255,.15); border: none; color: #fff;
+      padding: .4rem .7rem; border-radius: 8px; cursor: pointer;
+    }
+    .container { max-width: 1000px; margin: 0 auto; padding: 1.2rem; }
+
+    .aviso {
+      background: #fef3c7; border-left: 5px solid var(--dourado);
+      padding: .8rem 1rem; border-radius: 8px; font-size: .85rem;
+      color: #78350f; margin-bottom: 1rem;
+      display: flex; align-items: flex-start; gap: .6rem;
+    }
+    body.dark .aviso { background: #422006; color: #fde68a; }
+
+    .card {
+      background: var(--bg-card); border-radius: 12px; padding: 1.5rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,.06); margin-bottom: 1.2rem;
+    }
+    .card h2 {
+      font-size: 1rem; color: var(--azul); margin-bottom: 1rem;
+      display: flex; align-items: center; gap: .5rem;
+    }
+    body.dark .card h2 { color: var(--dourado); }
+
+    .header-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+    @media (max-width: 700px) {
+      .header-grid { grid-template-columns: 1fr; }
+    }
+    .form-group { display: flex; flex-direction: column; }
+    .form-group label {
+      font-weight: 600; font-size: .85rem; margin-bottom: .3rem;
+      color: var(--texto);
+    }
+    .form-group input,
+    .form-group select {
+      padding: .6rem .8rem; border-radius: 8px;
+      border: 1px solid var(--borda); background: var(--bg-card);
+      color: var(--texto); font-size: .9rem;
+    }
+    .form-group input:read-only {
+      background: #e9ecef; color: #555; font-weight: bold;
+    }
+    body.dark .form-group input:read-only { background: #334155; color: #cbd5e1; }
+
+    .editor-toolbar {
+      display: flex; gap: .4rem; margin-bottom: .5rem; flex-wrap: wrap;
+    }
+    .editor-toolbar button {
+      padding: .4rem .7rem; border: none; border-radius: 6px;
+      background: var(--dourado); color: #000; cursor: pointer;
+      font-weight: bold; font-size: .85rem;
+    }
+    .editor-toolbar button:hover { background: #ca8a04; color: #fff; }
+
+    #editorConteudo {
+      width: 100%;
+      min-height: 280px;
+      padding: 1rem;
+      border: 1px solid var(--borda);
+      border-radius: 8px;
+      font-size: 15px;
+      font-family: 'Times New Roman', serif;
+      background: var(--bg-card);
+      color: var(--texto);
+      overflow-y: auto;
+      line-height: 1.6;
+    }
+    #editorConteudo:empty:before {
+      content: attr(data-placeholder);
+      color: #94a3b8;
+    }
+
+    .upload-area {
+      border: 2px dashed var(--azul);
+      padding: 1.2rem;
+      text-align: center;
+      border-radius: 8px;
+      margin: .8rem 0;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .upload-area:hover { background: rgba(0,80,136,.05); }
+    body.dark .upload-area { border-color: var(--dourado); }
+    body.dark .upload-area:hover { background: rgba(234,179,8,.1); }
+
+    .anexo-item {
+      display: flex; justify-content: space-between; align-items: center;
+      background: #f1f5f9; padding: .5rem .8rem; border-radius: 6px;
+      font-size: .85rem; margin-top: .4rem;
+    }
+    body.dark .anexo-item { background: #334155; }
+    .anexo-item button {
+      background: #dc2626; color: white; border: none; border-radius: 4px;
+      padding: .2rem .5rem; cursor: pointer; font-size: .75rem;
+    }
+
+    .copia-obs-grid {
+      display: grid; grid-template-columns: 1fr 2fr; gap: 1rem; margin-top: 1rem;
+    }
+    @media (max-width: 600px) {
+      .copia-obs-grid { grid-template-columns: 1fr; }
+    }
+
+    .aviso-limite {
+      color: var(--vermelho); font-weight: bold; margin-top: .8rem;
+      padding: .6rem; background: #fee2e2; border-radius: 6px;
+      display: none;
+    }
+    .aviso-limite.ativo { display: block; }
+    .info-limite {
+      font-size: .85rem; color: #0369a1; background: #e0f2fe;
+      padding: .5rem .8rem; border-radius: 6px; margin-top: .5rem;
+      display: none;
+    }
+    .info-limite.ativo { display: block; }
+
+    .btn-enviar {
+      background: var(--azul); color: #fff; border: none;
+      padding: .9rem 1.2rem; border-radius: 8px;
+      font-size: 1rem; font-weight: bold; cursor: pointer;
+      width: 100%; margin-top: 1rem;
+      display: flex; align-items: center; justify-content: center; gap: .5rem;
+      transition: background .2s;
+    }
+    .btn-enviar:hover:not(:disabled) { background: #003d66; }
+    .btn-enviar:disabled { background: #cbd5e1; color: #64748b; cursor: not-allowed; }
+
+    .btn-preview {
+      background: var(--dourado); color: #000; border: none;
+      padding: .9rem 1.2rem; border-radius: 8px;
+      font-size: 1rem; font-weight: bold; cursor: pointer;
+      width: 100%; margin-top: .5rem;
+      display: flex; align-items: center; justify-content: center; gap: .5rem;
+    }
+    .btn-preview:hover { background: #ca8a04; color: #fff; }
+
+    .toast {
+      position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
+      background: var(--azul); color: #fff; padding: .7rem 1.2rem;
+      border-radius: 8px; opacity: 0; pointer-events: none;
+      transition: opacity .3s; z-index: 1000;
+      font-size: .9rem; font-weight: bold;
+      box-shadow: 0 4px 12px rgba(0,0,0,.2);
+    }
+    .toast.ativo { opacity: 1; }
+    .toast.erro { background: #dc2626; }
+    .toast.sucesso { background: #16a34a; }
+
+    .footer-voltar {
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      background: var(--azul); color: #fff; padding: .7rem 1.5rem;
+      border-radius: 999px; text-decoration: none; font-weight: bold;
+      display: flex; align-items: center; gap: .5rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,.2);
+      font-size: .9rem;
+    }
+
+    .spinner {
+      display: inline-block; width: 18px; height: 18px;
+      border: 3px solid rgba(255,255,255,.3);
+      border-top-color: #fff; border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.5);
+      display: none; align-items: center; justify-content: center;
+      z-index: 2000; color: #fff; font-size: 1.1rem; font-weight: bold;
+    }
+    .loading-overlay.ativo { display: flex; }
+    .loading-overlay .spinner { width: 40px; height: 40px; border-width: 5px; }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <h1><i class="fas fa-file-pen"></i> Criar Avaliação</h1>
+    <span id="professor-nome">Carregando...</span>
+    <button class="btn-dark" id="btn-tema" title="Alternar tema"><i class="fas fa-moon"></i></button>
+  </header>
+
+  <main class="container">
+
+    <div class="aviso">
+      <i class="fas fa-info-circle" style="margin-top:.15rem;"></i>
+      <div>
+        <strong>Instruções:</strong> O cabeçalho é preenchido automaticamente pelo sistema.
+        Escolha a turma, a disciplina e o trimestre para verificar o limite de impressões
+        (máximo de <strong>6 pedidos</strong> por turma/disciplina/trimestre).
+      </div>
+    </div>
+
+    <!-- CARD 1: CABEÇALHO -->
+    <section class="card">
+      <h2><i class="fas fa-id-card"></i> Cabeçalho da Prova</h2>
+      <div class="header-grid">
+        <div class="form-group">
+          <label>Professor(a)</label>
+          <input type="text" id="profNome" readonly>
+        </div>
+        <div class="form-group">
+          <label>Ano Letivo</label>
+          <input type="text" id="anoLetivo" value="2026" readonly>
+        </div>
+        <div class="form-group">
+          <label>Disciplina</label>
+          <select id="selectDisciplina">
+            <option value="">Carregando...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Turma</label>
+          <select id="selectTurma">
+            <option value="">Carregando...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Trimestre</label>
+          <select id="selectTrimestre">
+            <option value="1º">1º Trimestre</option>
+            <option value="2º">2º Trimestre</option>
+            <option value="3º">3º Trimestre</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Data da Prova</label>
+          <input type="date" id="dataProva" required>
+        </div>
+        <div class="form-group">
+          <label>Valor da Avaliação</label>
+          <input type="text" id="valorProva" placeholder="Ex: 10,0" required>
+        </div>
+        <div class="form-group">
+          <label>Professor(a) — Nome para o Cabeçalho</label>
+          <input type="text" id="profNomeCabecalho" placeholder="Como aparecerá na prova">
+        </div>
+      </div>
+
+      <div id="infoLimite" class="info-limite"></div>
+      <div id="avisoLimite" class="aviso-limite"></div>
+    </section>
+
+    <!-- CARD 2: EDITOR -->
+    <section class="card">
+      <h2><i class="fas fa-list-ol"></i> Questões da Avaliação</h2>
+      <div class="editor-toolbar">
+        <button type="button" onclick="execCmd('bold')"><b>N</b></button>
+        <button type="button" onclick="execCmd('italic')"><i>I</i></button>
+        <button type="button" onclick="execCmd('underline')"><u>S</u></button>
+        <button type="button" onclick="execCmd('insertOrderedList')">1. Lista</button>
+        <button type="button" onclick="execCmd('insertUnorderedList')">• Lista</button>
+        <button type="button" onclick="execCmd('justifyLeft')">⬅</button>
+        <button type="button" onclick="execCmd('justifyCenter')">⬌</button>
+        <button type="button" onclick="execCmd('justifyRight')">➡</button>
+        <button type="button" onclick="execCmd('formatBlock', 'H3')">Título</button>
+      </div>
+      <div id="editorConteudo" contenteditable="true"
+           data-placeholder="Digite as questões aqui... Ex:## Questão 1 – Perímetro
+Um terreno retangular possui 12,5 m de comprimento por 8,4 m de largura..."></div>
+    </section>
+
+    <!-- CARD 3: ANEXOS -->
+    <section class="card">
+      <h2><i class="fas fa-paperclip"></i> Anexos (imagens/PDFs) — opcional</h2>
+      <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+        <p style="margin:0; color: var(--azul); font-weight: bold; font-size:.95rem;">
+          📎 Clique para anexar imagens ou PDFs
+        </p>
+        <p style="margin:.3rem 0 0; font-size:.75rem; color:#64748b;">
+          JPG, PNG ou PDF · Máx. 5 MB por arquivo
+        </p>
+        <input type="file" id="fileInput" multiple accept="image/*,application/pdf"
+               style="display:none" onchange="adicionarAnexos(event)">
+      </div>
+      <div id="listaAnexos"></div>
+    </section>
+
+    <!-- CARD 4: CÓPIAS E OBS -->
+    <section class="card">
+      <h2><i class="fas fa-print"></i> Impressão</h2>
+      <div class="copia-obs-grid">
+        <div class="form-group">
+          <label>Qtd. de Cópias <span style="color: var(--vermelho);">*</span></label>
+          <input type="number" id="qtdCopias" min="1" value="30" required>
+        </div>
+        <div class="form-group">
+          <label>Observações (opcional)</label>
+          <input type="text" id="observacoes"
+                 placeholder="Ex: Imprimir frente e verso, grampear, separar por turma...">
+        </div>
+      </div>
+    </section>
+
+    <!-- BOTÕES DE AÇÃO -->
+    <button class="btn-preview" onclick="previewProva()">
+      <i class="fas fa-eye"></i> Visualizar Prévia
+    </button>
+    <button class="btn-enviar" id="btnEnviar" onclick="enviarPedido()">
+      <i class="fas fa-paper-plane"></i> Enviar para a Secretaria
+    </button>
+
+  </main>
+
+  <a href="painel-docente.html" class="footer-voltar">
+    <i class="fas fa-arrow-left"></i> Voltar ao Painel
+  </a>
+
+  <div class="toast" id="toast"></div>
+  <div class="loading-overlay" id="loadingOverlay">
+    <div style="text-align:center;">
+      <span class="spinner"></span>
+      <p style="margin-top:1rem;" id="loadingTexto">Enviando...</p>
+    </div>
+  </div>
+
+  <script>
+    // =============================================
+    // CONFIGURAÇÃO
+    // =============================================
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
+
+    let usuarioLogado = null;
+    let anexos = []; // { nome, tipo, base64, tamanhoMB }
+
+    // =============================================
+    // INICIALIZAÇÃO
+    // =============================================
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1) Carrega sessão
+      const sessaoRaw = sessionStorage.getItem('sgi_ccma_session') || localStorage.getItem('sgi_ccma_session');
+      if (!sessaoRaw) {
+        alert('Sessão não encontrada. Faça login novamente.');
+        window.location.href = 'index.html';
+        return;
+      }
+      try {
+        usuarioLogado = JSON.parse(sessaoRaw);
+      } catch (e) {
+        alert('Sessão inválida. Faça login novamente.');
+        window.location.href = 'index.html';
+        return;
+      }
+      if (!usuarioLogado.token) {
+        alert('Sessão sem token. Faça login novamente.');
+        window.location.href = 'index.html';
+        return;
+      }
+
+      // 2) Preenche topbar e nome
+      document.getElementById('professor-nome').textContent = usuarioLogado.nome || 'Professor(a)';
+      document.getElementById('profNome').value = usuarioLogado.nome || '';
+      document.getElementById('profNomeCabecalho').value = usuarioLogado.nome || '';
+
+      // 3) Tema escuro
+      if (localStorage.getItem('tema') === 'dark') {
+        document.body.classList.add('dark');
+        document.getElementById('btn-tema').innerHTML = '<i class="fas fa-sun"></i>';
+      }
+      document.getElementById('btn-tema').addEventListener('click', () => {
+        document.body.classList.toggle('dark');
+        const dark = document.body.classList.contains('dark');
+        localStorage.setItem('tema', dark ? 'dark' : 'light');
+        document.getElementById('btn-tema').innerHTML = dark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+      });
+
+      // 4) Carrega disciplinas e turmas
+      carregarDisciplinas();
+      carregarTurmas();
+
+      // 5) Listener para checar limite
+      ['selectDisciplina','selectTurma','selectTrimestre'].forEach(id => {
+        document.getElementById(id).addEventListener('change', verificarLimite);
+      });
+
+      // 6) Data padrão = hoje
+      document.getElementById('dataProva').value = new Date().toISOString().split('T')[0];
+    });
+
+    // =============================================
+    // HELPERS
+    // =============================================
+    function toast(msg, tipo) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'toast ativo' + (tipo ? ' ' + tipo : '');
+      setTimeout(() => t.classList.remove('ativo'), 3500);
+    }
+
+    function mostrarLoading(msg) {
+      document.getElementById('loadingTexto').textContent = msg || 'Carregando...';
+      document.getElementById('loadingOverlay').classList.add('ativo');
+    }
+    function esconderLoading() {
+      document.getElementById('loadingOverlay').classList.remove('ativo');
+    }
+
+    function execCmd(cmd, valor) {
+      document.execCommand(cmd, false, valor || null);
+      document.getElementById('editorConteudo').focus();
+    }
+
+    // =============================================
+    // CARREGAR DISCIPLINAS
+    // =============================================
+    async function carregarDisciplinas() {
+      const select = document.getElementById('selectDisciplina');
+      try {
+        const url = APPS_SCRIPT_URL + '?aba=avaliacoes_disciplinas_professor'
+          + '&email=' + encodeURIComponent(usuarioLogado.email)
+          + '&nome=' + encodeURIComponent(usuarioLogado.nome);
+        const resp = await fetch(url);
+        const disciplinas = await resp.json();
+
+        select.innerHTML = '<option value="">Selecione...</option>';
+        if (Array.isArray(disciplinas) && disciplinas.length > 0) {
+          disciplinas.forEach(d => {
+            select.innerHTML += `<option value="${d}">${d}</option>`;
+          });
+        } else {
+          select.innerHTML = '<option value="">Nenhuma disciplina encontrada</option>';
+        }
+      } catch (e) {
+        console.error(e);
+        select.innerHTML = '<option value="">Erro ao carregar</option>';
+        toast('Erro ao carregar disciplinas', 'erro');
+      }
+    }
+
+    // =============================================
+    // CARREGAR TURMAS
+    // =============================================
+    async function carregarTurmas() {
+      const select = document.getElementById('selectTurma');
+      try {
+        const url = APPS_SCRIPT_URL + '?aba=avaliacoes_turmas_professor'
+          + '&email=' + encodeURIComponent(usuarioLogado.email);
+        const resp = await fetch(url);
+        const turmas = await resp.json();
+
+        select.innerHTML = '<option value="">Selecione...</option>';
+        if (Array.isArray(turmas) && turmas.length > 0) {
+          turmas.forEach(t => {
+            select.innerHTML += `<option value="${t}">${t}</option>`;
+          });
+        } else {
+          select.innerHTML = '<option value="">Nenhuma turma encontrada</option>';
+        }
+      } catch (e) {
+        console.error(e);
+        select.innerHTML = '<option value="">Erro ao carregar</option>';
+        toast('Erro ao carregar turmas', 'erro');
+      }
+    }
+
+    // =============================================
+    // VERIFICAR LIMITE
+    // =============================================
+    let limiteAtual = null;
+    async function verificarLimite() {
+      const turma = document.getElementById('selectTurma').value;
+      const disciplina = document.getElementById('selectDisciplina').value;
+      const trimestre = document.getElementById('selectTrimestre').value;
+      const info = document.getElementById('infoLimite');
+      const aviso = document.getElementById('avisoLimite');
+      const btn = document.getElementById('btnEnviar');
+
+      if (!turma || !disciplina || !trimestre) {
+        info.classList.remove('ativo');
+        aviso.classList.remove('ativo');
+        btn.disabled = false;
+        return;
+      }
+
+      try {
+        const url = APPS_SCRIPT_URL + '?aba=avaliacoes_limite'
+          + '&turma=' + encodeURIComponent(turma)
+          + '&disciplina=' + encodeURIComponent(disciplina)
+          + '&trimestre=' + encodeURIComponent(trimestre);
+        const resp = await fetch(url);
+        limiteAtual = await resp.json();
+
+        if (limiteAtual.bloqueado) {
+          info.classList.remove('ativo');
+          aviso.classList.add('ativo');
+          aviso.innerHTML = '⚠️ Limite de ' + limiteAtual.limite
+            + ' pedidos para esta turma/disciplina/trimestre foi atingido. Procure a secretaria.';
+          btn.disabled = true;
+        } else {
+          aviso.classList.remove('ativo');
+          info.classList.add('ativo');
+          info.innerHTML = '✅ <strong>' + limiteAtual.contador + ' de ' + limiteAtual.limite
+            + '</strong> pedidos usados. Restam <strong>' + limiteAtual.restantes + '</strong>.';
+          btn.disabled = false;
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    // =============================================
+    // ANEXOS (base64)
+    // =============================================
+    function adicionarAnexos(event) {
+      const files = Array.from(event.target.files);
+      const MAX_MB = 5;
+
+      files.forEach(file => {
+        const mb = file.size / (1024 * 1024);
+        if (mb > MAX_MB) {
+          toast(`"${file.name}" excede ${MAX_MB} MB e foi ignorado.`, 'erro');
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const base64 = e.target.result.split(',')[1];
+          anexos.push({
+            nome: file.name,
+            tipo: file.type,
+            base64: base64,
+            tamanhoMB: mb.toFixed(2)
+          });
+          renderizarAnexos();
+        };
+        reader.readAsDataURL(file);
+      });
+
+      event.target.value = '';
+    }
+
+    function renderizarAnexos() {
+      const lista = document.getElementById('listaAnexos');
+      lista.innerHTML = '';
+      anexos.forEach((a, idx) => {
+        const div = document.createElement('div');
+        div.className = 'anexo-item';
+        div.innerHTML = `
+          <span>📄 <strong>${a.nome}</strong> (${a.tamanhoMB} MB)</span>
+          <button onclick="removerAnexo(${idx})"><i class="fas fa-times"></i></button>
+        `;
+        lista.appendChild(div);
+      });
+    }
+
+    function removerAnexo(idx) {
+      anexos.splice(idx, 1);
+      renderizarAnexos();
+    }
+
+    // =============================================
+    // ENVIAR PEDIDO
+    // =============================================
+    async function enviarPedido() {
+      const disciplina = document.getElementById('selectDisciplina').value;
+      const turma = document.getElementById('selectTurma').value;
+      const trimestre = document.getElementById('selectTrimestre').value;
+      const dataProva = document.getElementById('dataProva').value;
+      const valorProva = document.getElementById('valorProva').value.trim();
+      const conteudoHTML = document.getElementById('editorConteudo').innerHTML.trim();
+      const qtdCopias = parseInt(document.getElementById('qtdCopias').value);
+      const observacoes = document.getElementById('observacoes').value.trim();
+
+      // Validações
+      if (!disciplina) return toast('Selecione a disciplina.', 'erro');
+      if (!turma) return toast('Selecione a turma.', 'erro');
+      if (!trimestre) return toast('Selecione o trimestre.', 'erro');
+      if (!dataProva) return toast('Informe a data da prova.', 'erro');
+      if (!valorProva) return toast('Informe o valor da avaliação.', 'erro');
+      if (!conteudoHTML || conteudoHTML.length < 10) return toast('Digite o conteúdo da avaliação.', 'erro');
+      if (!qtdCopias || qtdCopias < 1) return toast('Informe a quantidade de cópias.', 'erro');
+
+      if (limiteAtual && limiteAtual.bloqueado) {
+        return toast('Limite de pedidos atingido para esta combinação.', 'erro');
+      }
+
+      mostrarLoading('Enviando pedido...');
+
+      const payload = {
+        operacao: 'CRIAR_PEDIDO_AVALIACAO',
+        token: usuarioLogado.token,
+        disciplina,
+        turma,
+        trimestre,
+        dataProva,
+        valor: valorProva,
+        conteudo: conteudoHTML,
+        qtdCopias,
+        observacoes,
+        anexos: anexos.map(a => ({ nome: a.nome, tipo: a.tipo, base64: a.base64 }))
+      };
+
+      try {
+        const resp = await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify(payload)
+        });
+        const result = await resp.json();
+
+        esconderLoading();
+
+        if (result.status === 'success') {
+          toast('✅ Pedido enviado! ID: ' + result.idPedido, 'sucesso');
+          // Limpa formulário
+          document.getElementById('editorConteudo').innerHTML = '';
+          document.getElementById('valorProva').value = '';
+          document.getElementById('observacoes').value = '';
+          anexos = [];
+          renderizarAnexos();
+          verificarLimite(); // atualiza contador
+        } else if (result.status === 'unauthorized') {
+          toast('Sessão expirada. Faça login novamente.', 'erro');
+          setTimeout(() => { window.location.href = 'index.html'; }, 2500);
+        } else {
+          toast('❌ ' + (result.message || 'Erro ao enviar pedido.'), 'erro');
+        }
+      } catch (e) {
+        esconderLoading();
+        console.error(e);
+        toast('Erro de conexão. Tente novamente.', 'erro');
+      }
+    }
+
+    // =============================================
+    // PREVIEW DA PROVA (layout de impressão)
+    // =============================================
+    function previewProva() {
+      const disciplina = document.getElementById('selectDisciplina').value;
+      const turma = document.getElementById('selectTurma').value;
+      const trimestre = document.getElementById('selectTrimestre').value;
+      const dataProva = document.getElementById('dataProva').value;
+      const valorProva = document.getElementById('valorProva').value;
+      const professorNome = document.getElementById('profNomeCabecalho').value || usuarioLogado.nome;
+      const conteudoHTML = document.getElementById('editorConteudo').innerHTML;
+
+      if (!disciplina || !turma || !conteudoHTML) {
+        return toast('Preencha disciplina, turma e conteúdo antes de visualizar.', 'erro');
+      }
+
+      const dataFormatada = dataProva ? dataProva.split('-').reverse().join('/') : '___/___/2026';
+
+      const html = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Prévia da Prova — ${disciplina} — ${turma}</title>
+<style>
+  @page { size: A4; margin: 15mm; }
+  body {
+    font-family: 'Times New Roman', serif;
+    font-size: 12pt;
+    color: #000;
+    padding: 10px;
+    line-height: 1.5;
+  }
+  .cabecalho {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    border-bottom: 3px double #002B5B;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+  }
+  .cabecalho img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+  }
+  .cabecalho .titulo {
+    flex: 1;
+    text-align: center;
+  }
+  .cabecalho .titulo h1 {
+    font-size: 16pt;
+    margin: 0;
+    color: #002B5B;
+    text-transform: uppercase;
+  }
+  .cabecalho .titulo p {
+    margin: 2px 0;
+    font-size: 10pt;
+  }
+  .linha-info {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 10px 0;
+    font-size: 10.5pt;
+  }
+  .linha-info div { flex: 1; min-width: 200px; }
+  .linha-info strong { color: #002B5B; }
+  .linha-assinatura {
+    border-bottom: 1px solid #000;
+    display: inline-block;
+    min-width: 180px;
+  }
+  .conteudo {
+    margin-top: 20px;
+    text-align: justify;
+  }
+  .conteudo h3 {
+    color: #002B5B;
+    font-size: 12pt;
+    margin-top: 15px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 3px;
+  }
+  .conteudo p { margin: 8px 0; }
+  .conteudo ol, .conteudo ul { margin-left: 25px; }
+  .espaco-calculo {
+    border: 1px dashed #999;
+    min-height: 80px;
+    margin: 10px 0;
+    padding: 5px;
+    background: #fafafa;
+    font-size: 9pt;
+    color: #888;
+  }
+  .rodape {
+    margin-top: 30px;
+    border-top: 1px solid #ccc;
+    padding-top: 10px;
+    font-size: 9pt;
+    text-align: center;
+    color: #666;
+  }
+  .no-print { text-align: center; margin-bottom: 20px; }
+  .no-print button {
+    background: #002B5B; color: #FFD700; border: none;
+    padding: 10px 30px; border-radius: 8px;
+    font-size: 14pt; font-weight: bold; cursor: pointer;
+  }
+  @media print {
+    .no-print { display: none; }
+    .espaco-calculo { background: #fff; }
+  }
+</style>
+</head>
+<body>
+
+<div class="no-print">
+  <button onclick="window.print()">🖨️ Imprimir esta Prova</button>
+</div>
+
+<div class="cabecalho">
+  <img src="img/SIG.png" alt="Brasão Anchieta" onerror="this.style.display='none'">
+  <div class="titulo">
+    <h1>Colégio Cívico-Militar Anchieta</h1>
+    <p>Secretaria de Estado da Educação — SEED/PR</p>
+    <p>Núcleo Regional de Educação de Umuarama</p>
+  </div>
+</div>
+
+<div class="linha-info">
+  <div><strong>Disciplina:</strong> ${disciplina}</div>
+  <div><strong>Série/Turma:</strong> ${turma}</div>
+  <div><strong>Trimestre:</strong> ${trimestre}</div>
+</div>
+<div class="linha-info">
+  <div><strong>Professor(a):</strong> ${professorNome}</div>
+  <div><strong>Data:</strong> ${dataFormatada}</div>
+  <div><strong>Valor:</strong> ${valorProva || '___'}</div>
+</div>
+<div class="linha-info">
+  <div><strong>Aluno(a):</strong> <span class="linha-assinatura"></span></div>
+  <div><strong>Nº:</strong> <span class="linha-assinatura" style="min-width:60px;"></span></div>
+</div>
+<div class="linha-info">
+  <div><strong>Ano Letivo:</strong> 2026</div>
+  <div><strong>Nota:</strong> <span class="linha-assinatura" style="min-width:100px;"></span></div>
+</div>
+
+<hr style="margin: 15px 0;">
+
+<div class="conteudo">
+  ${conteudoHTML || '<p><em>(Nenhuma questão cadastrada)</em></p>'}
+</div>
+
+<div class="rodape">
+  Avaliação elaborada pelo(a) professor(a) ${professorNome} — ${disciplina} — ${turma} — ${trimestre} de 2026
+</div>
+
+</body>
+</html>`;
+
+      const win = window.open('', '_blank', 'width=900,height=1000');
+      if (!win) {
+        return toast('Permita pop-ups para visualizar a prévia.', 'erro');
+      }
+      win.document.write(html);
+      win.document.close();
+    }
+  </script>
+</body>
+</html>
