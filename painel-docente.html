@@ -9,6 +9,14 @@
   <link rel="manifest" href="manifest.json">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <style>
+    /* 🆕 1. FORÇA ROLAGEM NA PÁGINA INTEIRA (ignora regras do style.css) */
+    html, body {
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+      height: auto !important;
+      min-height: 100% !important;
+    }
+
     :root {
       --azul: #005088;
       --dourado: #eab308;
@@ -27,12 +35,7 @@
       color: var(--texto);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    /* 🆕 Força a barra de rolagem a aparecer sempre */
-    html {
-      overflow-y: scroll;
-    }
-
+    
     body {
       font-family: 'Segoe UI', Roboto, sans-serif;
       background: #f3f4f6;
@@ -100,22 +103,39 @@
       font-size: 1rem; margin-bottom: .8rem; color: var(--azul);
     }
     body.dark .tabela-monitoramento h2 { color: var(--dourado); }
-    .tabela-monitoramento table { width: 100%; border-collapse: collapse; min-width: 640px; }
+    
+    /* 🆕 2. Tabela com display block para não bugar as linhas */
+    .tabela-monitoramento table { 
+      width: 100%; 
+      border-collapse: collapse; 
+      min-width: 640px; 
+    }
 
-    /* 🆕 Fundo branco forçado para evitar a "barra azul" de seleção/repaint do navegador */
+    /* 🆕 3. FORÇA BRUTA CONTRA A FAIXA AZUL */
     .tabela-monitoramento th, .tabela-monitoramento td {
       padding: .6rem .5rem; text-align: left; font-size: .88rem;
       border-bottom: 1px solid var(--borda);
-      background-color: var(--bg-card);
+      background-color: var(--bg-card) !important; /* Fundo branco forçado */
+      box-shadow: none !important;
+      animation: none !important;
+      transition: none !important;
     }
     .tabela-monitoramento th {
-      background-color: var(--azul); color: #fff; font-weight: 600;
+      background-color: var(--azul) !important; 
+      color: #fff !important; 
+      font-weight: 600;
     }
     body.dark .tabela-monitoramento th {
-      background-color: #0f172a;
+      background-color: #0f172a !important;
     }
-    .tabela-monitoramento tr:hover td { background-color: rgba(0,80,136,.05); }
-    body.dark .tabela-monitoramento tr:hover td { background-color: rgba(234,179,8,.05); }
+    
+    /* Hover cinza bem clarinho */
+    .tabela-monitoramento tr:hover td { 
+      background-color: rgba(0,80,136,.05) !important; 
+    }
+    body.dark .tabela-monitoramento tr:hover td { 
+      background-color: rgba(234,179,8,.05) !important; 
+    }
 
     .status-badge {
       display: inline-block; padding: .2rem .6rem; border-radius: 999px;
@@ -143,7 +163,7 @@
     }
     .toast.ativo { opacity: 1; }
 
-    /* 🆕 Botão Voltar normal no final da página */
+    /* Botão Voltar normal no fluxo */
     .footer-voltar-siga {
       display: inline-flex;
       align-items: center;
@@ -155,7 +175,6 @@
       text-decoration: none;
       font-weight: bold;
       font-size: .9rem;
-      margin-top: 1rem;
       transition: background .2s;
     }
     .footer-voltar-siga:hover { background: #003d66; }
@@ -281,7 +300,7 @@
       <canvas id="grafico-historico"></canvas>
     </section>
 
-    <!-- 🆕 Botão de voltar normal, no fluxo da página -->
+    <!-- Botão de voltar normal -->
     <div style="text-align: center; margin-top: 1rem; margin-bottom: 2rem;">
       <a href="restrito.html" class="footer-voltar-siga">
         <i class="fas fa-arrow-left"></i> Voltar ao SIGA
