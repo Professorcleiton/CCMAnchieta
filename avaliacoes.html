@@ -87,25 +87,6 @@
     }
     #editorConteudo:empty:before { content: attr(data-placeholder); color: #94a3b8; }
 
-    .upload-area {
-      border: 2px dashed var(--azul); padding: 1.2rem; text-align: center;
-      border-radius: 8px; margin: .8rem 0; cursor: pointer; transition: background .2s;
-    }
-    .upload-area:hover { background: rgba(0,80,136,.05); }
-    body.dark .upload-area { border-color: var(--dourado); }
-    body.dark .upload-area:hover { background: rgba(234,179,8,.1); }
-
-    .anexo-item {
-      display: flex; justify-content: space-between; align-items: center;
-      background: #f1f5f9; padding: .5rem .8rem; border-radius: 6px;
-      font-size: .85rem; margin-top: .4rem;
-    }
-    body.dark .anexo-item { background: #334155; }
-    .anexo-item button {
-      background: #dc2626; color: white; border: none; border-radius: 4px;
-      padding: .2rem .5rem; cursor: pointer; font-size: .75rem;
-    }
-
     .copia-obs-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 1rem; margin-top: 1rem; }
     @media (max-width: 600px) { .copia-obs-grid { grid-template-columns: 1fr; } }
 
@@ -252,22 +233,7 @@
       <div id="editorConteudo" contenteditable="true" data-placeholder="Digite as questões aqui..."></div>
     </section>
 
-    <!-- CARD 3: ANEXOS -->
-    <section class="card">
-      <h2><i class="fas fa-paperclip"></i> Anexos (imagens/PDFs) — opcional</h2>
-      <div class="upload-area" onclick="document.getElementById('fileInput').click()">
-        <p style="margin:0; color: var(--azul); font-weight: bold; font-size:.95rem;">
-          📎 Clique aqui para anexar imagens ou PDFs
-        </p>
-        <p style="margin:.3rem 0 0; font-size:.75rem; color:#64748b;">
-          JPG, PNG ou PDF · Máx. 5 MB por arquivo
-        </p>
-      </div>
-      <input type="file" id="fileInput" multiple accept="image/*,application/pdf" style="display:none" onchange="adicionarAnexos(event)">
-      <div id="listaAnexos"></div>
-    </section>
-
-    <!-- CARD 4: CÓPIAS E OBS -->
+    <!-- CARD 3: CÓPIAS E OBS -->
     <section class="card">
       <h2><i class="fas fa-print"></i> Impressão</h2>
       <div style="background:#e0f2fe;padding:.8rem 1rem;border-radius:8px;margin-bottom:1rem;border-left:4px solid var(--azul);">
@@ -334,7 +300,6 @@
   <script>
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
     let usuarioLogado = null;
-    let anexos = [];
     let alunosDaTurma = [];
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -466,40 +431,6 @@
       } catch (e) { console.error(e); }
     }
 
-    function adicionarAnexos(event) {
-      const files = Array.from(event.target.files);
-      const MAX_MB = 5;
-
-      files.forEach(file => {
-        const mb = file.size / (1024 * 1024);
-        if (mb > MAX_MB) {
-          toast(`"${file.name}" excede ${MAX_MB} MB e foi ignorado.`, 'erro');
-          return;
-        }
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          const base64 = e.target.result.split(',')[1];
-          anexos.push({ nome: file.name, tipo: file.type, base64: base64, tamanhoMB: mb.toFixed(2) });
-          renderizarAnexos();
-        };
-        reader.readAsDataURL(file);
-      });
-      event.target.value = '';
-    }
-
-    function renderizarAnexos() {
-      const lista = document.getElementById('listaAnexos');
-      lista.innerHTML = '';
-      anexos.forEach((a, idx) => {
-        const div = document.createElement('div');
-        div.className = 'anexo-item';
-        div.innerHTML = `<span>📄 <strong>${a.nome}</strong> (${a.tamanhoMB} MB)</span><button onclick="removerAnexo(${idx})"><i class="fas fa-times"></i></button>`;
-        lista.appendChild(div);
-      });
-    }
-
-    function removerAnexo(idx) { anexos.splice(idx, 1); renderizarAnexos(); }
-
     // FUNÇÃO DE ENVIO (Aceita Rascunho ou Pendente)
     async function enviarPedido(statusEnvio) {
       const disciplina = document.getElementById('selectDisciplina').value;
@@ -533,7 +464,6 @@
         token: usuarioLogado.token,
         disciplina, turma, trimestre, dataProva,
         valor: valorProva, conteudo: conteudoHTML, qtdCopias: qtdCopias || 30, observacoes,
-        anexos: anexos.map(a => ({ nome: a.nome, tipo: a.tipo, base64: a.base64 })),
         personalizar: personalizar,
         status: statusEnvio
       };
@@ -551,7 +481,6 @@
           document.getElementById('editorConteudo').innerHTML = '';
           document.getElementById('valorProva').value = '';
           document.getElementById('observacoes').value = '';
-          anexos = []; renderizarAnexos();
           document.getElementById('personalizarProvas').checked = false;
           document.getElementById('qtdCopias').disabled = false;
           document.getElementById('qtdCopias').value = 30;
@@ -636,7 +565,7 @@
   </div>
 
   <div class="rodape">
-    Avaliação elaborada pelo(a) professor(a) ${professorNome} — ${disciplina} — ${turma} — ${trimestre}TRi de 2026<br>
+    Avaliação elaborada pelo(a) professor(a) ${professorNome} — ${disciplina} — ${turma} — ${trimestre} de 2026<br>
     Colégio Cívico-Militar Anchieta — Cruzeiro do Oeste/PR
   </div>
 </div>`;
