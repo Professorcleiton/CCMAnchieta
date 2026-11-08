@@ -222,11 +222,17 @@
       await carregarTurmasDoProfessor();
     });
 
-    async function carregarTurmasDoProfessor() {
+        async function carregarTurmasDoProfessor() {
       try {
-        const url = APPS_SCRIPT_URL + '?aba=avaliacoes_turmas_professor&email=' + encodeURIComponent(usuarioLogado.email);
+        // 🆕 Puxa TODAS as turmas cadastradas na escola direto da aba Alunos
+        const url = APPS_SCRIPT_URL + '?aba=alunos';
         const resp = await fetch(url);
-        todasAsTurmasDoProfessor = await resp.json();
+        const todosAlunos = await resp.json();
+        
+        // Extrai apenas os códigos de turma únicos (ex: 6A, 7B)
+        const turmasUnicas = [...new Set(todosAlunos.map(a => a.turma_codigo).filter(Boolean))].sort();
+        
+        todasAsTurmasDoProfessor = turmasUnicas;
         console.log('Turmas carregadas:', todasAsTurmasDoProfessor);
       } catch (e) {
         console.error('Erro ao buscar turmas', e);
