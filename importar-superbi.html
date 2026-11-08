@@ -23,10 +23,7 @@
       color: var(--texto);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    
-    /* Força rolagem (para não bugar com o style.css) */
     html, body { overflow-y: auto !important; height: auto !important; }
-    
     body {
       font-family: 'Segoe UI', Roboto, sans-serif;
       background: #f3f4f6;
@@ -98,14 +95,14 @@
 
   <main class="container">
 
-        <a href="https://app.powerbi.com/groups/me/apps/3ba3686c-1e6b-43f3-b15b-533d58c91f91/reports/0cfca010-1d76-4778-a002-931211beb87a/ReportSectiona0ea065d0d3b7878ed40?language=pt-BR&experience=power-bi" target="_blank" class="superbi-btn">
+    <a href="https://app.powerbi.com/groups/me/apps/3ba3686c-1e6b-43f3-b15b-533d58c91f91/reports/0cfca010-1d76-4778-a002-931211beb87a/ReportSectiona0ea065d0d3b7878ed40?language=pt-BR&experience=power-bi" target="_blank" class="superbi-btn">
       <i class="fas fa-external-link-alt"></i> Abrir Relatório do Power BI
     </a>
 
     <div class="aviso">
       <i class="fas fa-info-circle" style="margin-top:.15rem;"></i>
       <div>
-        <strong>Como usar:</strong> Abra o Super BI acima, olhe os índices da sua turma, e preencha a tabela abaixo. 
+        <strong>Como usar:</strong> Abra o Power BI acima, olhe os índices da sua turma, e preencha a tabela abaixo. 
         O sistema salva os dados com a <strong>data de hoje</strong> automaticamente.
       </div>
     </div>
@@ -116,22 +113,22 @@
       
       <div class="form-row">
         <div class="form-group">
+          <label>Turma:</label>
+          <select id="add-turma" onchange="filtrarPlataformas()">
+            <option value="">Carregando turmas...</option>
+          </select>
+        </div>
+
+        <div class="form-group">
           <label>Plataforma:</label>
-          <select id="add-plataforma" onchange="filtrarOpcoes()">
-            <option value="">Selecione...</option>
-            <option value="Matific" data-disciplina="Matemática">Matific (Matemática)</option>
-            <option value="Khan Academy" data-disciplina="Matemática">Khan Academy (Matemática)</option>
-            <option value="Redação Paraná" data-disciplina="Português">Redação Paraná (Português)</option>
-            <option value="Leia Paraná" data-disciplina="Todas">Leia Paraná (Todas)</option>
-            <option value="Quizizz" data-disciplina="Todas">Quizizz / Desafio (Todas)</option>
-            <option value="Inglês Paraná" data-disciplina="Inglês">Inglês Paraná (Inglês)</option>
-            <option value="Alura" data-disciplina="Programação">Alura (Programação)</option>
+          <select id="add-plataforma" onchange="filtrarDisciplina()">
+            <option value="">Selecione a Turma primeiro...</option>
           </select>
         </div>
 
         <div class="form-group">
           <label>Disciplina:</label>
-          <select id="add-disciplina" onchange="filtrarTurmas()">
+          <select id="add-disciplina">
             <option value="">Selecione...</option>
             <option value="Matemática">Matemática</option>
             <option value="Português">Português</option>
@@ -145,15 +142,8 @@
         </div>
 
         <div class="form-group">
-          <label>Turma:</label>
-          <select id="add-turma">
-            <option value="">Aguardando disciplina...</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label>Índice (0 a 1):</label>
-          <input type="text" id="add-indice" placeholder="Ex: 1,100 ou 2,937">
+          <label>Índice (Ex: 1,100):</label>
+          <input type="text" id="add-indice" placeholder="Ex: 2,937 ou 1,100">
         </div>
 
         <button class="btn-add" onclick="adicionarLinha()">
@@ -200,15 +190,13 @@
     
     let usuarioLogado = null;
     let todasAsTurmasDoProfessor = [];
-    let listaDeLancamentos = []; // Armazena o que foi adicionado na tabela
+    let listaDeLancamentos = [];
 
     document.addEventListener('DOMContentLoaded', async () => {
-      // 1. Carrega sessão
       const sessaoRaw = localStorage.getItem('sgi_ccma_session') || sessionStorage.getItem('sgi_ccma_session');
       if (!sessaoRaw) { alert('Sessão não encontrada.'); window.location.href = 'index.html'; return; }
       usuarioLogado = JSON.parse(sessaoRaw);
 
-      // Tema
       const btnTema = document.getElementById('btn-tema');
       if (localStorage.getItem('tema') === 'dark') document.body.classList.add('dark');
       btnTema.addEventListener('click', () => {
@@ -218,29 +206,64 @@
         btnTema.innerHTML = dark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
       });
 
-      // 2. Busca as turmas do professor no banco
       await carregarTurmasDoProfessor();
     });
 
-        async function carregarTurmasDoProfessor() {
+    async function carregarTurmasDoProfessor() {
       try {
-        // 🆕 Puxa TODAS as turmas cadastradas na escola direto da aba Alunos
         const url = APPS_SCRIPT_URL + '?aba=alunos';
         const resp = await fetch(url);
         const todosAlunos = await resp.json();
-        
-        // Extrai apenas os códigos de turma únicos (ex: 6A, 7B)
         const turmasUnicas = [...new Set(todosAlunos.map(a => a.turma_codigo).filter(Boolean))].sort();
         
-        todasAsTurmasDoProfessor = turmasUnicas;
-        console.log('Turmas carregadas:', todasAsTurmasDoProfessor);
+        const select = document.getElementById('add-turma');
+        select.innerHTML = '<option value="">Selecione a Turma...</option>';
+        turmasUnicas.forEach(turma => {
+          select.innerHTML += `<option value="${turma}">${turma}</option>`;
+        });
       } catch (e) {
         console.error('Erro ao buscar turmas', e);
       }
     }
 
-    // 🆕 FILTRO MÁGICO: Quando escolhe a plataforma, já marca a disciplina
-    function filtrarOpcoes() {
+    // 🆕 Filtro Inteligente: Mostra Matific para 6º/7º e Khan para as outras
+    function filtrarPlataformas() {
+      const turma = document.getElementById('add-turma').value;
+      const selectPlataforma = document.getElementById('add-plataforma');
+      
+      selectPlataforma.innerHTML = '<option value="">Selecione a Plataforma...</option>';
+      
+      if (!turma) {
+         selectPlataforma.innerHTML = '<option value="">Selecione a Turma primeiro...</option>';
+         return;
+      }
+
+      let plataformasDisponiveis = [];
+      
+      // Regra: 6º e 7º ano usam Matific, as demais usam Khan.
+      if (turma.startsWith('6') || turma.startsWith('7')) {
+        plataformasDisponiveis.push({ nome: 'Matific', disciplina: 'Matemática' });
+      } else {
+        plataformasDisponiveis.push({ nome: 'Khan Academy', disciplina: 'Matemática' });
+      }
+
+      // Adiciona as outras plataformas gerais
+      plataformasDisponiveis.push({ nome: 'Redação Paraná', disciplina: 'Português' });
+      plataformasDisponiveis.push({ nome: 'Leia Paraná', disciplina: 'Todas' });
+      plataformasDisponiveis.push({ nome: 'Quizizz', disciplina: 'Todas' });
+      plataformasDisponiveis.push({ nome: 'Inglês Paraná', disciplina: 'Inglês' });
+
+      plataformasDisponiveis.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.nome;
+        opt.textContent = p.nome;
+        opt.setAttribute('data-disciplina', p.disciplina);
+        selectPlataforma.appendChild(opt);
+      });
+    }
+
+    // Preenche a disciplina automaticamente ao escolher a plataforma
+    function filtrarDisciplina() {
       const selectPlataforma = document.getElementById('add-plataforma');
       const selectDisciplina = document.getElementById('add-disciplina');
       
@@ -249,51 +272,26 @@
 
       if (disciplinaSugerida && disciplinaSugerida !== 'Todas') {
         selectDisciplina.value = disciplinaSugerida;
-      } else if (disciplinaSugerida === 'Todas') {
-        // Se for "Todas" (como Leia), não força a disciplina, deixa o professor escolher
+      } else {
         selectDisciplina.value = ''; 
       }
-      
-      filtrarTurmas();
     }
 
-    // 🆕 FILTRO MÁGICO: Mostra só as turmas que o professor dá aula naquela disciplina
-    function filtrarTurmas() {
-      const selectTurma = document.getElementById('add-turma');
-      selectTurma.innerHTML = '<option value="">Selecione a Turma...</option>';
-      
-      // Aqui simulamos o filtro. Como as turmas vêm do banco, filtramos pelo nome
-      // (Numa versão futura podemos cruzar com a aba Horarios para ser 100% exato)
-      if (todasAsTurmasDoProfessor.length === 0) {
-        selectTurma.innerHTML = '<option value="">Nenhuma turma encontrada</option>';
-        return;
-      }
-
-      todasAsTurmasDoProfessor.forEach(turma => {
-        const opt = document.createElement('option');
-        opt.value = turma;
-        opt.textContent = turma;
-        selectTurma.appendChild(opt);
-      });
-    }
-
-    // 🆕 ADICIONAR NA TABELA
-        function adicionarLinha() {
+    // Adiciona na tabela convertendo vírgula para ponto
+    function adicionarLinha() {
+      const turma = document.getElementById('add-turma').value;
       const plataforma = document.getElementById('add-plataforma').value;
       const disciplina = document.getElementById('add-disciplina').value;
-      const turma = document.getElementById('add-turma').value;
       let indiceStr = document.getElementById('add-indice').value.trim();
 
-      // 🆕 MÁGICA: Troca a vírgula por ponto (para o JS entender) e converte para número
       indiceStr = indiceStr.replace(',', '.');
       const indice = parseFloat(indiceStr);
 
-      if (!plataforma || !disciplina || !turma || isNaN(indice)) {
+      if (!turma || !plataforma || !disciplina || isNaN(indice)) {
         alert('Preencha todos os campos corretamente. Use vírgula para os decimais (ex: 2,937).');
         return;
       }
 
-      // 🆕 Ajuste para a Matific: se o professor digitar 2,937, salvamos como 2.937 no banco
       listaDeLancamentos.push({ plataforma, disciplina, turma, indice });
       renderizarTabela();
 
@@ -316,7 +314,7 @@
           <td><strong>${item.plataforma}</strong></td>
           <td>${item.disciplina}</td>
           <td>${item.turma}</td>
-          <td style="color: var(--azul); font-weight: bold;">${item.indice.toFixed(2)}</td>
+          <td style="color: var(--azul); font-weight: bold;">${item.indice.toFixed(3)}</td>
           <td><button class="linha-remover" onclick="removerLinha(${index})"><i class="fas fa-trash"></i></button></td>
         `;
         tbody.appendChild(tr);
@@ -335,8 +333,7 @@
       }
     }
 
-    // 🆕 SALVAR NA PLANILHA (Corrigido)
-        async function salvarNaPlanilha() {
+    async function salvarNaPlanilha() {
       if (listaDeLancamentos.length === 0) {
         alert('Adicione pelo menos um lançamento antes de salvar.');
         return;
@@ -366,15 +363,14 @@
           body: JSON.stringify(payload)
         });
         
-        const textoResposta = await resp.text(); // Pega o texto bruto primeiro
-        console.log("Resposta do servidor:", textoResposta); // Mostra no console o que o Google respondeu
+        const textoResposta = await resp.text();
+        console.log("Resposta do servidor:", textoResposta); 
 
         let result;
         try {
           result = JSON.parse(textoResposta);
         } catch(e) {
-          // Se o Apps Script não enviou JSON, significa que ele deu erro 500 ou página não encontrada
-          throw new Error("O servidor do Google não respondeu com JSON válido. Verifique se o Apps Script foi reimplantado.");
+          throw new Error("O servidor não respondeu com JSON válido. Reimplante o Apps Script.");
         }
 
         if (result.status === 'success') {
