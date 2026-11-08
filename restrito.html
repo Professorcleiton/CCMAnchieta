@@ -268,7 +268,10 @@
                                     <i class="fa-solid fa-print"></i>
                                     <span>Imprimir Apontamentos</span>
                                 </button>
-
+                                <a href="avaliacoes-secretaria.html" class="btn-acao" style="background-color: #005088;" id="btn-avaliacoes-secretaria" target="_blank">
+    <i class="fa-solid fa-clipboard-check"></i>
+    <span>Avaliações Pendentes</span>
+</a>
                                 <button id="btn-central-alertas" class="btn-acao" style="display: none; background-color: #dc2626;" onclick="abrirCentralAlertas()">
                                     <i class="fa-solid fa-triangle-exclamation"></i>
                                     <span>Central de Alertas</span>
@@ -1388,6 +1391,9 @@ function aplicarControleAcesso() {
             btn.style.display = nivel >= 3 ? 'flex' : 'none';
         }
     });
+    // Adicione dentro de aplicarControleAcesso(), junto com os outros botões nível 3:
+const btnAvSec = document.getElementById('btn-avaliacoes-secretaria');
+if (btnAvSec) btnAvSec.style.display = nivel >= 3 ? 'flex' : 'none';
     
     const botoesTodos = ['btn-meus-horarios', 'btn-agenda-lab'];
     botoesTodos.forEach(id => {
@@ -1396,6 +1402,7 @@ function aplicarControleAcesso() {
     });
 }
 
+            
 // HORÁRIOS DO PROFESSOR
 function abrirMeusHorarios() {
     document.getElementById('modal-meus-horarios').style.display = 'flex';
