@@ -372,7 +372,7 @@
       document.getElementById('total-vermelho').textContent = vermelho;
     }
 
-    function renderizarTabela() {
+        function renderizarTabela() {
       const tbody = document.getElementById('corpo-tabela');
       if (!dadosFiltrados.length) {
         tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:1.5rem;">Nenhum item encontrado.</td></tr>';
@@ -384,7 +384,13 @@
           nomePlataforma = 'Quizizz / Desafio';
         }
 
-        const meta = Number(d.meta_semanal) || 0;
+        // 🆕 CORREÇÃO DA META DA MATIFIC
+        // Se a planilha tiver 1.100 (mil e cem), ele transforma em 1.1
+        let meta = Number(d.meta_semanal) || 0;
+        if (nomePlataforma === 'Matific' && meta > 100) {
+            meta = meta / 1000; // Corrige o erro de digitação da planilha
+        }
+
         const lancado = Number(d.qtd_lancada) || 0;
         const pct = meta > 0 ? Math.round((lancado / meta) * 100) : 0;
 
@@ -401,14 +407,13 @@
           <td>${d.disciplina || '—'}</td>
           <td>${d.turma || '—'}</td>
           <td>${nomePlataforma}${universal}</td>
-          <td>${meta.toFixed(2)}</td>
-          <td>${lancado.toFixed(4)}</td>
+          <td>${meta.toFixed(3)}</td>
+          <td>${lancado.toFixed(3)}</td>
           <td>${pct}%</td>
           <td>${badge}</td>
         </tr>`;
       }).join('');
     }
-
     function mostrarToast(msg) {
       const t = document.getElementById('toast');
       t.textContent = msg;
