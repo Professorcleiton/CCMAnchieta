@@ -24,6 +24,7 @@
       color: var(--texto);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { overflow-y: auto !important; height: auto !important; }
     body {
       font-family: 'Segoe UI', Roboto, sans-serif;
       background: #f3f4f6;
@@ -42,7 +43,7 @@
       z-index: 100;
       box-shadow: 0 2px 8px rgba(0,0,0,.15);
     }
-    .topbar h1 { font-size: 1.1rem; flex: 1; }
+    .topbar h1 { font-size: 1.1rem; flex: 1; margin: 0; }
     .topbar #professor-nome { font-size: .85rem; opacity: .9; text-align: right; }
     .topbar .btn-dark {
       background: rgba(255,255,255,.15); border: none; color: #fff;
@@ -63,43 +64,29 @@
       box-shadow: 0 2px 6px rgba(0,0,0,.06); margin-bottom: 1.2rem;
     }
     .card h2 {
-      font-size: 1rem; color: var(--azul); margin-bottom: 1rem;
+      font-size: 1rem; color: var(--azul); margin-top: 0; margin-bottom: 1rem;
       display: flex; align-items: center; gap: .5rem;
     }
     body.dark .card h2 { color: var(--dourado); }
 
     .header-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1rem;
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;
     }
-    @media (max-width: 700px) {
-      .header-grid { grid-template-columns: 1fr; }
-    }
+    @media (max-width: 700px) { .header-grid { grid-template-columns: 1fr; } }
     .form-group { display: flex; flex-direction: column; }
     .form-group label {
-      font-weight: 600; font-size: .85rem; margin-bottom: .3rem;
-      color: var(--texto);
+      font-weight: 600; font-size: .85rem; margin-bottom: .3rem; color: var(--texto);
     }
-    .form-group input,
-    .form-group select {
-      padding: .6rem .8rem; border-radius: 8px;
-      border: 1px solid var(--borda); background: var(--bg-card);
-      color: var(--texto); font-size: .9rem;
+    .form-group input, .form-group select {
+      padding: .6rem .8rem; border-radius: 8px; border: 1px solid var(--borda);
+      background: var(--bg-card); color: var(--texto); font-size: .9rem;
     }
-    .form-group input:read-only {
-      background: #e9ecef; color: #555; font-weight: bold;
-    }
+    .form-group input:read-only { background: #e9ecef; color: #555; font-weight: bold; }
     body.dark .form-group input:read-only { background: #334155; color: #cbd5e1; }
-    .form-group input:disabled {
-      background: #e0f2fe; color: #0369a1; font-weight: bold;
-      cursor: not-allowed;
-    }
+    .form-group input:disabled { background: #e0f2fe; color: #0369a1; font-weight: bold; cursor: not-allowed; }
     body.dark .form-group input:disabled { background: #0c4a6e; color: #bae6fd; }
 
-    .editor-toolbar {
-      display: flex; gap: .4rem; margin-bottom: .5rem; flex-wrap: wrap;
-    }
+    .editor-toolbar { display: flex; gap: .4rem; margin-bottom: .5rem; flex-wrap: wrap; }
     .editor-toolbar button {
       padding: .4rem .7rem; border: none; border-radius: 6px;
       background: var(--dourado); color: #000; cursor: pointer;
@@ -108,31 +95,17 @@
     .editor-toolbar button:hover { background: #ca8a04; color: #fff; }
 
     #editorConteudo {
-      width: 100%;
-      min-height: 280px;
-      padding: 1rem;
-      border: 1px solid var(--borda);
-      border-radius: 8px;
-      font-size: 15px;
-      font-family: 'Times New Roman', serif;
-      background: var(--bg-card);
-      color: var(--texto);
-      overflow-y: auto;
-      line-height: 1.6;
+      width: 100%; min-height: 280px; padding: 1rem;
+      border: 1px solid var(--borda); border-radius: 8px;
+      font-size: 15px; font-family: 'Times New Roman', serif;
+      background: var(--bg-card); color: var(--texto);
+      overflow-y: auto; line-height: 1.6;
     }
-    #editorConteudo:empty:before {
-      content: attr(data-placeholder);
-      color: #94a3b8;
-    }
+    #editorConteudo:empty:before { content: attr(data-placeholder); color: #94a3b8; }
 
     .upload-area {
-      border: 2px dashed var(--azul);
-      padding: 1.2rem;
-      text-align: center;
-      border-radius: 8px;
-      margin: .8rem 0;
-      cursor: pointer;
-      transition: background .2s;
+      border: 2px dashed var(--azul); padding: 1.2rem; text-align: center;
+      border-radius: 8px; margin: .8rem 0; cursor: pointer; transition: background .2s;
     }
     .upload-area:hover { background: rgba(0,80,136,.05); }
     body.dark .upload-area { border-color: var(--dourado); }
@@ -149,32 +122,24 @@
       padding: .2rem .5rem; cursor: pointer; font-size: .75rem;
     }
 
-    .copia-obs-grid {
-      display: grid; grid-template-columns: 1fr 2fr; gap: 1rem; margin-top: 1rem;
-    }
-    @media (max-width: 600px) {
-      .copia-obs-grid { grid-template-columns: 1fr; }
-    }
+    .copia-obs-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 1rem; margin-top: 1rem; }
+    @media (max-width: 600px) { .copia-obs-grid { grid-template-columns: 1fr; } }
 
     .aviso-limite {
       color: var(--vermelho); font-weight: bold; margin-top: .8rem;
-      padding: .6rem; background: #fee2e2; border-radius: 6px;
-      display: none;
+      padding: .6rem; background: #fee2e2; border-radius: 6px; display: none;
     }
     .aviso-limite.ativo { display: block; }
     .info-limite {
       font-size: .85rem; color: #0369a1; background: #e0f2fe;
-      padding: .5rem .8rem; border-radius: 6px; margin-top: .5rem;
-      display: none;
+      padding: .5rem .8rem; border-radius: 6px; margin-top: .5rem; display: none;
     }
     .info-limite.ativo { display: block; }
 
     .btn-enviar {
       background: var(--azul); color: #fff; border: none;
-      padding: .9rem 1.2rem; border-radius: 8px;
-      font-size: 1rem; font-weight: bold; cursor: pointer;
-      width: 100%; margin-top: 1rem;
-      display: flex; align-items: center; justify-content: center; gap: .5rem;
+      padding: .9rem 1.2rem; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer;
+      width: 100%; margin-top: 1rem; display: flex; align-items: center; justify-content: center; gap: .5rem;
       transition: background .2s;
     }
     .btn-enviar:hover:not(:disabled) { background: #003d66; }
@@ -182,39 +147,32 @@
 
     .btn-preview {
       background: var(--dourado); color: #000; border: none;
-      padding: .9rem 1.2rem; border-radius: 8px;
-      font-size: 1rem; font-weight: bold; cursor: pointer;
-      width: 100%; margin-top: .5rem;
-      display: flex; align-items: center; justify-content: center; gap: .5rem;
+      padding: .9rem 1.2rem; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer;
+      width: 100%; margin-top: .5rem; display: flex; align-items: center; justify-content: center; gap: .5rem;
     }
     .btn-preview:hover { background: #ca8a04; color: #fff; }
 
     .toast {
       position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
       background: var(--azul); color: #fff; padding: .7rem 1.2rem;
-      border-radius: 8px; opacity: 0; pointer-events: none;
-      transition: opacity .3s; z-index: 1000;
-      font-size: .9rem; font-weight: bold;
-      box-shadow: 0 4px 12px rgba(0,0,0,.2);
+      border-radius: 8px; opacity: 0; pointer-events: none; transition: opacity .3s; z-index: 1000;
+      font-size: .9rem; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,.2);
     }
     .toast.ativo { opacity: 1; }
     .toast.erro { background: #dc2626; }
     .toast.sucesso { background: #16a34a; }
 
     .footer-voltar {
-      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-      background: var(--azul); color: #fff; padding: .7rem 1.5rem;
-      border-radius: 999px; text-decoration: none; font-weight: bold;
-      display: flex; align-items: center; gap: .5rem;
-      box-shadow: 0 4px 12px rgba(0,0,0,.2);
-      font-size: .9rem;
+      display: inline-flex; align-items: center; gap: .5rem;
+      background: var(--azul); color: #fff; padding: .8rem 1.5rem; border-radius: 8px;
+      text-decoration: none; font-weight: bold; font-size: .9rem; margin-top: 1rem;
     }
+    .footer-voltar:hover { background: #003d66; }
 
     .spinner {
       display: inline-block; width: 18px; height: 18px;
-      border: 3px solid rgba(255,255,255,.3);
-      border-top-color: #fff; border-radius: 50%;
-      animation: spin .7s linear infinite;
+      border: 3px solid rgba(255,255,255,.3); border-top-color: #fff;
+      border-radius: 50%; animation: spin .7s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -367,11 +325,13 @@
       <i class="fas fa-paper-plane"></i> Enviar para a Secretaria
     </button>
 
-  </main>
+    <div style="text-align: center; margin-top: 1rem; margin-bottom: 2rem;">
+      <a href="painel-docente.html" class="footer-voltar">
+        <i class="fas fa-arrow-left"></i> Voltar ao Painel
+      </a>
+    </div>
 
-  <a href="painel-docente.html" class="footer-voltar">
-    <i class="fas fa-arrow-left"></i> Voltar ao Painel
-  </a>
+  </main>
 
   <div class="toast" id="toast"></div>
   <div class="loading-overlay" id="loadingOverlay">
@@ -382,23 +342,14 @@
   </div>
 
   <script>
-    // =============================================
-    // CONFIGURAÇÃO
-    // =============================================
-    console.log('📄 avaliacoes.html carregado');
-
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxEMx6NmZvQqPMmmxsrTaV1DrMHa-F16_ARFR1cjm_5v054lUtF80YWtW88g6MsyhajRg/exec';
+    // ✅ URL correta do Apps Script
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
 
     let usuarioLogado = null;
     let anexos = [];
     let alunosDaTurma = [];
 
-    // =============================================
-    // INICIALIZAÇÃO (com retry)
-    // =============================================
-    async function inicializar() {
-      console.log('🚀 Iniciando inicialização...');
-
+    document.addEventListener('DOMContentLoaded', () => {
       // 1) Carrega sessão
       const sessaoRaw = sessionStorage.getItem('sgi_ccma_session') || localStorage.getItem('sgi_ccma_session');
       if (!sessaoRaw) {
@@ -419,9 +370,6 @@
         return;
       }
 
-      console.log('👤 Usuário:', usuarioLogado.nome, '|', usuarioLogado.email);
-      console.log('🔑 Token presente:', usuarioLogado.token ? 'SIM' : 'NÃO');
-
       // 2) Preenche topbar e nome
       document.getElementById('professor-nome').textContent = usuarioLogado.nome || 'Professor(a)';
       document.getElementById('profNome').value = usuarioLogado.nome || '';
@@ -439,9 +387,9 @@
         document.getElementById('btn-tema').innerHTML = dark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
       });
 
-      // 4) Carrega dados (com retry)
-      await carregarDisciplinas();
-      await carregarTurmas();
+      // 4) Carrega dados
+      carregarDisciplinas();
+      carregarTurmas();
 
       // 5) Listeners
       ['selectDisciplina','selectTurma','selectTrimestre'].forEach(id => {
@@ -456,26 +404,13 @@
       });
 
       document.getElementById('dataProva').value = new Date().toISOString().split('T')[0];
+    });
 
-      console.log('✅ Inicialização concluída');
-    }
-
-    // Dispara quando o DOM estiver pronto (com fallback)
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', inicializar);
-    } else {
-      inicializar();
-    }
-
-    // =============================================
-    // HELPERS
-    // =============================================
     function toast(msg, tipo) {
       const t = document.getElementById('toast');
       t.textContent = msg;
       t.className = 'toast ativo' + (tipo ? ' ' + tipo : '');
       setTimeout(() => t.classList.remove('ativo'), 3500);
-      console.log('💬 Toast:', msg);
     }
 
     function mostrarLoading(msg) {
@@ -491,111 +426,54 @@
       document.getElementById('editorConteudo').focus();
     }
 
-    // =============================================
-    // CARREGAR DISCIPLINAS (com retry)
-    // =============================================
-    async function carregarDisciplinas(tentativa = 1) {
+    async function carregarDisciplinas() {
       const select = document.getElementById('selectDisciplina');
       try {
         const url = APPS_SCRIPT_URL + '?aba=avaliacoes_disciplinas_professor'
           + '&email=' + encodeURIComponent(usuarioLogado.email)
           + '&nome=' + encodeURIComponent(usuarioLogado.nome);
-        console.log(`🔍 Buscando disciplinas (tentativa ${tentativa}):`, url);
-
         const resp = await fetch(url);
         const text = await resp.text();
-        console.log('📥 Resposta disciplinas (raw):', text.substring(0, 300));
-
         let disciplinas;
-        try {
-          disciplinas = JSON.parse(text);
-        } catch (e) {
-          console.error('❌ Resposta não é JSON:', text.substring(0, 200));
-          if (tentativa < 3) {
-            console.log('🔄 Tentando novamente em 1s...');
-            setTimeout(() => carregarDisciplinas(tentativa + 1), 1000);
-            return;
-          }
-          select.innerHTML = '<option value="">Erro na resposta do servidor</option>';
-          return;
-        }
+        try { disciplinas = JSON.parse(text); } catch(e) { disciplinas = null; }
 
         select.innerHTML = '<option value="">Selecione...</option>';
         if (Array.isArray(disciplinas) && disciplinas.length > 0) {
-          disciplinas.forEach(d => {
-            select.innerHTML += `<option value="${d}">${d}</option>`;
-          });
-          console.log('✅ Disciplinas carregadas:', disciplinas);
+          disciplinas.forEach(d => select.innerHTML += `<option value="${d}">${d}</option>`);
         } else {
           select.innerHTML = '<option value="">Nenhuma disciplina encontrada</option>';
-          console.warn('⚠️ Array vazio. Verifique a aba Usuários (coluna disciplinas) e a aba Horarios.');
         }
       } catch (e) {
-        console.error('❌ Erro ao carregar disciplinas:', e);
-        if (tentativa < 3) {
-          console.log('🔄 Tentando novamente em 1s...');
-          setTimeout(() => carregarDisciplinas(tentativa + 1), 1000);
-          return;
-        }
+        console.error(e);
         select.innerHTML = '<option value="">Erro ao carregar</option>';
         toast('Erro ao carregar disciplinas', 'erro');
       }
     }
 
-    // =============================================
-    // CARREGAR TURMAS (com retry)
-    // =============================================
-    async function carregarTurmas(tentativa = 1) {
+    async function carregarTurmas() {
       const select = document.getElementById('selectTurma');
       try {
         const url = APPS_SCRIPT_URL + '?aba=avaliacoes_turmas_professor'
           + '&email=' + encodeURIComponent(usuarioLogado.email);
-        console.log(`🔍 Buscando turmas (tentativa ${tentativa}):`, url);
-
         const resp = await fetch(url);
         const text = await resp.text();
-        console.log('📥 Resposta turmas (raw):', text.substring(0, 300));
-
         let turmas;
-        try {
-          turmas = JSON.parse(text);
-        } catch (e) {
-          console.error('❌ Resposta não é JSON:', text.substring(0, 200));
-          if (tentativa < 3) {
-            console.log('🔄 Tentando novamente em 1s...');
-            setTimeout(() => carregarTurmas(tentativa + 1), 1000);
-            return;
-          }
-          select.innerHTML = '<option value="">Erro na resposta do servidor</option>';
-          return;
-        }
+        try { turmas = JSON.parse(text); } catch(e) { turmas = null; }
 
         select.innerHTML = '<option value="">Selecione...</option>';
         if (Array.isArray(turmas) && turmas.length > 0) {
-          turmas.forEach(t => {
-            select.innerHTML += `<option value="${t}">${t}</option>`;
-          });
-          console.log('✅ Turmas carregadas:', turmas);
+          turmas.forEach(t => select.innerHTML += `<option value="${t}">${t}</option>`);
         } else {
           select.innerHTML = '<option value="">Nenhuma turma encontrada</option>';
-          console.warn('⚠️ Array vazio. Verifique a aba Turmas_Professor. O e-mail logado é:', usuarioLogado.email);
           toast('Nenhuma turma encontrada para ' + usuarioLogado.email, 'erro');
         }
       } catch (e) {
-        console.error('❌ Erro ao carregar turmas:', e);
-        if (tentativa < 3) {
-          console.log('🔄 Tentando novamente em 1s...');
-          setTimeout(() => carregarTurmas(tentativa + 1), 1000);
-          return;
-        }
+        console.error(e);
         select.innerHTML = '<option value="">Erro ao carregar</option>';
         toast('Erro ao carregar turmas', 'erro');
       }
     }
 
-    // =============================================
-    // PERSONALIZAÇÃO (nome + nº do aluno)
-    // =============================================
     async function togglePersonalizacao() {
       const checkbox = document.getElementById('personalizarProvas');
       const inputQtd = document.getElementById('qtdCopias');
@@ -647,9 +525,6 @@
       }
     }
 
-    // =============================================
-    // VERIFICAR LIMITE
-    // =============================================
     let limiteAtual = null;
     async function verificarLimite() {
       const turma = document.getElementById('selectTurma').value;
@@ -687,14 +562,9 @@
             + '</strong> pedidos usados. Restam <strong>' + limiteAtual.restantes + '</strong>.';
           btn.disabled = false;
         }
-      } catch (e) {
-        console.error(e);
-      }
+      } catch (e) { console.error(e); }
     }
 
-    // =============================================
-    // ANEXOS
-    // =============================================
     function adicionarAnexos(event) {
       const files = Array.from(event.target.files);
       const MAX_MB = 5;
@@ -708,12 +578,7 @@
         const reader = new FileReader();
         reader.onload = function(e) {
           const base64 = e.target.result.split(',')[1];
-          anexos.push({
-            nome: file.name,
-            tipo: file.type,
-            base64: base64,
-            tamanhoMB: mb.toFixed(2)
-          });
+          anexos.push({ nome: file.name, tipo: file.type, base64: base64, tamanhoMB: mb.toFixed(2) });
           renderizarAnexos();
         };
         reader.readAsDataURL(file);
@@ -741,9 +606,6 @@
       renderizarAnexos();
     }
 
-    // =============================================
-    // ENVIAR PEDIDO
-    // =============================================
     async function enviarPedido() {
       const disciplina = document.getElementById('selectDisciplina').value;
       const turma = document.getElementById('selectTurma').value;
@@ -764,7 +626,7 @@
       if (!qtdCopias || qtdCopias < 1) return toast('Informe a quantidade de cópias.', 'erro');
 
       if (personalizar && alunosDaTurma.length === 0) {
-        return toast('Aguarde o carregamento dos alunos ou desmarque a opção de personalização.', 'erro');
+        return toast('Aguarde o carregamento dos alunos ou desmarque a opção.', 'erro');
       }
 
       if (limiteAtual && limiteAtual.bloqueado) {
@@ -776,14 +638,8 @@
       const payload = {
         operacao: 'CRIAR_PEDIDO_AVALIACAO',
         token: usuarioLogado.token,
-        disciplina,
-        turma,
-        trimestre,
-        dataProva,
-        valor: valorProva,
-        conteudo: conteudoHTML,
-        qtdCopias,
-        observacoes,
+        disciplina, turma, trimestre, dataProva,
+        valor: valorProva, conteudo: conteudoHTML, qtdCopias, observacoes,
         anexos: anexos.map(a => ({ nome: a.nome, tipo: a.tipo, base64: a.base64 })),
         personalizar: personalizar
       };
@@ -795,7 +651,6 @@
           body: JSON.stringify(payload)
         });
         const result = await resp.json();
-
         esconderLoading();
 
         if (result.status === 'success') {
@@ -803,8 +658,7 @@
           document.getElementById('editorConteudo').innerHTML = '';
           document.getElementById('valorProva').value = '';
           document.getElementById('observacoes').value = '';
-          anexos = [];
-          renderizarAnexos();
+          anexos = []; renderizarAnexos();
           document.getElementById('personalizarProvas').checked = false;
           document.getElementById('qtdCopias').disabled = false;
           document.getElementById('qtdCopias').value = 30;
@@ -824,9 +678,6 @@
       }
     }
 
-    // =============================================
-    // PREVIEW DA PROVA (com personalização)
-    // =============================================
     function previewProva() {
       const disciplina = document.getElementById('selectDisciplina').value;
       const turma = document.getElementById('selectTurma').value;
@@ -842,12 +693,11 @@
       }
 
       if (personalizar && alunosDaTurma.length === 0) {
-        return toast('Aguarde o carregamento dos alunos ou desmarque a opção de personalização.', 'erro');
+        return toast('Aguarde o carregamento dos alunos ou desmarque a opção.', 'erro');
       }
 
       const dataFormatada = dataProva ? dataProva.split('-').reverse().join('/') : '___/___/2026';
       const brasaoPath = 'img/logoA.png';
-
       const paginas = personalizar ? alunosDaTurma : [{ numero: '', nome: '' }];
 
       const paginasHTML = paginas.map((aluno, idx) => {
@@ -883,15 +733,11 @@
   <div class="aluno-box">
     <div class="campo">
       <strong>Aluno(a):</strong>
-      ${nomeAluno
-        ? `<span style="border-bottom:1px solid #000;min-width:300px;display:inline-block;font-weight:bold;padding:0 5px;">${nomeAluno}</span>`
-        : `<span class="linha-assinatura" style="min-width:300px;"></span>`}
+      ${nomeAluno ? `<span style="border-bottom:1px solid #000;min-width:300px;display:inline-block;font-weight:bold;padding:0 5px;">${nomeAluno}</span>` : `<span class="linha-assinatura" style="min-width:300px;"></span>`}
     </div>
     <div class="campo">
       <strong>Nº:</strong>
-      ${numeroAluno
-        ? `<span style="border-bottom:1px solid #000;min-width:60px;display:inline-block;font-weight:bold;text-align:center;padding:0 5px;">${numeroAluno}</span>`
-        : `<span class="linha-assinatura" style="min-width:60px;"></span>`}
+      ${numeroAluno ? `<span style="border-bottom:1px solid #000;min-width:60px;display:inline-block;font-weight:bold;text-align:center;padding:0 5px;">${numeroAluno}</span>` : `<span class="linha-assinatura" style="min-width:60px;"></span>`}
     </div>
     <div class="campo">
       <strong>Nota:</strong>
@@ -918,78 +764,28 @@
 <style>
   @page { size: A4 portrait; margin: 12mm 15mm 12mm 15mm; }
   * { box-sizing: border-box; }
-  body {
-    font-family: 'Times New Roman', Times, serif;
-    font-size: 11pt;
-    color: #000;
-    line-height: 1.45;
-    margin: 0;
-    padding: 8px;
-  }
-  .cabecalho {
-    display: grid;
-    grid-template-columns: 90px 1fr 90px;
-    align-items: center;
-    gap: 15px;
-    border-bottom: 3px double #002B5B;
-    padding-bottom: 10px;
-    margin-bottom: 12px;
-  }
+  body { font-family: 'Times New Roman', Times, serif; font-size: 11pt; color: #000; line-height: 1.45; margin: 0; padding: 8px; }
+  .cabecalho { display: grid; grid-template-columns: 90px 1fr 90px; align-items: center; gap: 15px; border-bottom: 3px double #002B5B; padding-bottom: 10px; margin-bottom: 12px; }
   .cabecalho .brasao { width: 90px; height: 90px; object-fit: contain; }
   .cabecalho .titulo { text-align: center; line-height: 1.2; }
-  .cabecalho .titulo h1 {
-    font-size: 15pt; margin: 0 0 3px; color: #002B5B;
-    text-transform: uppercase; letter-spacing: 0.5px;
-  }
+  .cabecalho .titulo h1 { font-size: 15pt; margin: 0 0 3px; color: #002B5B; text-transform: uppercase; letter-spacing: 0.5px; }
   .cabecalho .titulo p { margin: 1px 0; font-size: 9pt; color: #333; }
-  .info-box {
-    background: #f4f6f9; border: 1px solid #cbd5e1;
-    border-left: 4px solid #002B5B; padding: 8px 12px;
-    margin-bottom: 12px; font-size: 10pt; border-radius: 4px;
-  }
-  .info-box .linha {
-    display: flex; justify-content: space-between;
-    flex-wrap: wrap; gap: 12px; margin: 3px 0;
-  }
+  .info-box { background: #f4f6f9; border: 1px solid #cbd5e1; border-left: 4px solid #002B5B; padding: 8px 12px; margin-bottom: 12px; font-size: 10pt; border-radius: 4px; }
+  .info-box .linha { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin: 3px 0; }
   .info-box strong { color: #002B5B; }
-  .aluno-box {
-    display: flex; justify-content: space-between;
-    flex-wrap: wrap; gap: 15px; margin: 10px 0; font-size: 10.5pt;
-  }
+  .aluno-box { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 15px; margin: 10px 0; font-size: 10.5pt; }
   .aluno-box .campo { display: flex; align-items: flex-end; gap: 5px; }
-  .aluno-box .campo .linha-assinatura {
-    border-bottom: 1px solid #000; display: inline-block;
-    min-width: 180px; height: 16px;
-  }
+  .aluno-box .campo .linha-assinatura { border-bottom: 1px solid #000; display: inline-block; min-width: 180px; height: 16px; }
   .conteudo { margin-top: 15px; text-align: justify; font-size: 11pt; }
-  .conteudo h3 {
-    color: #002B5B; font-size: 12pt; margin: 16px 0 8px;
-    padding-bottom: 3px; border-bottom: 1px solid #94a3b8;
-    page-break-after: avoid;
-  }
+  .conteudo h3 { color: #002B5B; font-size: 12pt; margin: 16px 0 8px; padding-bottom: 3px; border-bottom: 1px solid #94a3b8; page-break-after: avoid; }
   .conteudo p { margin: 8px 0; }
   .conteudo ol, .conteudo ul { margin-left: 25px; padding-left: 5px; }
   .conteudo li { margin: 4px 0; }
-  .rodape {
-    margin-top: 25px; padding-top: 8px; border-top: 1px solid #94a3b8;
-    font-size: 8.5pt; text-align: center; color: #555;
-    page-break-inside: avoid;
-  }
+  .rodape { margin-top: 25px; padding-top: 8px; border-top: 1px solid #94a3b8; font-size: 8.5pt; text-align: center; color: #555; page-break-inside: avoid; }
   .no-print { text-align: center; margin-bottom: 15px; }
-  .no-print button {
-    background: #002B5B; color: #FFD700; border: none;
-    padding: 10px 28px; border-radius: 8px;
-    font-size: 13pt; font-weight: bold; cursor: pointer;
-    font-family: 'Segoe UI', sans-serif;
-    margin: 0 5px;
-  }
+  .no-print button { background: #002B5B; color: #FFD700; border: none; padding: 10px 28px; border-radius: 8px; font-size: 13pt; font-weight: bold; cursor: pointer; font-family: 'Segoe UI', sans-serif; margin: 0 5px; }
   .no-print button:hover { background: #003d66; }
-  @media print {
-    .no-print { display: none; }
-    body { padding: 0; }
-    .info-box { background: #fff; }
-    .pagina-prova { page-break-inside: avoid; }
-  }
+  @media print { .no-print { display: none; } body { padding: 0; } .info-box { background: #fff; } .pagina-prova { page-break-inside: avoid; } }
 </style>
 </head>
 <body>
