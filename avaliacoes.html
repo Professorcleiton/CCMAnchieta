@@ -690,10 +690,8 @@ function previewProva() {
 
   const dataFormatada = dataProva ? dataProva.split('-').reverse().join('/') : '___/___/2026';
 
-  // Detecta o caminho do brasão (relativo ao avaliacoes.html)
-  const brasaoPath = window.location.pathname.includes('/')
-    ? 'img/brasao-anchieta.png'
-    : 'img/brasao-anchieta.png';
+    // Caminho do brasão oficial do Anchieta
+  const brasaoPath = 'img/logoA.png';
 
   const html = `<!DOCTYPE html>
 <html lang="pt-BR">
