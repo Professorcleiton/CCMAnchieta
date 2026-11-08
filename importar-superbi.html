@@ -198,26 +198,35 @@
       }
     }
 
-    function filtrarPlataformas() {
+       function filtrarPlataformas() {
       const turma = document.getElementById('add-turma').value;
       const selectPlataforma = document.getElementById('add-plataforma');
-      selectPlataforma.innerHTML = '<option value="">Selecione...</option>';
       
-      if (!turma) return;
-
-      let plataformas = [];
-      if (turma.startsWith('6') || turma.startsWith('7')) {
-        plataformas.push({ nome: 'Matific', disciplina: 'Matemática' });
-      } else {
-        plataformas.push({ nome: 'Khan Academy', disciplina: 'Matemática' });
+      selectPlataforma.innerHTML = '<option value="">Selecione a Plataforma...</option>';
+      
+      if (!turma) {
+         selectPlataforma.innerHTML = '<option value="">Selecione a Turma primeiro...</option>';
+         return;
       }
 
-      plataformas.push({ nome: 'Redação Paraná', disciplina: 'Português' });
-      plataformas.push({ nome: 'Leia Paraná', disciplina: 'Todas' });
-      plataformas.push({ nome: 'Quizizz', disciplina: 'Todas' });
-      plataformas.push({ nome: 'Inglês Paraná', disciplina: 'Inglês' });
+      let plataformasDisponiveis = [];
+      
+      // Regra de Matemática (Matific para 6/7, Khan para 8/9)
+      if (turma.startsWith('6') || turma.startsWith('7')) {
+        plataformasDisponiveis.push({ nome: 'Matific', disciplina: 'Matemática' });
+      } else {
+        plataformasDisponiveis.push({ nome: 'Khan Academy', disciplina: 'Matemática' });
+      }
 
-      plataformas.forEach(p => {
+      // Outras plataformas
+      plataformasDisponiveis.push({ nome: 'Redação Paraná', disciplina: 'Português' });
+      plataformasDisponiveis.push({ nome: 'Leia Paraná', disciplina: 'Todas' });
+      plataformasDisponiveis.push({ nome: 'Inglês Paraná', disciplina: 'Inglês' });
+      
+      // 🆕 QUIZIZZ (Aplica a Todas as disciplinas)
+      plataformasDisponiveis.push({ nome: 'Quizizz', disciplina: 'Todas' });
+
+      plataformasDisponiveis.forEach(p => {
         const opt = document.createElement('option');
         opt.value = p.nome;
         opt.textContent = p.nome;
@@ -226,10 +235,21 @@
       });
     }
 
-    function filtrarDisciplina() {
-      const sel = document.getElementById('add-plataforma');
-      const disc = sel.options[sel.selectedIndex].getAttribute('data-disciplina');
-      document.getElementById('add-disciplina').value = (disc && disc !== 'Todas') ? disc : '';
+        function filtrarDisciplina() {
+      const selectPlataforma = document.getElementById('add-plataforma');
+      const selectDisciplina = document.getElementById('add-disciplina');
+      
+      const optionSelecionada = selectPlataforma.options[selectPlataforma.selectedIndex];
+      const disciplinaSugerida = optionSelecionada.getAttribute('data-disciplina');
+
+      // Se a disciplina for 'Todas' (como Quizizz, Leia), deixa o professor escolher qual matéria foi
+      if (disciplinaSugerida && disciplinaSugerida !== 'Todas') {
+        selectDisciplina.value = disciplinaSugerida;
+        selectDisciplina.disabled = true; // Trava o campo (ex: Matific é sempre Matemática)
+      } else {
+        selectDisciplina.value = ''; 
+        selectDisciplina.disabled = false; // 🆕 Destrava o campo para ele escolher
+      }
     }
 
        function adicionarLinha() {
