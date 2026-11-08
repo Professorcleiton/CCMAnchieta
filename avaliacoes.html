@@ -672,120 +672,166 @@ Um terreno retangular possui 12,5 m de comprimento por 8,4 m de largura..."></di
       }
     }
 
-    // =============================================
-    // PREVIEW DA PROVA (layout de impressão)
-    // =============================================
-    function previewProva() {
-      const disciplina = document.getElementById('selectDisciplina').value;
-      const turma = document.getElementById('selectTurma').value;
-      const trimestre = document.getElementById('selectTrimestre').value;
-      const dataProva = document.getElementById('dataProva').value;
-      const valorProva = document.getElementById('valorProva').value;
-      const professorNome = document.getElementById('profNomeCabecalho').value || usuarioLogado.nome;
-      const conteudoHTML = document.getElementById('editorConteudo').innerHTML;
+// =============================================
+// PREVIEW DA PROVA
+// =============================================
+function previewProva() {
+  const disciplina = document.getElementById('selectDisciplina').value;
+  const turma = document.getElementById('selectTurma').value;
+  const trimestre = document.getElementById('selectTrimestre').value;
+  const dataProva = document.getElementById('dataProva').value;
+  const valorProva = document.getElementById('valorProva').value;
+  const professorNome = document.getElementById('profNomeCabecalho').value || usuarioLogado.nome;
+  const conteudoHTML = document.getElementById('editorConteudo').innerHTML;
 
-      if (!disciplina || !turma || !conteudoHTML) {
-        return toast('Preencha disciplina, turma e conteúdo antes de visualizar.', 'erro');
-      }
+  if (!disciplina || !turma || !conteudoHTML) {
+    return toast('Preencha disciplina, turma e conteúdo antes de visualizar.', 'erro');
+  }
 
-      const dataFormatada = dataProva ? dataProva.split('-').reverse().join('/') : '___/___/2026';
+  const dataFormatada = dataProva ? dataProva.split('-').reverse().join('/') : '___/___/2026';
 
-      const html = `<!DOCTYPE html>
+  // Detecta o caminho do brasão (relativo ao avaliacoes.html)
+  const brasaoPath = window.location.pathname.includes('/')
+    ? 'img/brasao-anchieta.png'
+    : 'img/brasao-anchieta.png';
+
+  const html = `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <title>Prévia da Prova — ${disciplina} — ${turma}</title>
 <style>
-  @page { size: A4; margin: 15mm; }
+  @page { size: A4 portrait; margin: 12mm 15mm 12mm 15mm; }
+  * { box-sizing: border-box; }
   body {
-    font-family: 'Times New Roman', serif;
-    font-size: 12pt;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 11pt;
     color: #000;
-    padding: 10px;
-    line-height: 1.5;
+    line-height: 1.45;
+    margin: 0;
+    padding: 8px;
   }
+
+  /* Cabeçalho institucional */
   .cabecalho {
-    display: flex;
+    display: grid;
+    grid-template-columns: 90px 1fr 90px;
     align-items: center;
     gap: 15px;
     border-bottom: 3px double #002B5B;
     padding-bottom: 10px;
-    margin-bottom: 15px;
+    margin-bottom: 12px;
   }
-  .cabecalho img {
-    width: 80px;
-    height: 80px;
+  .cabecalho .brasao {
+    width: 90px;
+    height: 90px;
     object-fit: contain;
   }
   .cabecalho .titulo {
-    flex: 1;
     text-align: center;
+    line-height: 1.2;
   }
   .cabecalho .titulo h1 {
-    font-size: 16pt;
-    margin: 0;
+    font-size: 15pt;
+    margin: 0 0 3px;
     color: #002B5B;
     text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
   .cabecalho .titulo p {
-    margin: 2px 0;
-    font-size: 10pt;
+    margin: 1px 0;
+    font-size: 9pt;
+    color: #333;
   }
-  .linha-info {
+
+  /* Dados da avaliação */
+  .info-box {
+    background: #f4f6f9;
+    border: 1px solid #cbd5e1;
+    border-left: 4px solid #002B5B;
+    padding: 8px 12px;
+    margin-bottom: 12px;
+    font-size: 10pt;
+    border-radius: 4px;
+  }
+  .info-box .linha {
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 12px;
+    margin: 3px 0;
+  }
+  .info-box strong { color: #002B5B; }
+
+  /* Campos de identificação do aluno */
+  .aluno-box {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 15px;
     margin: 10px 0;
     font-size: 10.5pt;
   }
-  .linha-info div { flex: 1; min-width: 200px; }
-  .linha-info strong { color: #002B5B; }
-  .linha-assinatura {
+  .aluno-box .campo { display: flex; align-items: flex-end; gap: 5px; }
+  .aluno-box .campo .linha-assinatura {
     border-bottom: 1px solid #000;
     display: inline-block;
     min-width: 180px;
+    height: 16px;
   }
+
+  /* Conteúdo das questões */
   .conteudo {
-    margin-top: 20px;
+    margin-top: 15px;
     text-align: justify;
+    font-size: 11pt;
   }
   .conteudo h3 {
     color: #002B5B;
     font-size: 12pt;
-    margin-top: 15px;
-    margin-bottom: 8px;
-    border-bottom: 1px solid #ccc;
+    margin: 16px 0 8px;
     padding-bottom: 3px;
+    border-bottom: 1px solid #94a3b8;
+    page-break-after: avoid;
   }
   .conteudo p { margin: 8px 0; }
-  .conteudo ol, .conteudo ul { margin-left: 25px; }
-  .espaco-calculo {
-    border: 1px dashed #999;
-    min-height: 80px;
-    margin: 10px 0;
-    padding: 5px;
-    background: #fafafa;
-    font-size: 9pt;
-    color: #888;
-  }
+  .conteudo ol, .conteudo ul { margin-left: 25px; padding-left: 5px; }
+  .conteudo li { margin: 4px 0; }
+  .conteudo br { display: block; content: ''; margin: 4px 0; }
+
+  /* Rodapé */
   .rodape {
-    margin-top: 30px;
-    border-top: 1px solid #ccc;
-    padding-top: 10px;
-    font-size: 9pt;
+    margin-top: 25px;
+    padding-top: 8px;
+    border-top: 1px solid #94a3b8;
+    font-size: 8.5pt;
     text-align: center;
-    color: #666;
+    color: #555;
+    page-break-inside: avoid;
   }
-  .no-print { text-align: center; margin-bottom: 20px; }
+
+  /* Botão de impressão (não aparece no print) */
+  .no-print {
+    text-align: center;
+    margin-bottom: 15px;
+  }
   .no-print button {
-    background: #002B5B; color: #FFD700; border: none;
-    padding: 10px 30px; border-radius: 8px;
-    font-size: 14pt; font-weight: bold; cursor: pointer;
+    background: #002B5B;
+    color: #FFD700;
+    border: none;
+    padding: 10px 28px;
+    border-radius: 8px;
+    font-size: 13pt;
+    font-weight: bold;
+    cursor: pointer;
+    font-family: 'Segoe UI', sans-serif;
   }
+  .no-print button:hover { background: #003d66; }
+
   @media print {
     .no-print { display: none; }
-    .espaco-calculo { background: #fff; }
+    body { padding: 0; }
+    .info-box { background: #fff; }
   }
 </style>
 </head>
@@ -795,54 +841,69 @@ Um terreno retangular possui 12,5 m de comprimento por 8,4 m de largura..."></di
   <button onclick="window.print()">🖨️ Imprimir esta Prova</button>
 </div>
 
+<!-- CABEÇALHO INSTITUCIONAL -->
 <div class="cabecalho">
-  <img src="img/SIG.png" alt="Brasão Anchieta" onerror="this.style.display='none'">
+  <img src="${brasaoPath}" alt="Brasão Anchieta" class="brasao"
+       onerror="this.src='img/SIG.png'">
   <div class="titulo">
     <h1>Colégio Cívico-Militar Anchieta</h1>
     <p>Secretaria de Estado da Educação — SEED/PR</p>
     <p>Núcleo Regional de Educação de Umuarama</p>
   </div>
+  <div></div>
 </div>
 
-<div class="linha-info">
-  <div><strong>Disciplina:</strong> ${disciplina}</div>
-  <div><strong>Série/Turma:</strong> ${turma}</div>
-  <div><strong>Trimestre:</strong> ${trimestre}</div>
-</div>
-<div class="linha-info">
-  <div><strong>Professor(a):</strong> ${professorNome}</div>
-  <div><strong>Data:</strong> ${dataFormatada}</div>
-  <div><strong>Valor:</strong> ${valorProva || '___'}</div>
-</div>
-<div class="linha-info">
-  <div><strong>Aluno(a):</strong> <span class="linha-assinatura"></span></div>
-  <div><strong>Nº:</strong> <span class="linha-assinatura" style="min-width:60px;"></span></div>
-</div>
-<div class="linha-info">
-  <div><strong>Ano Letivo:</strong> 2026</div>
-  <div><strong>Nota:</strong> <span class="linha-assinatura" style="min-width:100px;"></span></div>
+<!-- DADOS DA AVALIAÇÃO -->
+<div class="info-box">
+  <div class="linha">
+    <div><strong>Disciplina:</strong> ${disciplina}</div>
+    <div><strong>Série/Turma:</strong> ${turma}</div>
+    <div><strong>Trimestre:</strong> ${trimestre}</div>
+  </div>
+  <div class="linha">
+    <div><strong>Professor(a):</strong> ${professorNome}</div>
+    <div><strong>Data:</strong> ${dataFormatada}</div>
+    <div><strong>Valor:</strong> ${valorProva || '___'}</div>
+  </div>
 </div>
 
-<hr style="margin: 15px 0;">
+<!-- IDENTIFICAÇÃO DO ALUNO -->
+<div class="aluno-box">
+  <div class="campo">
+    <strong>Aluno(a):</strong>
+    <span class="linha-assinatura" style="min-width: 300px;"></span>
+  </div>
+  <div class="campo">
+    <strong>Nº:</strong>
+    <span class="linha-assinatura" style="min-width: 60px;"></span>
+  </div>
+  <div class="campo">
+    <strong>Nota:</strong>
+    <span class="linha-assinatura" style="min-width: 80px;"></span>
+  </div>
+</div>
 
+<!-- CONTEÚDO -->
 <div class="conteudo">
   ${conteudoHTML || '<p><em>(Nenhuma questão cadastrada)</em></p>'}
 </div>
 
+<!-- RODAPÉ -->
 <div class="rodape">
-  Avaliação elaborada pelo(a) professor(a) ${professorNome} — ${disciplina} — ${turma} — ${trimestre} de 2026
+  Avaliação elaborada pelo(a) professor(a) ${professorNome} — ${disciplina} — ${turma} — ${trimestre} de 2026<br>
+  Colégio Cívico-Militar Anchieta — Cruzeiro do Oeste/PR
 </div>
 
 </body>
 </html>`;
 
-      const win = window.open('', '_blank', 'width=900,height=1000');
-      if (!win) {
-        return toast('Permita pop-ups para visualizar a prévia.', 'erro');
-      }
-      win.document.write(html);
-      win.document.close();
-    }
+  const win = window.open('', '_blank', 'width=900,height=1000');
+  if (!win) {
+    return toast('Permita pop-ups para visualizar a prévia.', 'erro');
+  }
+  win.document.write(html);
+  win.document.close();
+}
   </script>
 </body>
 </html>
