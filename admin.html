@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel Master — SIGA Admin</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    :root {
+      --bg: #0f172a; --card: #1e293b; --texto: #f1f5f9; --azul: #005088; --dourado: #eab308;
+      --verde: #10b981; --vermelho: #ef4444; --borda: #334155;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--texto); padding-bottom: 50px; }
+    
+    .topbar { background: #020617; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--dourado); }
+    .topbar h1 { font-size: 1.2rem; color: var(--dourado); margin: 0; display: flex; align-items: center; gap: 10px; }
+    .user-info { display: flex; align-items: center; gap: 15px; font-size: 0.9rem; }
+    .badge-master { background: var(--vermelho); color: white; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 0.75rem; }
+    .btn-sair { background: transparent; color: #94a3b8; border: 1px solid #334155; padding: 6px 12px; border-radius: 6px; cursor: pointer; text-decoration: none; }
+    .btn-sair:hover { background: #334155; color: white; }
+
+    .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+    
+    .grid-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 40px; }
+    .card-link { background: var(--card); border-radius: 12px; padding: 25px; text-decoration: none; color: var(--texto); border: 1px solid var(--borda); transition: all 0.2s; display: flex; flex-direction: column; gap: 10px; }
+    .card-link:hover { border-color: var(--dourado); transform: translateY(-3px); box-shadow: 0 8px 16px rgba(0,0,0,0.3); }
+    .card-link i { font-size: 2rem; color: var(--dourado); margin-bottom: 10px; }
+    .card-link h3 { margin: 0; font-size: 1.1rem; }
+    .card-link p { margin: 0; font-size: 0.85rem; color: #94a3b8; }
+
+    .section-title { font-size: 1.2rem; margin-bottom: 20px; border-left: 4px solid var(--dourado); padding-left: 10px; }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <h1><i class="fas fa-shield-halved"></i> SIGA Master Console</h1>
+    <div class="user-info">
+      <span id="admin-nome">Carregando...</span>
+      <span class="badge-master">NÍVEL DESENVOLVEDOR</span>
+      <a href="index.html" class="btn-sair" onclick="localStorage.clear()"><i class="fas fa-power-off"></i> Sair</a>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <h2 class="section-title">Administração e Auditoria</h2>
+    <div class="grid-cards">
+      <a href="relatorio-geral.html" class="card-link">
+        <i class="fas fa-chart-line"></i>
+        <h3>Relatório Geral (BI)</h3>
+        <p>Veja o índice de todos os professores, filtre por turma e exporte para Excel.</p>
+      </a>
+      <a href="restrito.html" class="card-link">
+        <i class="fas fa-users-cog"></i>
+        <h3>Gestão de Usuários</h3>
+        <p>Acesse o painel principal para criar, editar ou excluir contas de alunos e servidores.</p>
+      </a>
+      <a href="importar-superbi.html" class="card-link">
+        <i class="fas fa-file-import"></i>
+        <h3>Lançar Índices (Master)</h3>
+        <p>Importe notas em lote e direcione para as contas dos professores.</p>
+      </a>
+    </div>
+
+    <h2 class="section-title">Módulos do Sistema (Testes)</h2>
+    <div class="grid-cards">
+      <a href="patrimonio.html" class="card-link">
+        <i class="fas fa-boxes-stacked"></i>
+        <h3>Módulo Patrimônio</h3>
+        <p>Gerencie os bens da escola, etiquetas com QR Code e inventário.</p>
+      </a>
+      <a href="agenda-laboratorio.html" class="card-link">
+        <i class="fas fa-desktop"></i>
+        <h3>Agenda do Laboratório</h3>
+        <p>Teste a visualização da agenda dos computadores e tablets.</p>
+      </a>
+      <a href="avaliacoes.html" class="card-link">
+        <i class="fas fa-file-pen"></i>
+        <h3>Criar Avaliação</h3>
+        <p>Teste a interface de criação de provas e envio para a secretaria.</p>
+      </a>
+      <a href="avaliacoes-secretaria.html" class="card-link">
+        <i class="fas fa-print"></i>
+        <h3>Secretaria (Impressões)</h3>
+        <p>Aprove, recuse e imprima as provas enviadas pelos professores.</p>
+      </a>
+      <a href="painel-docente.html" class="card-link">
+        <i class="fas fa-chalkboard-user"></i>
+        <h3>Painel Docente</h3>
+        <p>Veja como o professor enxerga as metas semanais e seus índices.</p>
+      </a>
+      <a href="responsaveis.html" class="card-link">
+        <i class="fas fa-user-friends"></i>
+        <h3>Portal do Responsável</h3>
+        <p>Veja a visão do pai/aluno (frequência, notas, ocorrências).</p>
+      </a>
+    </div>
+
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const sessao = JSON.parse(localStorage.getItem('sgi_ccma_session') || '{}');
+      
+      // Verificação de segurança: só entra se for nível 5 (Dev)
+      if (sessao.nivel < 5) {
+        alert('Acesso restrito ao Desenvolvedor Master.');
+        window.location.href = 'restrito.html';
+        return;
+      }
+
+      document.getElementById('admin-nome').innerHTML = `<strong>${sessao.nome}</strong>`;
+    });
+  </script>
+</body>
+</html>
