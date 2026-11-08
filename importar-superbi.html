@@ -329,7 +329,7 @@
     }
 
     // 🆕 SALVAR NA PLANILHA (Corrigido)
-    async function salvarNaPlanilha() {
+        async function salvarNaPlanilha() {
       if (listaDeLancamentos.length === 0) {
         alert('Adicione pelo menos um lançamento antes de salvar.');
         return;
@@ -339,17 +339,16 @@
       btn.disabled = true;
       btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
 
-      // Prepara o JSON exatamente como o Apps Script espera
       const payload = {
         operacao: 'IMPORTAR_LANCAMENTOS',
         token: usuarioLogado.token,
         emailOperador: usuarioLogado.email,
         lancamentos: listaDeLancamentos.map(l => ({
-          professor: usuarioLogado.email, // Salva o e-mail do professor
+          professor: usuarioLogado.email,
           disciplina: l.disciplina,
           turma: l.turma,
           plataforma: l.plataforma,
-          valor: l.indice // O Apps Script lê como 'valor' e salva na planilha
+          valor: l.indice
         }))
       };
 
@@ -360,18 +359,27 @@
           body: JSON.stringify(payload)
         });
         
-        const result = await resp.json();
+        const textoResposta = await resp.text(); // Pega o texto bruto primeiro
+        console.log("Resposta do servidor:", textoResposta); // Mostra no console o que o Google respondeu
+
+        let result;
+        try {
+          result = JSON.parse(textoResposta);
+        } catch(e) {
+          // Se o Apps Script não enviou JSON, significa que ele deu erro 500 ou página não encontrada
+          throw new Error("O servidor do Google não respondeu com JSON válido. Verifique se o Apps Script foi reimplantado.");
+        }
 
         if (result.status === 'success') {
           mostrarStatus('sucesso', `✅ ${result.inseridos} lançamento(s) salvo(s) com sucesso!`);
           listaDeLancamentos = [];
           renderizarTabela();
         } else {
-          mostrarStatus('erro', '❌ Erro: ' + (result.message || 'Falha ao salvar.'));
+          mostrarStatus('erro', '❌ Erro do Google: ' + (result.message || 'Tente novamente.'));
         }
       } catch (e) {
         console.error(e);
-        mostrarStatus('erro', '❌ Erro de conexão com o servidor.');
+        mostrarStatus('erro', '❌ Erro de conexão: ' + e.message);
       } finally {
         btn.disabled = false;
         btn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Salvar na Planilha';
