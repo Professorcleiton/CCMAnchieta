@@ -31,7 +31,7 @@
       font-family: 'Segoe UI', Roboto, sans-serif;
       background: #f3f4f6;
       color: var(--texto);
-      padding-bottom: 80px;
+      padding-bottom: 90px;
     }
     .topbar {
       background: var(--azul);
@@ -84,12 +84,27 @@
     .card.vermelho i, .card.vermelho .num { color: var(--vermelho); }
     .card.geral { border-left-color: var(--azul); }
     .card.geral i, .card.geral .num { color: var(--azul); }
+
+    /* 🆕 Tabela com rolagem vertical e sem seleção azul */
     .tabela-monitoramento {
       background: var(--bg-card); border-radius: 12px; padding: 1rem;
       box-shadow: 0 2px 6px rgba(0,0,0,.06); margin-bottom: 1.5rem;
+      max-height: 500px;
+      overflow-y: auto;
       overflow-x: auto;
+      user-select: none;
     }
-    .tabela-monitoramento h2 { font-size: 1rem; margin-bottom: .8rem; color: var(--azul); }
+    .tabela-monitoramento::-webkit-scrollbar { width: 10px; height: 10px; }
+    .tabela-monitoramento::-webkit-scrollbar-thumb {
+      background: #94a3b8; border-radius: 5px;
+    }
+    .tabela-monitoramento::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+    .tabela-monitoramento h2 {
+      font-size: 1rem; margin-bottom: .8rem; color: var(--azul);
+      position: sticky; top: 0; background: var(--bg-card);
+      z-index: 3; padding-top: .2rem;
+    }
     body.dark .tabela-monitoramento h2 { color: var(--dourado); }
     .tabela-monitoramento table { width: 100%; border-collapse: collapse; min-width: 640px; }
     .tabela-monitoramento th, .tabela-monitoramento td {
@@ -98,9 +113,10 @@
     }
     .tabela-monitoramento th {
       background: var(--azul); color: #fff; font-weight: 600;
-      position: sticky; top: 0;
+      position: sticky; top: 40px; z-index: 2;
     }
     .tabela-monitoramento tr:hover { background: rgba(0,80,136,.05); }
+
     .status-badge {
       display: inline-block; padding: .2rem .6rem; border-radius: 999px;
       font-size: .75rem; font-weight: 600; color: #fff;
@@ -110,6 +126,7 @@
     .status-vermelho { background: var(--vermelho); }
     .icone-universal { color: var(--azul); margin-left: .3rem; font-size: .8rem; }
     body.dark .icone-universal { color: #93c5fd; }
+
     .historico {
       background: var(--bg-card); border-radius: 12px; padding: 1rem;
       box-shadow: 0 2px 6px rgba(0,0,0,.06); margin-bottom: 1.5rem;
@@ -117,6 +134,7 @@
     .historico h2 { font-size: 1rem; margin-bottom: .8rem; color: var(--azul); }
     body.dark .historico h2 { color: var(--dourado); }
     .historico canvas { max-height: 320px; }
+
     .toast {
       position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
       background: var(--azul); color: #fff; padding: .7rem 1.2rem;
@@ -124,6 +142,32 @@
       transition: opacity .3s; z-index: 1000;
     }
     .toast.ativo { opacity: 1; }
+
+    /* 🆕 Botão Voltar ao SIGA */
+    .footer-voltar-siga {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--azul);
+      color: #fff;
+      padding: .7rem 1.5rem;
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,.2);
+      font-size: .9rem;
+      z-index: 100;
+      transition: background .2s, transform .2s;
+    }
+    .footer-voltar-siga:hover {
+      background: #003d66;
+      transform: translateX(-50%) translateY(-2px);
+    }
+
     @media (max-width: 900px) {
       .cards-resumo { grid-template-columns: repeat(2, 1fr); }
     }
@@ -153,7 +197,7 @@
       </div>
     </div>
 
-    <!-- 🆕 BOTÃO NOVA AVALIAÇÃO — destaque -->
+    <!-- BOTÃO NOVA AVALIAÇÃO -->
     <section style="background: linear-gradient(135deg, #005088 0%, #003d66 100%); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; box-shadow: 0 4px 12px rgba(0,80,136,.25);">
       <div style="color: #fff; flex: 1; min-width: 240px;">
         <h2 style="margin: 0 0 .3rem; font-size: 1.2rem; color: #fff;">
@@ -247,9 +291,14 @@
 
   </main>
 
+  <a href="restrito.html" class="footer-voltar-siga">
+    <i class="fas fa-arrow-left"></i> Voltar ao SIGA
+  </a>
+
   <div class="toast" id="toast"></div>
 
   <script>
+    // ✅ URL correta do Apps Script (a mesma do avaliacoes.html)
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
 
     let sessao = null;
@@ -288,19 +337,20 @@
       }
     }
 
- function popularFiltroTurmas() {
-  const turmas = [...new Set(
-    dadosOriginais
-      .map(d => d.turma)
-      .filter(t => t && t !== 'undefined' && t !== 'null' && String(t).trim() !== '')
-  )].sort();
-  
-  const sel = document.getElementById('filtro-turma');
-  sel.innerHTML = '<option value="">Todas as turmas</option>';
-  turmas.forEach(t => sel.innerHTML += `<option value="${t}">${t}</option>`);
-  
-  console.log('✅ Turmas encontradas:', turmas);
-}
+    function popularFiltroTurmas() {
+      // ✅ Filtra valores undefined/null/vazios antes de criar o Set
+      const turmas = [...new Set(
+        dadosOriginais
+          .map(d => d.turma)
+          .filter(t => t && t !== 'undefined' && t !== 'null' && String(t).trim() !== '')
+      )].sort();
+
+      const sel = document.getElementById('filtro-turma');
+      sel.innerHTML = '<option value="">Todas as turmas</option>';
+      turmas.forEach(t => sel.innerHTML += `<option value="${t}">${t}</option>`);
+
+      console.log('✅ Turmas encontradas:', turmas);
+    }
 
     function aplicarFiltros() {
       const plat = document.getElementById('filtro-plataforma').value;
@@ -333,45 +383,46 @@
       document.getElementById('total-vermelho').textContent = vermelho;
     }
 
-function renderizarTabela() {
-  const tbody = document.getElementById('corpo-tabela');
-  if (!dadosFiltrados.length) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:1.5rem;">Nenhum item encontrado.</td></tr>';
-    return;
-  }
-  tbody.innerHTML = dadosFiltrados.map(d => {
-    // Nome da plataforma
-    let nomePlataforma = d.plataforma || '—';
-    if (d.plataforma === 'Quizizz' || d.plataforma === 'Desafio') {
-      nomePlataforma = 'Quizizz / Desafio';
+    function renderizarTabela() {
+      const tbody = document.getElementById('corpo-tabela');
+      if (!dadosFiltrados.length) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:1.5rem;">Nenhum item encontrado.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = dadosFiltrados.map(d => {
+        // Nome da plataforma
+        let nomePlataforma = d.plataforma || '—';
+        if (d.plataforma === 'Quizizz' || d.plataforma === 'Desafio') {
+          nomePlataforma = 'Quizizz / Desafio';
+        }
+
+        // Cálculos seguros
+        const meta = Number(d.meta_semanal) || 0;
+        const lancado = Number(d.qtd_lancada) || 0;
+        const pct = meta > 0 ? Math.round((lancado / meta) * 100) : 0;
+
+        // Status seguro (protege contra undefined/null)
+        const statusRaw = d.status ? String(d.status).toLowerCase() : 'vermelho';
+        const statusValidos = ['verde', 'amarelo', 'vermelho'];
+        const statusSeguro = statusValidos.includes(statusRaw) ? statusRaw : 'vermelho';
+        const badge = `<span class="status-badge status-${statusSeguro}">${statusSeguro.toUpperCase()}</span>`;
+
+        const universal = d.universal
+          ? ' <i class="fas fa-globe icone-universal" title="Meta universal — vale para todas as disciplinas"></i>'
+          : '';
+
+        return `<tr>
+          <td>${d.disciplina || '—'}</td>
+          <td>${d.turma || '—'}</td>
+          <td>${nomePlataforma}${universal}</td>
+          <td>${meta.toFixed(2)}</td>
+          <td>${lancado.toFixed(4)}</td>
+          <td>${pct}%</td>
+          <td>${badge}</td>
+        </tr>`;
+      }).join('');
     }
 
-    // Cálculos seguros
-    const meta = Number(d.meta_semanal) || 0;
-    const lancado = Number(d.qtd_lancada) || 0;
-    const pct = meta > 0 ? Math.round((lancado / meta) * 100) : 0;
-
-    // Status seguro (protege contra undefined/null)
-    const statusRaw = d.status ? String(d.status).toLowerCase() : 'vermelho';
-    const statusValidos = ['verde', 'amarelo', 'vermelho'];
-    const statusSeguro = statusValidos.includes(statusRaw) ? statusRaw : 'vermelho';
-    const badge = `<span class="status-badge status-${statusSeguro}">${statusSeguro.toUpperCase()}</span>`;
-
-    const universal = d.universal
-      ? ' <i class="fas fa-globe icone-universal" title="Meta universal — vale para todas as disciplinas"></i>'
-      : '';
-
-    return `<tr>
-      <td>${d.disciplina || '—'}</td>
-      <td>${d.turma || '—'}</td>
-      <td>${nomePlataforma}${universal}</td>
-      <td>${meta.toFixed(2)}</td>
-      <td>${lancado.toFixed(4)}</td>
-      <td>${pct}%</td>
-      <td>${badge}</td>
-    </tr>`;
-  }).join('');
-}
     function mostrarToast(msg) {
       const t = document.getElementById('toast');
       t.textContent = msg;
