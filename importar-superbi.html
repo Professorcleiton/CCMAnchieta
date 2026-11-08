@@ -229,7 +229,7 @@
   </main>
 
   <script>
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxEMx6NmZvQqPMmmxsrTaV1DrMHa-F16_ARFR1cjm_5v054lUtF80YWtW88g6MsyhajRg/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
 
     // ===== TEMA =====
     const btnTema = document.getElementById('btn-tema');
@@ -433,17 +433,26 @@
       btnGravar.disabled = true;
       btnGravar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gravando...';
 
-      try {
+            try {
         const sessao = JSON.parse(localStorage.getItem('sgi_ccma_session') || '{}');
+        
+        // Prepara os dados exatamente como o Apps Script espera
+        const payload = {
+          operacao: 'IMPORTAR_LANCAMENTOS',
+          token: sessao.token, // 🆕 Envia o token de segurança
+          lancamentos: linhas.map(l => ({
+             disciplina: l.disciplina,
+             turma: l.turma,
+             plataforma: l.plataforma,
+             valor: l.valor,
+             professor: l.professor || sessao.nome // Se não preencheu, usa o nome de quem está logado
+          }))
+        };
+
         const resp = await fetch(APPS_SCRIPT_URL, {
           method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'text/plain' },
-          body: JSON.stringify({
-            operacao: 'IMPORTAR_LANCAMENTOS',
-            emailOperador: sessao.email || 'sistema',
-            lancamentos: linhas
-          })
+          headers: { 'Content-Type': 'text/plain' }, // Sem no-cors
+          body: JSON.stringify(payload)
         });
         const result = await resp.json();
 
