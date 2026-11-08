@@ -478,5 +478,35 @@
     carregarPainel();
     carregarHistorico();
   </script>
+    <script>
+    // 🚨 CAÇA-FANTASMA: Remove qualquer elemento fixo azul que estiver sobrando na tela
+    setTimeout(() => {
+      // Pega todos os elementos da página
+      const todos = document.querySelectorAll('*');
+      todos.forEach(el => {
+        const style = window.getComputedStyle(el);
+        
+        // Se o elemento for fixo ou sticky E tiver fundo azul (rgb(0, 80, 136) ou similar)
+        if ((style.position === 'fixed' || style.position === 'sticky') && 
+            (style.backgroundColor === 'rgb(0, 80, 136)' || 
+             style.backgroundColor === 'rgb(0, 61, 102)' ||
+             style.backgroundColor === 'rgba(0, 80, 136, 1)')) {
+          
+          // Não remove o topbar (a barra de cima que tem o título e o botão de tema)
+          if (el.classList.contains('topbar') || el.closest('.topbar')) return;
+          
+          // Se for o botão Nova Avaliação, não remove
+          if (el.tagName === 'A' && el.href.includes('avaliacoes.html')) return;
+
+          // Se for uma div gigante (> 100px de altura e largura > 50%), é o fantasma!
+          const rect = el.getBoundingClientRect();
+          if (rect.height > 30 && rect.width > 300) {
+            console.log('🗑️ Removendo elemento fantasma:', el.tagName, el.className);
+            el.style.display = 'none'; // Esconde em vez de remover para não quebrar o JS
+          }
+        }
+      });
+    }, 2000); // Espera 2 segundos (tempo do painel carregar) e executa
+  </script>
 </body>
 </html>
