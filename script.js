@@ -289,7 +289,10 @@ function inicializarPainel() {
     const displayUser = document.getElementById('user-display');
     if (displayUser) displayUser.innerHTML = `<i class="fa-solid fa-user-check"></i> ${usuarioLogado.nome}`;
     aplicarBloqueioSetores(usuarioLogado.setor, usuarioLogado.nivel);
-
+    
+    const btnAvSec = document.getElementById('btn-avaliacoes-secretaria');
+if (btnAvSec) btnAvSec.style.display = (usuarioLogado.nivel >= 3) ? 'inline-flex' : 'none';
+    
     const btnGestao = document.getElementById('btn-abrir-admin');
     if (btnGestao) btnGestao.style.display = (usuarioLogado.nivel >= 4) ? 'inline-flex' : 'none';
 
