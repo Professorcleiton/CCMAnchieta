@@ -91,6 +91,11 @@
       background: #e9ecef; color: #555; font-weight: bold;
     }
     body.dark .form-group input:read-only { background: #334155; color: #cbd5e1; }
+    .form-group input:disabled {
+      background: #e0f2fe; color: #0369a1; font-weight: bold;
+      cursor: not-allowed;
+    }
+    body.dark .form-group input:disabled { background: #0c4a6e; color: #bae6fd; }
 
     .editor-toolbar {
       display: flex; gap: .4rem; margin-bottom: .5rem; flex-wrap: wrap;
@@ -306,7 +311,8 @@
         <button type="button" onclick="execCmd('formatBlock', 'H3')">Título</button>
       </div>
       <div id="editorConteudo" contenteditable="true"
-           data-placeholder="Digite as questões aqui... Ex:## Questão 1 – Perímetro
+           data-placeholder="Digite as questões aqui... Ex:
+Questão 1 – Perímetro
 Um terreno retangular possui 12,5 m de comprimento por 8,4 m de largura..."></div>
     </section>
 
@@ -329,10 +335,23 @@ Um terreno retangular possui 12,5 m de comprimento por 8,4 m de largura..."></di
     <!-- CARD 4: CÓPIAS E OBS -->
     <section class="card">
       <h2><i class="fas fa-print"></i> Impressão</h2>
+
+      <!-- Checkbox de personalização -->
+      <div style="background:#e0f2fe;padding:.8rem 1rem;border-radius:8px;margin-bottom:1rem;border-left:4px solid var(--azul);">
+        <label style="display:flex;align-items:center;gap:.6rem;cursor:pointer;font-weight:600;">
+          <input type="checkbox" id="personalizarProvas" onchange="togglePersonalizacao()" style="width:18px;height:18px;cursor:pointer;">
+          <span>📝 Personalizar provas com nome e nº do aluno</span>
+        </label>
+        <p style="margin:.4rem 0 0 1.8rem;font-size:.8rem;color:#0369a1;">
+          Cada aluno da turma receberá uma prova com seu nome e número já impressos.
+        </p>
+      </div>
+
       <div class="copia-obs-grid">
         <div class="form-group">
           <label>Qtd. de Cópias <span style="color: var(--vermelho);">*</span></label>
           <input type="number" id="qtdCopias" min="1" value="30" required>
+          <small id="infoPersonalizacao" style="color:#0369a1;font-weight:600;margin-top:.3rem;display:none;"></small>
         </div>
         <div class="form-group">
           <label>Observações (opcional)</label>
@@ -371,13 +390,13 @@ Um terreno retangular possui 12,5 m de comprimento por 8,4 m de largura..."></di
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
 
     let usuarioLogado = null;
-    let anexos = []; // { nome, tipo, base64, tamanhoMB }
+    let anexos = [];
+    let alunosDaTurma = []; // { numero, nome }
 
     // =============================================
     // INICIALIZAÇÃO
     // =============================================
     document.addEventListener('DOMContentLoaded', () => {
-      // 1) Carrega sessão
       const sessaoRaw = sessionStorage.getItem('sgi_ccma_session') || localStorage.getItem('sgi_ccma_session');
       if (!sessaoRaw) {
         alert('Sessão não encontrada. Faça login novamente.');
@@ -397,12 +416,10 @@ Um terreno retangular possui 12,5 m de comprimento por 8,4 m de largura..."></di
         return;
       }
 
-      // 2) Preenche topbar e nome
       document.getElementById('professor-nome').textContent = usuarioLogado.nome || 'Professor(a)';
       document.getElementById('profNome').value = usuarioLogado.nome || '';
       document.getElementById('profNomeCabecalho').value = usuarioLogado.nome || '';
 
-      // 3) Tema escuro
       if (localStorage.getItem('tema') === 'dark') {
         document.body.classList.add('dark');
         document.getElementById('btn-tema').innerHTML = '<i class="fas fa-sun"></i>';
@@ -414,16 +431,21 @@ Um terreno retangular possui 12,5 m de comprimento por 8,4 m de largura..."></di
         document.getElementById('btn-tema').innerHTML = dark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
       });
 
-      // 4) Carrega disciplinas e turmas
       carregarDisciplinas();
       carregarTurmas();
 
-      // 5) Listener para checar limite
       ['selectDisciplina','selectTurma','selectTrimestre'].forEach(id => {
         document.getElementById(id).addEventListener('change', verificarLimite);
       });
 
-      // 6) Data padrão = hoje
+      // Recarrega alunos quando a turma muda (se personalização estiver ativa)
+      document.getElementById('selectTurma').addEventListener('change', () => {
+        const checkbox = document.getElementById('personalizarProvas');
+        if (checkbox && checkbox.checked) {
+          togglePersonalizacao();
+        }
+      });
+
       document.getElementById('dataProva').value = new Date().toISOString().split('T')[0];
     });
 
@@ -504,6 +526,60 @@ Um terreno retangular possui 12,5 m de comprimento por 8,4 m de largura..."></di
     }
 
     // =============================================
+    // PERSONALIZAÇÃO (nome + nº do aluno)
+    // =============================================
+    async function togglePersonalizacao() {
+      const checkbox = document.getElementById('personalizarProvas');
+      const inputQtd = document.getElementById('qtdCopias');
+      const info = document.getElementById('infoPersonalizacao');
+      const turma = document.getElementById('selectTurma').value;
+
+      if (!checkbox.checked) {
+        inputQtd.disabled = false;
+        inputQtd.value = 30;
+        info.style.display = 'none';
+        alunosDaTurma = [];
+        return;
+      }
+
+      if (!turma) {
+        toast('Selecione uma turma primeiro.', 'erro');
+        checkbox.checked = false;
+        return;
+      }
+
+      info.style.display = 'block';
+      info.textContent = '⏳ Carregando alunos da turma...';
+      inputQtd.disabled = true;
+
+      try {
+        const url = APPS_SCRIPT_URL + '?aba=avaliacoes_alunos_turma&turma=' + encodeURIComponent(turma);
+        const resp = await fetch(url);
+        const alunos = await resp.json();
+
+        if (!Array.isArray(alunos) || alunos.length === 0) {
+          toast('Nenhum aluno encontrado nesta turma.', 'erro');
+          checkbox.checked = false;
+          inputQtd.disabled = false;
+          info.style.display = 'none';
+          alunosDaTurma = [];
+          return;
+        }
+
+        alunosDaTurma = alunos;
+        inputQtd.value = alunos.length;
+        info.textContent = '✅ ' + alunos.length + ' alunos encontrados — ' + alunos.length + ' provas serão geradas.';
+      } catch (e) {
+        console.error(e);
+        toast('Erro ao carregar alunos da turma.', 'erro');
+        checkbox.checked = false;
+        inputQtd.disabled = false;
+        info.style.display = 'none';
+        alunosDaTurma = [];
+      }
+    }
+
+    // =============================================
     // VERIFICAR LIMITE
     // =============================================
     let limiteAtual = null;
@@ -549,7 +625,7 @@ Um terreno retangular possui 12,5 m de comprimento por 8,4 m de largura..."></di
     }
 
     // =============================================
-    // ANEXOS (base64)
+    // ANEXOS
     // =============================================
     function adicionarAnexos(event) {
       const files = Array.from(event.target.files);
@@ -561,7 +637,6 @@ Um terreno retangular possui 12,5 m de comprimento por 8,4 m de largura..."></di
           toast(`"${file.name}" excede ${MAX_MB} MB e foi ignorado.`, 'erro');
           return;
         }
-
         const reader = new FileReader();
         reader.onload = function(e) {
           const base64 = e.target.result.split(',')[1];
@@ -610,8 +685,8 @@ Um terreno retangular possui 12,5 m de comprimento por 8,4 m de largura..."></di
       const conteudoHTML = document.getElementById('editorConteudo').innerHTML.trim();
       const qtdCopias = parseInt(document.getElementById('qtdCopias').value);
       const observacoes = document.getElementById('observacoes').value.trim();
+      const personalizar = document.getElementById('personalizarProvas').checked;
 
-      // Validações
       if (!disciplina) return toast('Selecione a disciplina.', 'erro');
       if (!turma) return toast('Selecione a turma.', 'erro');
       if (!trimestre) return toast('Selecione o trimestre.', 'erro');
@@ -619,6 +694,10 @@ Um terreno retangular possui 12,5 m de comprimento por 8,4 m de largura..."></di
       if (!valorProva) return toast('Informe o valor da avaliação.', 'erro');
       if (!conteudoHTML || conteudoHTML.length < 10) return toast('Digite o conteúdo da avaliação.', 'erro');
       if (!qtdCopias || qtdCopias < 1) return toast('Informe a quantidade de cópias.', 'erro');
+
+      if (personalizar && alunosDaTurma.length === 0) {
+        return toast('Aguarde o carregamento dos alunos ou desmarque a opção de personalização.', 'erro');
+      }
 
       if (limiteAtual && limiteAtual.bloqueado) {
         return toast('Limite de pedidos atingido para esta combinação.', 'erro');
@@ -637,7 +716,8 @@ Um terreno retangular possui 12,5 m de comprimento por 8,4 m de largura..."></di
         conteudo: conteudoHTML,
         qtdCopias,
         observacoes,
-        anexos: anexos.map(a => ({ nome: a.nome, tipo: a.tipo, base64: a.base64 }))
+        anexos: anexos.map(a => ({ nome: a.nome, tipo: a.tipo, base64: a.base64 })),
+        personalizar: personalizar
       };
 
       try {
@@ -652,13 +732,17 @@ Um terreno retangular possui 12,5 m de comprimento por 8,4 m de largura..."></di
 
         if (result.status === 'success') {
           toast('✅ Pedido enviado! ID: ' + result.idPedido, 'sucesso');
-          // Limpa formulário
           document.getElementById('editorConteudo').innerHTML = '';
           document.getElementById('valorProva').value = '';
           document.getElementById('observacoes').value = '';
           anexos = [];
           renderizarAnexos();
-          verificarLimite(); // atualiza contador
+          document.getElementById('personalizarProvas').checked = false;
+          document.getElementById('qtdCopias').disabled = false;
+          document.getElementById('qtdCopias').value = 30;
+          document.getElementById('infoPersonalizacao').style.display = 'none';
+          alunosDaTurma = [];
+          verificarLimite();
         } else if (result.status === 'unauthorized') {
           toast('Sessão expirada. Faça login novamente.', 'erro');
           setTimeout(() => { window.location.href = 'index.html'; }, 2500);
@@ -672,28 +756,93 @@ Um terreno retangular possui 12,5 m de comprimento por 8,4 m de largura..."></di
       }
     }
 
-// =============================================
-// PREVIEW DA PROVA
-// =============================================
-function previewProva() {
-  const disciplina = document.getElementById('selectDisciplina').value;
-  const turma = document.getElementById('selectTurma').value;
-  const trimestre = document.getElementById('selectTrimestre').value;
-  const dataProva = document.getElementById('dataProva').value;
-  const valorProva = document.getElementById('valorProva').value;
-  const professorNome = document.getElementById('profNomeCabecalho').value || usuarioLogado.nome;
-  const conteudoHTML = document.getElementById('editorConteudo').innerHTML;
+    // =============================================
+    // PREVIEW DA PROVA (com personalização)
+    // =============================================
+    function previewProva() {
+      const disciplina = document.getElementById('selectDisciplina').value;
+      const turma = document.getElementById('selectTurma').value;
+      const trimestre = document.getElementById('selectTrimestre').value;
+      const dataProva = document.getElementById('dataProva').value;
+      const valorProva = document.getElementById('valorProva').value;
+      const professorNome = document.getElementById('profNomeCabecalho').value || usuarioLogado.nome;
+      const conteudoHTML = document.getElementById('editorConteudo').innerHTML;
+      const personalizar = document.getElementById('personalizarProvas').checked;
 
-  if (!disciplina || !turma || !conteudoHTML) {
-    return toast('Preencha disciplina, turma e conteúdo antes de visualizar.', 'erro');
-  }
+      if (!disciplina || !turma || !conteudoHTML) {
+        return toast('Preencha disciplina, turma e conteúdo antes de visualizar.', 'erro');
+      }
 
-  const dataFormatada = dataProva ? dataProva.split('-').reverse().join('/') : '___/___/2026';
+      if (personalizar && alunosDaTurma.length === 0) {
+        return toast('Aguarde o carregamento dos alunos ou desmarque a opção de personalização.', 'erro');
+      }
 
-    // Caminho do brasão oficial do Anchieta
-  const brasaoPath = 'img/logoA.png';
+      const dataFormatada = dataProva ? dataProva.split('-').reverse().join('/') : '___/___/2026';
+      const brasaoPath = 'img/logoA.png';
 
-  const html = `<!DOCTYPE html>
+      const paginas = personalizar ? alunosDaTurma : [{ numero: '', nome: '' }];
+
+      const paginasHTML = paginas.map((aluno, idx) => {
+        const quebraPagina = idx < paginas.length - 1 ? 'page-break-after: always;' : '';
+        const nomeAluno = aluno.nome || '';
+        const numeroAluno = aluno.numero || '';
+
+        return `
+<div class="pagina-prova" style="${quebraPagina}">
+  <div class="cabecalho">
+    <img src="${brasaoPath}" alt="Brasão Anchieta" class="brasao" onerror="this.src='img/SIG.png'">
+    <div class="titulo">
+      <h1>Colégio Cívico-Militar Anchieta</h1>
+      <p>Secretaria de Estado da Educação — SEED/PR</p>
+      <p>Núcleo Regional de Educação de Umuarama</p>
+    </div>
+    <div></div>
+  </div>
+
+  <div class="info-box">
+    <div class="linha">
+      <div><strong>Disciplina:</strong> ${disciplina}</div>
+      <div><strong>Série/Turma:</strong> ${turma}</div>
+      <div><strong>Trimestre:</strong> ${trimestre}</div>
+    </div>
+    <div class="linha">
+      <div><strong>Professor(a):</strong> ${professorNome}</div>
+      <div><strong>Data:</strong> ${dataFormatada}</div>
+      <div><strong>Valor:</strong> ${valorProva || '___'}</div>
+    </div>
+  </div>
+
+  <div class="aluno-box">
+    <div class="campo">
+      <strong>Aluno(a):</strong>
+      ${nomeAluno
+        ? `<span style="border-bottom:1px solid #000;min-width:300px;display:inline-block;font-weight:bold;padding:0 5px;">${nomeAluno}</span>`
+        : `<span class="linha-assinatura" style="min-width:300px;"></span>`}
+    </div>
+    <div class="campo">
+      <strong>Nº:</strong>
+      ${numeroAluno
+        ? `<span style="border-bottom:1px solid #000;min-width:60px;display:inline-block;font-weight:bold;text-align:center;padding:0 5px;">${numeroAluno}</span>`
+        : `<span class="linha-assinatura" style="min-width:60px;"></span>`}
+    </div>
+    <div class="campo">
+      <strong>Nota:</strong>
+      <span class="linha-assinatura" style="min-width:80px;"></span>
+    </div>
+  </div>
+
+  <div class="conteudo">
+    ${conteudoHTML || '<p><em>(Nenhuma questão cadastrada)</em></p>'}
+  </div>
+
+  <div class="rodape">
+    Avaliação elaborada pelo(a) professor(a) ${professorNome} — ${disciplina} — ${turma} — ${trimestre} de 2026<br>
+    Colégio Cívico-Militar Anchieta — Cruzeiro do Oeste/PR
+  </div>
+</div>`;
+      }).join('');
+
+      const html = `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -709,8 +858,6 @@ function previewProva() {
     margin: 0;
     padding: 8px;
   }
-
-  /* Cabeçalho institucional */
   .cabecalho {
     display: grid;
     grid-template-columns: 90px 1fr 90px;
@@ -720,188 +867,83 @@ function previewProva() {
     padding-bottom: 10px;
     margin-bottom: 12px;
   }
-  .cabecalho .brasao {
-    width: 90px;
-    height: 90px;
-    object-fit: contain;
-  }
-  .cabecalho .titulo {
-    text-align: center;
-    line-height: 1.2;
-  }
+  .cabecalho .brasao { width: 90px; height: 90px; object-fit: contain; }
+  .cabecalho .titulo { text-align: center; line-height: 1.2; }
   .cabecalho .titulo h1 {
-    font-size: 15pt;
-    margin: 0 0 3px;
-    color: #002B5B;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    font-size: 15pt; margin: 0 0 3px; color: #002B5B;
+    text-transform: uppercase; letter-spacing: 0.5px;
   }
-  .cabecalho .titulo p {
-    margin: 1px 0;
-    font-size: 9pt;
-    color: #333;
-  }
-
-  /* Dados da avaliação */
+  .cabecalho .titulo p { margin: 1px 0; font-size: 9pt; color: #333; }
   .info-box {
-    background: #f4f6f9;
-    border: 1px solid #cbd5e1;
-    border-left: 4px solid #002B5B;
-    padding: 8px 12px;
-    margin-bottom: 12px;
-    font-size: 10pt;
-    border-radius: 4px;
+    background: #f4f6f9; border: 1px solid #cbd5e1;
+    border-left: 4px solid #002B5B; padding: 8px 12px;
+    margin-bottom: 12px; font-size: 10pt; border-radius: 4px;
   }
   .info-box .linha {
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin: 3px 0;
+    display: flex; justify-content: space-between;
+    flex-wrap: wrap; gap: 12px; margin: 3px 0;
   }
   .info-box strong { color: #002B5B; }
-
-  /* Campos de identificação do aluno */
   .aluno-box {
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 15px;
-    margin: 10px 0;
-    font-size: 10.5pt;
+    display: flex; justify-content: space-between;
+    flex-wrap: wrap; gap: 15px; margin: 10px 0; font-size: 10.5pt;
   }
   .aluno-box .campo { display: flex; align-items: flex-end; gap: 5px; }
   .aluno-box .campo .linha-assinatura {
-    border-bottom: 1px solid #000;
-    display: inline-block;
-    min-width: 180px;
-    height: 16px;
+    border-bottom: 1px solid #000; display: inline-block;
+    min-width: 180px; height: 16px;
   }
-
-  /* Conteúdo das questões */
-  .conteudo {
-    margin-top: 15px;
-    text-align: justify;
-    font-size: 11pt;
-  }
+  .conteudo { margin-top: 15px; text-align: justify; font-size: 11pt; }
   .conteudo h3 {
-    color: #002B5B;
-    font-size: 12pt;
-    margin: 16px 0 8px;
-    padding-bottom: 3px;
-    border-bottom: 1px solid #94a3b8;
+    color: #002B5B; font-size: 12pt; margin: 16px 0 8px;
+    padding-bottom: 3px; border-bottom: 1px solid #94a3b8;
     page-break-after: avoid;
   }
   .conteudo p { margin: 8px 0; }
   .conteudo ol, .conteudo ul { margin-left: 25px; padding-left: 5px; }
   .conteudo li { margin: 4px 0; }
-  .conteudo br { display: block; content: ''; margin: 4px 0; }
-
-  /* Rodapé */
   .rodape {
-    margin-top: 25px;
-    padding-top: 8px;
-    border-top: 1px solid #94a3b8;
-    font-size: 8.5pt;
-    text-align: center;
-    color: #555;
+    margin-top: 25px; padding-top: 8px; border-top: 1px solid #94a3b8;
+    font-size: 8.5pt; text-align: center; color: #555;
     page-break-inside: avoid;
   }
-
-  /* Botão de impressão (não aparece no print) */
-  .no-print {
-    text-align: center;
-    margin-bottom: 15px;
-  }
+  .no-print { text-align: center; margin-bottom: 15px; }
   .no-print button {
-    background: #002B5B;
-    color: #FFD700;
-    border: none;
-    padding: 10px 28px;
-    border-radius: 8px;
-    font-size: 13pt;
-    font-weight: bold;
-    cursor: pointer;
+    background: #002B5B; color: #FFD700; border: none;
+    padding: 10px 28px; border-radius: 8px;
+    font-size: 13pt; font-weight: bold; cursor: pointer;
     font-family: 'Segoe UI', sans-serif;
+    margin: 0 5px;
   }
   .no-print button:hover { background: #003d66; }
-
   @media print {
     .no-print { display: none; }
     body { padding: 0; }
     .info-box { background: #fff; }
+    .pagina-prova { page-break-inside: avoid; }
   }
 </style>
 </head>
 <body>
 
 <div class="no-print">
-  <button onclick="window.print()">🖨️ Imprimir esta Prova</button>
+  <button onclick="window.print()">🖨️ Imprimir ${personalizar ? paginas.length + ' Provas' : 'Prova'}</button>
+  <button onclick="window.close()" style="background:#64748b;">✖ Fechar</button>
+  ${personalizar ? `<p style="font-size:10pt;color:#666;margin-top:10px;">${paginas.length} páginas — uma por aluno</p>` : ''}
 </div>
 
-<!-- CABEÇALHO INSTITUCIONAL -->
-<div class="cabecalho">
-  <img src="${brasaoPath}" alt="Brasão Anchieta" class="brasao"
-       onerror="this.src='img/SIG.png'">
-  <div class="titulo">
-    <h1>Colégio Cívico-Militar Anchieta</h1>
-    <p>Secretaria de Estado da Educação — SEED/PR</p>
-    <p>Núcleo Regional de Educação de Umuarama</p>
-  </div>
-  <div></div>
-</div>
-
-<!-- DADOS DA AVALIAÇÃO -->
-<div class="info-box">
-  <div class="linha">
-    <div><strong>Disciplina:</strong> ${disciplina}</div>
-    <div><strong>Série/Turma:</strong> ${turma}</div>
-    <div><strong>Trimestre:</strong> ${trimestre}</div>
-  </div>
-  <div class="linha">
-    <div><strong>Professor(a):</strong> ${professorNome}</div>
-    <div><strong>Data:</strong> ${dataFormatada}</div>
-    <div><strong>Valor:</strong> ${valorProva || '___'}</div>
-  </div>
-</div>
-
-<!-- IDENTIFICAÇÃO DO ALUNO -->
-<div class="aluno-box">
-  <div class="campo">
-    <strong>Aluno(a):</strong>
-    <span class="linha-assinatura" style="min-width: 300px;"></span>
-  </div>
-  <div class="campo">
-    <strong>Nº:</strong>
-    <span class="linha-assinatura" style="min-width: 60px;"></span>
-  </div>
-  <div class="campo">
-    <strong>Nota:</strong>
-    <span class="linha-assinatura" style="min-width: 80px;"></span>
-  </div>
-</div>
-
-<!-- CONTEÚDO -->
-<div class="conteudo">
-  ${conteudoHTML || '<p><em>(Nenhuma questão cadastrada)</em></p>'}
-</div>
-
-<!-- RODAPÉ -->
-<div class="rodape">
-  Avaliação elaborada pelo(a) professor(a) ${professorNome} — ${disciplina} — ${turma} — ${trimestre} de 2026<br>
-  Colégio Cívico-Militar Anchieta — Cruzeiro do Oeste/PR
-</div>
+${paginasHTML}
 
 </body>
 </html>`;
 
-  const win = window.open('', '_blank', 'width=900,height=1000');
-  if (!win) {
-    return toast('Permita pop-ups para visualizar a prévia.', 'erro');
-  }
-  win.document.write(html);
-  win.document.close();
-}
+      const win = window.open('', '_blank', 'width=900,height=1000');
+      if (!win) {
+        return toast('Permita pop-ups para visualizar a prévia.', 'erro');
+      }
+      win.document.write(html);
+      win.document.close();
+    }
   </script>
 </body>
 </html>
