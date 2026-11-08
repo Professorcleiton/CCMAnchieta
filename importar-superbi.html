@@ -9,6 +9,13 @@
   <link rel="manifest" href="manifest.json">
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <style>
+        /* 🆕 FORÇA A ROLAGEM NA PÁGINA INTEIRA */
+    html, body {
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+      height: auto !important;
+      min-height: 100% !important;
+    }
     :root {
       --azul: #005088;
       --verde: #16a34a;
@@ -153,6 +160,16 @@
     @media (max-width: 600px) {
       .topbar h1 { font-size: .9rem; }
       .dropzone { padding: 1.5rem 1rem; }
+    }
+        /* 🆕 GARANTE QUE A TABELA DE RESULTADOS NÃO ESTEJA TRAVADA */
+    .resultado {
+      max-height: none !important;
+      overflow: visible !important;
+    }
+    .tabela-wrap {
+      max-height: none !important;
+      overflow-x: auto !important;
+      overflow-y: visible !important;
     }
   </style>
 </head>
