@@ -9,7 +9,7 @@
   <link rel="manifest" href="manifest.json">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <style>
-    /* 🆕 1. FORÇA ROLAGEM NA PÁGINA INTEIRA (ignora regras do style.css) */
+    /* 1. FORÇA ROLAGEM NA PÁGINA INTEIRA */
     html, body {
       overflow-y: auto !important;
       overflow-x: hidden !important;
@@ -42,6 +42,7 @@
       color: var(--texto);
       padding-bottom: 2rem;
     }
+    
     .topbar {
       background: var(--azul);
       color: #fff;
@@ -60,19 +61,35 @@
       background: rgba(255,255,255,.15); border: none; color: #fff;
       padding: .4rem .7rem; border-radius: 8px; cursor: pointer;
     }
+    
     .painel-docente { max-width: 1200px; margin: 0 auto; padding: 1.2rem; }
+    
+    /* 🆕 FORÇA BRUTAL: Tira qualquer fundo azul de elementos soltos no meio da página */
+    .painel-docente > div, 
+    .painel-docente > section,
+    .tabela-monitoramento, 
+    .historico {
+      background-color: var(--bg-card) !important;
+      background-image: none !important;
+      border: none !important;
+      box-shadow: 0 2px 6px rgba(0,0,0,.06) !important;
+    }
+
     .aviso {
-      background: #fef3c7; border-left: 5px solid var(--dourado);
+      background: #fef3c7 !important; 
+      border-left: 5px solid var(--dourado) !important;
       padding: .8rem 1rem; border-radius: 8px; font-size: .85rem;
       color: #78350f; margin-bottom: 1rem;
       display: flex; align-items: flex-start; gap: .6rem;
     }
-    body.dark .aviso { background: #422006; color: #fde68a; }
+    body.dark .aviso { background: #422006 !important; color: #fde68a; }
+    
     .filtros { display: flex; gap: .6rem; flex-wrap: wrap; margin-bottom: 1rem; }
     .filtros select {
       padding: .5rem .7rem; border-radius: 8px; border: 1px solid var(--borda);
       background: var(--bg-card); color: var(--texto); font-size: .9rem;
     }
+    
     .cards-resumo {
       display: grid; grid-template-columns: repeat(4, 1fr);
       gap: 1rem; margin-bottom: 1.5rem;
@@ -96,64 +113,52 @@
 
     /* Tabela */
     .tabela-monitoramento {
-      background: var(--bg-card); border-radius: 12px; padding: 1rem;
-      box-shadow: 0 2px 6px rgba(0,0,0,.06); margin-bottom: 1.5rem;
+      border-radius: 12px; padding: 1rem;
+      margin-bottom: 1.5rem;
     }
     .tabela-monitoramento h2 {
-      font-size: 1rem; margin-bottom: .8rem; color: var(--azul);
+      font-size: 1rem; margin-bottom: .8rem; color: var(--azul) !important;
     }
-    body.dark .tabela-monitoramento h2 { color: var(--dourado); }
+    body.dark .tabela-monitoramento h2 { color: var(--dourado) !important; }
     
-    /* 🆕 2. Tabela com display block para não bugar as linhas */
-    .tabela-monitoramento table { 
-      width: 100%; 
-      border-collapse: collapse; 
-      min-width: 640px; 
-    }
-
-    /* 🆕 3. FORÇA BRUTA CONTRA A FAIXA AZUL */
+    .tabela-monitoramento table { width: 100%; border-collapse: collapse; min-width: 640px; }
     .tabela-monitoramento th, .tabela-monitoramento td {
       padding: .6rem .5rem; text-align: left; font-size: .88rem;
       border-bottom: 1px solid var(--borda);
-      background-color: var(--bg-card) !important; /* Fundo branco forçado */
+      background-color: var(--bg-card) !important;
+      background-image: none !important;
       box-shadow: none !important;
       animation: none !important;
       transition: none !important;
     }
     .tabela-monitoramento th {
-      background-color: var(--azul) !important; 
-      color: #fff !important; 
-      font-weight: 600;
+      background-color: var(--azul) !important; color: #fff !important; font-weight: 600;
     }
-    body.dark .tabela-monitoramento th {
-      background-color: #0f172a !important;
-    }
-    
-    /* Hover cinza bem clarinho */
-    .tabela-monitoramento tr:hover td { 
-      background-color: rgba(0,80,136,.05) !important; 
-    }
-    body.dark .tabela-monitoramento tr:hover td { 
-      background-color: rgba(234,179,8,.05) !important; 
-    }
+    body.dark .tabela-monitoramento th { background-color: #0f172a !important; }
+    .tabela-monitoramento tr:hover td { background-color: rgba(0,80,136,.05) !important; }
+    body.dark .tabela-monitoramento tr:hover td { background-color: rgba(234,179,8,.05) !important; }
 
     .status-badge {
       display: inline-block; padding: .2rem .6rem; border-radius: 999px;
       font-size: .75rem; font-weight: 600; color: #fff;
     }
-    .status-verde { background: var(--verde); }
-    .status-amarelo { background: var(--amarelo); color: #000; }
-    .status-vermelho { background: var(--vermelho); }
+    .status-verde { background: var(--verde) !important; }
+    .status-amarelo { background: var(--amarelo) !important; color: #000; }
+    .status-vermelho { background: var(--vermelho) !important; }
     .icone-universal { color: var(--azul); margin-left: .3rem; font-size: .8rem; }
     body.dark .icone-universal { color: #93c5fd; }
 
+    /* Gráfico */
     .historico {
-      background: var(--bg-card); border-radius: 12px; padding: 1rem;
-      box-shadow: 0 2px 6px rgba(0,0,0,.06); margin-bottom: 1.5rem;
+      border-radius: 12px; padding: 1rem;
+      margin-bottom: 1.5rem;
     }
-    .historico h2 { font-size: 1rem; margin-bottom: .8rem; color: var(--azul); }
-    body.dark .historico h2 { color: var(--dourado); }
-    .historico canvas { max-height: 320px; }
+    .historico h2 { font-size: 1rem; margin-bottom: .8rem; color: var(--azul) !important; }
+    body.dark .historico h2 { color: var(--dourado) !important; }
+    #grafico-historico {
+      background: transparent !important;
+      max-height: 320px;
+    }
 
     .toast {
       position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
@@ -163,25 +168,15 @@
     }
     .toast.ativo { opacity: 1; }
 
-    /* Botão Voltar normal no fluxo */
     .footer-voltar-siga {
-      display: inline-flex;
-      align-items: center;
-      gap: .5rem;
-      background: var(--azul);
-      color: #fff;
-      padding: .8rem 1.5rem;
-      border-radius: 8px;
-      text-decoration: none;
-      font-weight: bold;
-      font-size: .9rem;
-      transition: background .2s;
+      display: inline-flex; align-items: center; gap: .5rem;
+      background: var(--azul); color: #fff; padding: .8rem 1.5rem;
+      border-radius: 8px; text-decoration: none; font-weight: bold;
+      font-size: .9rem; transition: background .2s;
     }
     .footer-voltar-siga:hover { background: #003d66; }
 
-    @media (max-width: 900px) {
-      .cards-resumo { grid-template-columns: repeat(2, 1fr); }
-    }
+    @media (max-width: 900px) { .cards-resumo { grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 600px) {
       .cards-resumo { grid-template-columns: 1fr 1fr; }
       .card .num { font-size: 1.5rem; }
@@ -209,7 +204,7 @@
     </div>
 
     <!-- BOTÃO NOVA AVALIAÇÃO -->
-    <section style="background: linear-gradient(135deg, #005088 0%, #003d66 100%); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; box-shadow: 0 4px 12px rgba(0,80,136,.25);">
+    <section style="background: linear-gradient(135deg, #005088 0%, #003d66 100%) !important; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; box-shadow: 0 4px 12px rgba(0,80,136,.25);">
       <div style="color: #fff; flex: 1; min-width: 240px;">
         <h2 style="margin: 0 0 .3rem; font-size: 1.2rem; color: #fff;">
           <i class="fas fa-file-pen"></i> Criar Avaliação
@@ -230,7 +225,7 @@
       </a>
     </section>
 
-    <section class="filtros">
+    <section class="filtros" style="background: transparent !important; box-shadow: none !important;">
       <select id="filtro-plataforma">
         <option value="">Todas as plataformas</option>
         <option value="Matific">Matific</option>
@@ -295,13 +290,13 @@
       </table>
     </section>
 
-    <section class="historico">
+    <!-- 🆕 Gráfico isolado -->
+    <section class="historico" style="background: transparent !important; box-shadow: none !important; padding: 0 !important;">
       <h2><i class="fas fa-chart-bar"></i> Histórico das últimas 4 semanas</h2>
       <canvas id="grafico-historico"></canvas>
     </section>
 
-    <!-- Botão de voltar normal -->
-    <div style="text-align: center; margin-top: 1rem; margin-bottom: 2rem;">
+    <div style="text-align: center; margin-top: 1rem; margin-bottom: 2rem; background: transparent !important;">
       <a href="restrito.html" class="footer-voltar-siga">
         <i class="fas fa-arrow-left"></i> Voltar ao SIGA
       </a>
@@ -443,6 +438,13 @@
       const semanas = historico?.semanas || ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'];
       const valores = historico?.valores || [0, 0, 0, 0];
       if (grafico) grafico.destroy();
+      
+      // Se todos os valores forem 0, esconde o gráfico para não ficar vazio com cara de erro
+      const todosZeros = valores.every(v => v === 0);
+      document.getElementById('grafico-historico').style.display = todosZeros ? 'none' : 'block';
+
+      if (todosZeros) return;
+
       grafico = new Chart(ctx, {
         type: 'bar',
         data: {
