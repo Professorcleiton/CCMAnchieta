@@ -232,38 +232,50 @@
       document.getElementById('add-disciplina').value = (disc && disc !== 'Todas') ? disc : '';
     }
 
-    function adicionarLinha() {
-      const profEmail = document.getElementById('add-professor').value;
-      const profNome = document.getElementById('add-professor').options[document.getElementById('add-professor').selectedIndex].text;
-      const turma = document.getElementById('add-turma').value;
+       function adicionarLinha() {
+      const profEmail = document.getElementById('add-professor') ? document.getElementById('add-professor').value : '';
+      let turmaDigitada = document.getElementById('add-turma').value.trim().toUpperCase(); // Pega o que foi digitado/selecionado
       const plataforma = document.getElementById('add-plataforma').value;
       const disciplina = document.getElementById('add-disciplina').value;
       let indiceStr = document.getElementById('add-indice').value.replace(',', '.');
       const indice = parseFloat(indiceStr);
 
-      if (!profEmail || !turma || !plataforma || !disciplina || isNaN(indice)) {
+      if (!turmaDigitada || !plataforma || !disciplina || isNaN(indice)) {
         alert('Preencha todos os campos corretamente.');
         return;
       }
 
-      listaDeLancamentos.push({ profEmail, profNome, turma, plataforma, disciplina, indice });
+      // 🆕 TRADUTOR DE TURMA (Padroniza para 6A, 7B, etc.)
+      let turmaFormatada = turmaDigitada;
       
-      // Atualiza tabela visual
-      const tbody = document.getElementById('corpo-tabela');
-      if (listaDeLancamentos.length === 1) tbody.innerHTML = '';
-      
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${profNome}</td>
-        <td>${turma}</td>
-        <td>${plataforma}</td>
-        <td>${disciplina}</td>
-        <td><strong>${indice.toFixed(3)}</strong></td>
-        <td><button class="linha-remover" onclick="remover(${listaDeLancamentos.length - 1})"><i class="fas fa-trash"></i></button></td>
-      `;
-      tbody.appendChild(tr);
+      // Se a pessoa digitar "6º ANO A" ou "6 ANO A"
+      const matchAno = turmaDigitada.match(/(\d+)[º°]?\s*(?:ANO|SÉRIE)?\s*([A-D])/i);
+      if (matchAno) {
+        turmaFormatada = matchAno[1] + matchAno[2].toUpperCase(); // Vira "6A"
+      } 
+      // Se for NEM, FD ou AGRO
+      else if (turmaDigitada.includes('NEM')) {
+        turmaFormatada = turmaDigitada.replace(/[^0-9]/g, '') + 'NEM';
+      }
+      else if (turmaDigitada.includes('FD')) {
+        turmaFormatada = turmaDigitada.replace(/[^0-9]/g, '') + 'FD';
+      }
+      else if (turmaDigitada.includes('AGRO')) {
+        turmaFormatada = '1AGRO';
+      }
 
+      // Adiciona na lista (agora com a turma padronizada)
+      listaDeLancamentos.push({ 
+        profEmail: profEmail, 
+        turma: turmaFormatada, // 🆕 Salva "6A" em vez de "6º Ano A"
+        plataforma, 
+        disciplina, 
+        indice 
+      });
+      
+      renderizarTabela();
       document.getElementById('add-indice').value = '';
+      document.getElementById('add-indice').focus();
     }
 
     function remover(index) {
