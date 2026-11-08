@@ -3,19 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Importar Super BI — SIGA CCM Anchieta</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Lançar Índices — Super BI</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="manifest" href="manifest.json">
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <style>
-        /* 🆕 FORÇA A ROLAGEM NA PÁGINA INTEIRA */
-    html, body {
-      overflow-y: auto !important;
-      overflow-x: hidden !important;
-      height: auto !important;
-      min-height: 100% !important;
-    }
     :root {
       --azul: #005088;
       --verde: #16a34a;
@@ -33,6 +23,10 @@
       color: var(--texto);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    /* Força rolagem (para não bugar com o style.css) */
+    html, body { overflow-y: auto !important; height: auto !important; }
+    
     body {
       font-family: 'Segoe UI', Roboto, sans-serif;
       background: #f3f4f6;
@@ -41,204 +35,160 @@
     }
 
     .topbar {
-      background: var(--azul);
-      color: #fff;
-      padding: 0.9rem 1rem;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      box-shadow: 0 2px 8px rgba(0,0,0,.15);
+      background: var(--azul); color: #fff; padding: 0.9rem 1rem;
+      display: flex; align-items: center; gap: 1rem;
+      position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,.15);
     }
-    .topbar h1 { font-size: 1.1rem; flex: 1; }
-    .topbar a {
-      color: #fff; text-decoration: none; background: rgba(255,255,255,.15);
-      padding: .4rem .8rem; border-radius: 8px; font-size: .85rem;
-    }
-    .topbar .btn-dark {
-      background: rgba(255,255,255,.15); border: none; color: #fff;
-      padding: .4rem .7rem; border-radius: 8px; cursor: pointer;
-    }
+    .topbar h1 { font-size: 1.1rem; flex: 1; margin: 0; }
+    .topbar a { color: #fff; text-decoration: none; background: rgba(255,255,255,.15); padding: .4rem .8rem; border-radius: 8px; font-size: .85rem; }
+    .topbar .btn-dark { background: rgba(255,255,255,.15); border: none; color: #fff; padding: .4rem .7rem; border-radius: 8px; cursor: pointer; }
 
-    .container { max-width: 1200px; margin: 0 auto; padding: 1.2rem; }
+    .container { max-width: 900px; margin: 0 auto; padding: 1.2rem; }
 
     .aviso {
-      background: #fef3c7;
-      border-left: 5px solid var(--amarelo);
-      padding: .9rem 1rem;
-      border-radius: 8px;
-      font-size: .85rem;
-      color: #78350f;
-      margin-bottom: 1rem;
-      display: flex;
-      align-items: flex-start;
-      gap: .6rem;
+      background: #e0f2fe; border-left: 5px solid var(--azul);
+      padding: .9rem 1rem; border-radius: 8px; font-size: .85rem;
+      color: #0369a1; margin-bottom: 1.5rem; display: flex; align-items: flex-start; gap: .6rem;
     }
-    body.dark .aviso { background: #422006; color: #fde68a; }
+    body.dark .aviso { background: #0c4a6e; color: #bae6fd; }
 
-    .dropzone {
-      background: var(--bg-card);
-      border: 3px dashed var(--borda);
-      border-radius: 12px;
-      padding: 2.5rem 1.5rem;
-      text-align: center;
-      cursor: pointer;
-      transition: all .2s;
-      margin-bottom: 1.5rem;
-    }
-    .dropzone:hover, .dropzone.ativo {
-      border-color: var(--azul);
-      background: rgba(0,80,136,.05);
-    }
-    .dropzone i { font-size: 2.5rem; color: var(--azul); margin-bottom: .8rem; }
-    .dropzone p { font-size: .95rem; color: var(--texto); }
-    .dropzone small { display: block; margin-top: .5rem; color: #64748b; font-size: .8rem; }
-    .dropzone img {
-      max-width: 100%; max-height: 320px; margin-top: 1rem;
-      border-radius: 8px; border: 1px solid var(--borda);
-    }
+    .card { background: var(--bg-card); border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 6px rgba(0,0,0,.06); margin-bottom: 1.5rem; }
+    
+    .form-row { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr auto; gap: 1rem; align-items: end; }
+    @media (max-width: 768px) { .form-row { grid-template-columns: 1fr; } }
+    
+    .form-group { display: flex; flex-direction: column; }
+    label { font-weight: 600; font-size: .85rem; margin-bottom: .3rem; }
+    select, input { padding: .6rem; border: 1px solid var(--borda); border-radius: 6px; background: var(--bg-card); color: var(--texto); font-size: .9rem; }
+    
+    .btn-add { background: var(--azul); color: #fff; border: none; padding: .6rem 1.2rem; border-radius: 6px; font-weight: bold; cursor: pointer; height: 40px; display: flex; align-items: center; gap: .5rem; }
+    .btn-add:hover { background: #003d66; }
 
-    .progresso {
-      background: var(--bg-card); border-radius: 8px; padding: 1rem;
-      margin-bottom: 1rem; display: none;
-    }
-    .progresso.ativo { display: block; }
-    .progresso p { font-size: .85rem; margin-bottom: .5rem; }
-    .progresso .barra {
-      background: var(--borda); height: 8px; border-radius: 4px; overflow: hidden;
-    }
-    .progresso .barra div {
-      background: var(--azul); height: 100%; width: 0%; transition: width .3s;
-    }
+    .tabela-wrap { overflow-x: auto; margin-bottom: 1.5rem; }
+    table { width: 100%; border-collapse: collapse; min-width: 700px; font-size: .9rem; }
+    th, td { padding: .7rem; border-bottom: 1px solid var(--borda); text-align: left; }
+    th { background: #f8fafc; color: var(--azul); font-weight: 600; }
+    body.dark th { background: #1e293b; }
+    
+    .linha-remover { background: transparent; border: none; color: var(--vermelho); cursor: pointer; font-size: 1.1rem; }
 
-    .status {
-      padding: 1rem; border-radius: 8px; margin-bottom: 1rem;
-      font-size: .9rem; display: none;
-    }
+    .acoes { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1rem; }
+    .btn { padding: .8rem 1.5rem; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; font-size: .95rem; display: flex; align-items: center; gap: .5rem; }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-salvar { background: var(--verde); color: #fff; }
+    .btn-salvar:hover { background: #15803d; }
+    .btn-limpar { background: #e2e8f0; color: #475569; }
+    
+    .status { padding: 1rem; border-radius: 8px; margin-bottom: 1rem; font-size: .9rem; display: none; }
     .status.ativo { display: block; }
     .status.sucesso { background: #dcfce7; color: #166534; border-left: 5px solid var(--verde); }
     .status.erro { background: #fee2e2; color: #991b1b; border-left: 5px solid var(--vermelho); }
-    .status.info { background: #dbeafe; color: #1e40af; border-left: 5px solid var(--azul); }
 
-    .resultado {
-      background: var(--bg-card); border-radius: 12px; padding: 1rem;
-      box-shadow: 0 2px 6px rgba(0,0,0,.06); display: none;
-      margin-bottom: 1.5rem;
-    }
-    .resultado.ativo { display: block; }
-    .resultado h2 { font-size: 1rem; color: var(--azul); margin-bottom: .5rem; }
-    body.dark .resultado h2 { color: #93c5fd; }
-    .resultado p.instrucao { font-size: .85rem; color: #64748b; margin-bottom: 1rem; }
-
-    .tabela-wrap { overflow-x: auto; margin-bottom: 1rem; }
-    table { width: 100%; border-collapse: collapse; min-width: 900px; font-size: .85rem; }
-    th, td { padding: .5rem; border: 1px solid var(--borda); text-align: left; }
-    th { background: var(--azul); color: #fff; font-weight: 600; position: sticky; top: 0; }
-    td input, td select {
-      width: 100%; padding: .4rem; border: 1px solid var(--borda);
-      border-radius: 4px; font-size: .85rem; background: var(--bg-card); color: var(--texto);
-    }
-    td input.valor-campo { max-width: 90px; }
-    .linha-remover {
-      background: transparent; border: none; color: var(--vermelho);
-      cursor: pointer; font-size: 1rem;
-    }
-
-    .acoes { display: flex; gap: .6rem; flex-wrap: wrap; justify-content: flex-end; }
-    .btn {
-      padding: .7rem 1.2rem; border-radius: 8px; border: none;
-      font-weight: 600; cursor: pointer; font-size: .9rem;
-      display: inline-flex; align-items: center; gap: .5rem;
-    }
-    .btn:disabled { opacity: .5; cursor: not-allowed; }
-    .btn-primario { background: var(--azul); color: #fff; }
-    .btn-sucesso { background: var(--verde); color: #fff; }
-    .btn-secundario { background: var(--borda); color: var(--texto); }
-
-    @media (max-width: 600px) {
-      .topbar h1 { font-size: .9rem; }
-      .dropzone { padding: 1.5rem 1rem; }
-    }
-        /* 🆕 GARANTE QUE A TABELA DE RESULTADOS NÃO ESTEJA TRAVADA */
-    .resultado {
-      max-height: none !important;
-      overflow: visible !important;
-    }
-    .tabela-wrap {
-      max-height: none !important;
-      overflow-x: auto !important;
-      overflow-y: visible !important;
-    }
+    .superbi-btn { background: #dc2626; color: white; text-decoration: none; padding: .8rem 1.2rem; border-radius: 8px; font-weight: bold; display: inline-flex; align-items: center; gap: .5rem; margin-bottom: 1rem; }
+    .superbi-btn:hover { background: #b91c1c; }
   </style>
 </head>
 <body>
 
   <header class="topbar">
-    <h1><i class="fas fa-camera"></i> Importar Super BI</h1>
-    <a href="restrito.html"><i class="fas fa-arrow-left"></i> Voltar</a>
+    <h1><i class="fas fa-chart-line"></i> Lançar Índices do BI</h1>
+    <a href="painel-docente.html"><i class="fas fa-arrow-left"></i> Voltar</a>
     <button class="btn-dark" id="btn-tema" title="Alternar tema"><i class="fas fa-moon"></i></button>
   </header>
 
   <main class="container">
 
+    <a href="https://superbi.pr.gov.br/" target="_blank" class="superbi-btn">
+      <i class="fas fa-external-link-alt"></i> Abrir Super BI em outra aba
+    </a>
+
     <div class="aviso">
       <i class="fas fa-info-circle" style="margin-top:.15rem;"></i>
       <div>
-        <strong>Como funciona:</strong>
-        Tire um print da tabela do Super BI (só a parte com as turmas e os índices), suba aqui. O sistema lê os valores por OCR e você <strong>confere e ajusta</strong> antes de gravar na planilha.
-        Os valores são <strong>índices</strong> (0 a 1). <strong>Desafio = Quizizz</strong>.
+        <strong>Como usar:</strong> Abra o Super BI acima, olhe os índices da sua turma, e preencha a tabela abaixo. 
+        O sistema salva os dados com a <strong>data de hoje</strong> automaticamente.
       </div>
     </div>
 
-    <div class="dropzone" id="dropzone">
-      <i class="fas fa-cloud-upload-alt"></i>
-      <p>Clique aqui ou arraste o print do Super BI</p>
-      <small>Formatos aceitos: PNG, JPG, JPEG. Prefira prints nítidos e com a tabela inteira visível.</small>
-      <input type="file" id="fileInput" accept="image/*" hidden>
-      <img id="preview" style="display:none;" alt="Pré-visualização do print">
+    <!-- Formulário de Adição Rápida -->
+    <div class="card">
+      <h2 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--azul);">Adicionar Lançamento</h2>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label>Plataforma:</label>
+          <select id="add-plataforma" onchange="filtrarOpcoes()">
+            <option value="">Selecione...</option>
+            <option value="Matific" data-disciplina="Matemática">Matific (Matemática)</option>
+            <option value="Khan Academy" data-disciplina="Matemática">Khan Academy (Matemática)</option>
+            <option value="Redação Paraná" data-disciplina="Português">Redação Paraná (Português)</option>
+            <option value="Leia Paraná" data-disciplina="Todas">Leia Paraná (Todas)</option>
+            <option value="Quizizz" data-disciplina="Todas">Quizizz / Desafio (Todas)</option>
+            <option value="Inglês Paraná" data-disciplina="Inglês">Inglês Paraná (Inglês)</option>
+            <option value="Alura" data-disciplina="Programação">Alura (Programação)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Disciplina:</label>
+          <select id="add-disciplina" onchange="filtrarTurmas()">
+            <option value="">Selecione...</option>
+            <option value="Matemática">Matemática</option>
+            <option value="Português">Português</option>
+            <option value="Ciências">Ciências</option>
+            <option value="História">História</option>
+            <option value="Geografia">Geografia</option>
+            <option value="Inglês">Inglês</option>
+            <option value="Arte">Arte</option>
+            <option value="Educação Física">Educação Física</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Turma:</label>
+          <select id="add-turma">
+            <option value="">Aguardando disciplina...</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Índice (0 a 1):</label>
+          <input type="number" id="add-indice" step="0.01" min="0" max="1" placeholder="Ex: 0.85">
+        </div>
+
+        <button class="btn-add" onclick="adicionarLinha()">
+          <i class="fas fa-plus"></i> Add
+        </button>
+      </div>
     </div>
 
-    <div class="progresso" id="progresso">
-      <p id="progresso-texto">Processando...</p>
-      <div class="barra"><div id="progresso-barra"></div></div>
-    </div>
-
-    <div class="status" id="status"></div>
-
-    <div class="resultado" id="resultado">
-      <h2><i class="fas fa-check-circle"></i> Confira os dados lidos</h2>
-      <p class="instrucao">
-        O OCR pode errar. Corrija os campos abaixo se necessário e depois clique em <strong>Gravar na planilha</strong>.
-        A data da semana é preenchida automaticamente (segunda-feira da semana atual).
-      </p>
-
+    <!-- Tabela de Lançamentos -->
+    <div class="card" style="padding: 1rem;">
+      <div class="status" id="status"></div>
+      
       <div class="tabela-wrap">
-        <table id="tabela">
+        <table id="tabela-lancamentos">
           <thead>
             <tr>
-              <th>Turma</th>
-              <th>Disciplina</th>
               <th>Plataforma</th>
+              <th>Disciplina</th>
+              <th>Turma</th>
               <th>Índice</th>
-              <th>Professor (opcional)</th>
-              <th></th>
+              <th style="width: 50px;"></th>
             </tr>
           </thead>
-          <tbody id="tabela-corpo"></tbody>
+          <tbody id="corpo-tabela">
+            <tr><td colspan="5" style="text-align:center; color:#94a3b8; padding: 2rem;">Nenhum lançamento adicionado.</td></tr>
+          </tbody>
         </table>
       </div>
 
       <div class="acoes">
-        <button class="btn btn-secundario" id="btnAdicionarLinha">
-          <i class="fas fa-plus"></i> Adicionar linha
-        </button>
-        <button class="btn btn-secundario" id="btnLimpar">
+        <button class="btn btn-limpar" onclick="limparTabela()">
           <i class="fas fa-trash"></i> Limpar
         </button>
-        <button class="btn btn-sucesso" id="btnGravar">
-          <i class="fas fa-save"></i> Gravar na planilha
+        <button class="btn btn-salvar" id="btnSalvar" onclick="salvarNaPlanilha()">
+          <i class="fas fa-cloud-upload-alt"></i> Salvar na Planilha
         </button>
       </div>
     </div>
@@ -247,259 +197,192 @@
 
   <script>
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
+    
+    let usuarioLogado = null;
+    let todasAsTurmasDoProfessor = [];
+    let listaDeLancamentos = []; // Armazena o que foi adicionado na tabela
 
-    // ===== TEMA =====
-    const btnTema = document.getElementById('btn-tema');
-    if (localStorage.getItem('tema') === 'dark') document.body.classList.add('dark');
-    btnTema.addEventListener('click', () => {
-      document.body.classList.toggle('dark');
-      const dark = document.body.classList.contains('dark');
-      localStorage.setItem('tema', dark ? 'dark' : 'light');
-      btnTema.innerHTML = dark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
-    });
+    document.addEventListener('DOMContentLoaded', async () => {
+      // 1. Carrega sessão
+      const sessaoRaw = localStorage.getItem('sgi_ccma_session') || sessionStorage.getItem('sgi_ccma_session');
+      if (!sessaoRaw) { alert('Sessão não encontrada.'); window.location.href = 'index.html'; return; }
+      usuarioLogado = JSON.parse(sessaoRaw);
 
-    // ===== REFERÊNCIAS =====
-    const dropzone = document.getElementById('dropzone');
-    const fileInput = document.getElementById('fileInput');
-    const preview = document.getElementById('preview');
-    const progresso = document.getElementById('progresso');
-    const progressoTexto = document.getElementById('progresso-texto');
-    const progressoBarra = document.getElementById('progresso-barra');
-    const status = document.getElementById('status');
-    const resultado = document.getElementById('resultado');
-    const tabelaCorpo = document.getElementById('tabela-corpo');
-
-    let arquivoSelecionado = null;
-
-    // ===== UPLOAD =====
-    dropzone.addEventListener('click', () => fileInput.click());
-    dropzone.addEventListener('dragover', e => {
-      e.preventDefault();
-      dropzone.classList.add('ativo');
-    });
-    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('ativo'));
-    dropzone.addEventListener('drop', e => {
-      e.preventDefault();
-      dropzone.classList.remove('ativo');
-      if (e.dataTransfer.files.length) {
-        fileInput.files = e.dataTransfer.files;
-        carregarArquivo();
-      }
-    });
-    fileInput.addEventListener('change', carregarArquivo);
-
-    function carregarArquivo() {
-      const file = fileInput.files[0];
-      if (!file) return;
-      arquivoSelecionado = file;
-      const reader = new FileReader();
-      reader.onload = e => {
-        preview.src = e.target.result;
-        preview.style.display = 'block';
-        processarImagem();
-      };
-      reader.readAsDataURL(file);
-    }
-
-    // ===== OCR =====
-    async function processarImagem() {
-      if (!arquivoSelecionado) return;
-
-      progresso.classList.add('ativo');
-      status.classList.remove('ativo');
-      resultado.classList.remove('ativo');
-      progressoTexto.textContent = 'Iniciando OCR...';
-      progressoBarra.style.width = '0%';
-
-      try {
-        const { data: { text } } = await Tesseract.recognize(arquivoSelecionado, 'por', {
-          logger: m => {
-            if (m.status === 'recognizing text') {
-              const pct = Math.round(m.progress * 100);
-              progressoTexto.textContent = `Lendo o print... ${pct}%`;
-              progressoBarra.style.width = pct + '%';
-            }
-          }
-        });
-
-        progressoTexto.textContent = 'Processando dados...';
-        const linhas = parsearTexto(text);
-
-        progresso.classList.remove('ativo');
-
-        if (linhas.length === 0) {
-          mostrarStatus('erro', 'Não consegui identificar nenhuma linha de dados no print. Tente um print mais nítido, com a tabela inteira visível.');
-          return;
-        }
-
-        renderizarTabela(linhas);
-        resultado.classList.add('ativo');
-        mostrarStatus('info', `Foram identificadas ${linhas.length} linha(s). Confira e edite antes de gravar.`);
-      } catch (e) {
-        progresso.classList.remove('ativo');
-        mostrarStatus('erro', 'Erro no OCR: ' + e.message);
-      }
-    }
-
-    // ===== PARSER =====
-    // Colunas esperadas na ordem em que aparecem no Super BI
-    const COLUNAS_ESPERADAS = [
-      { disciplina: 'Redação',      plataforma: 'Redação' },
-      { disciplina: 'Inglês',       plataforma: 'Inglês Paraná' },
-      { disciplina: 'Desafio',      plataforma: 'Quizizz' },
-      { disciplina: 'Leia',         plataforma: 'Leia' },
-      { disciplina: 'Programação',  plataforma: 'Alura' },
-      { disciplina: 'Matemática',   plataforma: 'Matific' },
-      { disciplina: 'Matemática',   plataforma: 'Khan' }
-    ];
-
-    function parsearTexto(texto) {
-      // Normaliza quebras de linha
-      const linhas = texto
-        .split('\n')
-        .map(l => l.replace(/\s+/g, ' ').trim())
-        .filter(l => l.length > 0);
-
-      const resultado = [];
-
-      for (const linha of linhas) {
-        // Detecta o padrão de turma: "6º Série A Manhã - 2624496"
-        const matchTurma = linha.match(/(\d+[º°]?\s*(?:Série|Ano)\s*[A-Z])\s*(Manhã|Tarde)?/i);
-        if (!matchTurma) continue;
-
-        const turma = matchTurma[1].trim();
-
-        // Extrai todos os números com decimais
-        const numerosStr = linha.match(/\d+[.,]\d+/g) || [];
-        const numeros = numerosStr.map(n => parseFloat(n.replace(',', '.')));
-
-        // Filtra valores que fazem sentido como índice (0 a 1.5)
-        const valoresValidos = numeros.filter(n => !isNaN(n) && n >= 0 && n <= 1.5);
-
-        // Associa cada valor a uma coluna esperada
-        COLUNAS_ESPERADAS.forEach((col, i) => {
-          if (valoresValidos[i] === undefined) return;
-          resultado.push({
-            turma: turma,
-            disciplina: col.disciplina,
-            plataforma: col.plataforma,
-            valor: valoresValidos[i],
-            professor: ''
-          });
-        });
-      }
-
-      return resultado;
-    }
-
-    // ===== RENDERIZAÇÃO DA TABELA =====
-    function renderizarTabela(linhas) {
-      tabelaCorpo.innerHTML = '';
-      linhas.forEach(l => adicionarLinhaTabela(l));
-    }
-
-    function adicionarLinhaTabela(l = {}) {
-      const tr = document.createElement('tr');
-
-      tr.innerHTML = `
-        <td><input type="text" class="campo-turma" value="${escapeHtml(l.turma || '')}"></td>
-        <td><input type="text" class="campo-disciplina" value="${escapeHtml(l.disciplina || '')}"></td>
-        <td><input type="text" class="campo-plataforma" value="${escapeHtml(l.plataforma || '')}"></td>
-        <td><input type="number" step="0.0001" min="0" max="2" class="campo-valor valor-campo" value="${l.valor ?? ''}"></td>
-        <td><input type="text" class="campo-professor" placeholder="email ou nome (opcional)" value="${escapeHtml(l.professor || '')}"></td>
-        <td style="text-align:center;">
-          <button class="linha-remover" title="Remover linha"><i class="fas fa-trash"></i></button>
-        </td>
-      `;
-
-      tr.querySelector('.linha-remover').addEventListener('click', () => tr.remove());
-      tabelaCorpo.appendChild(tr);
-    }
-
-    document.getElementById('btnAdicionarLinha').addEventListener('click', () => adicionarLinhaTabela());
-    document.getElementById('btnLimpar').addEventListener('click', () => {
-      if (confirm('Limpar todas as linhas da tabela?')) {
-        tabelaCorpo.innerHTML = '';
-        resultado.classList.remove('ativo');
-        status.classList.remove('ativo');
-      }
-    });
-
-    // ===== GRAVAR =====
-    document.getElementById('btnGravar').addEventListener('click', async () => {
-      const linhas = [];
-      document.querySelectorAll('#tabela-corpo tr').forEach(tr => {
-        const turma = tr.querySelector('.campo-turma').value.trim();
-        const disciplina = tr.querySelector('.campo-disciplina').value.trim();
-        const plataforma = tr.querySelector('.campo-plataforma').value.trim();
-        const valor = parseFloat(tr.querySelector('.campo-valor').value);
-        const professor = tr.querySelector('.campo-professor').value.trim();
-
-        if (!turma || !plataforma || isNaN(valor)) return;
-        linhas.push({ turma, disciplina, plataforma, valor, professor });
+      // Tema
+      const btnTema = document.getElementById('btn-tema');
+      if (localStorage.getItem('tema') === 'dark') document.body.classList.add('dark');
+      btnTema.addEventListener('click', () => {
+        document.body.classList.toggle('dark');
+        const dark = document.body.classList.contains('dark');
+        localStorage.setItem('tema', dark ? 'dark' : 'light');
+        btnTema.innerHTML = dark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
       });
 
-      if (linhas.length === 0) {
-        mostrarStatus('erro', 'Nenhuma linha válida para gravar.');
+      // 2. Busca as turmas do professor no banco
+      await carregarTurmasDoProfessor();
+    });
+
+    async function carregarTurmasDoProfessor() {
+      try {
+        const url = APPS_SCRIPT_URL + '?aba=avaliacoes_turmas_professor&email=' + encodeURIComponent(usuarioLogado.email);
+        const resp = await fetch(url);
+        todasAsTurmasDoProfessor = await resp.json();
+        console.log('Turmas carregadas:', todasAsTurmasDoProfessor);
+      } catch (e) {
+        console.error('Erro ao buscar turmas', e);
+      }
+    }
+
+    // 🆕 FILTRO MÁGICO: Quando escolhe a plataforma, já marca a disciplina
+    function filtrarOpcoes() {
+      const selectPlataforma = document.getElementById('add-plataforma');
+      const selectDisciplina = document.getElementById('add-disciplina');
+      
+      const optionSelecionada = selectPlataforma.options[selectPlataforma.selectedIndex];
+      const disciplinaSugerida = optionSelecionada.getAttribute('data-disciplina');
+
+      if (disciplinaSugerida && disciplinaSugerida !== 'Todas') {
+        selectDisciplina.value = disciplinaSugerida;
+      } else if (disciplinaSugerida === 'Todas') {
+        // Se for "Todas" (como Leia), não força a disciplina, deixa o professor escolher
+        selectDisciplina.value = ''; 
+      }
+      
+      filtrarTurmas();
+    }
+
+    // 🆕 FILTRO MÁGICO: Mostra só as turmas que o professor dá aula naquela disciplina
+    function filtrarTurmas() {
+      const selectTurma = document.getElementById('add-turma');
+      selectTurma.innerHTML = '<option value="">Selecione a Turma...</option>';
+      
+      // Aqui simulamos o filtro. Como as turmas vêm do banco, filtramos pelo nome
+      // (Numa versão futura podemos cruzar com a aba Horarios para ser 100% exato)
+      if (todasAsTurmasDoProfessor.length === 0) {
+        selectTurma.innerHTML = '<option value="">Nenhuma turma encontrada</option>';
         return;
       }
 
-      if (!confirm(`Gravar ${linhas.length} lançamento(s) na planilha?\n\nOs valores serão salvos como ÍNDICES (0 a 1).`)) return;
+      todasAsTurmasDoProfessor.forEach(turma => {
+        const opt = document.createElement('option');
+        opt.value = turma;
+        opt.textContent = turma;
+        selectTurma.appendChild(opt);
+      });
+    }
 
-      const btnGravar = document.getElementById('btnGravar');
-      btnGravar.disabled = true;
-      btnGravar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gravando...';
+    // 🆕 ADICIONAR NA TABELA
+    function adicionarLinha() {
+      const plataforma = document.getElementById('add-plataforma').value;
+      const disciplina = document.getElementById('add-disciplina').value;
+      const turma = document.getElementById('add-turma').value;
+      const indice = parseFloat(document.getElementById('add-indice').value);
 
-            try {
-        const sessao = JSON.parse(localStorage.getItem('sgi_ccma_session') || '{}');
-        
-        // Prepara os dados exatamente como o Apps Script espera
-        const payload = {
-          operacao: 'IMPORTAR_LANCAMENTOS',
-          token: sessao.token, // 🆕 Envia o token de segurança
-          lancamentos: linhas.map(l => ({
-             disciplina: l.disciplina,
-             turma: l.turma,
-             plataforma: l.plataforma,
-             valor: l.valor,
-             professor: l.professor || sessao.nome // Se não preencheu, usa o nome de quem está logado
-          }))
-        };
+      if (!plataforma || !disciplina || !turma || isNaN(indice)) {
+        alert('Preencha todos os campos corretamente.');
+        return;
+      }
 
+      // Adiciona na lista (memória)
+      listaDeLancamentos.push({ plataforma, disciplina, turma, indice });
+
+      // Atualiza a tabela visual
+      renderizarTabela();
+
+      // Limpa os campos para o próximo
+      document.getElementById('add-indice').value = '';
+      document.getElementById('add-indice').focus();
+    }
+
+    function renderizarTabela() {
+      const tbody = document.getElementById('corpo-tabela');
+      tbody.innerHTML = '';
+
+      if (listaDeLancamentos.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding: 2rem;">Nenhum lançamento adicionado.</td></tr>';
+        return;
+      }
+
+      listaDeLancamentos.forEach((item, index) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${item.plataforma}</strong></td>
+          <td>${item.disciplina}</td>
+          <td>${item.turma}</td>
+          <td style="color: var(--azul); font-weight: bold;">${item.indice.toFixed(2)}</td>
+          <td><button class="linha-remover" onclick="removerLinha(${index})"><i class="fas fa-trash"></i></button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function removerLinha(index) {
+      listaDeLancamentos.splice(index, 1);
+      renderizarTabela();
+    }
+
+    function limparTabela() {
+      if (confirm('Apagar todos os lançamentos da lista?')) {
+        listaDeLancamentos = [];
+        renderizarTabela();
+      }
+    }
+
+    // 🆕 SALVAR NA PLANILHA (Corrigido)
+    async function salvarNaPlanilha() {
+      if (listaDeLancamentos.length === 0) {
+        alert('Adicione pelo menos um lançamento antes de salvar.');
+        return;
+      }
+
+      const btn = document.getElementById('btnSalvar');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+
+      // Prepara o JSON exatamente como o Apps Script espera
+      const payload = {
+        operacao: 'IMPORTAR_LANCAMENTOS',
+        token: usuarioLogado.token,
+        emailOperador: usuarioLogado.email,
+        lancamentos: listaDeLancamentos.map(l => ({
+          professor: usuarioLogado.email, // Salva o e-mail do professor
+          disciplina: l.disciplina,
+          turma: l.turma,
+          plataforma: l.plataforma,
+          valor: l.indice // O Apps Script lê como 'valor' e salva na planilha
+        }))
+      };
+
+      try {
         const resp = await fetch(APPS_SCRIPT_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'text/plain' }, // Sem no-cors
+          headers: { 'Content-Type': 'text/plain' },
           body: JSON.stringify(payload)
         });
+        
         const result = await resp.json();
 
         if (result.status === 'success') {
-          mostrarStatus('sucesso', `${result.inseridos} lançamento(s) gravado(s) com sucesso!`);
-          tabelaCorpo.innerHTML = '';
-          resultado.classList.remove('ativo');
+          mostrarStatus('sucesso', `✅ ${result.inseridos} lançamento(s) salvo(s) com sucesso!`);
+          listaDeLancamentos = [];
+          renderizarTabela();
         } else {
-          mostrarStatus('erro', 'Erro: ' + (result.message || 'Tente novamente.'));
+          mostrarStatus('erro', '❌ Erro: ' + (result.message || 'Falha ao salvar.'));
         }
       } catch (e) {
-        mostrarStatus('erro', 'Erro de conexão: ' + e.message);
+        console.error(e);
+        mostrarStatus('erro', '❌ Erro de conexão com o servidor.');
       } finally {
-        btnGravar.disabled = false;
-        btnGravar.innerHTML = '<i class="fas fa-save"></i> Gravar na planilha';
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Salvar na Planilha';
       }
-    });
-
-    // ===== HELPERS =====
-    function mostrarStatus(tipo, msg) {
-      status.className = 'status ativo ' + tipo;
-      status.innerHTML = msg;
     }
 
-    function escapeHtml(str) {
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
+    function mostrarStatus(tipo, msg) {
+      const el = document.getElementById('status');
+      el.className = 'status ativo ' + tipo;
+      el.innerHTML = msg;
+      setTimeout(() => { el.classList.remove('ativo'); }, 5000);
     }
   </script>
 </body>
