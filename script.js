@@ -292,6 +292,18 @@ function inicializarPainel() {
     
     const btnAvSec = document.getElementById('btn-avaliacoes-secretaria');
 if (btnAvSec) btnAvSec.style.display = (usuarioLogado.nivel >= 3) ? 'inline-flex' : 'none';
+
+    const btnPainelDocente = document.getElementById('btn-painel-docente');
+if (btnPainelDocente) {
+  const nivel = parseInt(usuarioLogado.nivel) || 0;
+  const setor = (usuarioLogado.setor || '').toLowerCase();
+  // Mostra para professores ou níveis 2+
+  if (nivel >= 2 || setor === 'professores') {
+    btnPainelDocente.style.display = 'flex';
+  } else {
+    btnPainelDocente.style.display = 'none';
+  }
+}
     
     const btnGestao = document.getElementById('btn-abrir-admin');
     if (btnGestao) btnGestao.style.display = (usuarioLogado.nivel >= 4) ? 'inline-flex' : 'none';
