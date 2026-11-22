@@ -19,6 +19,7 @@ Tempo estimado: 15 minutos. A camada foi testada junto com o `Código.gs` atual 
 4. Clique em **+ → Script** mais uma vez, dê o nome `noticias` e cole todo o conteúdo de `backend/noticias.gs`.
 5. E mais um: nome `frequenciometro`, conteúdo de `backend/frequenciometro.gs`.
 6. E outro: nome `horarios`, conteúdo de `backend/horarios.gs` (Gestão de Horários e recursos do laboratório).
+7. E outro: nome `virada-ano`, conteúdo de `backend/virada-ano.gs` (Virada do Ano Letivo).
 
 A configuração já vem ajustada para a sua planilha: abas `Usuários` (senha na coluna E), `Responsaveis` (senha na coluna C, push na F), `Alunos` e `Sessoes`.
 
@@ -102,6 +103,25 @@ Depois de colar o `horarios.gs` e o `seguranca.gs` atualizado, **implante uma no
 1. SIGA → **Gestão de Horários → 🖥️ Recursos**: confira o laboratório, os tablets (quantos kits) e as disciplinas que usam cada um (plataformas obrigatórias). Clique em **Salvar recursos**. São criadas as abas **Recursos** e **Recursos_Disciplinas**, que também podem ser editadas direto na planilha.
 2. Abra uma turma e salve. A grade anterior fica guardada na aba **Horarios_Historico** (data, quem salvou e as aulas).
 3. A **Agenda do Laboratório** passa a mostrar "Livre" sempre que o recurso estiver vago, e tem uma aba para cada recurso.
+
+## Passo 4d: Virada do Ano Letivo (virada-ano.gs)
+
+Substitui a antiga "Progressão de Turmas". SIGA → **Virada do Ano Letivo** (nível 4). Tudo pode ser preparado e salvo aos poucos; nada muda nos alunos até o passo 5.
+
+1. **Turmas e destinos**: para onde vai cada turma (6A → 7A, 3º ano → `EGRESSO`, 9º ano → `ESCOLHA`). Aba `Turmas_Ano`.
+2. **Turmas do ano novo**: incluir ou excluir turmas (ex.: 9D, 3º B NEM).
+3. **Situação dos alunos**: marcar só as exceções (Retido, Transferido, Desistente) e escolher a turma dos alunos do 9º. Aba `Situacao_Final`.
+4. **Matriz curricular**: aulas por semana de cada disciplina em cada série. Vem calculada pela grade atual e serve de base para o Auto-Preencher das turmas novas. Aba `Matriz_Curricular`.
+5. **Conferir e virar**: prévia por turma. Ao confirmar:
+   - é criada uma cópia da planilha no Drive;
+   - a turma de cada aluno vai para `Alunos_Historico`;
+   - egressos, transferidos e desistentes saem da lista;
+   - os contadores escolhidos (impressões, Pré-Conselho, frequenciômetro) são arquivados em `Nome_2026`;
+   - a propriedade `ANO_LETIVO` passa para o ano novo.
+
+   Dá para **desfazer por 30 dias**; quem foi matriculado depois da virada continua na lista.
+
+Faça a virada depois do último conselho de classe. A partir dela, os contadores de apontamentos e atas passam a contar o ano novo.
 
 ## Passo 5: fechar a planilha ao público
 
