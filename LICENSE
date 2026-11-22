@@ -1,21 +1,39 @@
-MIT License
+LICENÇA DE SOFTWARE PROPRIETÁRIO — TODOS OS DIREITOS RESERVADOS
 
-Copyright (c) 2026 Professorcleiton
+SIGA — Sistema Integrado de Gestão Anchieta
+Copyright (c) 2026 Cleiton Ivaí da Silva
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+1. TITULARIDADE
+   Este software, incluindo código-fonte, código-objeto, documentação, interfaces,
+   layouts e demais materiais que o acompanham (o "Software"), é obra protegida pela
+   Lei nº 9.609/1998 (Lei do Software) e pela Lei nº 9.610/1998 (Lei de Direitos
+   Autorais). Todos os direitos não expressamente concedidos nesta licença são
+   reservados ao autor.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+2. USO AUTORIZADO
+   Fica concedido ao Colégio Cívico-Militar Anchieta (Cruzeiro do Oeste/PR) o direito
+   não exclusivo, intransferível e revogável de utilizar o Software exclusivamente em
+   suas rotinas internas pedagógicas, disciplinares e administrativas.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+3. PROIBIÇÕES
+   Sem autorização prévia e por escrito do autor, é proibido:
+   a) copiar, reproduzir ou distribuir o Software, total ou parcialmente;
+   b) modificar, adaptar, traduzir ou criar obras derivadas;
+   c) vender, alugar, sublicenciar ou ceder o Software a terceiros;
+   d) utilizar o Software, ou partes dele, em outras instituições ou produtos.
+
+4. CÓDIGO VISÍVEL
+   A disponibilização do código-fonte para consulta, inclusive em repositório público,
+   não constitui licença de uso, cópia ou modificação.
+
+5. DADOS
+   Os dados pessoais tratados pelo Software pertencem à instituição usuária e estão
+   sujeitos à Lei nº 13.709/2018 (LGPD). Esta licença não concede qualquer direito
+   sobre esses dados.
+
+6. GARANTIA
+   O Software é fornecido "no estado em que se encontra", sem garantias de qualquer
+   natureza. O autor não se responsabiliza por danos decorrentes do uso do Software.
+
+7. CONTATO
+   Pedidos de autorização: Cleiton Ivaí da Silva — cleiton.ivai.silva@escola.pr.gov.br

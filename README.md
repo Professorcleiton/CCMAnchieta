@@ -40,7 +40,7 @@ O SIGA conecta o Pedagógico, o Disciplinar (MEIV'S), a Secretaria, a Direção,
   - neutraliza HTML vindo do servidor (proteção contra XSS);
   - oferece `escaparHTML()` e `escaparJSAttr()` para montar HTML com dados;
   - trata sessão expirada e oferece "Esqueci minha senha".
-- `backend/seguranca.gs` é a camada do Apps Script que exige login, confere o nível de acesso por operação, controla o vínculo responsável ↔ aluno e registra auditoria.
+- `backend/seguranca.gs` é a camada do Apps Script (feita sob medida para o Código.gs atual) que exige login, grava senhas com hash, confere o nível de acesso por operação, controla o vínculo responsável ↔ aluno e registra auditoria.
   **Instalação: veja [`backend/INTEGRACAO.md`](backend/INTEGRACAO.md).**
 
 ### Regras para quem for mexer no código
@@ -68,7 +68,8 @@ O SIGA conecta o Pedagógico, o Disciplinar (MEIV'S), a Secretaria, a Direção,
 
 ## ⚖️ Licença
 
-Copyright © 2026 Cleiton Ivaí da Silva. Veja o arquivo `LICENSE`.
+**Software proprietário. Todos os direitos reservados.** Copyright © 2026 Cleiton Ivaí da Silva.
+Uso concedido exclusivamente ao Colégio Cívico-Militar Anchieta. É proibido copiar, modificar, redistribuir ou sublicenciar sem autorização por escrito. Veja o arquivo [`LICENSE`](LICENSE).
 
 ## 👤 Autor
 
@@ -79,5 +80,5 @@ Desenvolvido por **Cleiton Ivaí da Silva**
 
 ```bash
 node tests/test-core.js      # núcleo do front-end (token, XSS, senhas)
-node tests/test-backend.js   # camada de segurança do Apps Script (simulada)
+node tests/test-backend.js Codigo.gs   # camada de segurança + seu Código.gs (simulado; não suba o Código.gs)
 ```

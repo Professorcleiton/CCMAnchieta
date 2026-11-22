@@ -384,7 +384,8 @@ window.addEventListener('DOMContentLoaded', function() {
                     body: JSON.stringify({
                         operacao: 'salvar_token_push',
                         email: dadosResponsavel.email,
-                        token: token
+                        token: token,                    // inscrição push
+                        tokenSessao: obterTokenSIGA()    // sessão
                     })
                 });
                 
