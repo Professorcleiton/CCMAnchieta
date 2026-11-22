@@ -212,6 +212,7 @@
 
     function nomeNormalizado(nome) {
         const t = String(nome || '').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .replace(/\s*-?\s*\d{6,}\s*$/, ' ')          // "7º Série D Tarde - 2624935" → sem o código
             .replace(/FORMACAO\s+DE\s+DOCENTES?/g, ' FD ')
             .replace(/NOVO\s+ENSINO\s+MEDIO/g, ' NEM ')
             .replace(/(TECNICO\s+EM\s+)?AGRO\w*/g, ' AGRO ')
@@ -253,34 +254,62 @@
         previsualizar();
     }
 
-    // Casa cada linha do Power BI com uma turma da planilha
+    // Linhas que existem no Power BI mas não fazem parte do painel (não geram alerta)
+    function foraDoPainel(nome) {
+        return /sem\s+seria|per[ií]odo|^total$|^\s*$/i.test(String(nome || '').trim());
+    }
+
+    // Casa cada linha do Power BI com uma turma da planilha.
+    // Turmas que aparecem em mais de uma linha (ex.: 3º A NEM = 2625776 e 2625775)
+    // são somadas: Σ presenças ÷ Σ aulas, a mesma conta do Power BI.
     function casarLinhas() {
         const kT = +document.getElementById('col-turma').value, kF = +document.getElementById('col-freq').value;
+        const cab = tabelaBI.cab.map(c => String(c));
+        const kP = cab.findIndex(c => /presen[cç]as/i.test(c) && !/%/.test(c));          // Σ Presenças
+        const kA = cab.findIndex(c => /aulas/i.test(c) && !/%|previst|dadas/i.test(c));  // Σ Aulas
+        const kN = cab.findIndex(c => /alunos/i.test(c));                                // Alunos Ativos
         const porCodigo = {}, porNome = {};
         dados.turmas.forEach((t, i) => {
             codigosDaTurma(t.codigo).forEach(c => { porCodigo[c] = i; });
             porNome[nomeNormalizado(t.turma)] = i;
         });
-        const brutos = tabelaBI.linhas.map(l => l[kF]);
-        const nums = brutos.map(v => valorFrequencia(v, false)).filter(v => v !== null);
+        const nums = tabelaBI.linhas.map(l => valorFrequencia(l[kF], false)).filter(v => v !== null);
         const todosFracao = nums.length > 0 && nums.every(v => v <= 1.0001);   // Excel exporta 91% como 0,91
+        // Σ Presenças / Σ Aulas: "28.527" é vinte e oito mil (ponto de milhar), não 28,527
+        const inteiro = v => {
+            if (typeof v === 'number') return v;
+            const t = String(v == null ? '' : v).trim();
+            if (/^\d{1,3}(\.\d{3})+$/.test(t)) return parseInt(t.replace(/\./g, ''), 10);
+            return valorFrequencia(t, false);
+        };
 
-        const res = { ok: [], ignoradas: [] };
+        const grupos = {};   // índice da turma → linhas do BI
+        const ignoradas = [];
         tabelaBI.linhas.forEach(l => {
             const f = valorFrequencia(l[kF], todosFracao);
+            const nomeBI = String(l[kT] || '').trim();
             if (f === null || f < 0 || f > 100) return;
             let i;
-            // 1) código em qualquer coluna da linha
             for (const c of l) {
                 for (const cod of String(c).match(/\d{6,}/g) || []) { if (porCodigo[cod] !== undefined) { i = porCodigo[cod]; break; } }
                 if (i !== undefined) break;
             }
-            // 2) nome da turma
-            if (i === undefined) i = porNome[nomeNormalizado(l[kT])];
-            if (i === undefined) { res.ignoradas.push(String(l[kT] || '').trim() || '(sem nome)'); return; }
-            res.ok.push({ i, f: Math.round(f * 100) / 100, origem: String(l[kT] || '').trim() });
+            if (i === undefined) i = porNome[nomeNormalizado(nomeBI)];
+            if (i === undefined) { if (!foraDoPainel(nomeBI)) ignoradas.push(nomeBI || '(sem nome)'); return; }
+            (grupos[i] = grupos[i] || []).push({ f, p: kP >= 0 ? inteiro(l[kP]) : null, a: kA >= 0 ? inteiro(l[kA]) : null,
+                n: kN >= 0 ? inteiro(l[kN]) : null, origem: nomeBI });
         });
-        return res;
+
+        const ok = Object.keys(grupos).map(k => {
+            const g = grupos[k];
+            let f;
+            if (g.length === 1) f = g[0].f;
+            else if (g.every(x => x.p !== null && x.a)) f = 100 * g.reduce((s, x) => s + x.p, 0) / g.reduce((s, x) => s + x.a, 0);
+            else if (g.every(x => x.n)) f = g.reduce((s, x) => s + x.f * x.n, 0) / g.reduce((s, x) => s + x.n, 0);
+            else f = g.reduce((s, x) => s + x.f, 0) / g.length;
+            return { i: +k, f: Math.round(f * 100) / 100, origem: g.map(x => x.origem).join(' + '), linhas: g.length };
+        });
+        return { ok, ignoradas };
     }
 
     function previsualizar() {
@@ -291,7 +320,9 @@
             `✅ <strong>${r.ok.length}</strong> de ${dados.turmas.length} turmas reconhecidas.` +
             (r.ok.length ? '<br>Ex.: ' + r.ok.slice(0, 3).map(o => `${escaparHTML(o.origem)} → <strong>${escaparHTML(dados.turmas[o.i].turma)}</strong> (${fmt(o.f)}%)`).join(' · ') : '') +
             (faltando.length ? `<br>⚠️ Sem valor no arquivo: ${escaparHTML(faltando.join(', '))}` : '') +
-            (r.ignoradas.length ? `<br>Linhas do arquivo não reconhecidas: ${escaparHTML(r.ignoradas.slice(0, 6).join(', '))}${r.ignoradas.length > 6 ? '…' : ''}` : '');
+            (r.ok.some(o => o.linhas > 1) ? `<br>🔗 Somadas (mais de uma linha no Power BI): ${r.ok.filter(o => o.linhas > 1).map(o => escaparHTML(dados.turmas[o.i].turma) + ' = ' + fmt(o.f) + '%').join(' · ')}` : '') +
+            (r.ignoradas.length ? `<br>Linhas do arquivo não reconhecidas: ${escaparHTML(r.ignoradas.slice(0, 6).join(', '))}${r.ignoradas.length > 6 ? '…' : ''}` : '') +
+            '<br><small>Turmas "Sem Seriação" e "Período" do Power BI são ignoradas porque não fazem parte do painel.</small>';
     }
 
     function aplicarImportacao() {
