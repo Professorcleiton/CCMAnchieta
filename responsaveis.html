@@ -169,6 +169,9 @@ O sistema reconhece mesmo sem acentos ou letras maiúsculas."></textarea>
   <script>
     const APPS_SCRIPT_URL = SIGA_CONFIG.APPS_SCRIPT_URL;
 
+    // Link "Primeiro acesso" do site (responsaveis.html#cadastro) abre a aba de cadastro
+    window.addEventListener('DOMContentLoaded', () => { if (location.hash === '#cadastro') mostrarAba('cadastro'); });
+
     function mostrarAba(tipo) {
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.form').forEach(f => f.classList.remove('active'));
