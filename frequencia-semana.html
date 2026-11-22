@@ -54,16 +54,26 @@
         </div>
 
         <div class="card">
-            <details>
-                <summary><i class="fa-solid fa-paste"></i> Colar de um relatório ou planilha (opcional)</summary>
-                <div class="ajuda" style="margin-top:8px">
-                    Cole as linhas com <strong>turma e porcentagem</strong> (ex.: <code>6º A - EF  91,26</code> ou <code>6A 91.26</code>),
-                    ou só a <strong>coluna de porcentagens na mesma ordem</strong> da tabela abaixo. Os valores entram nos campos para você conferir antes de salvar.
-                </div>
-                <textarea id="colar" placeholder="6º A - EF	91,26&#10;6º B - EF	93,29&#10;..."></textarea>
-                <button class="btn btn-sec" style="margin-top:8px" onclick="aplicarColagem()"><i class="fa-solid fa-wand-magic-sparkles"></i> Preencher a tabela</button>
-                <span id="msg-colar" class="ajuda" style="margin-left:8px"></span>
-            </details>
+            <h2><i class="fa-solid fa-file-import"></i> Importar do Power BI</h2>
+            <div class="ajuda">
+                <strong>Opção 1: arquivo.</strong> No Power BI, passe o mouse sobre a tabela de frequência por turma →
+                <strong>⋯ (Mais opções) → Exportar dados</strong> → escolha <em>.xlsx</em> ou <em>.csv</em> → envie aqui.<br>
+                <strong>Opção 2: copiar.</strong> Clique com o botão direito na tabela → <strong>Copiar → Copiar tabela</strong> → cole na caixa abaixo.<br>
+                As turmas são reconhecidas pelo <strong>código</strong> (coluna "Código da Turma" da planilha) ou pelo nome. Os valores entram na tabela para você conferir antes de salvar.
+            </div>
+            <input type="file" id="arquivo-bi" accept=".xlsx,.xls,.csv,.txt" onchange="lerArquivoBI(this)">
+            <textarea id="colar" placeholder="...ou cole aqui a tabela copiada do Power BI"></textarea>
+            <button class="btn btn-sec" style="margin-top:8px" onclick="lerColagem()"><i class="fa-solid fa-table"></i> Ler tabela colada</button>
+
+            <div id="mapeamento" style="display:none; margin-top:14px; padding:12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px;">
+                <div class="ajuda" style="margin-bottom:6px"><strong id="map-resumo"></strong></div>
+                <label style="font-size:13px; margin-right:12px">Coluna da turma
+                    <select id="col-turma" onchange="previsualizar()" style="padding:6px; border-radius:6px; border:1px solid #cbd5e1;"></select></label>
+                <label style="font-size:13px">Coluna da frequência
+                    <select id="col-freq" onchange="previsualizar()" style="padding:6px; border-radius:6px; border:1px solid #cbd5e1;"></select></label>
+                <div id="previa" class="ajuda" style="margin-top:8px"></div>
+                <button class="btn btn-salvar" style="margin-top:6px" onclick="aplicarImportacao()"><i class="fa-solid fa-wand-magic-sparkles"></i> Preencher a tabela</button>
+            </div>
         </div>
 
         <div class="card">
@@ -174,30 +184,165 @@
         else if (haAlteracoes()) { msg.style.color = '#b45309'; msg.textContent = 'Há alterações não salvas.'; }
     }
 
-    function aplicarColagem() {
-        const linhas = document.getElementById('colar').value.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-        const inputs = Array.from(document.querySelectorAll('input.freq'));
-        const out = document.getElementById('msg-colar');
-        if (!linhas.length) { out.textContent = 'Nada colado.'; return; }
+    // ================= IMPORTAÇÃO (Power BI) =================
+    let tabelaBI = null;   // { cab: [...], linhas: [[...]] }
 
-        // Só números, na ordem da tabela
-        if (linhas.every(l => num(l.split(/\t|;/)[0]) !== null)) {
-            linhas.slice(0, inputs.length).forEach((l, i) => { inputs[i].value = l.split(/\t|;/)[0].trim(); marcar(inputs[i]); });
-            out.textContent = `${Math.min(linhas.length, inputs.length)} valores preenchidos pela ordem.` + (linhas.length !== inputs.length ? ` (A tabela tem ${inputs.length} turmas e você colou ${linhas.length} linhas, confira.)` : '');
-            return;
-        }
-        // Turma + número
-        const porCodigo = {};
-        dados.turmas.forEach((t, i) => { porCodigo[codigoTurma(t.turma)] = i; });
-        let ok = 0; const naoAchadas = [];
-        linhas.forEach(l => {
-            const m = l.match(/^(.*?)[\s;\t]+(\d{1,3}(?:[.,]\d+)?)\s*%?\s*$/);
-            if (!m) { naoAchadas.push(l); return; }
-            const i = porCodigo[codigoTurma(m[1])];
-            if (i === undefined) { naoAchadas.push(m[1]); return; }
-            inputs[i].value = m[2]; marcar(inputs[i]); ok++;
+    // "2625776/775" → ["2625776", "2625775"]
+    function codigosDaTurma(texto) {
+        const partes = String(texto || '').split(/[\/,;]/).map(p => p.trim()).filter(Boolean);
+        const out = [];
+        partes.forEach((p, i) => {
+            if (i > 0 && out[0] && p.length < out[0].length) out.push(out[0].slice(0, out[0].length - p.length) + p);
+            else out.push(p);
         });
-        out.textContent = `${ok} turma(s) preenchida(s).` + (naoAchadas.length ? ' Não reconhecidas: ' + naoAchadas.slice(0, 5).join(', ') + (naoAchadas.length > 5 ? '…' : '') : '');
+        return out.filter(c => /^\d{4,}$/.test(c));
+    }
+
+    // Converte "91,26%", "91.26", 0,9126 (fração do Excel) → 91.26
+    function valorFrequencia(v, todosFracao) {
+        if (typeof v === 'number') return todosFracao ? v * 100 : v;
+        const t = String(v == null ? '' : v).trim().replace(/\s/g, '');
+        if (!t) return null;
+        let s2 = t.replace('%', '');
+        if (/,\d+$/.test(s2)) s2 = s2.replace(/\./g, '').replace(',', '.');   // 1.234,56 → 1234.56
+        const n = parseFloat(s2.replace(/[^0-9.\-]/g, ''));
+        if (isNaN(n)) return null;
+        return (todosFracao && !t.includes('%')) ? n * 100 : n;
+    }
+
+    function nomeNormalizado(nome) {
+        const t = String(nome || '').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .replace(/FORMACAO\s+DE\s+DOCENTES?/g, ' FD ')
+            .replace(/NOVO\s+ENSINO\s+MEDIO/g, ' NEM ')
+            .replace(/(TECNICO\s+EM\s+)?AGRO\w*/g, ' AGRO ')
+            .replace(/\b(ENSINO|FUNDAMENTAL|MEDIO|REGULAR|INTEGRAL|ANOS FINAIS|NOVO|DE|DA|DO)\b/g, ' ');
+        return codigoTurma(t);
+    }
+
+    // Recebe as linhas (matriz) e descobre cabeçalho e colunas
+    function prepararTabela(matriz) {
+        const linhas = matriz.map(l => l.map(c => (c == null ? '' : c))).filter(l => l.some(c => String(c).trim() !== ''));
+        if (!linhas.length) { alert('Não encontrei dados.'); return; }
+        // cabeçalho: primeira linha (entre as 10 primeiras) com texto parecido com turma/frequência
+        // (ignora títulos de uma célula só, como "Frequência por Turma - Ref. 17/11")
+        let ic = linhas.slice(0, 10).findIndex(l => l.filter(c => String(c).trim() !== '').length >= 2 &&
+            l.some(c => /turma|classe|s[ée]rie|frequ|presen|%/i.test(String(c))) &&
+            !l.some(c => typeof c === 'number' || /^\d+([.,]\d+)?%?$/.test(String(c).trim())));
+        if (ic < 0) ic = -1;
+        const cab = ic >= 0 ? linhas[ic].map(String) : linhas[0].map((_, k) => 'Coluna ' + (k + 1));
+        const corpo = linhas.slice(ic + 1);
+        tabelaBI = { cab, linhas: corpo };
+
+        const nCol = Math.max(...linhas.map(l => l.length));
+        const opcoes = Array.from({ length: nCol }, (_, k) => `<option value="${k}">${escaparHTML(cab[k] || ('Coluna ' + (k + 1)))}</option>`).join('');
+        const selT = document.getElementById('col-turma'), selF = document.getElementById('col-freq');
+        selT.innerHTML = opcoes; selF.innerHTML = opcoes;
+
+        // Palpites
+        const achar = re => cab.findIndex(c => re.test(c));
+        let kT = cab.findIndex(c => /turma|classe|s[ée]rie/i.test(c) && !/c[óo]d|\bid\b|n[ºo°]\.?\s/i.test(c));
+        if (kT < 0) kT = achar(/turma|classe|s[ée]rie/i);
+        let kF = achar(/frequ|presen/i); if (kF < 0) kF = achar(/%/);
+        const numerica = k => corpo.filter(l => { const v = valorFrequencia(l[k], false); return v !== null && v >= 0 && v <= 100; }).length;
+        if (kF < 0) { let melhor = -1, max = 0; for (let k = 0; k < nCol; k++) { const n = numerica(k); if (n >= max) { max = n; melhor = k; } } kF = melhor; }
+        if (kT < 0) kT = cab.findIndex((_, k) => k !== kF && corpo.some(l => /[a-z]/i.test(String(l[k]))));
+        selT.value = String(Math.max(kT, 0)); selF.value = String(Math.max(kF, 0));
+
+        document.getElementById('mapeamento').style.display = 'block';
+        document.getElementById('map-resumo').textContent = `${corpo.length} linhas lidas. Confira as colunas:`;
+        previsualizar();
+    }
+
+    // Casa cada linha do Power BI com uma turma da planilha
+    function casarLinhas() {
+        const kT = +document.getElementById('col-turma').value, kF = +document.getElementById('col-freq').value;
+        const porCodigo = {}, porNome = {};
+        dados.turmas.forEach((t, i) => {
+            codigosDaTurma(t.codigo).forEach(c => { porCodigo[c] = i; });
+            porNome[nomeNormalizado(t.turma)] = i;
+        });
+        const brutos = tabelaBI.linhas.map(l => l[kF]);
+        const nums = brutos.map(v => valorFrequencia(v, false)).filter(v => v !== null);
+        const todosFracao = nums.length > 0 && nums.every(v => v <= 1.0001);   // Excel exporta 91% como 0,91
+
+        const res = { ok: [], ignoradas: [] };
+        tabelaBI.linhas.forEach(l => {
+            const f = valorFrequencia(l[kF], todosFracao);
+            if (f === null || f < 0 || f > 100) return;
+            let i;
+            // 1) código em qualquer coluna da linha
+            for (const c of l) {
+                for (const cod of String(c).match(/\d{6,}/g) || []) { if (porCodigo[cod] !== undefined) { i = porCodigo[cod]; break; } }
+                if (i !== undefined) break;
+            }
+            // 2) nome da turma
+            if (i === undefined) i = porNome[nomeNormalizado(l[kT])];
+            if (i === undefined) { res.ignoradas.push(String(l[kT] || '').trim() || '(sem nome)'); return; }
+            res.ok.push({ i, f: Math.round(f * 100) / 100, origem: String(l[kT] || '').trim() });
+        });
+        return res;
+    }
+
+    function previsualizar() {
+        if (!tabelaBI) return;
+        const r = casarLinhas();
+        const faltando = dados.turmas.filter((_, i) => !r.ok.some(o => o.i === i)).map(t => t.turma);
+        document.getElementById('previa').innerHTML =
+            `✅ <strong>${r.ok.length}</strong> de ${dados.turmas.length} turmas reconhecidas.` +
+            (r.ok.length ? '<br>Ex.: ' + r.ok.slice(0, 3).map(o => `${escaparHTML(o.origem)} → <strong>${escaparHTML(dados.turmas[o.i].turma)}</strong> (${fmt(o.f)}%)`).join(' · ') : '') +
+            (faltando.length ? `<br>⚠️ Sem valor no arquivo: ${escaparHTML(faltando.join(', '))}` : '') +
+            (r.ignoradas.length ? `<br>Linhas do arquivo não reconhecidas: ${escaparHTML(r.ignoradas.slice(0, 6).join(', '))}${r.ignoradas.length > 6 ? '…' : ''}` : '');
+    }
+
+    function aplicarImportacao() {
+        const r = casarLinhas();
+        if (!r.ok.length) { alert('Nenhuma turma reconhecida. Confira as colunas escolhidas.'); return; }
+        const inputs = document.querySelectorAll('input.freq');
+        r.ok.forEach(o => { inputs[o.i].value = fmt(o.f); marcar(inputs[o.i]); });
+        document.getElementById('msg').style.color = '#b45309';
+        document.getElementById('msg').textContent = `${r.ok.length} turmas preenchidas. Confira e clique em Salvar.`;
+        document.querySelector('table').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function lerColagem() {
+        const texto = document.getElementById('colar').value;
+        if (!texto.trim()) { alert('Cole a tabela primeiro.'); return; }
+        const sep = texto.includes('\t') ? '\t' : (texto.includes(';') ? ';' : null);
+        const matriz = texto.split(/\r?\n/).map(l => sep ? l.split(sep) : (l.match(/^(.*?)\s+(\d{1,3}(?:[.,]\d+)?\s*%?)\s*$/) || [null, l, '']).slice(1));
+        prepararTabela(matriz);
+    }
+
+    function carregarSheetJS() {
+        if (window.XLSX) return Promise.resolve();
+        return new Promise((ok, erro) => {
+            const sc = document.createElement('script');
+            sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+            sc.onload = ok; sc.onerror = () => erro(new Error('Não consegui carregar o leitor de Excel.'));
+            document.head.appendChild(sc);
+        });
+    }
+
+    async function lerArquivoBI(input) {
+        const arq = input.files[0];
+        if (!arq) return;
+        try {
+            if (/\.(csv|txt)$/i.test(arq.name)) {
+                let texto = await arq.text();
+                if (texto.includes('\uFFFD')) texto = new TextDecoder('windows-1252').decode(await arq.arrayBuffer());
+                const sep = (texto.split('\n')[0].match(/;/g) || []).length >= (texto.split('\n')[0].match(/,/g) || []).length ? ';' : ',';
+                const matriz = texto.split(/\r?\n/).map(l => l.split(new RegExp(`${sep}(?=(?:[^"]*"[^"]*")*[^"]*$)`)).map(c => c.replace(/^"|"$/g, '').trim()));
+                prepararTabela(matriz);
+            } else {
+                await carregarSheetJS();
+                const wb = XLSX.read(await arq.arrayBuffer(), { type: 'array' });
+                const ws = wb.Sheets[wb.SheetNames[0]];
+                prepararTabela(XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: '' }));
+            }
+        } catch (e) {
+            alert('Não foi possível ler o arquivo: ' + e.message);
+        } finally {
+            input.value = '';
+        }
     }
 
     async function chamar(payload) {

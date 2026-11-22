@@ -80,5 +80,6 @@ Desenvolvido por **Cleiton Ivaí da Silva**
 
 ```bash
 node tests/test-core.js      # núcleo do front-end (token, XSS, senhas)
+node tests/test-importacao-powerbi.js   # leitura das planilhas exportadas do Power BI
 node tests/test-backend.js Codigo.gs   # camada de segurança + seu Código.gs (simulado; não suba o Código.gs)
 ```

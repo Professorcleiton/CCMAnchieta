@@ -85,7 +85,7 @@ As abas `frequencia`, `HistoricoGeral` e `Alunos` já estão na planilha do SIGA
 ### Atualização semanal (sem abrir a planilha)
 
 **SIGA → Frequência da Semana** (nível 3+):
-- digite as porcentagens ou cole de um relatório (turma + %, ou só a coluna de % na ordem) e clique em **Salvar**. A TV mostra os números novos em até 10 minutos;
+- **Power BI:** na tabela de frequência por turma, **⋯ → Exportar dados → .xlsx** e envie o arquivo, ou clique com o botão direito → **Copiar → Copiar tabela** e cole. As turmas são reconhecidas pelo código (coluna E da aba `frequencia`) ou pelo nome. Confira os valores e clique em **Salvar**. A TV mostra os números novos em até 10 minutos;
 - toda **sexta às 18h**, se houve atualização na semana, a média da escola entra no `HistoricoGeral` como a próxima semana;
 - para registrar antes, use o botão **Fechar semana agora**.
 
