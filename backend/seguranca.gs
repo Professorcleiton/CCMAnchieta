@@ -91,6 +91,7 @@ var SEG_NIVEL_MINIMO = {
   'PAT_EXCLUIR': 3,
   'PAT_TRANSFERIR': 3,
   'SALVAR_GRADE': 3,
+  'RECURSOS_SALVAR': 4,
   'MARCAR_PEDIDO_IMPRESSO': 3,
   'CANCELAR_PEDIDO_AVALIACAO': 3,
   'NOTIFICAR_PROFESSOR_IMPRESSAO': 3,
@@ -158,6 +159,8 @@ function doGet(e) {
   if (rota === 'responsaveis_cadastros') return SEG_json_(SEG_listarVinculos_());
   if (rota === 'noticias_gestao') return SEG_json_(NOT_listarTodas_());
   if (rota === 'frequencia_gestao') return SEG_json_(FREQ_gestao_());
+  // Horários e recursos (horarios.gs)
+  if (rota === 'recursos' && sessao.tipo === 'servidor' && typeof HOR_lerRecursos_ === 'function') return SEG_json_(HOR_lerRecursos_());
   // Servidores: todos os registros do ano letivo (sem o corte de 200 do Código.gs)
   if (rota === 'todos_os_dados' && sessao.tipo === 'servidor') return SEG_json_(SEG_dadosEscolaAno_());
 
@@ -205,6 +208,8 @@ function doPost(e) {
     if (op === 'NOTICIA_ADICIONAR') { SEG_auditar_(sessao, op, corpo.link); return SEG_json_(NOT_adicionar_(sessao, corpo)); }
     if (op === 'NOTICIA_OCULTAR') { SEG_auditar_(sessao, op, corpo.id); return SEG_json_(NOT_alterarAtivo_(corpo, false)); }
     if (op === 'NOTICIA_REATIVAR') { SEG_auditar_(sessao, op, corpo.id); return SEG_json_(NOT_alterarAtivo_(corpo, true)); }
+    if (op === 'SALVAR_GRADE' && typeof HOR_salvarGrade_ === 'function') return SEG_json_(HOR_salvarGrade_(sessao, corpo));
+    if (op === 'RECURSOS_SALVAR' && typeof HOR_salvarRecursos_ === 'function') return SEG_json_(HOR_salvarRecursos_(sessao, corpo));
     if (op === 'APROVAR_RESPONSAVEL') return SEG_json_(SEG_decidirVinculo_(sessao, corpo.email, true, corpo.alunos));
     if (op === 'RECUSAR_RESPONSAVEL') return SEG_json_(SEG_decidirVinculo_(sessao, corpo.email, false, []));
 
