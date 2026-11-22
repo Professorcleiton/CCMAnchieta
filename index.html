@@ -221,6 +221,38 @@
             .carousel-caption p { font-size: 0.85rem; }
             #btn-instalar { bottom: 15px; right: 15px; padding: 10px 18px; font-size: 0.9rem; }
         }
+        /* DESAFIO COLETIVO */
+        .desafio { margin: 40px 0; }
+        .desafio-sub { text-align: center; color: #64748b; margin-bottom: 22px; }
+        .desafio-grade { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+        .desafio-card { background: var(--white); border-radius: 22px; padding: 20px; box-shadow: 0 4px 14px rgba(0,0,0,.07); }
+        .desafio-card-grafico { border-top: 7px solid #059669; display: flex; flex-direction: column; }
+        .desafio-card-media { border-bottom: 7px solid #059669; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .desafio-rotulo { display: block; text-align: center; color: #64748b; font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; }
+        .desafio-grafico { width: 100%; min-height: 220px; display: flex; align-items: center; justify-content: center; }
+        .desafio-grafico svg { width: 100%; height: auto; overflow: visible; }
+        .desafio-carregando { color: #94a3b8; font-weight: 700; font-size: 13px; }
+        .desafio-legenda { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; font-size: 12px; color: #64748b; margin-top: 8px; }
+        .desafio-legenda i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+        .desafio-emoji { font-size: 40px; }
+        .desafio-card-media h3 { font-size: 1.4rem; font-weight: 900; color: #1e293b; text-transform: uppercase; margin-top: 4px; }
+        .desafio-mini { font-size: 11px; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+        .desafio-numero { font-size: 3.4rem; font-weight: 900; margin: 10px 0; color: #94a3b8; font-variant-numeric: tabular-nums; }
+        .desafio-barra { width: 100%; height: 26px; background: #e2e8f0; border-radius: 12px; overflow: hidden; position: relative; }
+        .desafio-barra::after { content: ''; position: absolute; top: 0; bottom: 0; left: 95%; border-left: 2px dashed #059669; }
+        #desafio-barra-preenchida { height: 100%; width: 0; border-radius: 12px; transition: width 1.6s ease-out, background-color .3s; }
+        .desafio-status { margin-top: 10px; font-size: 14px; font-weight: 700; color: #475569; min-height: 20px; }
+        .desafio-rodape { text-align: center; margin-top: 14px; font-size: 14px; }
+        .desafio-rodape a { color: var(--primary-blue); font-weight: 700; text-decoration: none; }
+        #desafio-atualizado { display: block; color: #94a3b8; font-size: 12px; margin-top: 4px; }
+        .desafio-barra-svg { opacity: 0; animation: desafioSobe .6s cubic-bezier(.16,1,.3,1) forwards; }
+        @keyframes desafioSobe { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+        @media (prefers-reduced-motion: reduce) { .desafio-barra-svg { animation: none; opacity: 1; } #desafio-barra-preenchida { transition: none; } }
+        @media (max-width: 768px) {
+            .desafio-grade { grid-template-columns: 1fr; }
+            .desafio-numero { font-size: 2.8rem; }
+        }
+
         /* NOTÍCIAS DAS REDES SOCIAIS */
         #noticias { margin: 50px 0; }
         .noticias-sub { text-align: center; color: #64748b; margin-bottom: 22px; }
@@ -260,7 +292,7 @@
 
         <nav>
             <ul>
-                <li><a href="#destaques">DESTAQUES</a></li>
+                <li><a href="#destaques">DESAFIO 🎯</a></li>
                 <li id="nav-noticias" style="display:none"><a href="#noticias">NOTÍCIAS</a></li>
                 <li><a href="#sobre">SOBRE NÓS</a></li>
                 <li><a href="https://anchietafrequencia.vercel.app" class="frequenciometro" target="_blank">FREQUÊNCIA 📊</a></li>
@@ -282,66 +314,38 @@
             </video>
         </section>
 
-        <!-- 2. CARROSSEL DE FOTOS -->
-        <section id="destaques">
-            <h2 style="color: var(--primary-blue); margin-bottom: 20px; text-align: center;">Últimas Atualizações</h2>
-            
-            <div class="carousel-wrapper" id="mainCarousel">
+        <!-- 2. DESAFIO COLETIVO ANCHIETA (mesmos dados do Frequenciômetro, vindos do SIGA) -->
+        <section id="destaques" class="desafio" aria-labelledby="titulo-desafio">
+            <h2 id="titulo-desafio" style="color: var(--primary-blue); margin-bottom: 6px; text-align: center;">🎯 Desafio Coletivo Anchieta</h2>
+            <p class="desafio-sub">Frequência da escola semana a semana · <strong>Meta coletiva: 95%</strong></p>
 
-                <!-- Slide 1: Imagem -->
-                <div class="carousel-item" data-type="image">
-                    <img src="img/IMG-20260623-WA0012.jpg" alt="Arraiá do Anchieta">
-                    <div class="carousel-caption">
-                        <h3>Arraiá do Anchieta</h3>
-                        <p>O festão vai ser bão, mas com a presença dos pais vai ser mais mio de bão.</p>
+            <div class="desafio-grade">
+                <div class="desafio-card desafio-card-grafico">
+                    <span class="desafio-rotulo">Histórico de engajamento da escola</span>
+                    <div id="desafio-grafico" class="desafio-grafico" role="img" aria-label="Gráfico da frequência semanal da escola">
+                        <span class="desafio-carregando">Carregando…</span>
                     </div>
-                </div>
-                
-                <div class="carousel-item" data-type="image">
-                    <img src="img/premiacao.jpeg" alt="Premiação OLITEF 2025">
-                    <div class="carousel-caption">
-                        <h3>Premiação OLITEF 2025</h3>
-                        <p>NOTA DE ORGULHO Estudantes do Colégio Cívico Militar Anchieta São PREMIADOS NACIONALMENTE!</p>
-                    </div>
-                </div>  
-
-                <!-- Slide 2: Imagem -->
-                <div class="carousel-item" data-type="image">
-                    <img src="img/ach1.jpg" alt="Agrinho 2025">
-                    <div class="carousel-caption">
-                        <h3>Agrinho 2025</h3>
-                        <p>Nossos alunos se destacando em mais uma edição do projeto.</p>
+                    <div class="desafio-legenda" aria-hidden="true">
+                        <span><i style="background:#e11d48"></i>abaixo de 90%</span>
+                        <span><i style="background:#f59e0b"></i>90% a 95%</span>
+                        <span><i style="background:#10b981"></i>95% ou mais</span>
                     </div>
                 </div>
 
-                <!-- Slide 3: Imagem -->
-                <div class="carousel-item" data-type="image">
-                    <img src="img/ftt1.jpg" alt="Dia das Crianças">
-                    <div class="carousel-caption">
-                        <h3>Dia das Crianças</h3>
-                        <p>Muita alegria e diversão em nossa escola.</p>
-                    </div>
+                <div class="desafio-card desafio-card-media">
+                    <span class="desafio-emoji" aria-hidden="true">🎯</span>
+                    <h3>Média Geral</h3>
+                    <p class="desafio-mini">Toda a instituição · semana atual</p>
+                    <span id="desafio-numero" class="desafio-numero">–</span>
+                    <div class="desafio-barra" aria-hidden="true"><div id="desafio-barra-preenchida"></div></div>
+                    <p id="desafio-status" class="desafio-status"></p>
                 </div>
-
-                <!-- Slide 4: Imagem -->
-                <div class="carousel-item" data-type="image">
-                    <img src="img/FDCOPA.jpeg" alt="Formação de Docente">
-                    <div class="carousel-caption">
-                        <h3>Formação de Docente em Clima de Copa</h3>
-                        <p>Animação da Copa do Mundo também chegou por aqui.</p>
-                    </div>
-                </div>
-
-                <!-- Slide 5: Imagem -->
-                <div class="carousel-item" data-type="image">
-                    <img src="img/diaprofessores.jpeg" alt="Dia dos Professores">
-                    <div class="carousel-caption">
-                        <h3>Homenagem aos Professores</h3>
-                        <p>Reconhecimento àqueles que transformam futuros.</p>
-                    </div>
-                </div>
-
             </div>
+
+            <p class="desafio-rodape">
+                <a href="https://anchietafrequencia.vercel.app" target="_blank" rel="noopener">Ver o Frequenciômetro completo <i class="fas fa-arrow-right"></i></a>
+                <span id="desafio-atualizado"></span>
+            </p>
         </section>
 
         <!-- 3. NOTÍCIAS DAS REDES SOCIAIS (publicadas pela secretaria em noticias-admin.html) -->
@@ -372,6 +376,97 @@
     </footer>
 
     <script>
+    // ===== DESAFIO COLETIVO ANCHIETA (mesmo gráfico do Frequenciômetro) =====
+    (function () {
+        const META = 95;
+        const cor = v => v >= 95 ? '#10b981' : v >= 90 ? '#f59e0b' : '#e11d48';
+        const num = v => { const n = parseFloat(String(v == null ? '' : v).replace('%', '').trim().replace(',', '.')); return isNaN(n) ? null : n; };
+        const br = (v, c = 1) => v.toFixed(c).replace('.', ',');
+
+        let semanasCache = [];
+        function desenharGrafico(todas) {
+            semanasCache = todas;
+            const el = document.getElementById('desafio-grafico');
+            if (!todas.length) { el.innerHTML = '<span class="desafio-carregando">Ainda não há semanas registradas.</span>'; return; }
+            // Celular: menos semanas e letras maiores, para continuar legível
+            const estreito = el.clientWidth < 560;
+            const semanas = estreito ? todas.slice(-6) : todas;
+            const L = estreito ? 560 : 1000, A = estreito ? 380 : 340, mx = estreito ? 20 : 50, base = 44;
+            const fV = estreito ? 24 : 17, fR = estreito ? 21 : 15;
+            const vals = semanas.map(s => s.media);
+            const minF = Math.floor(Math.min(...vals, 85)) - 2, maxF = 100;
+            const util = A - base - 28, passo = (L - 2 * mx) / semanas.length, larg = Math.min(passo * 0.65, 64);
+            const y = v => A - base - ((Math.min(Math.max(v, minF), maxF) - minF) / (maxF - minF)) * util;
+            let barras = '', rotulos = '';
+            semanas.forEach((s, i) => {
+                const x = mx + i * passo + passo / 2 - larg / 2, topo = y(s.media);
+                barras += `<g class="desafio-barra-svg" style="animation-delay:${i * 110}ms">
+                    <rect x="${x}" y="${topo}" width="${larg}" height="${A - base - topo}" fill="${cor(s.media)}" rx="5"/>
+                    <text x="${x + larg / 2}" y="${topo - 10}" fill="${cor(s.media)}" font-size="${fV}" font-weight="900" text-anchor="middle">${br(s.media)}%</text></g>`;
+                rotulos += `<text x="${x + larg / 2}" y="${A - 12}" fill="#64748b" font-size="${fR}" font-weight="800" text-anchor="middle">${estreito ? s.rotulo.replace('Sem. ', '') : s.rotulo}</text>`;
+            });
+            const yM = y(META);
+            el.innerHTML = `<svg viewBox="0 0 ${L} ${A}" preserveAspectRatio="xMidYMid meet">
+                <line x1="${mx}" y1="${yM}" x2="${L - mx}" y2="${yM}" stroke="#10b981" stroke-dasharray="6 6" stroke-width="2.5" opacity=".6"/>
+                <text x="${L - mx}" y="${yM - 8}" fill="#10b981" font-size="${estreito ? 18 : 13}" font-weight="900" text-anchor="end">META 95%</text>
+                ${rotulos}${barras}</svg>`;
+            el.setAttribute('aria-label', 'Frequência semanal da escola: ' + semanas.map(s => s.rotulo + ' ' + br(s.media) + '%').join(', ') + '. Meta: 95%.');
+        }
+
+        function animarMedia(media) {
+            const numEl = document.getElementById('desafio-numero'), barra = document.getElementById('desafio-barra-preenchida');
+            const c = cor(media);
+            numEl.style.color = c; barra.style.backgroundColor = c;
+            barra.style.width = Math.min(media, 100) + '%';
+            const reduzir = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+            if (reduzir) { numEl.textContent = br(media) + '%'; }
+            else {
+                const t0 = performance.now(), dur = 1600;
+                (function passo(t) {
+                    const p = Math.min((t - t0) / dur, 1), e = 1 - Math.pow(1 - p, 3);
+                    numEl.textContent = br(media * e) + '%';
+                    if (p < 1) requestAnimationFrame(passo);
+                })(t0);
+            }
+            const falta = META - media;
+            document.getElementById('desafio-status').textContent = falta <= 0
+                ? '🏆 Meta coletiva batida! Parabéns, Anchieta!'
+                : `Faltam ${br(falta, 2)} pontos para a meta de 95%`;
+        }
+
+        async function carregar() {
+            const secao = document.getElementById('destaques');
+            try {
+                const r = await fetch(SIGA_CONFIG.APPS_SCRIPT_URL + '?aba=frequenciometro');
+                const d = await r.json();
+                if (!d || d.status !== 'success' || !Array.isArray(d.historico)) throw new Error('sem dados');
+                // Últimas 10 semanas, como na TV; a semana em andamento aparece como "Atual"
+                let semanas = d.historico.slice(1)
+                    .map(l => ({ atual: String(l[0]).trim() === 'Esta', rotulo: String(l[0]).trim() === 'Esta' ? 'Atual' : 'Sem. ' + String(l[0]).trim(), media: num(l[1]) }))
+                    .filter(s => s.media !== null && s.media > 0);
+                // Logo depois de fechar a semana, "Atual" repete a última semana: não mostra duas barras iguais
+                const n = semanas.length;
+                if (n >= 2 && semanas[n - 1].atual && Math.abs(semanas[n - 1].media - semanas[n - 2].media) < 0.005) semanas.pop();
+                semanas = semanas.slice(-10);
+                const media = d.medias && typeof d.medias.escola === 'number' ? d.medias.escola
+                    : (semanas.length ? semanas[semanas.length - 1].media : null);
+
+                const iniciar = () => { desenharGrafico(semanas); if (media !== null) animarMedia(media); };
+                if ('IntersectionObserver' in window) {
+                    const obs = new IntersectionObserver(e => { if (e.some(x => x.isIntersecting)) { obs.disconnect(); iniciar(); } }, { threshold: 0.2 });
+                    obs.observe(secao);
+                } else iniciar();
+                if (d.atualizadoEm) document.getElementById('desafio-atualizado').textContent = 'Atualizado em ' + d.atualizadoEm;
+            } catch (e) {
+                document.getElementById('desafio-grafico').innerHTML = '<span class="desafio-carregando">Os dados do desafio estarão disponíveis em breve.</span>';
+                document.getElementById('desafio-status').textContent = 'Acompanhe pelo Frequenciômetro.';
+            }
+        }
+        window.addEventListener('DOMContentLoaded', carregar);
+        let tRedim;
+        window.addEventListener('resize', () => { clearTimeout(tRedim); tRedim = setTimeout(() => { if (semanasCache.length) desenharGrafico(semanasCache); }, 250); });
+    })();
+
     // ===== NOTÍCIAS: links publicados pela secretaria, incorporados do Instagram/Facebook =====
     (function () {
         let noticias = [];
