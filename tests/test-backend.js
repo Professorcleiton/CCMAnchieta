@@ -178,26 +178,45 @@ const gest=G({aba:'noticias_gestao',token:tdir}); assert.strictEqual(gest.length
 assert.strictEqual(G({aba:'noticias_gestao',token:tp2()}).status,'forbidden');
 assert.strictEqual(P({operacao:'NOTICIA_OCULTAR',token:tdir,id:gest[0].id}).status,'success');
 assert.strictEqual(G({aba:'noticias'}).noticias.length,2,'oculta some do site');
-// ===== Frequenciômetro =====
-S.FreqTurmas=sheet('FreqTurmas',[['Turma','Freq','Turno','Troféus'],['6º Ano A','96,5%','Manhã','2'],['7º Ano B','88,1%','Tarde','0'],['','','','']],1746538498);
-S.FreqAlunos=sheet('FreqAlunos',[['id','nome','turma','cod'],['1','JOÃO DA SILVA','6º Ano A','6A'],['2','MARIA SOUZA','7º Ano B','7B']],1866544411);
-S.FreqHist=sheet('FreqHist',[['Semana','Média'],['S1','91,2'],['S2','93,0']],541390615);
+// ===== Frequenciômetro (abas como nas capturas de tela da escola) =====
+S.frequencia=sheet('frequencia',[['Turma','Frequência','Bloco','Troféus','Código da Turma'],['6º A - EF',91.26,'manha',2,''],['1º A - NEM',81.86,'manha',0,'2625700'],['3º B - NEM',84.44,'manha',0,'2625837/836']]);
+S.HistoricoGeral=sheet('HistoricoGeral',[['Semana','Media'],[1,'92.77'],[2,'92.41'],[21,87.73],[22,89.8],['Esta',0]]);
+S.Alunos.rows.push(['3','PEDRO NEM','1º Ano A NEM','1NEM']);
 let F=G({aba:'frequenciometro'});
-assert.strictEqual(F.status,'success'); assert.strictEqual(F.frequencia.length,3,'linha vazia removida'); assert.strictEqual(F.frequencia[1][1],'96,5%');
-assert.strictEqual(F.historico.length,3); assert.deepStrictEqual(F.trimestres.map(t=>t.fechado),[91.9,null,null]);
-assert(!JSON.stringify(F).includes('JOÃO'),'sem nomes de alunos no público');
+assert.strictEqual(F.status,'success'); assert.strictEqual(F.frequencia.length,4); assert.strictEqual(F.frequencia[1][0],'6º A - EF');
+const hist=F.historico.slice(1);
+assert.deepStrictEqual(hist.map(h=>h[0]),['1','2','21','22','Esta'],'Esta calculada, sem o zero antigo');
+assert.strictEqual(hist[0][1],'92,77','92.77 lido como 92,77');
+assert.strictEqual(hist.at(-1)[1],((91.26+81.86+84.44)/3).toFixed(2).replace('.',','),'Esta = média atual');
+assert(!JSON.stringify(F).includes('PEDRO'),'sem nomes de alunos no público');
 assert.strictEqual(G({aba:'frequenciometro_alunos'}).status,'unauthorized','sem chave');
 vm.runInContext('FREQ_gerarChaveTV()',ctx); const chave=ctx.PropertiesService._p.FREQ_CHAVE_TV; assert.strictEqual(chave.length,24);
 assert.strictEqual(G({aba:'frequenciometro_alunos',chave:'x'.repeat(24)}).status,'unauthorized','chave errada');
-let A=G({aba:'frequenciometro_alunos',chave}); assert.strictEqual(A.alunos.length,3); assert.deepStrictEqual(A.sorteados,[]);
+let A=G({aba:'frequenciometro_alunos',chave}); assert(A.alunos.some(a=>a[1]==='PEDRO NEM'));
 assert.strictEqual(P({operacao:'SORTEIO_REGISTRAR',nome:'MARIA SOUZA',turma:'7B'}).status,'unauthorized');
 assert.strictEqual(P({operacao:'SORTEIO_REGISTRAR',chave,nome:'MARIA SOUZA',turma:'7B'}).status,'success');
 assert.strictEqual(P({operacao:'SORTEIO_REGISTRAR',chave,nome:'JOÃO DA SILVA',turma:'6A',origem:'manual'}).status,'success');
 assert.deepStrictEqual(G({aba:'frequenciometro_alunos',chave}).sorteados.sort(),['JOÃO DA SILVA','MARIA SOUZA']);
 assert.strictEqual(P({operacao:'SORTEIO_LIMPAR',chave,turma:'7B'}).alterados,1);
-assert.deepStrictEqual(G({aba:'frequenciometro_alunos',chave}).sorteados,['JOÃO DA SILVA']);
 assert.strictEqual(P({operacao:'SORTEIO_DESMARCAR',chave,nome:'JOÃO DA SILVA'}).alterados,1);
 assert.strictEqual(S.Sorteios.rows.length,3,'histórico preservado (só marca NAO)');
 S.Frequenciometro_Trimestres.rows[2][1]='93,4'; ctx.CacheService.getScriptCache().remove('freq_publico');
 assert.deepStrictEqual(G({aba:'frequenciometro'}).trimestres.map(t=>t.fechado),[91.9,93.4,null]);
+// --- Tela "Frequência da Semana"
+assert.strictEqual(G({aba:'frequencia_gestao',token:tp2()}).status,'forbidden','professor não acessa');
+let FG=G({aba:'frequencia_gestao',token:tdir});
+assert.strictEqual(FG.proximaSemana,23); assert.strictEqual(FG.ultimaSemana.semana,22); assert.strictEqual(FG.turmas.length,3);
+let SV=P({operacao:'FREQ_SALVAR',token:tdir,itens:[{linha:2,turma:'6º A - EF',freq:'95,5',trofeus:'3'},{linha:3,turma:'1º A - NEM',freq:150},{linha:4,turma:'OUTRA',freq:50}]});
+assert.strictEqual(SV.status,'success'); assert.strictEqual(S.frequencia.rows[1][1],95.5); assert.strictEqual(S.frequencia.rows[1][3],3);
+assert.strictEqual(S.frequencia.rows[2][1],81.86,'150% recusado'); assert.strictEqual(S.frequencia.rows[3][1],84.44,'linha trocada recusada');
+assert.strictEqual(SV.gestao.pendenteFechar,true);
+// fechamento automático de sexta
+vm.runInContext('FREQ_fecharSemanaAutomatico()',ctx);
+const h=S.HistoricoGeral.rows;
+assert.deepStrictEqual(h.map(r=>r[0]).filter(x=>x!==''),['Semana',1,2,21,22,23],'semana 23 no lugar da linha Esta');
+assert.strictEqual(h[5][1],Math.round((95.5+81.86+84.44)/3*100)/100);
+assert.strictEqual(h[1][1],92.77,'texto 92.77 virou número');
+vm.runInContext('FREQ_fecharSemanaAutomatico()',ctx);
+assert.strictEqual(h.filter(r=>r[0]===24).length,0,'sem atualização na semana, não fecha de novo');
+assert.strictEqual(P({operacao:'FREQ_FECHAR_SEMANA',token:tdir}).semana,24,'fechamento manual');
 console.log('INTEGRAÇÃO COM O CÓDIGO.GS REAL: TODOS OS TESTES PASSARAM —',S.Auditoria.rows.length-1,'linhas de auditoria');

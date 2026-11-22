@@ -330,6 +330,11 @@
                                     <span>Aprovar Responsáveis</span>
                                 </a>
 
+                                <a id="btn-frequencia-semana" href="frequencia-semana.html" class="btn-acao" style="display: none; background-color: #0891b2;">
+                                    <i class="fa-solid fa-chart-line"></i>
+                                    <span>Frequência da Semana</span>
+                                </a>
+
                                 <a id="btn-noticias-site" href="noticias-admin.html" class="btn-acao" style="display: none; background-color: #bc1888;">
                                     <i class="fa-brands fa-instagram"></i>
                                     <span>Notícias do Site</span>
@@ -1402,7 +1407,7 @@ function aplicarControleAcesso() {
         if (btn) btn.style.display = nivel >= 4 ? 'flex' : 'none';
     });
     
-    const botoesNivel3 = ['btn-patrimonio', 'btn-comunicado-seed', 'btn-central-alertas', 'btn-aba-secretaria', 'btn-aniversarios', 'btn-imprimir-apontamentos', 'btn-certificados', 'btn-aprovar-responsaveis', 'btn-noticias-site'];
+    const botoesNivel3 = ['btn-patrimonio', 'btn-comunicado-seed', 'btn-central-alertas', 'btn-aba-secretaria', 'btn-aniversarios', 'btn-imprimir-apontamentos', 'btn-certificados', 'btn-aprovar-responsaveis', 'btn-noticias-site', 'btn-frequencia-semana'];
     botoesNivel3.forEach(id => {
         const btn = document.getElementById(id);
         if (btn) {

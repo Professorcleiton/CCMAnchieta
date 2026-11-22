@@ -72,13 +72,24 @@ Os responsáveis que já tinham conta continuam entrando e aparecem como **"LEGA
 
 ## Passo 4b: ligar o Frequenciômetro
 
-1. Em `frequenciometro.gs`, no topo, preencha `PLANILHA_ID` com o ID da planilha do frequenciômetro: o trecho entre `/d/` e `/edit` no endereço dela. Se as abas de frequência estiverem nesta mesma planilha do SIGA, deixe `''`.
-2. No editor, escolha a função **`FREQ_diagnosticar`** e clique em **Executar**. O registro precisa mostrar **OK** para Frequência, Alunos e Histórico.
-3. Escolha **`FREQ_gerarChaveTV`** e clique em **Executar**. O registro mostra um endereço `https://anchietafrequencia.vercel.app/?chave=...`. Abra esse endereço **uma vez** em cada TV ou computador do painel.
+As abas `frequencia`, `HistoricoGeral` e `Alunos` já estão na planilha do SIGA, e o `frequenciometro.gs` está configurado para elas. Não precisa mudar nada no código.
+
+1. No editor, escolha **`FREQ_diagnosticar`** e clique em **Executar**. O registro precisa mostrar **OK** para Frequência, Alunos e Histórico.
+2. Execute **`FREQ_instalarFechamentoSemanal`**. Ele faz duas coisas: corrige as semanas gravadas como texto ("92.77") e passa a fechar a semana sozinho toda sexta às 18h.
+3. Execute **`FREQ_gerarChaveTV`** e abra **uma vez** em cada TV o endereço `https://anchietafrequencia.vercel.app/?chave=...` que aparece no registro.
 4. Faça o merge do PR do repositório **frequenciometro**.
-5. Teste um sorteio. O nome aparece na aba **Sorteios** da planilha.
-6. Quando o sorteio estiver funcionando, **interrompa a publicação** da planilha do frequenciômetro: **Arquivo → Compartilhar → Publicar na Web → Interromper publicação**. Em seguida, no `index.html` do frequenciometro, mude `USAR_PLANILHA_PUBLICADA` para `false`.
+5. Teste um sorteio. O nome aparece na aba **Sorteios**.
+6. Depois que a TV estiver mostrando os dados novos, **interrompa a publicação da planilha antiga** do frequenciômetro: **Arquivo → Compartilhar → Publicar na Web → Interromper publicação**. Em seguida, no `index.html` do frequenciometro, mude `USAR_PLANILHA_PUBLICADA` para `false`.
 7. Na aba **Frequenciometro_Trimestres**, preencha a média de cada trimestre quando ele fechar.
+
+### Atualização semanal (sem abrir a planilha)
+
+**SIGA → Frequência da Semana** (nível 3+):
+- digite as porcentagens ou cole de um relatório (turma + %, ou só a coluna de % na ordem) e clique em **Salvar**. A TV mostra os números novos em até 10 minutos;
+- toda **sexta às 18h**, se houve atualização na semana, a média da escola entra no `HistoricoGeral` como a próxima semana;
+- para registrar antes, use o botão **Fechar semana agora**.
+
+A linha **"Esta"** do gráfico agora é calculada sozinha com a média atual. A linha "Esta" antiga da planilha pode ser apagada; se ficar, o sistema a ignora e a substitui no próximo fechamento.
 
 ## Passo 5: fechar a planilha ao público
 

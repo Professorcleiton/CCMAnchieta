@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <script src="siga-core.js?v=14"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frequência da Semana | SIGA</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f1f5f9; color: #1e293b; }
+        header { background: #005088; color: #fff; padding: 16px 20px; border-bottom: 4px solid #eab308; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+        header h1 { font-size: 18px; }
+        header a { color: #fff; text-decoration: none; font-size: 14px; }
+        main { max-width: 900px; margin: 20px auto; padding: 0 16px 40px; }
+        .card { background: #fff; border-radius: 10px; padding: 18px; box-shadow: 0 1px 3px rgba(0,0,0,.08); margin-bottom: 16px; }
+        .card h2 { font-size: 16px; color: #005088; margin-bottom: 8px; }
+        .resumo { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+        .kpi { background: #f8fafc; border-radius: 8px; padding: 12px; border: 1px solid #e2e8f0; }
+        .kpi small { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: #64748b; font-weight: 700; }
+        .kpi strong { font-size: 24px; color: #0f172a; }
+        .kpi span { font-size: 12px; color: #64748b; }
+        .ajuda { font-size: 13px; color: #64748b; line-height: 1.5; margin-bottom: 10px; }
+        details summary { cursor: pointer; font-weight: 600; color: #005088; font-size: 14px; }
+        textarea { width: 100%; min-height: 110px; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font: 13px/1.4 monospace; margin-top: 8px; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: #64748b; padding: 8px 6px; border-bottom: 2px solid #e2e8f0; }
+        td { padding: 6px; border-bottom: 1px solid #f1f5f9; }
+        td.turma { font-weight: 600; }
+        td.bloco { color: #64748b; font-size: 12px; }
+        input.num { width: 90px; padding: 7px 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; text-align: right; }
+        input.num.trof { width: 60px; }
+        input.num.mudou { border-color: #f59e0b; background: #fffbeb; }
+        input.num.invalido { border-color: #dc2626; background: #fef2f2; }
+        .antes { font-size: 11px; color: #94a3b8; margin-left: 4px; }
+        .barra-acoes { position: sticky; bottom: 0; background: #fff; border-top: 1px solid #e2e8f0; padding: 12px 18px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; box-shadow: 0 -2px 8px rgba(0,0,0,.05); border-radius: 10px; }
+        .btn { border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; font-size: 14px; cursor: pointer; }
+        .btn:disabled { opacity: .55; cursor: not-allowed; }
+        .btn-salvar { background: #16a34a; color: #fff; }
+        .btn-fechar { background: #005088; color: #fff; }
+        .btn-sec { background: #e2e8f0; color: #1e293b; }
+        .msg { font-size: 13px; flex: 1; min-width: 200px; }
+        .vazio { text-align: center; color: #64748b; padding: 24px 0; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1><i class="fa-solid fa-chart-line"></i> Frequência da Semana</h1>
+        <a href="restrito.html"><i class="fa-solid fa-arrow-left"></i> Voltar ao SIGA</a>
+    </header>
+    <main>
+        <div class="card">
+            <div class="resumo" id="resumo"><div class="vazio">Carregando…</div></div>
+        </div>
+
+        <div class="card">
+            <details>
+                <summary><i class="fa-solid fa-paste"></i> Colar de um relatório ou planilha (opcional)</summary>
+                <div class="ajuda" style="margin-top:8px">
+                    Cole as linhas com <strong>turma e porcentagem</strong> (ex.: <code>6º A - EF  91,26</code> ou <code>6A 91.26</code>),
+                    ou só a <strong>coluna de porcentagens na mesma ordem</strong> da tabela abaixo. Os valores entram nos campos para você conferir antes de salvar.
+                </div>
+                <textarea id="colar" placeholder="6º A - EF	91,26&#10;6º B - EF	93,29&#10;..."></textarea>
+                <button class="btn btn-sec" style="margin-top:8px" onclick="aplicarColagem()"><i class="fa-solid fa-wand-magic-sparkles"></i> Preencher a tabela</button>
+                <span id="msg-colar" class="ajuda" style="margin-left:8px"></span>
+            </details>
+        </div>
+
+        <div class="card">
+            <h2>Turmas</h2>
+            <div class="ajuda">Campos em amarelo foram alterados e ainda não foram salvos. Frequência de 0 a 100, com vírgula ou ponto.</div>
+            <div id="tabela"><div class="vazio">Carregando…</div></div>
+        </div>
+
+        <div class="barra-acoes">
+            <button class="btn btn-salvar" id="btn-salvar" onclick="salvar()" disabled><i class="fa-solid fa-floppy-disk"></i> Salvar</button>
+            <button class="btn btn-fechar" id="btn-fechar" onclick="fecharSemana()"><i class="fa-solid fa-flag-checkered"></i> Fechar semana agora</button>
+            <div class="msg" id="msg" aria-live="polite"></div>
+        </div>
+    </main>
+
+<script>
+    const APPS_SCRIPT_URL = SIGA_CONFIG.APPS_SCRIPT_URL;
+    let dados = null;
+
+    // Mesmo código de turma do frequenciômetro ("1º A - NEM" e "1NEM" viram a mesma coisa)
+    function codigoTurma(nome) {
+        const c = String(nome || '').toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+            .replace(/º|ª|°/g, '').replace(/-/g, ' ').replace(/\b(EF|EM|ANOS|ANO|SERIE)\b/g, '')
+            .replace(/\b(MANHA|TARDE|NOITE)\b/g, '').replace(/\s+/g, '').trim();
+        return c.replace(/^(\d)A(NEM|FD|AGRO)$/, '$1$2');
+    }
+    function num(v) {
+        const t = String(v == null ? '' : v).replace('%', '').trim().replace(',', '.');
+        if (t === '' || !/^-?\d+(\.\d+)?$/.test(t)) return null;
+        return parseFloat(t);
+    }
+    function fmt(n) { return n == null ? '—' : n.toFixed(2).replace('.', ','); }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        let sessao = null;
+        try { sessao = JSON.parse(sessionStorage.getItem('sgi_ccma_session') || localStorage.getItem('sgi_ccma_session') || 'null'); } catch (e) {}
+        if (!sessao || !sessao.token) { location.href = 'restrito.html'; return; }
+        if ((parseInt(sessao.nivel) || 0) < 3) { alert('Acesso restrito à Secretaria e à Direção.'); location.href = 'restrito.html'; return; }
+        carregar();
+        window.addEventListener('beforeunload', e => { if (haAlteracoes()) { e.preventDefault(); e.returnValue = ''; } });
+    });
+
+    async function carregar() {
+        try {
+            const r = await fetch(APPS_SCRIPT_URL + '?aba=frequencia_gestao');
+            const d = await r.json();
+            if (!d || d.status !== 'success') throw new Error(d && d.message ? d.message : 'Resposta inesperada');
+            dados = d;
+            renderizar();
+        } catch (e) {
+            document.getElementById('tabela').innerHTML = '<div class="vazio">Não foi possível carregar.<br><small>' + escaparHTML(e.message) +
+                '</small><br><small>Confira se o arquivo frequenciometro.gs já está no Apps Script.</small></div>';
+            document.getElementById('resumo').innerHTML = '';
+        }
+    }
+
+    function renderizar() {
+        const d = dados;
+        document.getElementById('resumo').innerHTML = `
+            <div class="kpi"><small>Média atual da escola</small><strong id="media-viva">${fmt(d.mediaAtual)}%</strong><span>prévia da semana ${d.proximaSemana}</span></div>
+            <div class="kpi"><small>Última semana fechada</small><strong>${d.ultimaSemana ? fmt(d.ultimaSemana.media) + '%' : '—'}</strong><span>${d.ultimaSemana ? 'semana ' + d.ultimaSemana.semana : 'nenhuma ainda'}</span></div>
+            <div class="kpi"><small>Última atualização</small><strong style="font-size:16px">${escaparHTML(d.atualizadoEm || '—')}</strong><span>${escaparHTML(d.atualizadoPor || '')}</span></div>
+            <div class="kpi"><small>Fechamento automático</small><strong style="font-size:16px">${d.pendenteFechar ? 'Sexta, 18h' : 'Em dia'}</strong><span>${d.pendenteFechar ? 'semana ' + d.proximaSemana + ' será registrada' : 'atualize para registrar a próxima'}</span></div>`;
+
+        document.getElementById('btn-fechar').innerHTML = `<i class="fa-solid fa-flag-checkered"></i> Fechar semana ${d.proximaSemana} agora`;
+
+        if (!d.turmas.length) { document.getElementById('tabela').innerHTML = '<div class="vazio">Nenhuma turma na aba "frequencia".</div>'; return; }
+        document.getElementById('tabela').innerHTML = `
+            <table>
+                <thead><tr><th>Turma</th><th>Turno</th><th>Frequência (%)</th><th>Troféus</th></tr></thead>
+                <tbody>${d.turmas.map((t, i) => `
+                    <tr>
+                        <td class="turma">${escaparHTML(t.turma)}</td>
+                        <td class="bloco">${escaparHTML(t.bloco)}</td>
+                        <td><input class="num freq" data-i="${i}" inputmode="decimal" value="${t.freq == null ? '' : fmt(t.freq)}" oninput="marcar(this)" aria-label="Frequência ${escaparHTML(t.turma)}"><span class="antes">antes ${fmt(t.freq)}</span></td>
+                        <td><input class="num trof" data-i="${i}" inputmode="numeric" value="${t.trofeus || 0}" oninput="marcar(this)" aria-label="Troféus ${escaparHTML(t.turma)}"></td>
+                    </tr>`).join('')}
+                </tbody>
+            </table>`;
+        atualizarEstado();
+    }
+
+    function marcar(inp) {
+        const t = dados.turmas[+inp.dataset.i];
+        if (inp.classList.contains('freq')) {
+            const v = num(inp.value);
+            inp.classList.toggle('invalido', inp.value.trim() !== '' && (v === null || v < 0 || v > 100));
+            inp.classList.toggle('mudou', v !== null && t.freq !== null ? Math.abs(v - t.freq) > 0.004 : v !== t.freq);
+        } else {
+            const v = parseInt(inp.value, 10);
+            inp.classList.toggle('invalido', inp.value.trim() !== '' && (isNaN(v) || v < 0));
+            inp.classList.toggle('mudou', !isNaN(v) && v !== (t.trofeus || 0));
+        }
+        atualizarEstado();
+    }
+
+    function haAlteracoes() { return !!document.querySelector('input.num.mudou'); }
+
+    function atualizarEstado() {
+        const invalidos = document.querySelectorAll('input.num.invalido').length;
+        document.getElementById('btn-salvar').disabled = !haAlteracoes() || invalidos > 0;
+        const vals = Array.from(document.querySelectorAll('input.freq')).map(i => num(i.value)).filter(v => v !== null && v > 0);
+        const m = vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+        const el = document.getElementById('media-viva');
+        if (el) el.textContent = fmt(m) + '%';
+        const msg = document.getElementById('msg');
+        if (invalidos) { msg.style.color = '#dc2626'; msg.textContent = 'Corrija os campos em vermelho.'; }
+        else if (haAlteracoes()) { msg.style.color = '#b45309'; msg.textContent = 'Há alterações não salvas.'; }
+    }
+
+    function aplicarColagem() {
+        const linhas = document.getElementById('colar').value.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+        const inputs = Array.from(document.querySelectorAll('input.freq'));
+        const out = document.getElementById('msg-colar');
+        if (!linhas.length) { out.textContent = 'Nada colado.'; return; }
+
+        // Só números, na ordem da tabela
+        if (linhas.every(l => num(l.split(/\t|;/)[0]) !== null)) {
+            linhas.slice(0, inputs.length).forEach((l, i) => { inputs[i].value = l.split(/\t|;/)[0].trim(); marcar(inputs[i]); });
+            out.textContent = `${Math.min(linhas.length, inputs.length)} valores preenchidos pela ordem.` + (linhas.length !== inputs.length ? ` (A tabela tem ${inputs.length} turmas e você colou ${linhas.length} linhas, confira.)` : '');
+            return;
+        }
+        // Turma + número
+        const porCodigo = {};
+        dados.turmas.forEach((t, i) => { porCodigo[codigoTurma(t.turma)] = i; });
+        let ok = 0; const naoAchadas = [];
+        linhas.forEach(l => {
+            const m = l.match(/^(.*?)[\s;\t]+(\d{1,3}(?:[.,]\d+)?)\s*%?\s*$/);
+            if (!m) { naoAchadas.push(l); return; }
+            const i = porCodigo[codigoTurma(m[1])];
+            if (i === undefined) { naoAchadas.push(m[1]); return; }
+            inputs[i].value = m[2]; marcar(inputs[i]); ok++;
+        });
+        out.textContent = `${ok} turma(s) preenchida(s).` + (naoAchadas.length ? ' Não reconhecidas: ' + naoAchadas.slice(0, 5).join(', ') + (naoAchadas.length > 5 ? '…' : '') : '');
+    }
+
+    async function chamar(payload) {
+        const r = await fetch(APPS_SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
+        return r.json();
+    }
+
+    async function salvar() {
+        const itens = [];
+        dados.turmas.forEach((t, i) => {
+            const f = document.querySelector(`input.freq[data-i="${i}"]`), tr = document.querySelector(`input.trof[data-i="${i}"]`);
+            if (f.classList.contains('mudou') || tr.classList.contains('mudou')) {
+                itens.push({ linha: t.linha, turma: t.turma, freq: num(f.value), trofeus: tr.value.trim() });
+            }
+        });
+        const btn = document.getElementById('btn-salvar'), msg = document.getElementById('msg');
+        btn.disabled = true; msg.style.color = '#64748b'; msg.textContent = 'Salvando…';
+        try {
+            const d = await chamar({ operacao: 'FREQ_SALVAR', itens });
+            if (d.status !== 'success') throw new Error(d.message || 'Falha ao salvar');
+            dados = d.gestao; renderizar();
+            msg.style.color = '#16a34a'; msg.textContent = '✅ ' + d.message + ' A TV atualiza em até 10 minutos.';
+        } catch (e) {
+            msg.style.color = '#dc2626'; msg.textContent = e.message; btn.disabled = false;
+        }
+    }
+
+    async function fecharSemana() {
+        if (haAlteracoes()) { alert('Salve as alterações antes de fechar a semana.'); return; }
+        const n = dados.proximaSemana;
+        if (!confirm(`Registrar a semana ${n} no histórico com a média atual (${fmt(dados.mediaAtual)}%)?\n\nSe não fizer isso, o sistema fecha sozinho na sexta às 18h.`)) return;
+        const msg = document.getElementById('msg');
+        msg.style.color = '#64748b'; msg.textContent = 'Fechando semana…';
+        try {
+            const d = await chamar({ operacao: 'FREQ_FECHAR_SEMANA' });
+            if (d.status !== 'success') throw new Error(d.message || 'Falha');
+            msg.style.color = '#16a34a'; msg.textContent = '✅ ' + d.message;
+            carregar();
+        } catch (e) { msg.style.color = '#dc2626'; msg.textContent = e.message; }
+    }
+</script>
+</body>
+</html>

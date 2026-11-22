@@ -13,22 +13,29 @@
  *   - POST SORTEIO_REGISTRAR / SORTEIO_DESMARCAR / SORTEIO_LIMPAR
  *                                   → SÓ COM A CHAVE DA TV: histórico na aba "Sorteios"
  *
- *  CONFIGURAÇÃO (uma vez):
- *   1. Ajuste FREQ_CONFIG.PLANILHA_ID abaixo (veja o comentário).
- *   2. No editor, execute FREQ_diagnosticar: o registro mostra se as 3 abas foram achadas.
- *   3. Execute FREQ_gerarChaveTV: o registro mostra o endereço para abrir na TV.
+ *  CONFIGURAÇÃO (uma vez, pelo editor do Apps Script):
+ *   1. Execute FREQ_diagnosticar: o registro mostra se as abas foram achadas.
+ *   2. Execute FREQ_gerarChaveTV: o registro mostra o endereço para abrir na TV.
+ *   3. Execute FREQ_instalarFechamentoSemanal: fecha a semana sozinho toda sexta.
+ *
+ *  ATUALIZAÇÃO SEMANAL (sem abrir a planilha):
+ *   SIGA → "Frequência da Semana" (nível 3+): digitar ou colar as % das turmas.
+ *   Toda sexta às 18h, se os números foram atualizados na semana, a média da
+ *   escola entra sozinha no HistoricoGeral como a próxima semana.
  * =====================================================================
  */
 
 var FREQ_CONFIG = {
-  // ID da planilha do frequenciômetro: o trecho entre /d/ e /edit no endereço dela.
-  // Deixe '' se as abas de frequência estiverem nesta MESMA planilha do SIGA.
+  // '' = esta mesma planilha do SIGA (é onde as abas estão agora).
   PLANILHA_ID: '',
 
-  // Números "gid" das abas que o frequenciômetro usava (copiados do código antigo).
-  GID_FREQUENCIA: 1746538498,   // A = turma, B = % frequência, C = turno, D = troféus
-  GID_ALUNOS: 1866544411,       // A = id, B = nome, C = turma, D = código da turma
-  GID_HISTORICO: 541390615,     // A = semana, B = média da escola
+  // Nomes das abas (procuradas pelo nome; o gid antigo fica como reserva)
+  ABA_FREQUENCIA: 'frequencia',   // A = Turma, B = Frequência, C = Bloco, D = Troféus, E = Código
+  ABA_ALUNOS: 'Alunos',           // A = aluno_id, B = nome_aluno, C = turma_ref, D = turma_codigo
+  ABA_HISTORICO: 'HistoricoGeral',// A = Semana, B = Media
+  GID_FREQUENCIA: 1746538498,
+  GID_ALUNOS: 1866544411,
+  GID_HISTORICO: 541390615,
 
   ABA_TRIMESTRES: 'Frequenciometro_Trimestres', // criada automaticamente nesta planilha
   ABA_SORTEIOS: 'Sorteios',                     // criada automaticamente nesta planilha
@@ -45,11 +52,15 @@ function FREQ_dadosPublicos_() {
   if (c) return JSON.parse(c);
 
   var ss = FREQ_planilha_();
+  var turmas = FREQ_lerTurmas_();
+  var historico = [['Semana', 'Media']].concat(FREQ_lerHistorico_().map(function (h) { return [String(h.semana), FREQ_fmt_(h.media)]; }));
+  var media = FREQ_mediaEscola_(turmas);
+  if (media !== null) historico.push(['Esta', FREQ_fmt_(media)]);   // semana em andamento, sempre calculada
   var resposta = {
     status: 'success',
     atualizadoEm: Utilities.formatDate(new Date(), 'GMT-3', 'dd/MM/yyyy HH:mm'),
-    frequencia: FREQ_linhas_(ss, FREQ_CONFIG.GID_FREQUENCIA, 4),
-    historico: FREQ_linhas_(ss, FREQ_CONFIG.GID_HISTORICO, 2),
+    frequencia: FREQ_linhas_(ss, 'frequencia', 4),
+    historico: historico,
     trimestres: FREQ_trimestres_()
   };
   cache.put('freq_publico', JSON.stringify(resposta), FREQ_CONFIG.CACHE_SEGUNDOS);
@@ -60,7 +71,7 @@ function FREQ_dadosAlunos_(chave) {
   if (!FREQ_chaveValida_(chave)) return { status: 'unauthorized', message: 'Chave da TV inválida.' };
   return {
     status: 'success',
-    alunos: FREQ_linhas_(FREQ_planilha_(), FREQ_CONFIG.GID_ALUNOS, 4),
+    alunos: FREQ_linhas_(FREQ_planilha_(), 'alunos', 4),
     sorteados: FREQ_sorteadosAtivos_()
   };
 }
@@ -115,9 +126,28 @@ function FREQ_abaPorGid_(ss, gid) {
   return null;
 }
 
+// tipo: 'frequencia' | 'alunos' | 'historico' — procura pelo nome e, se não achar, pelo gid antigo
+function FREQ_aba_(ss, tipo) {
+  var mapa = {
+    frequencia: [FREQ_CONFIG.ABA_FREQUENCIA, FREQ_CONFIG.GID_FREQUENCIA],
+    alunos: [FREQ_CONFIG.ABA_ALUNOS, FREQ_CONFIG.GID_ALUNOS],
+    historico: [FREQ_CONFIG.ABA_HISTORICO, FREQ_CONFIG.GID_HISTORICO]
+  }[tipo];
+  return ss.getSheetByName(mapa[0]) || FREQ_abaPorGid_(ss, mapa[1]);
+}
+
+// Lê "91,26", "92.77", "90%" ou número → 91.26
+function FREQ_num_(v) {
+  if (typeof v === 'number') return v;
+  var t = String(v == null ? '' : v).replace('%', '').trim().replace(',', '.').replace(/[^0-9.\-]/g, '');
+  var n = parseFloat(t);
+  return isNaN(n) ? null : n;
+}
+function FREQ_fmt_(n) { return (Math.round(n * 100) / 100).toFixed(2).replace('.', ','); }
+
 // Devolve as linhas como texto, igual ao CSV antigo (com o cabeçalho na linha 0)
-function FREQ_linhas_(ss, gid, colunas) {
-  var aba = FREQ_abaPorGid_(ss, gid);
+function FREQ_linhas_(ss, tipo, colunas) {
+  var aba = FREQ_aba_(ss, tipo);
   if (!aba || aba.getLastRow() === 0) return [];
   return aba.getRange(1, 1, aba.getLastRow(), colunas).getDisplayValues()
     .filter(function (l, i) { return i === 0 || l.join('').trim() !== ''; });
@@ -164,6 +194,152 @@ function FREQ_sorteadosAtivos_() {
 
 
 // ---------------------------------------------------------------------
+//  Frequência semanal: leitura, gravação e fechamento da semana
+// ---------------------------------------------------------------------
+function FREQ_lerTurmas_() {
+  var aba = FREQ_aba_(FREQ_planilha_(), 'frequencia');
+  if (!aba || aba.getLastRow() < 2) return [];
+  return aba.getRange(2, 1, aba.getLastRow() - 1, 5).getValues()
+    .map(function (l, i) {
+      return { linha: i + 2, turma: String(l[0] || '').trim(), freq: FREQ_num_(l[1]),
+        bloco: String(l[2] || '').trim(), trofeus: FREQ_num_(l[3]) || 0, codigo: String(l[4] || '').trim() };
+    })
+    .filter(function (t) { return t.turma !== ''; });
+}
+
+// Só as semanas numeradas (a linha "Esta" antiga é ignorada)
+function FREQ_lerHistorico_() {
+  var aba = FREQ_aba_(FREQ_planilha_(), 'historico');
+  if (!aba || aba.getLastRow() < 2) return [];
+  return aba.getRange(2, 1, aba.getLastRow() - 1, 2).getValues()
+    .map(function (l, i) { return { linha: i + 2, semana: parseInt(l[0], 10), media: FREQ_num_(l[1]) }; })
+    .filter(function (h) { return !isNaN(h.semana) && h.media !== null && h.media > 0; });
+}
+
+function FREQ_mediaEscola_(turmas) {
+  var v = turmas.map(function (t) { return t.freq; }).filter(function (x) { return x !== null && x > 0; });
+  if (!v.length) return null;
+  return v.reduce(function (a, b) { return a + b; }, 0) / v.length;
+}
+
+// Tela "Frequência da Semana" do SIGA (nível 3+)
+function FREQ_gestao_() {
+  var turmas = FREQ_lerTurmas_();
+  var hist = FREQ_lerHistorico_();
+  var props = PropertiesService.getScriptProperties();
+  var ultima = hist.length ? hist[hist.length - 1] : null;
+  return {
+    status: 'success',
+    turmas: turmas,
+    mediaAtual: FREQ_mediaEscola_(turmas),
+    ultimaSemana: ultima ? { semana: ultima.semana, media: ultima.media } : null,
+    proximaSemana: ultima ? ultima.semana + 1 : 1,
+    atualizadoEm: props.getProperty('FREQ_ATUALIZADO_EM') || '',
+    atualizadoPor: props.getProperty('FREQ_ATUALIZADO_POR') || '',
+    pendenteFechar: props.getProperty('FREQ_PENDENTE') === 'SIM'
+  };
+}
+
+function FREQ_salvar_(sessao, corpo) {
+  var itens = Array.isArray(corpo.itens) ? corpo.itens : [];
+  if (!itens.length) return { status: 'error', message: 'Nada para salvar.' };
+  var lock = LockService.getScriptLock();
+  lock.waitLock(15000);
+  try {
+    var aba = FREQ_aba_(FREQ_planilha_(), 'frequencia');
+    var turmas = FREQ_lerTurmas_();
+    var porLinha = {};
+    turmas.forEach(function (t) { porLinha[t.linha] = t; });
+    var n = 0;
+    itens.forEach(function (it) {
+      var t = porLinha[parseInt(it.linha, 10)];
+      if (!t) return;
+      // confere que a linha ainda é a mesma turma (alguém pode ter mexido na planilha)
+      if (it.turma && String(it.turma).trim() !== t.turma) return;
+      var f = FREQ_num_(it.freq);
+      if (f !== null && f >= 0 && f <= 100) { aba.getRange(t.linha, 2).setValue(Math.round(f * 100) / 100); n++; }
+      if (it.trofeus !== undefined && it.trofeus !== '') {
+        var tr = parseInt(it.trofeus, 10);
+        if (!isNaN(tr) && tr >= 0 && tr < 1000) aba.getRange(t.linha, 4).setValue(tr);
+      }
+    });
+    var props = PropertiesService.getScriptProperties();
+    props.setProperty('FREQ_ATUALIZADO_EM', Utilities.formatDate(new Date(), 'GMT-3', 'dd/MM/yyyy HH:mm'));
+    props.setProperty('FREQ_ATUALIZADO_POR', sessao.email);
+    props.setProperty('FREQ_PENDENTE', 'SIM');
+    CacheService.getScriptCache().remove('freq_publico');
+    return { status: 'success', message: n + ' turma(s) atualizada(s).', gestao: FREQ_gestao_() };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+// Acrescenta a média atual como a próxima semana do HistoricoGeral
+function FREQ_fecharSemana_(quem) {
+  var lock = LockService.getScriptLock();
+  lock.waitLock(15000);
+  try {
+    var media = FREQ_mediaEscola_(FREQ_lerTurmas_());
+    if (media === null) return { status: 'error', message: 'Sem frequências para calcular a média.' };
+    var aba = FREQ_aba_(FREQ_planilha_(), 'historico');
+    FREQ_corrigirHistorico_(aba);
+    var hist = FREQ_lerHistorico_();
+    var semana = hist.length ? hist[hist.length - 1].semana + 1 : 1;
+    // Escreve logo depois da última semana numerada (sobrescreve a linha "Esta" antiga, se houver)
+    var linha = hist.length ? hist[hist.length - 1].linha + 1 : 2;
+    aba.getRange(linha, 1, 1, 2).setValues([[semana, Math.round(media * 100) / 100]]);
+    var resto = aba.getLastRow() - linha;
+    if (resto > 0) {
+      var abaixo = aba.getRange(linha + 1, 1, resto, 1).getValues();
+      for (var i = 0; i < abaixo.length; i++) {
+        if (String(abaixo[i][0]).trim().toLowerCase() === 'esta') aba.getRange(linha + 1 + i, 1, 1, 2).clearContent();
+      }
+    }
+    var props = PropertiesService.getScriptProperties();
+    props.setProperty('FREQ_PENDENTE', 'NAO');
+    CacheService.getScriptCache().remove('freq_publico');
+    if (typeof SEG_auditar_ === 'function') SEG_auditar_({ email: quem || 'automático', tipo: 'sistema' }, 'FREQ_FECHAR_SEMANA', 'Semana ' + semana + ' = ' + FREQ_fmt_(media));
+    return { status: 'success', message: 'Semana ' + semana + ' registrada: ' + FREQ_fmt_(media) + '%', semana: semana };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+// Converte "92.77" (texto com ponto) em número de verdade
+function FREQ_corrigirHistorico_(aba) {
+  if (!aba || aba.getLastRow() < 2) return;
+  var rng = aba.getRange(2, 2, aba.getLastRow() - 1, 1);
+  var v = rng.getValues(), mudou = false;
+  for (var i = 0; i < v.length; i++) {
+    if (typeof v[i][0] === 'string' && v[i][0].trim() !== '') {
+      var n = FREQ_num_(v[i][0]);
+      if (n !== null) { v[i][0] = n; mudou = true; }
+    }
+  }
+  if (mudou) rng.setValues(v);
+}
+
+// Gatilho de sexta-feira: só fecha se houve atualização na semana
+function FREQ_fecharSemanaAutomatico() {
+  if (PropertiesService.getScriptProperties().getProperty('FREQ_PENDENTE') !== 'SIM') {
+    Logger.log('Frequência não foi atualizada nesta semana: nada a fechar.');
+    return;
+  }
+  Logger.log(JSON.stringify(FREQ_fecharSemana_('automático (sexta-feira)')));
+}
+
+// Execute UMA vez pelo editor
+function FREQ_instalarFechamentoSemanal() {
+  ScriptApp.getProjectTriggers().forEach(function (t) {
+    if (t.getHandlerFunction() === 'FREQ_fecharSemanaAutomatico') ScriptApp.deleteTrigger(t);
+  });
+  ScriptApp.newTrigger('FREQ_fecharSemanaAutomatico').timeBased()
+    .onWeekDay(ScriptApp.WeekDay.FRIDAY).atHour(18).inTimezone('America/Sao_Paulo').create();
+  FREQ_corrigirHistorico_(FREQ_aba_(FREQ_planilha_(), 'historico'));
+  Logger.log('Pronto: toda sexta às 18h a semana é fechada (se a frequência foi atualizada).');
+}
+
+// ---------------------------------------------------------------------
 //  Chave da TV
 // ---------------------------------------------------------------------
 function FREQ_chaveValida_(chave) {
@@ -188,11 +364,16 @@ function FREQ_gerarChaveTV() {
 function FREQ_diagnosticar() {
   var ss = FREQ_planilha_();
   Logger.log('Planilha: ' + ss.getName());
-  [['Frequência', FREQ_CONFIG.GID_FREQUENCIA], ['Alunos', FREQ_CONFIG.GID_ALUNOS], ['Histórico', FREQ_CONFIG.GID_HISTORICO]]
+  [['Frequência', 'frequencia'], ['Alunos', 'alunos'], ['Histórico', 'historico']]
     .forEach(function (p) {
-      var aba = FREQ_abaPorGid_(ss, p[1]);
-      Logger.log(p[0] + ' (gid ' + p[1] + '): ' + (aba ? 'OK → aba "' + aba.getName() + '", ' + (aba.getLastRow() - 1) + ' linhas'
-        : 'NÃO ENCONTRADA. Confira FREQ_CONFIG.PLANILHA_ID.'));
+      var aba = FREQ_aba_(ss, p[1]);
+      Logger.log(p[0] + ': ' + (aba ? 'OK → aba "' + aba.getName() + '", ' + (aba.getLastRow() - 1) + ' linhas'
+        : 'NÃO ENCONTRADA. Confira os nomes em FREQ_CONFIG.'));
     });
+  var hist = FREQ_lerHistorico_();
+  Logger.log('Última semana no histórico: ' + (hist.length ? hist[hist.length - 1].semana : 'nenhuma'));
+  Logger.log('Média atual da escola: ' + FREQ_fmt_(FREQ_mediaEscola_(FREQ_lerTurmas_()) || 0) + '%');
+  Logger.log('Fechamento automático: ' + (ScriptApp.getProjectTriggers().some(function (t) {
+    return t.getHandlerFunction() === 'FREQ_fecharSemanaAutomatico'; }) ? 'instalado' : 'FALTA, execute FREQ_instalarFechamentoSemanal'));
   Logger.log('Chave da TV: ' + (PropertiesService.getScriptProperties().getProperty('FREQ_CHAVE_TV') ? 'configurada' : 'FALTA, execute FREQ_gerarChaveTV'));
 }

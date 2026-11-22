@@ -62,6 +62,7 @@ var SEG_NIVEL_MINIMO = {
   'usuarios': 3,
   'responsaveis_cadastros': 3,
   'noticias_gestao': 3,
+  'frequencia_gestao': 3,
   'avaliacoes_listar': 3,
   'avaliacoes_estatisticas': 3,
   'disciplinas_todas': 3,
@@ -70,6 +71,8 @@ var SEG_NIVEL_MINIMO = {
   // POST (operacao)
   'APROVAR_RESPONSAVEL': 3,
   'NOTICIA_ADICIONAR': 3,
+  'FREQ_SALVAR': 3,
+  'FREQ_FECHAR_SEMANA': 3,
   'NOTICIA_OCULTAR': 3,
   'NOTICIA_REATIVAR': 3,
   'RECUSAR_RESPONSAVEL': 3,
@@ -151,6 +154,7 @@ function doGet(e) {
   if (rota === 'tabela') return SEG_json_(SEG_lerTabelaGviz_(p.nome));
   if (rota === 'responsaveis_cadastros') return SEG_json_(SEG_listarVinculos_());
   if (rota === 'noticias_gestao') return SEG_json_(NOT_listarTodas_());
+  if (rota === 'frequencia_gestao') return SEG_json_(FREQ_gestao_());
 
   var saida = doGetOriginal(e);
   if (sessao.tipo === 'responsavel') saida = SEG_filtrarSaidaResponsavel_(saida, sessao, rota);
@@ -190,6 +194,8 @@ function doPost(e) {
     }
     e.postData.contents = JSON.stringify(corpo); // o doPostOriginal lê daqui
 
+    if (op === 'FREQ_SALVAR') { SEG_auditar_(sessao, op, (corpo.itens || []).length + ' turmas'); return SEG_json_(FREQ_salvar_(sessao, corpo)); }
+    if (op === 'FREQ_FECHAR_SEMANA') return SEG_json_(FREQ_fecharSemana_(sessao.email));
     if (op === 'NOTICIA_ADICIONAR') { SEG_auditar_(sessao, op, corpo.link); return SEG_json_(NOT_adicionar_(sessao, corpo)); }
     if (op === 'NOTICIA_OCULTAR') { SEG_auditar_(sessao, op, corpo.id); return SEG_json_(NOT_alterarAtivo_(corpo, false)); }
     if (op === 'NOTICIA_REATIVAR') { SEG_auditar_(sessao, op, corpo.id); return SEG_json_(NOT_alterarAtivo_(corpo, true)); }
