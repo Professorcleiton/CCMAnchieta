@@ -1,8 +1,8 @@
-const CACHE_NAME = 'siga-cache-v14'; // v14: push Web Push (VAPID) sem conteúdo sensível
+const CACHE_NAME = 'siga-cache-v15'; // v15: app dos pais (manifest-pais.json) e provas no portal
 
 const urlsToCache = [
     '/', '/index.html', '/restrito.html', '/responsaveis.html',
-    '/painel-responsavel.html', '/style.css', '/siga-core.js', '/script.js', '/db.js',
+    '/painel-responsavel.html', '/horarios-filho.html', '/manifest-pais.json', '/img/app-pais-192.png', '/img/app-pais-512.png', '/img/siga-192.png', '/style.css', '/siga-core.js', '/script.js', '/db.js',
     '/img/SIGA.png', '/img/logoA.png'
 ];
 

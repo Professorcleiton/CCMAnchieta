@@ -43,6 +43,7 @@ var SEG_CONFIG = {
   ABA_AUDITORIA: 'Auditoria',            // criada automaticamente
 
   SESSAO_CACHE_SEGUNDOS: 6 * 60 * 60,    // cache rápido; a fonte oficial continua sendo a aba "Sessoes"
+  SESSAO_RESPONSAVEL_DIAS: 30,           // app dos pais ("manter conectado"); a equipe segue com 8 h
 
   // Responsáveis que JÁ tinham conta antes desta atualização:
   //  true  = continuam entrando; o vínculo vira "APROVADO (LEGADO - revisar)"
@@ -108,7 +109,7 @@ var SEG_ROTAS_PROPRIO_EMAIL = ['avaliacoes_disciplinas_professor', 'avaliacoes_r
 
 // O que um RESPONSÁVEL logado pode chamar (todo o resto é negado)
 var SEG_PERMITIDO_RESPONSAVEL = {
-  GET: ['todos_os_dados', 'listar_documentos_aluno', 'fatos_emitidos', 'horarios', 'alunos'],
+  GET: ['todos_os_dados', 'listar_documentos_aluno', 'fatos_emitidos', 'horarios', 'alunos', 'provas_filhos'],
   POST: ['salvar_token_push', 'verificar_atualizacao', 'listar_documentos_aluno', 'upload_documento', 'LOGOUT']
 };
 
@@ -153,6 +154,7 @@ function doGet(e) {
   if (SEG_AUDITAR_GET.indexOf(rota) !== -1) SEG_auditar_(sessao, 'GET ' + rota, p.aluno || p.nome || p.turma || '');
 
   if (rota === 'tabela') return SEG_json_(SEG_lerTabelaGviz_(p.nome));
+  if (rota === 'provas_filhos') return SEG_json_(SEG_provasDosFilhos_(sessao));
   if (rota === 'responsaveis_cadastros') return SEG_json_(SEG_listarVinculos_());
   if (rota === 'noticias_gestao') return SEG_json_(NOT_listarTodas_());
   if (rota === 'frequencia_gestao') return SEG_json_(FREQ_gestao_());
@@ -255,6 +257,19 @@ function SEG_validarSessao_(token) {
 
 function SEG_registrarSessao_(sessao) {
   var token = salvarSessao(sessao.email, sessao.nome, sessao.setor, sessao.nivel); // grava na aba Sessoes
+  if (sessao.tipo === 'responsavel' && SEG_CONFIG.SESSAO_RESPONSAVEL_DIAS) {
+    // Responsável: estende a validade (coluna G "ExpiraEm" da aba Sessoes)
+    var aba = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Sessoes');
+    if (aba) {
+      var dados = aba.getDataRange().getValues();
+      for (var i = dados.length - 1; i >= 1; i--) {
+        if (String(dados[i][0]) === token) {
+          aba.getRange(i + 1, 7).setValue(new Date(Date.now() + SEG_CONFIG.SESSAO_RESPONSAVEL_DIAS * 86400000).toISOString());
+          break;
+        }
+      }
+    }
+  }
   CacheService.getScriptCache().put('sess_' + token, JSON.stringify(sessao), SEG_CONFIG.SESSAO_CACHE_SEGUNDOS);
   return token;
 }
@@ -702,6 +717,74 @@ function SEG_lerRegistros_(filtroAluno, ano, incluirFatos) {
     saida.fatos_seed = fatos;
   }
   return saida;
+}
+
+
+// =====================================================================
+//  PROVAS DOS FILHOS (Portal dos Pais)
+//  Lê os pedidos de impressão (aba Pedidos_Avaliacoes) das turmas dos filhos.
+//  Entrega SÓ disciplina, data, valor, trimestre e professor:
+//  o conteúdo da prova e os anexos nunca saem do servidor.
+// =====================================================================
+function SEG_codigoTurma_(t) {
+  var c = String(t || '').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[º°ª]/g, '').replace(/-/g, ' ')
+    .replace(/\b(EF|EM|ANOS|ANO|SERIE|MANHA|TARDE|NOITE|INTEGRAL)\b/g, '').replace(/\s+/g, '');
+  return c.replace(/^(\d)A(NEM|FD|AGRO)$/, '$1$2');
+}
+
+function SEG_dataProva_(v) {
+  if (v instanceof Date) return new Date(v.getFullYear(), v.getMonth(), v.getDate());
+  var t = String(v || '').trim(), m;
+  if ((m = t.match(/^(\d{4})-(\d{2})-(\d{2})/))) return new Date(+m[1], +m[2] - 1, +m[3]);
+  if ((m = t.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/))) return new Date(+m[3], +m[2] - 1, +m[1]);
+  return null;
+}
+
+function SEG_provasDosFilhos_(sessao) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var abaAlunos = ss.getSheetByName(SEG_CONFIG.ABA_ALUNOS);
+  var abaPedidos = ss.getSheetByName('Pedidos_Avaliacoes');
+  if (!abaAlunos || !abaPedidos) return { status: 'success', filhos: [] };
+
+  // turma de cada filho (coluna C = turma, D = código da turma)
+  var alvo = {};
+  sessao.alunos.forEach(function (n) { alvo[SEG_normalizar_(n)] = n; });
+  var filhos = {};
+  abaAlunos.getDataRange().getValues().slice(1).forEach(function (l) {
+    var chave = SEG_normalizar_(l[1]);
+    if (!alvo[chave]) return;
+    filhos[chave] = { aluno: alvo[chave], turma: String(l[3] || l[2] || '').trim(),
+      codigos: [SEG_codigoTurma_(l[3]), SEG_codigoTurma_(l[2])].filter(function (c) { return c; }), provas: [], _vistas: {} };
+  });
+
+  var hoje = new Date(); hoje = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+  var desde = new Date(hoje.getTime() - 7 * 86400000);    // mostra também as da última semana
+  abaPedidos.getDataRange().getValues().slice(1).forEach(function (l) {
+    var status = String(l[13] || '').trim();
+    if (!l[0] || status === 'Rascunho' || status === 'Cancelado') return;
+    var data = SEG_dataProva_(l[7]);
+    if (!data || data < desde) return;
+    var codigo = SEG_codigoTurma_(l[5]);
+    Object.keys(filhos).forEach(function (k) {
+      var f = filhos[k];
+      if (f.codigos.indexOf(codigo) === -1) return;
+      var disciplina = String(l[4] || '').trim();
+      var iso = Utilities.formatDate(data, 'GMT-3', 'yyyy-MM-dd');
+      var chave = disciplina.toLowerCase() + '|' + iso;   // reimpressões/versões personalizadas = uma prova só
+      if (f._vistas[chave]) return;
+      f._vistas[chave] = true;
+      f.provas.push({ data: iso, disciplina: disciplina, valor: String(l[8] || '').trim(),
+        trimestre: String(l[6] || '').trim(), professor: String(l[3] || '').trim() });
+    });
+  });
+
+  var lista = Object.keys(filhos).map(function (k) {
+    var f = filhos[k];
+    f.provas.sort(function (a, b) { return a.data < b.data ? -1 : a.data > b.data ? 1 : 0; });
+    return { aluno: f.aluno, turma: f.turma, provas: f.provas };
+  });
+  return { status: 'success', hoje: Utilities.formatDate(hoje, 'GMT-3', 'yyyy-MM-dd'), filhos: lista };
 }
 
 

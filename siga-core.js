@@ -96,7 +96,17 @@
     function obterSessao() {
         return lerJSON(sessionStorage, CHAVE_SESSAO_SERVIDOR)
             || lerJSON(localStorage, CHAVE_SESSAO_SERVIDOR)
-            || lerJSON(sessionStorage, CHAVE_SESSAO_RESPONSAVEL);
+            || lerJSON(sessionStorage, CHAVE_SESSAO_RESPONSAVEL)
+            || lerJSON(localStorage, CHAVE_SESSAO_RESPONSAVEL);
+    }
+
+    // Sessão do responsável: no app ("manter conectado") fica no aparelho
+    function obterSessaoResponsavel() {
+        return lerJSON(sessionStorage, CHAVE_SESSAO_RESPONSAVEL) || lerJSON(localStorage, CHAVE_SESSAO_RESPONSAVEL);
+    }
+    function sairResponsavel() {
+        sessionStorage.removeItem(CHAVE_SESSAO_RESPONSAVEL);
+        localStorage.removeItem(CHAVE_SESSAO_RESPONSAVEL);
     }
 
     function obterToken() {
@@ -105,10 +115,11 @@
     }
 
     function encerrarSessaoLocal(motivo) {
-        const eraResponsavel = !!sessionStorage.getItem(CHAVE_SESSAO_RESPONSAVEL);
+        const eraResponsavel = !!(sessionStorage.getItem(CHAVE_SESSAO_RESPONSAVEL) || localStorage.getItem(CHAVE_SESSAO_RESPONSAVEL));
         sessionStorage.removeItem(CHAVE_SESSAO_SERVIDOR);
         localStorage.removeItem(CHAVE_SESSAO_SERVIDOR);
         sessionStorage.removeItem(CHAVE_SESSAO_RESPONSAVEL);
+        localStorage.removeItem(CHAVE_SESSAO_RESPONSAVEL);
         try { sessionStorage.setItem('siga_aviso_login', motivo || 'Sua sessão expirou. Entre novamente.'); } catch (e) {}
         const destino = eraResponsavel ? 'responsaveis.html' : 'restrito.html';
         const pagina = location.pathname.split('/').pop() || 'index.html';
@@ -397,7 +408,63 @@
         return d.status === 'success' ? { ok: true } : { ok: false, motivo: d.message || 'Não foi possível salvar no servidor.' };
     }
 
+    // ---------- 9. INSTALAR O APP (PWA) ----------
+    // O navegador avisa cedo que o app pode ser instalado: guardamos o aviso.
+    let avisoInstalacao = null;
+    global.addEventListener('beforeinstallprompt', function (e) {
+        e.preventDefault();
+        avisoInstalacao = e;
+        document.querySelectorAll('[data-instalar-app]').forEach(function (b) { b.style.display = ''; });
+    });
+    global.addEventListener('appinstalled', function () {
+        avisoInstalacao = null;
+        document.querySelectorAll('[data-instalar-app]').forEach(function (b) { b.style.display = 'none'; });
+    });
+
+    function appJaInstalado() {
+        return (global.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+    }
+    function ehIOS() { return /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); }
+
+    // Liga um botão (com o atributo data-instalar-app) à instalação. nomeApp aparece nas instruções do iPhone.
+    function configurarInstalacao(botao, nomeApp) {
+        if (!botao) return;
+        botao.setAttribute('data-instalar-app', '');
+        botao.style.display = 'none';
+        if (appJaInstalado()) return;                 // já está aberto como app
+        if (avisoInstalacao || ehIOS()) botao.style.display = '';
+        botao.addEventListener('click', async function () {
+            if (avisoInstalacao) {
+                avisoInstalacao.prompt();
+                try { await avisoInstalacao.userChoice; } catch (e) {}
+                avisoInstalacao = null;
+                botao.style.display = 'none';
+                return;
+            }
+            if (ehIOS()) mostrarInstrucoesIOS(nomeApp);
+        });
+    }
+
+    function mostrarInstrucoesIOS(nomeApp) {
+        const fundo = document.createElement('div');
+        fundo.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:99998;display:flex;align-items:flex-end;justify-content:center;padding:16px;font-family:system-ui,sans-serif;';
+        fundo.innerHTML = '<div role="dialog" aria-modal="true" style="background:#fff;color:#1e293b;border-radius:16px;max-width:420px;width:100%;padding:20px;box-shadow:0 10px 30px rgba(0,0,0,.3);">' +
+            '<h3 style="margin:0 0 10px;font-size:18px;">Instalar o app ' + escaparHTML(nomeApp) + '</h3>' +
+            '<ol style="margin:0 0 14px 18px;padding:0;line-height:1.7;font-size:15px;">' +
+            '<li>Toque em <strong>Compartilhar</strong> <span style="font-size:18px">⎋</span> (o quadrado com a seta, na barra do Safari)</li>' +
+            '<li>Role e toque em <strong>Adicionar à Tela de Início</strong></li>' +
+            '<li>Toque em <strong>Adicionar</strong></li></ol>' +
+            '<p style="font-size:13px;color:#64748b;margin:0 0 14px;">No iPhone, as notificações da escola só funcionam com o app instalado assim (Safari, iOS 16.4 ou mais novo).</p>' +
+            '<button type="button" style="width:100%;padding:12px;border:none;border-radius:10px;background:#7c3aed;color:#fff;font-weight:700;font-size:15px;">Entendi</button></div>';
+        fundo.addEventListener('click', function (e) { if (e.target === fundo || e.target.tagName === 'BUTTON') fundo.remove(); });
+        document.body.appendChild(fundo);
+    }
+
     // ---------- EXPORTA ----------
+    global.configurarInstalacao = configurarInstalacao;
+    global.appJaInstaladoSIGA = appJaInstalado;
+    global.obterSessaoResponsavel = obterSessaoResponsavel;
+    global.sairResponsavel = sairResponsavel;
     global.ativarPushSIGA = ativarPushSIGA;
     global.pushAtivoSIGA = pushAtivo;
     global.abrirRecuperacaoSenha = abrirRecuperacaoSenha;
