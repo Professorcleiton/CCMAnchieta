@@ -23,7 +23,7 @@ regs.splice(1,0,[new Date(2026,0,1),'JOÃO DA SILVA','ped','velho <b>','Prof']);
 add('Registros',regs);
 const ctx={console,Date,Math,JSON,String,Number,Array,Object,parseInt,Set,
  CacheService:{getScriptCache:()=>({get:k=>cache[k]??null,put:(k,v)=>{cache[k]=v},remove:k=>{delete cache[k]}})},
- SpreadsheetApp:{getActiveSpreadsheet:()=>({getSheetByName:n=>S[n]||null,insertSheet:n=>(S[n]=sheet(n,[])),getSheets:()=>Object.values(S)})},
+ SpreadsheetApp:{getActiveSpreadsheet:()=>({getId:()=>'PLANILHA',getSheetByName:n=>S[n]||null,insertSheet:n=>(S[n]=sheet(n,[])),deleteSheet:a=>{delete S[a.name]},getSheets:()=>Object.values(S)})},
  ContentService:{MimeType:{JSON:'json',TEXT:'text',JAVASCRIPT:'js'},createTextOutput:s=>({c:s,getContent(){return this.c},setMimeType(){return this}})},
  Utilities:{getUuid:()=>crypto.randomUUID(),DigestAlgorithm:{SHA_256:1},MacAlgorithm:{HMAC_SHA_256:1},Charset:{UTF_8:1},
   computeDigest:(a,t)=>s8(crypto.createHash('sha256').update(typeof t==='string'?Buffer.from(t):u8(t)).digest()),
@@ -34,7 +34,7 @@ const ctx={console,Date,Math,JSON,String,Number,Array,Object,parseInt,Set,
   newBlob:(d,t,n)=>typeof d==='string'?{getBytes:()=>s8(Buffer.from(d,'utf8'))}:{bytes:d,type:t,name:n},
   formatDate:(d,tz,p)=>p==='yyyy-MM-dd'?[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-'):d.toISOString()},
  PropertiesService:{_p:{},getScriptProperties(){const p=this._p;return{getProperty:k=>p[k]??null,setProperty:(k,v)=>{p[k]=v}}}},
- DriveApp:{arquivos:[],getFolderById(){const self=this;return{createFile(b){const f={nome:b.name,tipo:b.type,setDescription(){},getUrl:()=>'https://drive.google.com/file/d/'+self.arquivos.length};self.arquivos.push(f);return f}}}},
+ DriveApp:{arquivos:[],copias:[],getFileById(id){const self=this;return{makeCopy(n){self.copias.push(n);return{getUrl:()=>'https://docs.google.com/copia/'+self.copias.length}}}},getFolderById(){const self=this;return{createFile(b){const f={nome:b.name,tipo:b.type,setDescription(){},getUrl:()=>'https://drive.google.com/file/d/'+self.arquivos.length};self.arquivos.push(f);return f}}}},
  UrlFetchApp:{calls:[],fetch(u,o){this.calls.push({u,o});return{getResponseCode:()=>201,getContentText:()=>''}}},
  LockService:{getScriptLock:()=>({waitLock(){},releaseLock(){}})},
  MailApp:{sent:[],falhar:false,sendEmail(o,a,b){if(this.falhar)throw new Error('Cota diária de e-mail excedida');this.sent.push(typeof o==='object'?o:{to:o,subject:a,body:b})}},
@@ -47,6 +47,7 @@ vm.runInContext(fs.readFileSync(path.join(__dirname,'..','backend','push-e-docum
 vm.runInContext(fs.readFileSync(path.join(__dirname,'..','backend','noticias.gs'),'utf8'),ctx);
 vm.runInContext(fs.readFileSync(path.join(__dirname,'..','backend','frequenciometro.gs'),'utf8'),ctx);
 vm.runInContext(fs.readFileSync(path.join(__dirname,'..','backend','horarios.gs'),'utf8'),ctx);
+vm.runInContext(fs.readFileSync(path.join(__dirname,'..','backend','virada-ano.gs'),'utf8'),ctx);
 const G=p=>JSON.parse(ctx.doGet({parameter:p}).getContent());
 const P=b=>{const o=ctx.doPost({parameter:{},postData:{contents:JSON.stringify(b)}}).getContent();try{return JSON.parse(o)}catch(e){return o}};
 // --- acesso anônimo bloqueado
@@ -340,4 +341,66 @@ assert.strictEqual(SG.status,'success'); assert.strictEqual(S.Horarios.rows.slic
 assert.strictEqual(S.Horarios.rows.find(r=>r[1]==='6A'&&r[0]==='Manhã')[8],'','apoio removido quando pedido');
 assert.strictEqual(P({operacao:'SALVAR_GRADE',token:tdir,turma:'6A',turno:'Noite',grade:{}}).status,'error');
 assert.strictEqual(P({operacao:'SALVAR_GRADE',token:tp2(),turma:'6A',turno:'Manhã',grade:{}}).status,'forbidden');
+
+// ===== virada-ano.gs
+S.Alunos.rows.length=0;
+S.Alunos.rows.push(['aluno_id','nome_aluno','turma_ref','turma_codigo','extra'],
+ [1,'ANA 6A','6º Ano A','6A','e1'],[2,'BETO 6A','6º Ano A','6A','e2'],[3,'CAIO 9A','9º Ano A','9A',''],[4,'DANI 9A','9º Ano A','9A',''],
+ [5,'EVA 3ANEM','3º Ano A NEM','3ANEM',''],[6,'FABI 2NEM','2º Ano NEM','2NEM',''],[7,'GABI 6A','6º Ano A','6A','']);
+S.Horarios.rows.push(['Manhã','9A','Terça','1ª','','Matemática','Ana','',''],['Manhã','9A','Terça','2ª','','Matemática','Ana','',''],
+ ['Manhã','6A','Terça','3ª','','Matemática','Ana','',''],['Tarde','3ANEM','Terça','1ª','','Física','Leo','',''],['Tarde','2NEM','Terça','1ª','','Física','Leo','','']);
+let VD=G({aba:'virada_dados',token:tdir});
+assert.strictEqual(VD.status,'success'); assert.strictEqual(VD.turmasAtuaisSalvas,false);
+const dest=Object.fromEntries(VD.turmasAtuais.map(t=>[t.codigo,t.destino]));
+assert.strictEqual(dest['6A'],'7A'); assert.strictEqual(dest['9A'],'ESCOLHA'); assert.strictEqual(dest['3ANEM'],'EGRESSO'); assert.strictEqual(dest['2NEM'],'3NEM');
+assert.strictEqual(VD.turmasAtuais.find(t=>t.codigo==='6A').nome,'6º Ano A','nome vem da aba Alunos');
+assert.deepStrictEqual(VD.turmasProximas.map(t=>t.codigo),['6A','7A','8B','3NEM'],'sugeridas pelos destinos (7B vira 8B), médio no fim');
+assert(VD.turmasProximas.some(t=>t.codigo==='6A'),'6º ano novo'); assert(VD.turmasProximas.some(t=>t.codigo==='7A'));
+const mat=VD.matriz.linhas.find(l=>l.serie==='9'&&l.disciplina==='Matemática'); assert.strictEqual(mat.aulas,2,'matriz pela grade');
+assert.strictEqual(VD.matriz.salva,false);
+assert.strictEqual(G({aba:'virada_dados',token:ts}).status,'forbidden','secretaria (3) não acessa');
+// executar sem salvar turmas -> erro
+assert.strictEqual(P({operacao:'VIRADA_EXECUTAR',token:tdir,confirmar:String(VD.proximoAno)}).status,'error');
+// salvar turmas do ano e do próximo (9D nova, 2NEM -> 3BNEM)
+const atuais=VD.turmasAtuais.map(t=>t.codigo==='2NEM'?{...t,destino:'3BNEM'}:t);
+assert.strictEqual(P({operacao:'VIRADA_SALVAR_TURMAS',token:tdir,ano:VD.anoAtual,turmas:atuais}).status,'success');
+assert.strictEqual(P({operacao:'VIRADA_SALVAR_TURMAS',token:tdir,ano:VD.anoAtual+1,turmas:[{codigo:'6A'},{codigo:'7a',nome:'7º Ano A',turno:'Tarde'},{codigo:'1NEM'},{codigo:'3BNEM'}]}).status,'success');
+assert.strictEqual(P({operacao:'VIRADA_SALVAR_TURMAS',token:tdir,ano:VD.anoAtual+5,turmas:[]}).status,'error');
+assert.strictEqual(P({operacao:'VIRADA_SALVAR_TURMAS',token:tdir,ano:VD.anoAtual,turmas:[{codigo:'6A'},{codigo:'6a'}]}).message,'Turma repetida: 6A');
+// pendência: 9º sem escolha
+let VX=P({operacao:'VIRADA_EXECUTAR',token:tdir,confirmar:String(VD.proximoAno)});
+assert.strictEqual(VX.status,'pendencias'); assert.strictEqual(VX.pendencias.length,2);
+// situações: Caio -> 1NEM, Dani transferida, Gabi retida no 6A
+assert.strictEqual(P({operacao:'VIRADA_SALVAR_SITUACOES',token:tdir,itens:[{nome:'CAIO 9A',turma:'9A',situacao:'Aprovado',destino:'1NEM'},{nome:'DANI 9A',turma:'9A',situacao:'Transferido'},{nome:'GABI 6A',turma:'6A',situacao:'Retido'},{nome:'X',situacao:'Foi embora'}]}).status,'error','situação inválida');
+assert.strictEqual(P({operacao:'VIRADA_SALVAR_SITUACOES',token:tdir,itens:[{nome:'CAIO 9A',turma:'9A',situacao:'Aprovado',destino:'1NEM'},{nome:'DANI 9A',turma:'9A',situacao:'Transferido'},{nome:'GABI 6A',turma:'6A',situacao:'Retido'}]}).status,'success');
+assert.strictEqual(P({operacao:'VIRADA_EXECUTAR',token:tdir,confirmar:'2000'}).status,'error','confirmação errada');
+S.Controle_Impressoes=sheet('Controle_Impressoes',[['Turma','Disciplina','Tri','Qtd'],['6A','Mat',1,6]]);
+VX=P({operacao:'VIRADA_EXECUTAR',token:tdir,confirmar:String(VD.proximoAno),arquivar:{impressoes:true,preConselho:false}});
+assert.strictEqual(VX.status,'success',JSON.stringify(VX));
+assert.deepStrictEqual(VX.contagem,{Aprovado:4,Retido:1,Transferido:1,Desistente:0,Egresso:1});
+const novos=S.Alunos.rows.slice(1).filter(r=>r[1]);
+const turmaDe=n=>{const r=novos.find(r=>r[1]===n);return r?r[3]:null};
+assert.strictEqual(turmaDe('ANA 6A'),'7A'); assert.strictEqual(novos.find(r=>r[1]==='ANA 6A')[2],'7º Ano A','nome por extenso'); assert.strictEqual(novos.find(r=>r[1]==='ANA 6A')[4],'e1','colunas extras');
+assert.strictEqual(turmaDe('GABI 6A'),'6A','retida'); assert.strictEqual(turmaDe('CAIO 9A'),'1NEM'); assert.strictEqual(turmaDe('FABI 2NEM'),'3BNEM');
+assert.strictEqual(turmaDe('EVA 3ANEM'),null,'egressa sai'); assert.strictEqual(turmaDe('DANI 9A'),null,'transferida sai');
+assert.strictEqual(S.Alunos_Historico.rows.length,8,'7 alunos no histórico');
+assert.strictEqual(ctx.PropertiesService.getScriptProperties().getProperty('ANO_LETIVO'),String(VD.proximoAno));
+assert.strictEqual(S.Controle_Impressoes.rows.filter(r=>r.join('')).length,1,'contador de impressões zerado');
+assert.strictEqual(S['Controle_Impressoes_'+VD.anoAtual].rows.length,2,'arquivado');
+assert.strictEqual(ctx.DriveApp.copias.length,1,'cópia de segurança'); assert(S.Turmas_Professor.rows.filter(r=>r[0]).length===1,'cache de turmas limpo');
+// matrícula nova depois da virada + desfazer
+S.Alunos.rows.push([99,'NOVO 6A','6º Ano A','6A','']);
+S.Controle_Impressoes.rows.push(['7A','Port',1,1]);
+VD=G({aba:'virada_dados',token:tdir}); assert.strictEqual(VD.anoAtual,VD.ultimaVirada.para); assert.strictEqual(VD.podeDesfazer,true);
+let DF=P({operacao:'VIRADA_DESFAZER',token:tdir}); assert.strictEqual(DF.status,'success'); assert.strictEqual(DF.mantidos,1);
+const volta=S.Alunos.rows.slice(1).filter(r=>r[1]);
+assert.strictEqual(volta.length,8); assert.strictEqual(volta.find(r=>r[1]==='ANA 6A')[3],'6A'); assert(volta.some(r=>r[1]==='EVA 3ANEM')); assert(volta.some(r=>r[1]==='NOVO 6A'),'matrícula nova mantida');
+assert.strictEqual(S.Controle_Impressoes.rows.filter(r=>r.join('')).length,3,'impressões voltaram + a nova'); assert(!S['Controle_Impressoes_'+(VD.anoAtual-1)],'aba de arquivo removida');
+assert.strictEqual(ctx.PropertiesService.getScriptProperties().getProperty('ANO_LETIVO'),String(VD.anoAtual-1));
+assert.strictEqual(P({operacao:'VIRADA_DESFAZER',token:tdir}).status,'error','não desfaz duas vezes');
+assert.strictEqual(S.Alunos_Historico.rows.filter(r=>r[0]).length,1,'histórico da virada desfeita apagado');
+// matriz salva
+assert.strictEqual(P({operacao:'VIRADA_SALVAR_MATRIZ',token:tdir,linhas:[{serie:'9',disciplina:'Matemática',aulas:5},{serie:'9',disciplina:'matemática',aulas:3},{serie:'6',disciplina:'Robótica',aulas:'2'}]}).linhas,2);
+assert.strictEqual(G({aba:'planejamento_ano',token:ts}).matriz.salva,true,'secretaria lê o planejamento');
+ctx.PropertiesService._p={};
 console.log('INTEGRAÇÃO COM O CÓDIGO.GS REAL: TODOS OS TESTES PASSARAM —',S.Auditoria.rows.length-1,'linhas de auditoria');

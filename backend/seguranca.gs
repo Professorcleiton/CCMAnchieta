@@ -92,6 +92,13 @@ var SEG_NIVEL_MINIMO = {
   'PAT_TRANSFERIR': 3,
   'SALVAR_GRADE': 3,
   'RECURSOS_SALVAR': 4,
+  'virada_dados': 4,
+  'planejamento_ano': 3,
+  'VIRADA_SALVAR_TURMAS': 4,
+  'VIRADA_SALVAR_MATRIZ': 4,
+  'VIRADA_SALVAR_SITUACOES': 4,
+  'VIRADA_EXECUTAR': 4,
+  'VIRADA_DESFAZER': 4,
   'MARCAR_PEDIDO_IMPRESSO': 3,
   'CANCELAR_PEDIDO_AVALIACAO': 3,
   'NOTIFICAR_PROFESSOR_IMPRESSAO': 3,
@@ -161,6 +168,9 @@ function doGet(e) {
   if (rota === 'frequencia_gestao') return SEG_json_(FREQ_gestao_());
   // Horários e recursos (horarios.gs)
   if (rota === 'recursos' && sessao.tipo === 'servidor' && typeof HOR_lerRecursos_ === 'function') return SEG_json_(HOR_lerRecursos_());
+  // Virada do ano letivo (virada-ano.gs)
+  if (rota === 'virada_dados' && typeof VIR_dados_ === 'function') return SEG_json_(VIR_dados_());
+  if (rota === 'planejamento_ano' && typeof VIR_planejamento_ === 'function') return SEG_json_(VIR_planejamento_());
   // Servidores: todos os registros do ano letivo (sem o corte de 200 do Código.gs)
   if (rota === 'todos_os_dados' && sessao.tipo === 'servidor') return SEG_json_(SEG_dadosEscolaAno_());
 
@@ -210,6 +220,13 @@ function doPost(e) {
     if (op === 'NOTICIA_REATIVAR') { SEG_auditar_(sessao, op, corpo.id); return SEG_json_(NOT_alterarAtivo_(corpo, true)); }
     if (op === 'SALVAR_GRADE' && typeof HOR_salvarGrade_ === 'function') return SEG_json_(HOR_salvarGrade_(sessao, corpo));
     if (op === 'RECURSOS_SALVAR' && typeof HOR_salvarRecursos_ === 'function') return SEG_json_(HOR_salvarRecursos_(sessao, corpo));
+    if (/^VIRADA_/.test(op) && typeof VIR_executar_ === 'function') {
+      if (op === 'VIRADA_SALVAR_TURMAS') return SEG_json_(VIR_salvarTurmas_(sessao, corpo));
+      if (op === 'VIRADA_SALVAR_MATRIZ') return SEG_json_(VIR_salvarMatriz_(sessao, corpo));
+      if (op === 'VIRADA_SALVAR_SITUACOES') return SEG_json_(VIR_salvarSituacoes_(sessao, corpo));
+      if (op === 'VIRADA_EXECUTAR') return SEG_json_(VIR_executar_(sessao, corpo));
+      if (op === 'VIRADA_DESFAZER') return SEG_json_(VIR_desfazer_(sessao));
+    }
     if (op === 'APROVAR_RESPONSAVEL') return SEG_json_(SEG_decidirVinculo_(sessao, corpo.email, true, corpo.alunos));
     if (op === 'RECUSAR_RESPONSAVEL') return SEG_json_(SEG_decidirVinculo_(sessao, corpo.email, false, []));
 

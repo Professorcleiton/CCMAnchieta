@@ -320,7 +320,7 @@
 
     const est = {
         carregado: false, todas: [], professores: [], cfg: RECURSOS_PADRAO, cfgPadrao: true, ha: [], turmas: [],
-        turma: '', turno: 'Manhã', grade: gradeVazia(), alterado: false
+        turma: '', turno: 'Manhã', grade: gradeVazia(), alterado: false, matriz: []
     };
 
     async function getJSON(params) {
@@ -330,13 +330,15 @@
 
     async function carregarBase(forcar) {
         if (est.carregado && !forcar) return;
-        const [alunos, horarios, usuarios, recursos, ha] = await Promise.all([
+        const [alunos, horarios, usuarios, recursos, ha, plano] = await Promise.all([
             getJSON('aba=alunos').catch(() => []),
             getJSON('aba=horarios').catch(() => ({})),
             getJSON('aba=usuarios').catch(() => []),
             getJSON('aba=recursos').catch(() => null),
-            getJSON('aba=horas_atividade').catch(() => [])
+            getJSON('aba=horas_atividade').catch(() => []),
+            getJSON('aba=planejamento_ano').catch(() => null)
         ]);
+        est.matriz = (plano && plano.status === 'success' && plano.matriz) ? plano.matriz.linhas || [] : [];
         est.todas = (horarios && horarios.horarios) || [];
         est.professores = (Array.isArray(usuarios) ? usuarios : []).filter(u => /prof|dire|pedag/i.test(u.setor || '') || u.disciplinas);
         if (recursos && recursos.status === 'success') { est.cfg = recursos; est.cfgPadrao = !!recursos.padrao; }
@@ -344,6 +346,7 @@
         const turmas = new Set();
         (Array.isArray(alunos) ? alunos : []).forEach(a => a.turma_codigo && turmas.add(a.turma_codigo));
         est.todas.forEach(h => h.turma && turmas.add(h.turma));
+        if (plano && plano.status === 'success') (plano.turmas || []).concat(plano.turmasProximas || []).forEach(t => t.codigo && t.ativa !== false && turmas.add(t.codigo));
         est.turmas = [...turmas].sort((a, b) => a.localeCompare(b, 'pt-BR', { numeric: true }));
         est.carregado = true;
     }
@@ -599,6 +602,18 @@
         let origem = est.turma;
         if (!base.length) {
             const serie = serieDaTurma(est.turma);
+            const daMatriz = (est.matriz || []).filter(l => norm(l.serie) === norm(serie) && (parseInt(l.aulas, 10) || 0) > 0);
+            if (daMatriz.length) {
+                const total = daMatriz.reduce((t, l) => t + (parseInt(l.aulas, 10) || 0), 0);
+                if (confirm('A turma ' + est.turma + ' ainda não tem aulas.\nUsar a matriz curricular da série ' + serie + ' (' + total + ' aulas: ' + daMatriz.map(l => l.disciplina + ' ' + l.aulas).join(', ') + ')?')) {
+                    const aulas = [];
+                    daMatriz.forEach(l => {
+                        const prof = sugerirProfessor(l.disciplina, est.turma, gradeVazia(), est.todas, est.professores);
+                        for (let i = 0; i < (parseInt(l.aulas, 10) || 0); i++) aulas.push({ disciplina: l.disciplina, professor: prof, local: '' });
+                    });
+                    return aplicarRegrasRecurso(aulas);
+                }
+            }
             const candidatas = [...new Set(est.todas.filter(h => serieDaTurma(h.turma) === serie).map(h => h.turma))].sort();
             const escolha = candidatas.length ? prompt('A turma ' + est.turma + ' ainda não tem aulas.\nCopiar as disciplinas de qual turma?\n\n' + candidatas.join(', '), candidatas[0]) : prompt('A turma ' + est.turma + ' ainda não tem aulas.\nDigite a turma que servirá de modelo:');
             if (!escolha) return null;
@@ -612,7 +627,11 @@
             professor: origem === est.turma ? (h.professor || '') : sugerirProfessor(h.disciplina, est.turma, gradeVazia(), est.todas.filter(x => x.turma !== origem), est.professores),
             local: recursoDoLocal(h.local, est.cfg.recursos || []) || ''
         }));
-        // aplica as regras de recurso (ex.: Matemática 1 aula/semana no laboratório)
+        return aplicarRegrasRecurso(aulas);
+    }
+
+    // aplica as regras de recurso (ex.: Matemática 1 aula/semana no laboratório)
+    function aplicarRegrasRecurso(aulas) {
         const porDisc = {};
         aulas.forEach(a => (porDisc[a.disciplina] = porDisc[a.disciplina] || []).push(a));
         Object.keys(porDisc).forEach(d => {

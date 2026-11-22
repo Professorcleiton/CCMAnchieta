@@ -1,4 +1,4 @@
-const CACHE_NAME = 'siga-cache-v16'; // v16: gestão de horários (horarios-gestao.js) e agenda por recurso
+const CACHE_NAME = 'siga-cache-v17'; // v17: virada do ano letivo (virada-ano.js)
 
 const urlsToCache = [
     '/', '/index.html', '/restrito.html', '/responsaveis.html',
