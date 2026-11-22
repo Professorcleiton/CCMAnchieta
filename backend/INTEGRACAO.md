@@ -17,6 +17,7 @@ Tempo estimado: 15 minutos. A camada foi testada junto com o `Código.gs` atual 
 2. Clique em **+ → Script**, dê o nome `seguranca` e cole todo o conteúdo de `backend/seguranca.gs`.
 3. Clique em **+ → Script** de novo, dê o nome `push-e-documentos` e cole todo o conteúdo de `backend/push-e-documentos.gs`.
 4. Clique em **+ → Script** mais uma vez, dê o nome `noticias` e cole todo o conteúdo de `backend/noticias.gs`.
+5. E mais um: nome `frequenciometro`, conteúdo de `backend/frequenciometro.gs`.
 
 A configuração já vem ajustada para a sua planilha: abas `Usuários` (senha na coluna E), `Responsaveis` (senha na coluna C, push na F), `Alunos` e `Sessoes`.
 
@@ -68,6 +69,16 @@ Não crie uma implantação nova, senão a URL muda. O Google vai pedir novas au
 Os responsáveis que já tinham conta continuam entrando e aparecem como **"LEGADO - revisar"** em Aprovar Responsáveis. Peça à secretaria para revisar a lista e revogar quem não for responsável de verdade. A revogação derruba a sessão na hora.
 
 **Para desfazer:** apague o arquivo `seguranca` e volte os nomes para `doGet`/`doPost`. Depois publique uma nova versão.
+
+## Passo 4b: ligar o Frequenciômetro
+
+1. Em `frequenciometro.gs`, no topo, preencha `PLANILHA_ID` com o ID da planilha do frequenciômetro: o trecho entre `/d/` e `/edit` no endereço dela. Se as abas de frequência estiverem nesta mesma planilha do SIGA, deixe `''`.
+2. No editor, escolha a função **`FREQ_diagnosticar`** e clique em **Executar**. O registro precisa mostrar **OK** para Frequência, Alunos e Histórico.
+3. Escolha **`FREQ_gerarChaveTV`** e clique em **Executar**. O registro mostra um endereço `https://anchietafrequencia.vercel.app/?chave=...`. Abra esse endereço **uma vez** em cada TV ou computador do painel.
+4. Faça o merge do PR do repositório **frequenciometro**.
+5. Teste um sorteio. O nome aparece na aba **Sorteios** da planilha.
+6. Quando o sorteio estiver funcionando, **interrompa a publicação** da planilha do frequenciômetro: **Arquivo → Compartilhar → Publicar na Web → Interromper publicação**. Em seguida, no `index.html` do frequenciometro, mude `USAR_PLANILHA_PUBLICADA` para `false`.
+7. Na aba **Frequenciometro_Trimestres**, preencha a média de cada trimestre quando ele fechar.
 
 ## Passo 5: fechar a planilha ao público
 

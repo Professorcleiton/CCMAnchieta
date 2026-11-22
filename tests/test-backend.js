@@ -7,9 +7,11 @@ if(!arquivo){console.error('Informe o caminho do Código.gs: node tests/test-bac
 let codigo=fs.readFileSync(arquivo,'utf8');
 codigo=codigo.replace('function doGet(e)','function doGetOriginal(e)').replace('function doPost(e)','function doPostOriginal(e)');
 const cache={};
-function sheet(name,rows){return{name,rows,getDataRange(){return{getValues:()=>rows.map(r=>r.slice())}},appendRow(r){rows.push(r.slice())},setFrozenRows(){},
+let gidSeq=1000;
+function sheet(name,rows,gid){return{name,rows,_gid:gid||(gidSeq++),getSheetId(){return this._gid},getDataRange(){return{getValues:()=>rows.map(r=>r.slice())}},appendRow(r){rows.push(r.slice())},setFrozenRows(){},
  getLastRow(){return rows.length},deleteRow(i){rows.splice(i-1,1)},
- getRange(l,c,nr,nc){return{setValues(v){for(let i=0;i<v[0].length;i++){rows[l-1]=rows[l-1]||[];rows[l-1][c-1+i]=v[0][i]}},setValue(v){rows[l-1][c-1]=v},getValues(){return rows.slice(l-1,l-1+(nr||1)).map(r=>[r[c-1]])},setFontWeight(){return this},setBackground(){return this},setFontColor(){return this}}}}}
+ getRange(l,c,nr,nc){const bloco=()=>rows.slice(l-1,l-1+(nr||1)).map(r=>Array.from({length:nc||1},(_,k)=>r[c-1+k]===undefined?'':r[c-1+k]));
+  return{setValues(v){v.forEach((linha,di)=>{rows[l-1+di]=rows[l-1+di]||[];linha.forEach((x,i)=>rows[l-1+di][c-1+i]=x)})},setValue(v){rows[l-1][c-1]=v},getValues:bloco,getDisplayValues:()=>bloco().map(r=>r.map(String)),setFontWeight(){return this},setBackground(){return this},setFontColor(){return this}}}}}
 const S={};
 function add(n,rows){S[n]=sheet(n,rows)}
 add('Usuários',[['email','nome','setor','nivel','senha'],['prof@x.com','Prof Ana','professores',1,'1234'],['sec@x.com','Secretaria','secretaria',3,'5555'],['dir@x.com','Diretor','direcao',4,'9999']]);
@@ -31,7 +33,7 @@ const ctx={console,Date,Math,JSON,String,Number,Array,Object,parseInt,Set,
   base64DecodeWebSafe:s=>s8(Buffer.from(s.replace(/-/g,'+').replace(/_/g,'/'),'base64')),
   newBlob:(d,t,n)=>typeof d==='string'?{getBytes:()=>s8(Buffer.from(d,'utf8'))}:{bytes:d,type:t,name:n},
   formatDate:(d)=>d.toISOString()},
- PropertiesService:{getScriptProperties:()=>({getProperty:()=>null})},
+ PropertiesService:{_p:{},getScriptProperties(){const p=this._p;return{getProperty:k=>p[k]??null,setProperty:(k,v)=>{p[k]=v}}}},
  DriveApp:{arquivos:[],getFolderById(){const self=this;return{createFile(b){const f={nome:b.name,tipo:b.type,setDescription(){},getUrl:()=>'https://drive.google.com/file/d/'+self.arquivos.length};self.arquivos.push(f);return f}}}},
  UrlFetchApp:{calls:[],fetch(u,o){this.calls.push({u,o});return{getResponseCode:()=>201,getContentText:()=>''}}},
  LockService:{getScriptLock:()=>({waitLock(){},releaseLock(){}})},
@@ -43,6 +45,7 @@ if(!vm.runInContext('typeof PASTA_DOCUMENTOS_ID',ctx).includes('string')) vm.run
 vm.runInContext(fs.readFileSync(path.join(__dirname,'..','backend','seguranca.gs'),'utf8'),ctx);
 vm.runInContext(fs.readFileSync(path.join(__dirname,'..','backend','push-e-documentos.gs'),'utf8'),ctx);
 vm.runInContext(fs.readFileSync(path.join(__dirname,'..','backend','noticias.gs'),'utf8'),ctx);
+vm.runInContext(fs.readFileSync(path.join(__dirname,'..','backend','frequenciometro.gs'),'utf8'),ctx);
 const G=p=>JSON.parse(ctx.doGet({parameter:p}).getContent());
 const P=b=>{const o=ctx.doPost({parameter:{},postData:{contents:JSON.stringify(b)}}).getContent();try{return JSON.parse(o)}catch(e){return o}};
 // --- acesso anônimo bloqueado
@@ -175,4 +178,26 @@ const gest=G({aba:'noticias_gestao',token:tdir}); assert.strictEqual(gest.length
 assert.strictEqual(G({aba:'noticias_gestao',token:tp2()}).status,'forbidden');
 assert.strictEqual(P({operacao:'NOTICIA_OCULTAR',token:tdir,id:gest[0].id}).status,'success');
 assert.strictEqual(G({aba:'noticias'}).noticias.length,2,'oculta some do site');
+// ===== Frequenciômetro =====
+S.FreqTurmas=sheet('FreqTurmas',[['Turma','Freq','Turno','Troféus'],['6º Ano A','96,5%','Manhã','2'],['7º Ano B','88,1%','Tarde','0'],['','','','']],1746538498);
+S.FreqAlunos=sheet('FreqAlunos',[['id','nome','turma','cod'],['1','JOÃO DA SILVA','6º Ano A','6A'],['2','MARIA SOUZA','7º Ano B','7B']],1866544411);
+S.FreqHist=sheet('FreqHist',[['Semana','Média'],['S1','91,2'],['S2','93,0']],541390615);
+let F=G({aba:'frequenciometro'});
+assert.strictEqual(F.status,'success'); assert.strictEqual(F.frequencia.length,3,'linha vazia removida'); assert.strictEqual(F.frequencia[1][1],'96,5%');
+assert.strictEqual(F.historico.length,3); assert.deepStrictEqual(F.trimestres.map(t=>t.fechado),[91.9,null,null]);
+assert(!JSON.stringify(F).includes('JOÃO'),'sem nomes de alunos no público');
+assert.strictEqual(G({aba:'frequenciometro_alunos'}).status,'unauthorized','sem chave');
+vm.runInContext('FREQ_gerarChaveTV()',ctx); const chave=ctx.PropertiesService._p.FREQ_CHAVE_TV; assert.strictEqual(chave.length,24);
+assert.strictEqual(G({aba:'frequenciometro_alunos',chave:'x'.repeat(24)}).status,'unauthorized','chave errada');
+let A=G({aba:'frequenciometro_alunos',chave}); assert.strictEqual(A.alunos.length,3); assert.deepStrictEqual(A.sorteados,[]);
+assert.strictEqual(P({operacao:'SORTEIO_REGISTRAR',nome:'MARIA SOUZA',turma:'7B'}).status,'unauthorized');
+assert.strictEqual(P({operacao:'SORTEIO_REGISTRAR',chave,nome:'MARIA SOUZA',turma:'7B'}).status,'success');
+assert.strictEqual(P({operacao:'SORTEIO_REGISTRAR',chave,nome:'JOÃO DA SILVA',turma:'6A',origem:'manual'}).status,'success');
+assert.deepStrictEqual(G({aba:'frequenciometro_alunos',chave}).sorteados.sort(),['JOÃO DA SILVA','MARIA SOUZA']);
+assert.strictEqual(P({operacao:'SORTEIO_LIMPAR',chave,turma:'7B'}).alterados,1);
+assert.deepStrictEqual(G({aba:'frequenciometro_alunos',chave}).sorteados,['JOÃO DA SILVA']);
+assert.strictEqual(P({operacao:'SORTEIO_DESMARCAR',chave,nome:'JOÃO DA SILVA'}).alterados,1);
+assert.strictEqual(S.Sorteios.rows.length,3,'histórico preservado (só marca NAO)');
+S.Frequenciometro_Trimestres.rows[2][1]='93,4'; ctx.CacheService.getScriptCache().remove('freq_publico');
+assert.deepStrictEqual(G({aba:'frequenciometro'}).trimestres.map(t=>t.fechado),[91.9,93.4,null]);
 console.log('INTEGRAÇÃO COM O CÓDIGO.GS REAL: TODOS OS TESTES PASSARAM —',S.Auditoria.rows.length-1,'linhas de auditoria');

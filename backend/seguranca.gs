@@ -130,6 +130,9 @@ function doGet(e) {
 
   // Única leitura pública: notícias da página inicial (noticias.gs)
   if (rota === 'noticias' && typeof NOT_listarPublicas_ === 'function') return SEG_json_(NOT_listarPublicas_());
+  // Frequenciômetro (frequenciometro.gs): números públicos; nomes só com a chave da TV
+  if (rota === 'frequenciometro' && typeof FREQ_dadosPublicos_ === 'function') return SEG_json_(FREQ_dadosPublicos_());
+  if (rota === 'frequenciometro_alunos' && typeof FREQ_dadosAlunos_ === 'function') return SEG_json_(FREQ_dadosAlunos_(p.chave));
 
   var sessao = SEG_validarSessao_(p.token);
   if (!sessao) return SEG_json_({ status: 'unauthorized', message: 'Sessão expirada. Entre novamente.' });
@@ -168,6 +171,7 @@ function doPost(e) {
     if (op === 'CADASTRAR_RESPONSAVEL') return SEG_cadastrarResponsavel_(e, corpo);
     if (op === 'RECUPERAR_SENHA') return SEG_json_(SEG_recuperarSenha_(corpo));
     if (op === 'REDEFINIR_SENHA') return SEG_json_(SEG_redefinirSenha_(corpo));
+    if (/^SORTEIO_/.test(op) && typeof FREQ_post_ === 'function') return SEG_json_(FREQ_post_(corpo));  // chave da TV
 
     // ---- Daqui para baixo, só com sessão válida ----
     // salvar_token_push usa "token" para a inscrição push; a sessão vem em "tokenSessao"
