@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <script src="siga-core.js?v=13"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal dos Pais - SIGA Anchieta</title>
     <style>
@@ -132,9 +133,10 @@
         <div id="form-login" class="form active">
             <label>E-mail</label>
             <input type="email" id="login-email" placeholder="email@exemplo.com">
-            <label>Senha (apenas números)</label>
-            <input type="password" id="login-senha" placeholder="Digite sua senha numérica">
+            <label>Senha</label>
+            <input type="password" id="login-senha" placeholder="Digite sua senha">
             <button onclick="fazerLogin()">Entrar</button>
+            <a href="#" onclick="abrirRecuperacaoSenha('responsavel'); return false;" style="display:block;margin-top:10px;font-size:13px;text-align:center;">Esqueci minha senha</a>
             <div class="msg" id="msg-login"></div>
         </div>
 
@@ -146,8 +148,8 @@
             <label>E-mail (será seu login)</label>
             <input type="email" id="cad-email" placeholder="email@exemplo.com">
 
-            <label>Senha (apenas números, ex: RG)</label>
-            <input type="password" id="cad-senha" placeholder="Apenas números">
+            <label>Crie uma senha (mínimo 6 caracteres)</label>
+            <input type="password" id="cad-senha" autocomplete="new-password" placeholder="Letras e/ou números">
 
             <label>Telefone com WhatsApp (obrigatório)</label>
             <input type="text" id="cad-telefone" placeholder="(44) 99999-9999" required>
@@ -165,7 +167,7 @@ O sistema reconhece mesmo sem acentos ou letras maiúsculas."></textarea>
     <a href="index.html" class="voltar">← Voltar ao site</a>
 
   <script>
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
+    const APPS_SCRIPT_URL = SIGA_CONFIG.APPS_SCRIPT_URL;
 
     function mostrarAba(tipo) {
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -180,25 +182,26 @@ O sistema reconhece mesmo sem acentos ou letras maiúsculas."></textarea>
     }
 
 // =============================================
-// FUNÇÃO PARA FAZER REQUISIÇÕES (SEM JSONP)
+// FUNÇÃO PARA FAZER REQUISIÇÕES
+// 🔒 POST com corpo JSON: a senha não vai mais na URL (que fica em históricos e logs)
 // =============================================
 async function fazerRequisicao(params) {
     try {
-        // Constrói a URL com os parâmetros
-        let url = APPS_SCRIPT_URL + '?';
-        for (let key in params) {
-            url += key + '=' + encodeURIComponent(params[key]) + '&';
+        const response = await fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify(params)
+        });
+        const texto = await response.text();
+        try {
+            return JSON.parse(texto);
+        } catch (e) {
+            // O backend antigo responde o cadastro em texto puro
+            const t = (texto || '').trim();
+            if (t === 'success') return { status: 'success' };
+            if (t.indexOf('Cadastro parcial') === 0) return { status: 'success', message: t };
+            return { status: 'error', message: t || 'Resposta inválida do servidor.' };
         }
-        // Remove o último '&'
-        url = url.slice(0, -1);
-        
-        console.log('📤 URL:', url);
-        
-        const response = await fetch(url);
-        const data = await response.json();
-        console.log('📦 Resposta:', data);
-        
-        return data;
     } catch (error) {
         console.error('❌ Erro:', error);
         return { status: 'error', message: 'Erro de conexão: ' + error.message };
@@ -210,10 +213,10 @@ async function fazerRequisicao(params) {
 // =============================================
 async function fazerLogin() {
     const email = document.getElementById('login-email').value.trim().toLowerCase();
-    const senha = document.getElementById('login-senha').value.trim().replace(/\D/g, '');
+    const senhas = variacoesSenha(document.getElementById('login-senha').value);
     const msg = document.getElementById('msg-login');
 
-    if (!email || !senha) {
+    if (!email || senhas.length === 0) {
         msg.innerText = 'Preencha e-mail e senha.';
         return;
     }
@@ -221,15 +224,21 @@ async function fazerLogin() {
     msg.innerText = 'Verificando...';
 
     try {
-        const data = await fazerRequisicao({
-            operacao: 'LOGIN_RESPONSAVEL',
-            email: email,
-            senha: senha
-        });
+        let data = null;
+        for (const senha of senhas) {
+            data = await fazerRequisicao({
+                operacao: 'LOGIN_RESPONSAVEL',
+                email: email,
+                senha: senha
+            });
+            if (data.status === 'success' || data.status === 'pending') break;
+        }
         
         console.log('📦 Resposta do login:', data);
         
-        if (data.status === "success") {
+        if (data.status === 'pending') {
+            msg.innerText = '⏳ ' + (data.message || 'Seu cadastro ainda está aguardando a confirmação da secretaria.');
+        } else if (data.status === "success") {
             msg.innerText = '✅ Login bem-sucedido! Redirecionando...';
             sessionStorage.setItem('resp_logado', JSON.stringify(data));
 
@@ -254,7 +263,7 @@ async function fazerLogin() {
 async function cadastrar() {
     const nome = document.getElementById('cad-nome').value.trim();
     const email = document.getElementById('cad-email').value.trim().toLowerCase();
-    const senha = document.getElementById('cad-senha').value.trim().replace(/\D/g, '');
+    const senha = document.getElementById('cad-senha').value.trim();
     const telefone = document.getElementById('cad-telefone').value.trim();
     const filhosTexto = document.getElementById('cad-filhos').value.trim();
     const msg = document.getElementById('msg-cadastro');
@@ -262,6 +271,12 @@ async function cadastrar() {
 
     if (!nome || !email || !senha || !telefone || !filhosTexto) {
         msg.innerText = 'Preencha todos os campos obrigatórios.';
+        return;
+    }
+
+    const problemaSenha = validarNovaSenha(senha);
+    if (problemaSenha) {
+        msg.innerText = problemaSenha;
         return;
     }
 
@@ -287,13 +302,15 @@ async function cadastrar() {
             email: email,
             senha: senha,
             telefone: telefone,
-            filhos: JSON.stringify(filhos)
+            filhos: filhos
         });
         
         console.log('Resposta do servidor:', data);
         
-        if (data.status === 'success') {
-            msg.innerText = '✅ Cadastro realizado! Agora você pode entrar.';
+        if (data.status === 'success' || data.status === 'pending') {
+            msg.innerText = data.status === 'pending'
+                ? '⏳ ' + (data.message || 'Cadastro recebido! A secretaria vai confirmar o vínculo com o(s) aluno(s) e você receberá acesso em breve.')
+                : '✅ ' + (data.message ? data.message + ' Agora você pode entrar.' : 'Cadastro realizado! Agora você pode entrar.');
             document.getElementById('cad-nome').value = '';
             document.getElementById('cad-email').value = '';
             document.getElementById('cad-senha').value = '';
@@ -357,7 +374,8 @@ async function cadastrar() {
 fazerRequisicao({
     operacao: 'salvar_token_push',
     email: emailResponsavel,
-    token: JSON.stringify(subscription)
+    token: JSON.stringify(subscription),   // inscrição push
+    tokenSessao: obterTokenSIGA()          // sessão (o campo "token" já é da inscrição)
 }).then(function(result) {
     if (result.status === 'success') {
         console.log('✅ Token push salvo com sucesso!');

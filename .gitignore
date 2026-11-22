@@ -1,0 +1,10 @@
+.env
+.env.*
+node_modules/
+.DS_Store
+Thumbs.db
+*.log
+.clasp.json
+.clasprc.json
+Codigo.gs
+Código.gs

@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
+    <script src="siga-core.js?v=13"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Painel Docente — SIGA CCM Anchieta</title>
   
@@ -291,7 +292,7 @@
   <div class="toast" id="toast"></div>
 
   <script>
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
+    const APPS_SCRIPT_URL = SIGA_CONFIG.APPS_SCRIPT_URL;
 
     let sessao = null;
     try { sessao = JSON.parse(localStorage.getItem('sgi_ccma_session') || 'null'); } catch (e) {}

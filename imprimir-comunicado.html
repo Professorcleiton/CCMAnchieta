@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <script src="siga-core.js?v=13"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Comunicado de Fato Observado – SEED</title>
     <style>
@@ -186,7 +187,7 @@
     </div>
 </div>
 <script>
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxEMx6NmZvQqPMmmxsrTaV1DrMHa-F16_ARFR1cjm_5v054lUtF80YWtW88g6MsyhajRg/exec';
+    const APPS_SCRIPT_URL = SIGA_CONFIG.APPS_SCRIPT_URL_COMUNICADOS;
 
     const params = new URLSearchParams(window.location.search);
     const token = params.get('token');

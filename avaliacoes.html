@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
+    <script src="siga-core.js?v=13"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Criar Avaliação — SIGA CCM Anchieta</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -298,7 +299,7 @@
   </div>
 
   <script>
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
+    const APPS_SCRIPT_URL = SIGA_CONFIG.APPS_SCRIPT_URL;
     let usuarioLogado = null;
     let alunosDaTurma = [];
 
@@ -649,7 +650,7 @@ ${paginasHTML}
             <div style="font-size: .85rem; color: #64748b; margin-bottom: 1rem;">
               Data da Prova: ${r.dataProva ? r.dataProva.split('-').reverse().join('/') : 'Não informada'} | Valor: ${r.valor || '—'}
             </div>
-            <button onclick="carregarRascunho('${r.idPedido}')" style="background: var(--dourado); color: #000; border: none; padding: .5rem 1rem; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: .85rem;">
+            <button onclick="carregarRascunho('${escaparJSAttr(r.idPedido)}')" style="background: var(--dourado); color: #000; border: none; padding: .5rem 1rem; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: .85rem;">
               <i class="fas fa-edit"></i> Abrir e Editar
             </button>
           </div>

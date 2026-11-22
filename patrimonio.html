@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <script src="siga-core.js?v=13"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Patrimônio – SIGA Anchieta</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -582,7 +583,7 @@
     // ============================================================
     // CONFIGURAÇÃO
     // ============================================================
-    const APPS_SCRIPT_PAT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
+    const APPS_SCRIPT_PAT_URL = SIGA_CONFIG.APPS_SCRIPT_URL;
     let patTodos = [];
     let patAmbientes = [];
     let patSalaFiltro = 'TODOS';
@@ -690,7 +691,7 @@
         const sidebarList = document.getElementById('pat-room-list-updated');
         sidebarList.innerHTML = `<li class="room-item ${patSalaFiltro==='TODOS'?'active':''}" onclick="patFiltrarSala('TODOS', this)"><span><i class="fa-solid fa-boxes-stacked"></i> Ver Tudo</span></li>`;
         patAmbientes.forEach(sala => {
-            sidebarList.innerHTML += `<li class="room-item ${patSalaFiltro===sala?'active':''}" onclick="patFiltrarSala('${sala}', this)"><span><i class="fa-solid fa-location-dot"></i> ${sala}</span></li>`;
+            sidebarList.innerHTML += `<li class="room-item ${patSalaFiltro===sala?'active':''}" onclick="patFiltrarSala('${escaparJSAttr(sala)}', this)"><span><i class="fa-solid fa-location-dot"></i> ${sala}</span></li>`;
         });
         document.querySelectorAll('.select-salas-dinamicas').forEach(select => {
             const valorAtual = select.value;
@@ -707,7 +708,7 @@
         patAmbientes.forEach(sala => {
             miniBox.innerHTML += `<li style="padding:8px 12px;display:flex;justify-content:space-between;border-bottom:1px solid #f1f5f9;">
                 <span>${sala}</span>
-                <button onclick="patDeletarAmbiente('${sala}')" style="background:none;border:none;color:#ef4444;cursor:pointer;"><i class="fa-solid fa-trash"></i></button>
+                <button onclick="patDeletarAmbiente('${escaparJSAttr(sala)}')" style="background:none;border:none;color:#ef4444;cursor:pointer;"><i class="fa-solid fa-trash"></i></button>
             </li>`;
         });
     }
@@ -766,7 +767,7 @@
                 <td>${item.localizacao || '—'}</td>
                 <td><span class="status-badge ${badgeClass}">${item.status || 'Bom'}</span></td>
                 <td>
-                    <button onclick="event.stopPropagation();carregarParaEdicao('${item.codigo}')" style="background:none;border:none;color:#005088;cursor:pointer;font-size:16px;" title="Editar">
+                    <button onclick="event.stopPropagation();carregarParaEdicao('${escaparJSAttr(item.codigo)}')" style="background:none;border:none;color:#005088;cursor:pointer;font-size:16px;" title="Editar">
                         <i class="fa-solid fa-pen-to-square"></i>
                     </button>
                 </td>
@@ -813,7 +814,7 @@
                 <td>${temFoto ? `<img src="${item.foto}" class="foto-mini">` : '—'}</td>
                 <td>${item.localizacao || '—'}</td>
                 <td><span class="status-badge ${badgeClass}">${item.status || 'Bom'}</span></td>
-                <td><button onclick="event.stopPropagation();carregarParaEdicao('${item.codigo}')" style="background:none;border:none;color:#005088;cursor:pointer;font-size:16px;"><i class="fa-solid fa-pen-to-square"></i></button></td>
+                <td><button onclick="event.stopPropagation();carregarParaEdicao('${escaparJSAttr(item.codigo)}')" style="background:none;border:none;color:#005088;cursor:pointer;font-size:16px;"><i class="fa-solid fa-pen-to-square"></i></button></td>
             `;
             tbody.appendChild(tr);
         });

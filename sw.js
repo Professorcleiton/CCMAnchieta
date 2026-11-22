@@ -1,8 +1,8 @@
-const CACHE_NAME = 'siga-cache-v12'; // Versão atualizada
+const CACHE_NAME = 'siga-cache-v13'; // v13: siga-core.js + não guarda dados de terceiros
 
 const urlsToCache = [
     '/', '/index.html', '/restrito.html', '/responsaveis.html',
-    '/painel-responsavel.html', '/style.css', '/script.js', '/db.js',
+    '/painel-responsavel.html', '/style.css', '/siga-core.js', '/script.js', '/db.js',
     '/img/SIGA.png', '/img/logoA.png'
 ];
 
@@ -20,7 +20,9 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('fetch', event => {
     const url = new URL(event.request.url);
-    if (url.hostname.includes('script.google.com')) return;
+    // 🔒 Só o próprio site passa pelo cache. Dados da escola (Apps Script,
+    // planilhas, CDNs) nunca ficam guardados no aparelho pelo service worker.
+    if (url.origin !== self.location.origin || event.request.method !== 'GET') return;
 
     // 🆕 Código do app NUNCA vem do cache (evita tela travada no mobile)
     if (/\.(js|css|html)$/i.test(url.pathname)) {
