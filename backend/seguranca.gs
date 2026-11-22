@@ -86,6 +86,7 @@ var SEG_NIVEL_MINIMO = {
   'AMB_ADICIONAR': 4,
   'AMB_DELETAR': 4,
   'IMPORTAR_LANCAMENTOS': 4,
+  'PLATAFORMAS_SALVAR': 4,
   'PROGRESSAO_TURMAS': 4,
   'PAT_CADASTRAR': 3,
   'PAT_EXCLUIR': 3,
@@ -228,6 +229,7 @@ function doPost(e) {
     if (op === 'SALVAR_GRADE' && typeof HOR_salvarGrade_ === 'function') return SEG_json_(HOR_salvarGrade_(sessao, corpo));
     if (op === 'RECURSOS_SALVAR' && typeof HOR_salvarRecursos_ === 'function') return SEG_json_(HOR_salvarRecursos_(sessao, corpo));
     if (op === 'IMPORTAR_LANCAMENTOS' && typeof PLAT_importar_ === 'function') return SEG_json_(PLAT_importar_(sessao, corpo));
+    if (op === 'PLATAFORMAS_SALVAR' && typeof PLAT_salvarRegras_ === 'function') return SEG_json_(PLAT_salvarRegras_(sessao, corpo));
     if (/^VIRADA_/.test(op) && typeof VIR_executar_ === 'function') {
       if (op === 'VIRADA_SALVAR_TURMAS') return SEG_json_(VIR_salvarTurmas_(sessao, corpo));
       if (op === 'VIRADA_SALVAR_MATRIZ') return SEG_json_(VIR_salvarMatriz_(sessao, corpo));
