@@ -93,6 +93,7 @@ var SEG_NIVEL_MINIMO = {
   'PAT_TRANSFERIR': 3,
   'SALVAR_GRADE': 3,
   'RECURSOS_SALVAR': 4,
+  'HA_SALVAR': 4,
   'virada_dados': 4,
   'planejamento_ano': 3,
   'VIRADA_SALVAR_TURMAS': 4,
@@ -227,6 +228,7 @@ function doPost(e) {
     if (op === 'NOTICIA_OCULTAR') { SEG_auditar_(sessao, op, corpo.id); return SEG_json_(NOT_alterarAtivo_(corpo, false)); }
     if (op === 'NOTICIA_REATIVAR') { SEG_auditar_(sessao, op, corpo.id); return SEG_json_(NOT_alterarAtivo_(corpo, true)); }
     if (op === 'SALVAR_GRADE' && typeof HOR_salvarGrade_ === 'function') return SEG_json_(HOR_salvarGrade_(sessao, corpo));
+    if (op === 'HA_SALVAR' && typeof HOR_salvarHA_ === 'function') return SEG_json_(HOR_salvarHA_(sessao, corpo));
     if (op === 'RECURSOS_SALVAR' && typeof HOR_salvarRecursos_ === 'function') return SEG_json_(HOR_salvarRecursos_(sessao, corpo));
     if (op === 'IMPORTAR_LANCAMENTOS' && typeof PLAT_importar_ === 'function') return SEG_json_(PLAT_importar_(sessao, corpo));
     if (op === 'PLATAFORMAS_SALVAR' && typeof PLAT_salvarRegras_ === 'function') return SEG_json_(PLAT_salvarRegras_(sessao, corpo));

@@ -328,3 +328,66 @@ function HOR_limparTurmasProfessor_(nomes) {
   aba.getRange(1, 1, manter.length, largura).setValues(manter.map(function (l) { while (l.length < largura) l.push(''); return l.slice(0, largura); }));
   return removidas;
 }
+
+
+// ---------------------------------------------------------------------
+//  Hora-atividade (aba "Horas_Atividade": A Turno | B Professor | C Dia | D Aula | E Horário | F Tipo)
+// ---------------------------------------------------------------------
+// Tabela oficial: aulas de regência → horas-atividade (índice = número de aulas)
+var HOR_TABELA_HA = [0, 0, 0, 1, 1, 2, 2, 2, 2, 3, 3, 4, 4, 4, 4, 5, 5, 5, 6, 6, 6, 7, 7, 7, 8, 8, 8, 9, 9, 10, 10];
+
+function HOR_haEsperada_(aulas) {
+  aulas = Math.max(0, parseInt(aulas, 10) || 0);
+  return aulas < HOR_TABELA_HA.length ? HOR_TABELA_HA[aulas] : HOR_TABELA_HA[HOR_TABELA_HA.length - 1];
+}
+
+/**
+ * POST HA_SALVAR { professor, itens: [{turno, dia, aula, tipo}], ignorarConflitos }
+ * Substitui todas as horas-atividade do professor.
+ */
+function HOR_salvarHA_(sessao, corpo) {
+  var professor = String(corpo.professor || '').trim();
+  if (!professor) return { status: 'error', message: 'Escolha o professor.' };
+  var itens = Array.isArray(corpo.itens) ? corpo.itens : [];
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var alvo = HOR_norm_(professor);
+
+  // aulas do professor (como titular ou apoio), para conferir choque
+  var aulas = {}, regencia = 0;
+  var abaH = ss.getSheetByName(HOR_CONFIG.ABA_HORARIOS);
+  (abaH ? abaH.getDataRange().getValues().slice(1) : []).forEach(function (l) {
+    var tit = HOR_norm_(l[6]) === alvo, apoio = HOR_norm_(l[8]) === alvo;
+    if (!tit && !apoio) return;
+    if (tit) regencia++;
+    aulas[String(l[0]).trim() + '|' + String(l[2]).trim() + '|' + String(l[3]).trim()] = String(l[1]).trim();
+  });
+
+  var linhas = [], conflitos = [], vistos = {};
+  for (var i = 0; i < itens.length; i++) {
+    var it = itens[i] || {};
+    var turno = String(it.turno || '').trim(), dia = String(it.dia || '').trim(), aula = String(it.aula || '').trim();
+    var idx = HOR_CONFIG.AULAS.indexOf(aula);
+    if (!HOR_CONFIG.HORARIOS[turno] || HOR_CONFIG.DIAS.indexOf(dia) === -1 || idx === -1) return { status: 'error', message: 'Horário inválido: ' + turno + ' ' + dia + ' ' + aula };
+    var k = turno + '|' + dia + '|' + aula;
+    if (vistos[k]) continue;
+    vistos[k] = true;
+    if (aulas[k]) conflitos.push({ dia: dia, aula: aula, texto: turno + ': aula no ' + aulas[k] });
+    linhas.push([turno, professor, dia, aula, HOR_CONFIG.HORARIOS[turno][idx], String(it.tipo || 'H.A. - Planejamento').trim().slice(0, 60)]);
+  }
+  if (conflitos.length && !corpo.ignorarConflitos) return { status: 'conflito', conflitos: conflitos };
+
+  var lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    var aba = ss.getSheetByName('Horas_Atividade');
+    if (!aba) { aba = ss.insertSheet('Horas_Atividade'); aba.getRange(1, 1, 1, 6).setValues([['Turno', 'Professor', 'Dia', 'Aula', 'Horário', 'Tipo']]); }
+    var dados = aba.getDataRange().getValues();
+    var largura = Math.max(6, dados[0].length);
+    var manter = dados.slice(1).filter(function (l) { return String(l[1] || '').trim() && HOR_norm_(l[1]) !== alvo; })
+      .map(function (l) { l = l.slice(0, largura); while (l.length < largura) l.push(''); return l; });
+    var todas = manter.concat(linhas.map(function (l) { while (l.length < largura) l.push(''); return l; }));
+    if (dados.length > 1) aba.getRange(2, 1, dados.length - 1, largura).clearContent();
+    if (todas.length) aba.getRange(2, 1, todas.length, largura).setValues(todas);
+  } finally { lock.releaseLock(); }
+  if (typeof SEG_auditar_ === 'function') SEG_auditar_(sessao, 'HA_SALVAR', professor + ': ' + linhas.length + ' H.A.');
+  return { status: 'success', horas: linhas.length, regencia: regencia, esperadas: HOR_haEsperada_(regencia), conflitos: conflitos };
+}

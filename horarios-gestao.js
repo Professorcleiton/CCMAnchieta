@@ -306,7 +306,67 @@
         return g;
     }
 
-    const nucleo = { DIAS, AULAS, HORARIOS_FIXOS, norm, listaDisciplinas, recursoDoLocal, serieDaTurma, regraDaDisciplina,
+
+    // ------------------------------------------------------------------
+    //  Hora-atividade
+    // ------------------------------------------------------------------
+    // Tabela oficial: aulas de regência (índice) → horas-atividade
+    const TABELA_HA = [0, 0, 0, 1, 1, 2, 2, 2, 2, 3, 3, 4, 4, 4, 4, 5, 5, 5, 6, 6, 6, 7, 7, 7, 8, 8, 8, 9, 9, 10, 10];
+    function haEsperada(aulas) {
+        const n = Math.max(0, parseInt(aulas, 10) || 0);
+        return n < TABELA_HA.length ? TABELA_HA[n] : TABELA_HA[TABELA_HA.length - 1];
+    }
+    /** Aulas do professor (titular conta como regência; apoio só ocupa o horário). */
+    function aulasDoProfessor(nome, todas) {
+        const n = norm(nome);
+        return todas.filter(h => norm(h.professor) === n || norm(h.professor_apoio) === n)
+            .map(h => Object.assign({}, h, { apoio: norm(h.professor) !== n }));
+    }
+    function regencia(nome, todas) { return aulasDoProfessor(nome, todas).filter(a => !a.apoio).length; }
+
+    /**
+     * Sugere horários de hora-atividade que faltam.
+     * ha: horas-atividade atuais do professor [{turno, dia, aula, tipo}]
+     * Prefere: turno e dias em que o professor já está na escola, "janelas" entre aulas,
+     * no máximo 2 por dia, espalhando pela semana; evita dias das restrições do cadastro.
+     */
+    function sugerirHA(nome, todas, ha, perfil, tipo) {
+        const aulas = aulasDoProfessor(nome, todas);
+        const falta = haEsperada(aulas.filter(a => !a.apoio).length) - ha.length;
+        if (falta <= 0) return [];
+        const ocupado = new Set(aulas.map(a => a.turno + '|' + a.dia + '|' + a.aula).concat(ha.map(h => h.turno + '|' + h.dia + '|' + h.aula)));
+        const porTurno = {};
+        aulas.forEach(a => { porTurno[a.turno] = (porTurno[a.turno] || 0) + 1; });
+        const turnos = Object.keys(porTurno).length ? Object.keys(porTurno).sort((x, y) => porTurno[y] - porTurno[x]) : ['Manhã'];
+        const restr = norm(perfil && perfil.restricoes);
+        const novas = [];
+        const haNoDia = (t, d) => ha.concat(novas).filter(h => h.turno === t && h.dia === d).length;
+        for (let k = 0; k < falta; k++) {
+            let melhor = null, melhorNota = -Infinity;
+            turnos.forEach((t, ti) => DIAS.forEach(d => {
+                if (restr && restr.includes(norm(d))) return;
+                const aulasDia = aulas.filter(a => a.turno === t && a.dia === d).map(a => AULAS.indexOf(a.aula));
+                if (haNoDia(t, d) >= 2) return;
+                AULAS.forEach((au, i) => {
+                    const chave = t + '|' + d + '|' + au;
+                    if (ocupado.has(chave)) return;
+                    let nota = 0;
+                    if (aulasDia.length) nota += 4;                                   // já está na escola
+                    if (aulasDia.some(x => x < i) && aulasDia.some(x => x > i)) nota += 3; // janela entre aulas
+                    else if (aulasDia.some(x => Math.abs(x - i) === 1)) nota += 2;     // colada numa aula
+                    nota -= haNoDia(t, d) * 2;                                         // espalha pela semana
+                    nota -= ti * 3;                                                    // turno principal primeiro
+                    if (nota > melhorNota) { melhorNota = nota; melhor = { turno: t, dia: d, aula: au, tipo: tipo || 'H.A. - Planejamento' }; }
+                });
+            }));
+            if (!melhor) break;
+            novas.push(melhor);
+            ocupado.add(melhor.turno + '|' + melhor.dia + '|' + melhor.aula);
+        }
+        return novas;
+    }
+
+    const nucleo = { haEsperada, aulasDoProfessor, regencia, sugerirHA, DIAS, AULAS, HORARIOS_FIXOS, norm, listaDisciplinas, recursoDoLocal, serieDaTurma, regraDaDisciplina,
         analisarGrade, sugerirProfessor, distribuirAulas, gradeVazia };
     if (typeof module !== 'undefined' && module.exports) { module.exports = nucleo; return; }
     global.HorariosNucleo = nucleo;
@@ -320,7 +380,8 @@
 
     const est = {
         carregado: false, todas: [], professores: [], cfg: RECURSOS_PADRAO, cfgPadrao: true, ha: [], turmas: [],
-        turma: '', turno: 'Manhã', grade: gradeVazia(), alterado: false, matriz: []
+        turma: '', turno: 'Manhã', grade: gradeVazia(), alterado: false, matriz: [],
+        modo: 'turma', prof: '', haEdit: [], haAlterado: false
     };
 
     async function getJSON(params) {
@@ -364,7 +425,8 @@
         try {
             await carregarBase(true);
             preencherTurmas();
-            if (est.turma) carregarGradeEdicao();
+            if (est.modo === 'professor') { preencherProfessores(); est.haEdit = haDe(est.prof); est.haAlterado = false; renderizarProfessor(); }
+            else if (est.turma) carregarGradeEdicao();
         } catch (e) {
             console.error(e);
             document.getElementById('container-grade').innerHTML = '<p style="color:#ef4444;text-align:center;padding:30px;">Erro ao carregar os horários.</p>';
@@ -390,6 +452,7 @@
     }
 
     function carregarGradeEdicao(semPerguntar) {
+        if (est.modo === 'professor') { est.turno = document.getElementById('gestao-turno').value; return renderizarProfessor(); }
         const turno = document.getElementById('gestao-turno').value;
         if (!semPerguntar && est.alterado && turno !== est.turno && !confirm('Há mudanças não salvas. Trocar de turno mesmo assim?')) {
             document.getElementById('gestao-turno').value = est.turno; return;
@@ -768,7 +831,161 @@
         }
     }
 
-    Object.assign(global, { abrirGestaoHorarios, trocarTurmaGestao, carregarGradeEdicao, atualizarCelula, salvarGradeAtual,
+
+    // ------------------------------------------------------------------
+    //  Modo "Professores": hora-atividade
+    // ------------------------------------------------------------------
+    const TIPOS_HA = ['H.A. - Planejamento', 'H.A. - Formação', 'H.A. - Atendimento', 'H.A. - Concentrada'];
+
+    function trocarModoGestao(modo) {
+        if (modo === est.modo) return;
+        if ((est.alterado || est.haAlterado) && !confirm('Há mudanças não salvas. Trocar mesmo assim?')) return;
+        est.modo = modo; est.alterado = false; est.haAlterado = false;
+        document.getElementById('btn-modo-turma').style.opacity = modo === 'turma' ? '1' : '.55';
+        document.getElementById('btn-modo-prof').style.opacity = modo === 'professor' ? '1' : '.55';
+        document.querySelectorAll('.so-turma').forEach(el => { el.style.display = modo === 'turma' ? '' : 'none'; });
+        document.querySelectorAll('.so-prof').forEach(el => { el.style.display = modo === 'professor' ? '' : 'none'; });
+        if (modo === 'professor') { preencherProfessores(); renderizarProfessor(); }
+        else { carregarGradeEdicao(true); }
+    }
+
+    function haDe(nome) { return est.ha.filter(h => norm(h.professor) === norm(nome)).map(h => ({ turno: h.turno || 'Manhã', dia: h.dia, aula: h.aula, tipo: h.tipo || 'H.A. - Planejamento' })); }
+
+    function preencherProfessores() {
+        const nomes = [...new Set(est.todas.map(h => h.professor).filter(Boolean).concat(est.professores.map(p => p.nome)))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+        const sel = document.getElementById('gestao-professor');
+        sel.innerHTML = '<option value="">Selecione um professor...</option>' + nomes.map(n => {
+            const r = regencia(n, est.todas), e = haEsperada(r), m = haDe(n).length;
+            const marca = !r ? '' : (m === e ? ' ✓' : (m < e ? ' ⚠️' : ' ▲'));
+            return '<option value="' + esc(n) + '"' + (n === est.prof ? ' selected' : '') + '>' + esc(n) + ' — ' + r + ' aulas, H.A. ' + m + '/' + e + marca + '</option>';
+        }).join('');
+    }
+
+    function trocarProfessorGestao() {
+        if (est.haAlterado && !confirm('Há horas-atividade não salvas. Trocar de professor mesmo assim?')) { document.getElementById('gestao-professor').value = est.prof; return; }
+        est.prof = document.getElementById('gestao-professor').value;
+        est.haEdit = haDe(est.prof);
+        est.haAlterado = false;
+        const aulas = aulasDoProfessor(est.prof, est.todas);
+        if (aulas.length && !aulas.some(a => a.turno === est.turno)) { est.turno = aulas[0].turno; document.getElementById('gestao-turno').value = est.turno; }
+        renderizarProfessor();
+    }
+
+    function renderizarProfessor() {
+        const cont = document.getElementById('container-grade');
+        if (!est.prof) {
+            cont.innerHTML = '<div style="text-align:center;padding:30px;color:#64748b;">Escolha um professor para ver a semana dele e marcar as horas-atividade.</div>';
+            renderizarResumoHA();
+            return;
+        }
+        const aulas = aulasDoProfessor(est.prof, est.todas);
+        const perfil = est.professores.find(p => norm(p.nome) === norm(est.prof)) || {};
+        let html = '<table style="width:100%;border-collapse:collapse;font-size:12px;background:white;"><thead><tr style="background:#7c3aed;color:white;"><th style="padding:8px;">Aula</th>';
+        DIAS.forEach(d => { html += '<th style="padding:8px;">' + d + '</th>'; });
+        html += '</tr></thead><tbody>';
+        AULAS.forEach((aula, i) => {
+            html += '<tr><td style="padding:6px;background:#f8fafc;font-weight:bold;text-align:center;">' + aula + '<br><small style="font-weight:normal;color:#64748b;">' + HORARIOS_FIXOS[est.turno][i] + '</small></td>';
+            DIAS.forEach(dia => {
+                const aqui = aulas.filter(a => a.turno === est.turno && a.dia === dia && a.aula === aula);
+                const ha = est.haEdit.find(h => h.turno === est.turno && h.dia === dia && h.aula === aula);
+                const a = "'" + dia + "','" + aula + "'";
+                let bg = '#f0fdf4', conteudo = '';
+                aqui.forEach(x => { conteudo += '<div style="font-weight:bold;color:#1e293b;">' + esc(x.turma) + (x.apoio ? ' <small>(apoio)</small>' : '') + '</div><div style="color:#475569;font-size:11px;">' + esc(x.disciplina) + '</div>'; });
+                if (aqui.length) bg = '#eef2ff';
+                if (ha) {
+                    bg = aqui.length ? '#fee2e2' : '#f3e8ff';
+                    conteudo += '<select onchange="mudarTipoHA(' + a + ',this.value)" style="width:100%;font-size:11px;padding:2px;border:1px solid #c4b5fd;border-radius:4px;margin-top:2px;">' +
+                        TIPOS_HA.concat(TIPOS_HA.includes(ha.tipo) ? [] : [ha.tipo]).map(t => '<option' + (t === ha.tipo ? ' selected' : '') + '>' + esc(t) + '</option>').join('') + '</select>' +
+                        '<button onclick="alternarHA(' + a + ')" style="margin-top:2px;width:100%;font-size:11px;border:none;background:#ede9fe;border-radius:4px;cursor:pointer;">✕ tirar H.A.</button>';
+                    if (aqui.length) conteudo += '<div style="color:#b91c1c;font-size:10px;">🔴 H.A. em horário de aula</div>';
+                } else if (!aqui.length) {
+                    const restrito = perfil.restricoes && norm(perfil.restricoes).includes(norm(dia));
+                    conteudo = '<button onclick="alternarHA(' + a + ')" style="width:100%;height:100%;min-height:38px;border:1px dashed #c4b5fd;background:transparent;color:#7c3aed;border-radius:4px;cursor:pointer;font-size:11px;">+ H.A.' + (restrito ? '<br><small style="color:#b45309;">restrição</small>' : '') + '</button>';
+                }
+                html += '<td style="padding:4px;background:' + bg + ';border:1px solid #e2e8f0;min-width:120px;vertical-align:top;">' + conteudo + '</td>';
+            });
+            html += '</tr>';
+            if (aula === '3ª') html += '<tr style="background:#fef3c7;"><td colspan="6" style="text-align:center;font-weight:bold;padding:4px;">☕ INTERVALO — ' + INTERVALO[est.turno] + '</td></tr>';
+        });
+        html += '</tbody></table>';
+        cont.innerHTML = html;
+        renderizarResumoHA();
+    }
+
+    function renderizarResumoHA() {
+        const painel = document.getElementById('painel-conflitos');
+        let html = '';
+        if (est.prof) {
+            const r = regencia(est.prof, est.todas), e = haEsperada(r), m = est.haEdit.length;
+            const outroTurno = est.haEdit.filter(h => h.turno !== est.turno).length;
+            const cor = m === e ? '#dcfce7' : (m < e ? '#fef3c7' : '#e0e7ff');
+            html += '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-size:13px;margin-bottom:10px;">' +
+                '<span style="background:#ede9fe;padding:6px 10px;border-radius:6px;"><b>' + r + '</b> aulas de regência</span>' +
+                '<span style="background:' + cor + ';padding:6px 10px;border-radius:6px;">H.A.: <b>' + m + '</b> de <b>' + e + '</b> pela tabela' + (m < e ? ' — faltam ' + (e - m) : m > e ? ' — ' + (m - e) + ' a mais' : ' ✓') + '</span>' +
+                (outroTurno ? '<span style="color:#64748b;">(' + outroTurno + ' no outro turno)</span>' : '') +
+                (est.haAlterado ? '<span style="background:#fde68a;padding:6px 10px;border-radius:6px;">✏️ não salvo</span>' : '') +
+                '<button onclick="sugerirHAProfessor()" style="background:#7c3aed;color:white;border:none;padding:7px 12px;border-radius:6px;cursor:pointer;font-weight:bold;margin-left:auto;">✨ Sugerir as que faltam</button>' +
+                '<button onclick="salvarHAProfessor()" id="btn-salvar-ha" style="background:#22c55e;color:white;border:none;padding:7px 12px;border-radius:6px;cursor:pointer;font-weight:bold;">💾 Salvar H.A.</button></div>';
+        }
+        // visão geral da escola
+        const nomes = [...new Set(est.todas.map(h => h.professor).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+        const linhas = nomes.map(n => { const r = regencia(n, est.todas); return { n, r, e: haEsperada(r), m: haDe(n).length }; }).filter(x => x.r);
+        const pend = linhas.filter(x => x.m !== x.e);
+        html += '<details' + (est.prof ? '' : ' open') + ' style="font-size:12px;"><summary style="cursor:pointer;font-weight:bold;">Todos os professores — ' + (pend.length ? pend.length + ' com H.A. diferente da tabela' : 'todos de acordo com a tabela ✓') + '</summary>' +
+            '<table style="width:100%;border-collapse:collapse;margin-top:6px;"><tr style="background:#ede9fe;"><th style="text-align:left;padding:4px;">Professor</th><th>Aulas</th><th>H.A. pela tabela</th><th>H.A. marcadas</th><th></th></tr>' +
+            linhas.map(x => '<tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:4px;">' + esc(x.n) + '</td><td style="text-align:center;">' + x.r + '</td><td style="text-align:center;">' + x.e + '</td>' +
+                '<td style="text-align:center;font-weight:bold;color:' + (x.m === x.e ? '#15803d' : '#b45309') + ';">' + x.m + '</td>' +
+                '<td><button onclick="abrirProfessorHA(\'' + esc(x.n).replace(/'/g, '&#39;') + '\')" style="border:none;background:#ede9fe;border-radius:4px;cursor:pointer;padding:2px 8px;">abrir</button></td></tr>').join('') + '</table></details>';
+        painel.innerHTML = html;
+    }
+
+    function abrirProfessorHA(nome) {
+        const sel = document.getElementById('gestao-professor');
+        sel.value = nome;
+        if (sel.value !== nome) return;
+        trocarProfessorGestao();
+    }
+
+    function alternarHA(dia, aula) {
+        const i = est.haEdit.findIndex(h => h.turno === est.turno && h.dia === dia && h.aula === aula);
+        if (i >= 0) est.haEdit.splice(i, 1);
+        else est.haEdit.push({ turno: est.turno, dia, aula, tipo: TIPOS_HA[0] });
+        est.haAlterado = true;
+        renderizarProfessor();
+    }
+    function mudarTipoHA(dia, aula, tipo) {
+        const h = est.haEdit.find(x => x.turno === est.turno && x.dia === dia && x.aula === aula);
+        if (h) { h.tipo = tipo; est.haAlterado = true; renderizarResumoHA(); }
+    }
+    function sugerirHAProfessor() {
+        const perfil = est.professores.find(p => norm(p.nome) === norm(est.prof));
+        const novas = sugerirHA(est.prof, est.todas, est.haEdit, perfil);
+        if (!novas.length) { alert('Nada a sugerir: o professor já tem as horas-atividade da tabela (ou não há horário livre).'); return; }
+        est.haEdit = est.haEdit.concat(novas);
+        est.haAlterado = true;
+        renderizarProfessor();
+        toast('✨ ' + novas.length + ' hora(s)-atividade sugeridas. Confira e clique em Salvar H.A.');
+    }
+    async function salvarHAProfessor(ignorar) {
+        const btn = document.getElementById('btn-salvar-ha');
+        if (btn) { btn.disabled = true; btn.textContent = '⏳ Salvando...'; }
+        try {
+            const r = await (await global.fetchAutenticado(URL(), { operacao: 'HA_SALVAR', professor: est.prof, itens: est.haEdit, ignorarConflitos: !!ignorar })).json();
+            if (r.status === 'conflito') {
+                if (confirm('⚠️ Hora-atividade em horário de aula:\n\n' + r.conflitos.map(c => c.dia + ' ' + c.aula + ' — ' + c.texto).join('\n') + '\n\nSalvar mesmo assim?')) return salvarHAProfessor(true);
+            } else if (r.status === 'success') {
+                est.ha = est.ha.filter(h => norm(h.professor) !== norm(est.prof))
+                    .concat(est.haEdit.map(h => Object.assign({ professor: est.prof, horario: HORARIOS_FIXOS[h.turno][AULAS.indexOf(h.aula)] }, h)));
+                est.haAlterado = false;
+                preencherProfessores();
+                renderizarProfessor();
+                toast('✅ Horas-atividade de ' + est.prof + ' salvas (' + r.horas + ').');
+            } else alert('❌ ' + (r.message || 'Não foi possível salvar.'));
+        } catch (e) { alert('❌ Erro de conexão.'); }
+        finally { const b = document.getElementById('btn-salvar-ha'); if (b) { b.disabled = false; b.textContent = '💾 Salvar H.A.'; } }
+    }
+
+    Object.assign(global, { trocarModoGestao, trocarProfessorGestao, abrirProfessorHA, alternarHA, mudarTipoHA, sugerirHAProfessor, salvarHAProfessor, abrirGestaoHorarios, trocarTurmaGestao, carregarGradeEdicao, atualizarCelula, salvarGradeAtual,
         autoPreencherGrade, limparGrade, fecharModalGestaoHorarios, abrirRecursos, editarRecurso, adicionarRecurso,
         removerRecurso, salvarRecursos });
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'siga-cache-v18'; // v18: importar do BI e painel do professor
+const CACHE_NAME = 'siga-cache-v19'; // v19: hora-atividade na Gestão de Horários
 
 const urlsToCache = [
     '/', '/index.html', '/restrito.html', '/responsaveis.html',

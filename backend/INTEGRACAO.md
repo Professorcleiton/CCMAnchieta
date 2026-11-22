@@ -103,7 +103,8 @@ Depois de colar o `horarios.gs` e o `seguranca.gs` atualizado, **implante uma no
 
 1. SIGA → **Gestão de Horários → 🖥️ Recursos**: confira o laboratório, os tablets (quantos kits) e as disciplinas que usam cada um (plataformas obrigatórias). Clique em **Salvar recursos**. São criadas as abas **Recursos** e **Recursos_Disciplinas**, que também podem ser editadas direto na planilha.
 2. Abra uma turma e salve. A grade anterior fica guardada na aba **Horarios_Historico** (data, quem salvou e as aulas).
-3. A **Agenda do Laboratório** passa a mostrar "Livre" sempre que o recurso estiver vago, e tem uma aba para cada recurso.
+3. **Hora-atividade:** em Gestão de Horários → **👩‍🏫 Professores e hora-atividade**, escolha o professor, clique nos horários para marcar e salve (aba `Horas_Atividade`). O número esperado vem da tabela oficial (aulas de regência → horas-atividade).
+4. A **Agenda do Laboratório** passa a mostrar "Livre" sempre que o recurso estiver vago, e tem uma aba para cada recurso.
 
 ## Passo 4d: Virada do Ano Letivo (virada-ano.gs)
 

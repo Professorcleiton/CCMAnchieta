@@ -560,26 +560,34 @@
                 <h3><i class="fa-solid fa-table"></i> Gestão de Horários</h3>
                 <div style="display:flex;gap:10px;align-items:center;">
                     <button onclick="abrirRecursos()" title="Laboratório, tablets e disciplinas que usam cada um" style="background:#4c1d95;color:white;border:none;padding:8px 14px;border-radius:6px;font-weight:bold;cursor:pointer;">🖥️ Recursos</button>
-                    <button onclick="salvarGradeAtual()" id="btn-salvar-grade" style="background:#22c55e;color:white;border:none;padding:8px 16px;border-radius:6px;font-weight:bold;cursor:pointer;">💾 Salvar</button>
+                    <button onclick="salvarGradeAtual()" id="btn-salvar-grade" class="so-turma" style="background:#22c55e;color:white;border:none;padding:8px 16px;border-radius:6px;font-weight:bold;cursor:pointer;">💾 Salvar</button>
                     <button onclick="document.getElementById('modal-gestao-horarios').style.display='none'" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;">&times;</button>
                 </div>
             </div>
             <div class="modal-body" style="padding: 15px; overflow-y: auto; flex: 1;">
+                <div style="display:flex;gap:6px;margin-bottom:12px;">
+                    <button id="btn-modo-turma" onclick="trocarModoGestao('turma')" style="background:#7c3aed;color:white;border:none;padding:8px 14px;border-radius:6px;cursor:pointer;font-weight:bold;">📚 Grade das turmas</button>
+                    <button id="btn-modo-prof" onclick="trocarModoGestao('professor')" style="background:#7c3aed;color:white;border:none;padding:8px 14px;border-radius:6px;cursor:pointer;font-weight:bold;opacity:.55;">👩‍🏫 Professores e hora-atividade</button>
+                </div>
                 <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;align-items:center;">
-                    <label style="font-weight:bold;">Turma:</label>
-                    <select id="gestao-turma" onchange="trocarTurmaGestao()" style="padding:8px 12px;border:1px solid #cbd5e1;border-radius:6px;font-size:14px;">
+                    <label class="so-turma" style="font-weight:bold;">Turma:</label>
+                    <select class="so-turma" id="gestao-turma" onchange="trocarTurmaGestao()" style="padding:8px 12px;border:1px solid #cbd5e1;border-radius:6px;font-size:14px;">
                         <option value="">Carregando...</option>
+                    </select>
+                    <label class="so-prof" style="font-weight:bold;display:none;">Professor:</label>
+                    <select class="so-prof" id="gestao-professor" onchange="trocarProfessorGestao()" style="padding:8px 12px;border:1px solid #cbd5e1;border-radius:6px;font-size:14px;display:none;max-width:420px;">
+                        <option value="">Selecione...</option>
                     </select>
                     <label style="font-weight:bold;margin-left:10px;">Turno:</label>
                     <select id="gestao-turno" onchange="carregarGradeEdicao()" style="padding:8px 12px;border:1px solid #cbd5e1;border-radius:6px;font-size:14px;">
                         <option value="Manhã">Manhã</option>
                         <option value="Tarde">Tarde</option>
                     </select>
-                    <button onclick="autoPreencherGrade()" id="btn-auto-preencher" style="background:#f59e0b;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:bold;margin-left:auto;">⚡ Auto-Preencher</button>
-                    <button onclick="limparGrade()" style="background:#ef4444;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:bold;">🗑️ Limpar</button>
+                    <button onclick="autoPreencherGrade()" id="btn-auto-preencher" class="so-turma" style="background:#f59e0b;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:bold;margin-left:auto;">⚡ Auto-Preencher</button>
+                    <button onclick="limparGrade()" class="so-turma" style="background:#ef4444;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:bold;">🗑️ Limpar</button>
                 </div>
 
-                <div style="display:flex;gap:15px;margin-bottom:10px;font-size:12px;flex-wrap:wrap;">
+                <div class="so-turma" style="display:flex;gap:15px;margin-bottom:10px;font-size:12px;flex-wrap:wrap;">
                     <span style="color:#16a34a;">🟢 Horário vago</span>
                     <span style="color:#ef4444;">🔴 Conflito (professor ou recurso ocupado em outra turma)</span>
                     <span style="color:#d97706;">🟡 Alerta (hora-atividade, limite de aulas, preferência)</span>
@@ -1127,7 +1135,7 @@
     <!-- ============================================= -->
     <script src="db.js?v=13"></script>
     <script src="script.js?v=13"></script>
-    <script src="horarios-gestao.js?v=1"></script>
+    <script src="horarios-gestao.js?v=2"></script>
     <script src="virada-ano.js?v=1"></script>
 
 <!-- PARTE 2 CONTINUA ABAIXO -->
@@ -1482,8 +1490,8 @@ async function carregarHorariosProfessor() {
                 if (nomeHA === nomeLogadoNorm) {
                     horarios.push({
                         turma: '---', dia: h.dia, aula: h.aula, horario: h.horario,
-                        disciplina: 'H.A. - Planejamento', professor: h.professor,
-                        local: 'Coordenação', como_apoio: false, isHA: true,
+                        disciplina: h.tipo || 'H.A. - Planejamento', professor: h.professor,
+                        local: 'Hora-atividade', como_apoio: false, isHA: true,
                         turno: h.turno || 'Manhã'
                     });
                 }
@@ -1520,7 +1528,9 @@ function renderizarHorariosNoModal(horarios, container) {
     let html = '<div style="display:flex;gap:15px;margin-bottom:20px;flex-wrap:wrap;">';
     html += '<div style="background:#f8fafc;padding:15px;border-radius:8px;text-align:center;min-width:120px;"><strong style="font-size:24px;color:#6366f1;">' + totalAulas + '</strong><br><small>Aulas/Semana</small></div>';
     html += '<div style="background:#f8fafc;padding:15px;border-radius:8px;text-align:center;min-width:120px;"><strong style="font-size:24px;color:#6366f1;">' + turmas.length + '</strong><br><small>Turmas</small></div>';
-    html += '<div style="background:#fef3c7;padding:15px;border-radius:8px;text-align:center;min-width:120px;"><strong style="font-size:24px;color:#92400e;">' + totalHA + '</strong><br><small>H.A. - Planejamento</small></div>';
+    const regenciaProf = horarios.filter(h => !h.isHA && !h.como_apoio).length;
+    const haTabela = window.HorariosNucleo ? HorariosNucleo.haEsperada(regenciaProf) : null;
+    html += '<div style="background:#fef3c7;padding:15px;border-radius:8px;text-align:center;min-width:120px;"><strong style="font-size:24px;color:#92400e;">' + totalHA + (haTabela !== null ? '<small style="font-size:14px;"> / ' + haTabela + '</small>' : '') + '</strong><br><small>Horas-atividade' + (haTabela !== null ? ' (marcadas / pela tabela)' : '') + '</small></div>';
     html += '</div>';
     
     dias.forEach(dia => {
