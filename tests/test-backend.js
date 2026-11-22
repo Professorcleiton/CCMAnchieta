@@ -306,6 +306,8 @@ assert.strictEqual(P({operacao:'FREQ_HISTORICO_SALVAR',token:tp2(),semanas:[{sem
 ctx.CacheService.getScriptCache().remove('freq_publico');
 F=G({aba:'frequenciometro'}); assert.deepStrictEqual(F.historico.slice(1).map(h=>h[0]),['1','2','21','22','23','33','37','41','42','Esta']);
 
+add('Turmas_Professor',[['Email','Turmas'],['prof@x.com','6A, 9B'],['sec@x.com','7B']]);
+S['Usuários'].rows.find(r=>r[0]==='prof@x.com')[1]='Ana';
 // ===== horarios.gs: SALVAR_GRADE preserva apoio/local, confere conflitos, guarda histórico
 add('Horarios',[['Turno','Turma','Dia','Aula','Horário','Disciplina','Professor','Local','Professor Apoio','Extra'],
  ['Manhã','6A','Segunda','1ª','06:55-07:45','Matemática','Ana','Lab. Informática','Bia','x1'],
@@ -331,6 +333,7 @@ const seg1=linhas.find(r=>r[1]==='6A'&&r[0]==='Manhã'&&r[2]==='Segunda'&&r[3]==
 assert.strictEqual(seg1[8],'Bia','professor de apoio preservado'); assert.strictEqual(seg1[9],'x1','coluna extra preservada'); assert.strictEqual(seg1[7],'Lab. Informática');
 assert(linhas.some(r=>r[1]==='6A'&&r[0]==='Tarde'),'outro turno intacto'); assert(linhas.some(r=>r[1]==='7B'),'outra turma intacta');
 assert.strictEqual(linhas.length,5); assert.strictEqual(S.Horarios_Historico.rows.length,3,'2 aulas antigas no histórico');
+assert.deepStrictEqual(S.Turmas_Professor.rows.filter(r=>r[0]).map(r=>r[0]),['Email','sec@x.com'],'cache de turmas da Ana refeito; os outros ficam');
 // sem conflito: grava direto; trocar apoio explicitamente
 SG=P({operacao:'SALVAR_GRADE',token:tdir,turma:'6A',turno:'Manhã',grade:{Segunda:{'1ª':{disciplina:'Matemática',professor:'Ana',local:'',professor_apoio:''}}}});
 assert.strictEqual(SG.status,'success'); assert.strictEqual(S.Horarios.rows.slice(1).filter(r=>r[1]==='6A'&&r[0]==='Manhã').length,1);

@@ -282,6 +282,11 @@ function HOR_salvarGrade_(sessao, corpo) {
     if (todas.length) aba.getRange(2, 1, todas.length, largura).setValues(todas);
     if (!dados.length) aba.getRange(1, 1, 1, cabecalho.length).setValues([cabecalho]);
 
+    // Professores que entraram ou saíram da turma: o "Turmas do professor" se refaz sozinho
+    var nomes = {};
+    daTurma.concat(novas).forEach(function (l) { [l[6], l[8]].forEach(function (n) { if (String(n || '').trim()) nomes[HOR_norm_(n)] = true; }); });
+    HOR_limparTurmasProfessor_(nomes);
+
     if (typeof SEG_auditar_ === 'function') {
       SEG_auditar_(sessao, 'SALVAR_GRADE', turma + ' ' + turno + ' (' + novas.length + ' aulas' + (conflitos.length ? ', ' + conflitos.length + ' conflitos aceitos' : '') + ')');
     }
@@ -289,4 +294,37 @@ function HOR_salvarGrade_(sessao, corpo) {
   } finally {
     lock.releaseLock();
   }
+}
+
+
+/**
+ * A aba "Turmas_Professor" guarda as turmas de cada professor na primeira consulta
+ * e nunca mais atualiza. Apaga a linha dos professores indicados (por nome normalizado,
+ * ou todos se nomes === null): o Código.gs refaz a partir da aba Horarios na próxima consulta.
+ */
+function HOR_limparTurmasProfessor_(nomes) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var aba = ss.getSheetByName('Turmas_Professor');
+  if (!aba) return 0;
+  var emails = null;
+  if (nomes) {
+    emails = {};
+    var u = ss.getSheetByName('Usuários');
+    if (u) u.getDataRange().getValues().slice(1).forEach(function (l) {
+      if (nomes[HOR_norm_(l[1])]) emails[String(l[0] || '').trim().toLowerCase()] = true;
+    });
+  }
+  var dados = aba.getDataRange().getValues();
+  var manter = [dados[0] || ['Email', 'Turmas']], removidas = 0;
+  for (var i = 1; i < dados.length; i++) {
+    var email = String(dados[i][0] || '').trim().toLowerCase();
+    if (!email) continue;
+    if (emails === null || emails[email]) { removidas++; continue; }
+    manter.push(dados[i]);
+  }
+  if (!removidas) return 0;
+  var largura = manter[0].length;
+  aba.getRange(1, 1, dados.length, largura).clearContent();
+  aba.getRange(1, 1, manter.length, largura).setValues(manter.map(function (l) { while (l.length < largura) l.push(''); return l.slice(0, largura); }));
+  return removidas;
 }
