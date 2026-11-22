@@ -2,7 +2,12 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <script src="siga-core.js?v=14"></script>
+    <script src="siga-core.js?v=15"></script>
+    <link rel="manifest" href="/manifest-pais.json">
+    <meta name="theme-color" content="#7c3aed">
+    <link rel="apple-touch-icon" href="/img/app-pais-180.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Anchieta Pais">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Horário Escolar - SIGA Anchieta</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -17,7 +22,7 @@
         
         /* Cabeçalho */
         .header {
-            background: #2e7d32;
+            background: #7c3aed;
             color: white;
             padding: 20px;
             text-align: center;
@@ -62,7 +67,7 @@
             transition: border 0.2s;
         }
         .seletor-box select:focus {
-            border-color: #2e7d32;
+            border-color: #7c3aed;
         }
         
         /* Cards de dia */
@@ -170,7 +175,7 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            color: #2e7d32;
+            color: #7c3aed;
             text-decoration: none;
             font-weight: 600;
             margin-bottom: 15px;
@@ -229,7 +234,7 @@
 
         // Inicialização
         window.addEventListener('DOMContentLoaded', function() {
-            const sessao = sessionStorage.getItem('resp_logado');
+            const sessao = (function () { const x = obterSessaoResponsavel(); return x ? JSON.stringify(x) : null; })();
             if (!sessao) {
                 window.location.href = 'responsaveis.html';
                 return;
@@ -332,7 +337,7 @@
             
             // Título com a turma
             html += '<div style="background:white;padding:15px 20px;border-radius:12px;margin-bottom:15px;box-shadow:0 2px 8px rgba(0,0,0,0.05);">';
-            html += '<strong style="color:#2e7d32;font-size:16px;">🎒 Turma: ' + turma + '</strong>';
+            html += '<strong style="color:#7c3aed;font-size:16px;">🎒 Turma: ' + turma + '</strong>';
             html += '</div>';
 
             dias.forEach(function(dia) {

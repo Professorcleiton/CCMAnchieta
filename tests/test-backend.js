@@ -32,7 +32,7 @@ const ctx={console,Date,Math,JSON,String,Number,Array,Object,parseInt,Set,
   base64EncodeWebSafe:b=>(typeof b==='string'?Buffer.from(b):u8(b)).toString('base64').replace(/\+/g,'-').replace(/\//g,'_'),
   base64DecodeWebSafe:s=>s8(Buffer.from(s.replace(/-/g,'+').replace(/_/g,'/'),'base64')),
   newBlob:(d,t,n)=>typeof d==='string'?{getBytes:()=>s8(Buffer.from(d,'utf8'))}:{bytes:d,type:t,name:n},
-  formatDate:(d)=>d.toISOString()},
+  formatDate:(d,tz,p)=>p==='yyyy-MM-dd'?[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-'):d.toISOString()},
  PropertiesService:{_p:{},getScriptProperties(){const p=this._p;return{getProperty:k=>p[k]??null,setProperty:(k,v)=>{p[k]=v}}}},
  DriveApp:{arquivos:[],getFolderById(){const self=this;return{createFile(b){const f={nome:b.name,tipo:b.type,setDescription(){},getUrl:()=>'https://drive.google.com/file/d/'+self.arquivos.length};self.arquivos.push(f);return f}}}},
  UrlFetchApp:{calls:[],fetch(u,o){this.calls.push({u,o});return{getResponseCode:()=>201,getContentText:()=>''}}},
@@ -160,6 +160,35 @@ assert.strictEqual(P({operacao:'upload_documento',token:tpai,aluno:'JOÃO DA SIL
 assert.strictEqual(P({operacao:'upload_documento',token:tpai,aluno:'JOÃO DA SILVA',documento:'RG',nomeArquivo:'falso.pdf',arquivo:Buffer.from('MZ....').toString('base64')}).status,'error','conteúdo falso');
 assert.strictEqual(P({operacao:'upload_documento',aluno:'JOÃO DA SILVA',documento:'RG',nomeArquivo:'a.pdf',arquivo:pdf}).status,'unauthorized');
 assert.strictEqual(ctx.DriveApp.arquivos.length,2);
+// ===== Sessão longa do responsável (app "manter conectado") =====
+{ const linha=S.Sessoes.rows.find(r=>r[0]===tpai); const dias=(new Date(linha[6])-Date.now())/86400000;
+  assert(dias>29 && dias<=30,'responsável: 30 dias ('+dias+')');
+  const tdirS=P({operacao:'LOGIN',email:'dir@x.com',senha:'9999'}).token; const ls=S.Sessoes.rows.find(r=>r[0]===tdirS);
+  assert((new Date(ls[6])-Date.now())/3600000<=8.01,'equipe continua com 8 h'); }
+// ===== Provas no Portal dos Pais =====
+{
+  const d=n=>{const x=new Date();x.setDate(x.getDate()+n);return x;};
+  const iso=x=>[x.getFullYear(),String(x.getMonth()+1).padStart(2,'0'),String(x.getDate()).padStart(2,'0')].join('-');
+  const cab=['ID_Pedido','Data_Pedido','Professor_Email','Professor_Nome','Disciplina','Turma','Trimestre','Data_Prova','Valor','Conteudo_HTML','Anexos_URLs','Qtd_Copias','Observacoes','Status','Data_Status'];
+  const L=(id,disc,turma,dp,valor,status)=>[id,'x','prof@x.com','Prof Ana',disc,turma,'3º Trimestre',dp,valor,'<p>QUESTÃO SECRETA 1</p>','https://drive/anexo',30,'',status,''];
+  S.Pedidos_Avaliacoes=sheet('Pedidos_Avaliacoes',[cab,
+    L('AV1','Matemática','6A',iso(d(3)),'10,0','Pendente'),
+    L('AV2','Matemática','6A',iso(d(3)),'10,0','Impresso'),          // versão personalizada: mesma prova
+    L('AV3','História','6º Ano A',d(1),'5,0','Impresso'),            // data como Date e turma por extenso
+    L('AV4','Ciências','6A',iso(d(5)),'8,0','Rascunho'),
+    L('AV5','Inglês','6A',iso(d(6)),'4,0','Cancelado'),
+    L('AV6','Geografia','6A',iso(d(-3)),'6,0','Entregue'),           // última semana: aparece
+    L('AV7','Arte','6A',iso(d(-20)),'3,0','Entregue'),               // antiga: não aparece
+    L('AV8','Matemática','7B',iso(d(2)),'10,0','Pendente')]);        // outra turma
+  const PV=G({aba:'provas_filhos',token:tpai});
+  assert.strictEqual(PV.status,'success'); assert.strictEqual(PV.filhos.length,1);
+  const f=PV.filhos[0]; assert.strictEqual(f.aluno,'JOÃO DA SILVA');
+  assert.deepStrictEqual(f.provas.map(p=>p.disciplina),['Geografia','História','Matemática']);
+  assert.deepStrictEqual(Object.keys(f.provas[0]).sort(),['data','disciplina','professor','trimestre','valor']);
+  assert(!JSON.stringify(PV).includes('SECRETA') && !JSON.stringify(PV).includes('drive/anexo'),'conteúdo e anexos nunca saem');
+  assert.strictEqual(f.provas[2].valor,'10,0'); assert.strictEqual(f.provas[2].data,iso(d(3)));
+  assert.strictEqual(G({aba:'provas_filhos'}).status,'unauthorized');
+}
 // ===== Push =====
 const sub=JSON.stringify({endpoint:'https://fcm.googleapis.com/fcm/send/abc123',keys:{p256dh:'x',auth:'y'}});
 assert.strictEqual(P({operacao:'salvar_token_push',email:'pai@x.com',token:sub,tokenSessao:tpai}).status,'success');

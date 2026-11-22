@@ -1,7 +1,7 @@
 const fs=require('fs');
 function mkStore(){const m={};return{getItem:k=>k in m?m[k]:null,setItem:(k,v)=>m[k]=String(v),removeItem:k=>delete m[k]};}
 global.sessionStorage=mkStore(); global.localStorage=mkStore();
-global.document={addEventListener(){}};
+global.document={addEventListener(){},querySelectorAll:()=>[]}; global.addEventListener=()=>{};
 let navegou=null;
 global.location={pathname:'/alertas.html',set href(v){navegou=v},reload(){navegou='reload'}};
 const chamadas=[];

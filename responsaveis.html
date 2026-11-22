@@ -2,9 +2,14 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <script src="siga-core.js?v=14"></script>
+    <script src="siga-core.js?v=15"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal dos Pais - SIGA Anchieta</title>
+    <link rel="manifest" href="/manifest-pais.json">
+    <meta name="theme-color" content="#7c3aed">
+    <link rel="apple-touch-icon" href="/img/app-pais-180.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Anchieta Pais">
     <style>
         /* (mantenha o mesmo CSS anterior, sem alterações) */
         body {
@@ -19,7 +24,7 @@
         }
         .header {
             width: 100%;
-            background-color: #2e7d32;
+            background-color: #7c3aed;
             color: white;
             padding: 20px;
             text-align: center;
@@ -33,7 +38,9 @@
             width: 90%;
             max-width: 500px;
             margin: 30px auto;
+            box-sizing: border-box;   /* o padding não empurra o cartão para fora da tela */
         }
+        @media (max-width: 480px) { .container { width: calc(100% - 24px); padding: 20px; margin: 16px auto; } }
         .tabs {
             display: flex;
             margin-bottom: 25px;
@@ -51,8 +58,8 @@
             margin-bottom: -2px;
         }
         .tab.active {
-            color: #2e7d32;
-            border-bottom-color: #2e7d32;
+            color: #7c3aed;
+            border-bottom-color: #7c3aed;
         }
         .form {
             display: none;
@@ -82,7 +89,7 @@
         }
         button {
             padding: 14px;
-            background-color: #2e7d32;
+            background-color: #7c3aed;
             color: white;
             border: none;
             border-radius: 5px;
@@ -92,7 +99,7 @@
             transition: background 0.3s;
         }
         button:hover {
-            background-color: #1b5e20;
+            background-color: #5b21b6;
         }
         .msg {
             font-size: 14px;
@@ -135,6 +142,9 @@
             <input type="email" id="login-email" placeholder="email@exemplo.com">
             <label>Senha</label>
             <input type="password" id="login-senha" placeholder="Digite sua senha">
+            <label style="display:flex;align-items:center;gap:8px;font-weight:normal;margin:4px 0 10px;cursor:pointer;">
+                <input type="checkbox" id="manter-conectado" checked style="width:auto;margin:0;"> Manter conectado neste aparelho
+            </label>
             <button onclick="fazerLogin()">Entrar</button>
             <a href="#" onclick="abrirRecuperacaoSenha('responsavel'); return false;" style="display:block;margin-top:10px;font-size:13px;text-align:center;">Esqueci minha senha</a>
             <div class="msg" id="msg-login"></div>
@@ -164,13 +174,24 @@ O sistema reconhece mesmo sem acentos ou letras maiúsculas."></textarea>
         </div>
     </div>
 
+    <div style="text-align:center;margin:18px 0 0;">
+        <button id="btn-instalar-pais" type="button" style="display:none;background:#7c3aed;color:#fff;border:none;padding:12px 22px;border-radius:26px;font-weight:bold;font-size:15px;cursor:pointer;box-shadow:0 3px 10px rgba(124,58,237,.35);">
+            📲 Instalar o app Anchieta Pais
+        </button>
+    </div>
+
     <a href="index.html" class="voltar">← Voltar ao site</a>
 
   <script>
     const APPS_SCRIPT_URL = SIGA_CONFIG.APPS_SCRIPT_URL;
 
-    // Link "Primeiro acesso" do site (responsaveis.html#cadastro) abre a aba de cadastro
-    window.addEventListener('DOMContentLoaded', () => { if (location.hash === '#cadastro') mostrarAba('cadastro'); });
+    window.addEventListener('DOMContentLoaded', () => {
+        // Já entrou antes ("manter conectado")? Vai direto para o painel
+        if (obterSessaoResponsavel() && location.hash !== '#cadastro') { location.replace('painel-responsavel.html'); return; }
+        // Link "Primeiro acesso" do site (responsaveis.html#cadastro) abre a aba de cadastro
+        if (location.hash === '#cadastro') mostrarAba('cadastro');
+        configurarInstalacao(document.getElementById('btn-instalar-pais'), 'Anchieta Pais');
+    });
 
     function mostrarAba(tipo) {
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -244,6 +265,8 @@ async function fazerLogin() {
         } else if (data.status === "success") {
             msg.innerText = '✅ Login bem-sucedido! Redirecionando...';
             sessionStorage.setItem('resp_logado', JSON.stringify(data));
+            if (document.getElementById('manter-conectado').checked) localStorage.setItem('resp_logado', JSON.stringify(data));
+            else localStorage.removeItem('resp_logado');
 
             // Ativa notificações push
             ativarPush(email);

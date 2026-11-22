@@ -2,14 +2,17 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <script src="siga-core.js?v=14"></script>
+    <script src="siga-core.js?v=15"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel do Responsável - SIGA Anchieta</title>
-    <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#2e7d32">
+    <link rel="manifest" href="/manifest-pais.json">
+    <meta name="theme-color" content="#7c3aed">
+    <link rel="apple-touch-icon" href="/img/app-pais-180.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Anchieta Pais">
     <style>
         body { font-family: Arial, sans-serif; background-color: #f4f6f8; margin: 0; padding: 20px; color: #333; }
-        .header { background-color: #2e7d32; color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; text-align: center; }
+        .header { background-color: #7c3aed; color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; text-align: center; }
         .header h2 { margin: 0; }
         .logout { display: inline-block; margin-top: 10px; color: #fff; text-decoration: underline; cursor: pointer; }
         .filtro { background: white; padding: 15px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
@@ -31,10 +34,28 @@
         .btn-upload { background: #2563eb; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }
         .btn-upload:hover { background: #1d4ed8; }
         .btn-visualizar { background: #059669; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; text-decoration: none; display: inline-block; }
-        .push-container { background: #e8f5e9; border-left: 5px solid #2e7d32; padding: 15px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .push-container h3 { color: #2e7d32; margin-top: 0; }
-        .btn-push { padding: 12px 20px; background: #2e7d32; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
-        .btn-push:disabled { background: #a5d6a7; cursor: not-allowed; }
+        .push-container { background: #f3e8ff; border-left: 5px solid #7c3aed; padding: 15px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .push-container h3 { color: #7c3aed; margin-top: 0; }
+        .btn-push { padding: 12px 20px; background: #7c3aed; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
+        .btn-push:disabled { background: #c4b5fd; cursor: not-allowed; }
+        /* PRÓXIMAS AVALIAÇÕES */
+        .provas { background: white; padding: 15px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .provas h3 { margin: 0 0 4px; color: #7c3aed; }
+        .provas-sub { font-size: 13px; color: #64748b; margin: 0 0 12px; }
+        .provas-lista { display: flex; flex-direction: column; gap: 10px; }
+        .prova { display: flex; gap: 12px; align-items: center; border: 1px solid #ede9fe; border-left: 5px solid #7c3aed; border-radius: 10px; padding: 10px 12px; background: #faf5ff; }
+        .prova.passada { opacity: .6; border-left-color: #94a3b8; background: #f8fafc; border-color: #e2e8f0; }
+        .prova-data { flex-shrink: 0; width: 58px; text-align: center; background: #7c3aed; color: #fff; border-radius: 8px; padding: 6px 0; line-height: 1.1; }
+        .prova.passada .prova-data { background: #94a3b8; }
+        .prova-data .dia { font-size: 22px; font-weight: 800; display: block; }
+        .prova-data .mes { font-size: 11px; text-transform: uppercase; font-weight: 700; letter-spacing: .05em; }
+        .prova-info { flex: 1; min-width: 0; }
+        .prova-disc { font-weight: 700; font-size: 16px; color: #1e293b; }
+        .prova-det { font-size: 13px; color: #475569; margin-top: 2px; }
+        .prova-quando { flex-shrink: 0; font-size: 12px; font-weight: 800; padding: 4px 9px; border-radius: 12px; background: #ede9fe; color: #5b21b6; white-space: nowrap; }
+        .prova-quando.hoje { background: #fee2e2; color: #b91c1c; }
+        .prova-quando.amanha { background: #fef3c7; color: #92400e; }
+        .prova-filho { font-size: 11px; font-weight: 700; color: #7c3aed; text-transform: uppercase; letter-spacing: .03em; }
     </style>
 </head>
 <body>
@@ -43,7 +64,7 @@
     <p id="nome-responsavel">Carregando...</p>
     <a class="logout" onclick="logout()">Sair</a>
     <!-- 🆕 Botão de horários -->
-    <a href="horarios-filho.html" style="display:inline-block;margin-top:10px;color:#fff;background:#1b5e20;padding:8px 16px;border-radius:6px;text-decoration:none;font-weight:bold;">
+    <a href="horarios-filho.html" style="display:inline-block;margin-top:10px;color:#fff;background:#5b21b6;padding:8px 16px;border-radius:6px;text-decoration:none;font-weight:bold;">
         📚 Ver Horários Escolares
     </a>
 </div>
@@ -78,8 +99,15 @@
             <option value="">Todos os filhos</option>
         </select>
     </div>
+    <!-- PRÓXIMAS AVALIAÇÕES (dos pedidos de impressão de provas dos professores) -->
+    <div class="provas" id="secao-provas" style="display:none">
+        <h3>📝 Próximas Avaliações</h3>
+        <p class="provas-sub">Provas agendadas pelos professores para a turma do seu filho.</p>
+        <div class="provas-lista" id="lista-provas"></div>
+    </div>
+
     <div id="comunicados-recebidos" style="margin-top: 30px;">
-  <h3 style="color: #2e7d32; border-bottom: 2px solid #2e7d32; padding-bottom: 5px;">
+  <h3 style="color: #7c3aed; border-bottom: 2px solid #7c3aed; padding-bottom: 5px;">
     <i class="fa-solid fa-file-lines"></i> Comunicados Recebidos
   </h3>
   <div id="lista-comunicados" style="display: flex; flex-direction: column; gap: 15px;">
@@ -87,12 +115,12 @@
   </div>
 </div>
     <div class="filtro" style="margin-top: 20px;">
-        <h3 style="margin-top: 0; color: #2e7d32;">📁 Documentos Solicitados</h3>
+        <h3 style="margin-top: 0; color: #7c3aed;">📁 Documentos Solicitados</h3>
         <p style="font-size: 14px; color: #666; margin-bottom: 15px;">
             Para enviar um documento solicitado pela secretaria, utilize o formulário abaixo.
             Após o envio, o status será atualizado automaticamente.
         </p>
-        <a href="https://forms.gle/yKgcvaT81Pxnc9Ra9" target="_blank" style="display: inline-block; padding: 12px 20px; background: #2e7d32; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; margin-bottom: 15px;">
+        <a href="https://forms.gle/yKgcvaT81Pxnc9Ra9" target="_blank" style="display: inline-block; padding: 12px 20px; background: #7c3aed; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; margin-bottom: 15px;">
             📤 Enviar Documento
         </a>
         <div id="lista-documentos" style="margin-top: 15px;">
@@ -113,9 +141,8 @@
         var todosRegistros = [];
 
 window.addEventListener('DOMContentLoaded', function() {
-    var sessao = sessionStorage.getItem('resp_logado');
-    if (!sessao) { window.location.href = 'responsaveis.html'; return; }
-    dadosResponsavel = JSON.parse(sessao);
+    dadosResponsavel = obterSessaoResponsavel();
+    if (!dadosResponsavel) { window.location.href = 'responsaveis.html'; return; }
     document.getElementById('nome-responsavel').innerText = 'Bem-vindo(a), ' + dadosResponsavel.nome;
     var select = document.getElementById('filho-select');
     dadosResponsavel.alunos.forEach(function(aluno) {
@@ -129,9 +156,58 @@ window.addEventListener('DOMContentLoaded', function() {
     verificarAtualizacaoCadastral();
     verificarSuportePush();
     carregarComunicadosEmitidos(dadosResponsavel.alunos);  // ← CORRIGIDO!
+    carregarProvas();
 });
 
-        function logout() { sessionStorage.removeItem('resp_logado'); window.location.href = 'responsaveis.html'; }
+        // ===== PRÓXIMAS AVALIAÇÕES =====
+        var provasFilhos = [];
+        var hojeServidor = null;
+        async function carregarProvas() {
+            try {
+                var r = await fetch(APPS_SCRIPT_URL + '?aba=provas_filhos');
+                var d = await r.json();
+                if (!d || d.status !== 'success' || !Array.isArray(d.filhos)) return;   // backend antigo: seção fica escondida
+                provasFilhos = d.filhos;
+                hojeServidor = d.hoje || null;
+                renderizarProvas();
+            } catch (e) { console.warn('Provas indisponíveis:', e); }
+        }
+
+        function renderizarProvas() {
+            var secao = document.getElementById('secao-provas'), lista = document.getElementById('lista-provas');
+            var filtro = document.getElementById('filho-select').value;
+            var varios = provasFilhos.length > 1;
+            var itens = [];
+            provasFilhos.forEach(function (f) {
+                if (filtro && f.aluno !== filtro) return;
+                f.provas.forEach(function (p) { itens.push(Object.assign({ aluno: f.aluno }, p)); });
+            });
+            itens.sort(function (a, b) { return a.data < b.data ? -1 : a.data > b.data ? 1 : 0; });
+            secao.style.display = '';
+            if (!itens.length) { lista.innerHTML = '<div class="sem-registros" style="padding:12px">Nenhuma prova agendada no momento.</div>'; return; }
+
+            var meses = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+            var semana = ['domingo','segunda','terça','quarta','quinta','sexta','sábado'];
+            var base = hojeServidor ? new Date(hojeServidor + 'T00:00:00') : new Date(new Date().toDateString());
+            lista.innerHTML = itens.map(function (p) {
+                var dt = new Date(p.data + 'T00:00:00');
+                var dias = Math.round((dt - base) / 86400000);
+                var quando = dias < 0 ? 'Realizada' : dias === 0 ? 'Hoje' : dias === 1 ? 'Amanhã' : 'em ' + dias + ' dias';
+                var classe = dias === 0 ? 'hoje' : dias === 1 ? 'amanha' : '';
+                var det = [semana[dt.getDay()]];
+                if (p.valor) det.push('vale ' + escaparHTML(p.valor));
+                if (p.trimestre) det.push(escaparHTML(p.trimestre));
+                if (p.professor) det.push('Prof. ' + escaparHTML(p.professor.split(' ')[0]));
+                return '<div class="prova' + (dias < 0 ? ' passada' : '') + '">' +
+                    '<div class="prova-data"><span class="dia">' + dt.getDate() + '</span><span class="mes">' + meses[dt.getMonth()] + '</span></div>' +
+                    '<div class="prova-info">' + (varios ? '<div class="prova-filho">' + escaparHTML(p.aluno.split(' ')[0]) + '</div>' : '') +
+                    '<div class="prova-disc">' + escaparHTML(p.disciplina) + '</div>' +
+                    '<div class="prova-det">' + det.join(' · ') + '</div></div>' +
+                    '<span class="prova-quando ' + classe + '">' + quando + '</span></div>';
+            }).join('');
+        }
+
+        function logout() { sairResponsavel(); window.location.href = 'responsaveis.html'; }
 
   function carregarRegistros() {
     var container = document.getElementById('lista-registros');
@@ -222,6 +298,7 @@ window.addEventListener('DOMContentLoaded', function() {
 }
 
     async function filtrarRegistros() {
+            if (provasFilhos.length) renderizarProvas();
             var filhoSelecionado = document.getElementById('filho-select').value;
             var container = document.getElementById('lista-registros');
             var registros = filhoSelecionado ? todosRegistros.filter(function(r) { return r.aluno === filhoSelecionado; }) : todosRegistros;
@@ -406,7 +483,7 @@ function carregarComunicadosEmitidos(alunos) {
                 
                 container.innerHTML = '';
                 comunicados.forEach(function(f) {
-                    const cor = f.tipo && f.tipo.toLowerCase() === 'positivo' ? '#2e7d32' : '#c62828';
+                    const cor = f.tipo && f.tipo.toLowerCase() === 'positivo' ? '#7c3aed' : '#c62828';
                     const div = document.createElement('div');
                     div.style.cssText = 'border: 1px solid #e0e0e0; border-left: 5px solid ' + cor + '; padding: 15px; border-radius: 6px; background: #fff; margin-bottom: 10px;';
                     div.innerHTML = `

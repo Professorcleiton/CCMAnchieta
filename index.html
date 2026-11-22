@@ -2,11 +2,14 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <script src="siga-core.js?v=14"></script>
+    <script src="siga-core.js?v=15"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CCM Anchieta | Colégio Cívico-Militar</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="manifest-pais.json">
+    <link rel="apple-touch-icon" href="img/app-pais-180.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Anchieta Pais">
     <link rel="icon" type="image/png" href="img/SIGA.png">
 <link rel="apple-touch-icon" href="img/SIGA.png">
     <meta name="mobile-web-app-capable" content="yes">
@@ -259,7 +262,7 @@
             bottom: 20px;
             right: 20px;
             z-index: 9999;
-            background: var(--btn-green);
+            background: #7c3aed;
             color: white;
             border: none;
             padding: 12px 24px;
@@ -268,11 +271,11 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
             cursor: pointer;
             font-size: 1rem;
-            display: none;
+            display: flex;
             align-items: center;
             gap: 8px;
         }
-        #btn-instalar:hover { background: var(--btn-dark); }
+        #btn-instalar:hover { background: #5b21b6; }
 
         @media (max-width: 768px) {
             .header-logos { height: 100px; }
@@ -611,8 +614,8 @@
     </script>
 
     <!-- BOTÃO DE INSTALAÇÃO PWA -->
-    <button id="btn-instalar">
-        <i class="fas fa-download"></i> Instalar App
+    <button id="btn-instalar" style="display:none">
+        <i class="fas fa-download"></i> Instalar app dos Pais
     </button>
 
     <!-- Acessibilidade -->
@@ -681,30 +684,8 @@
                 showSlide(0);
             }
 
-            // Lógica do Botão de Instalação (PWA)
-            let deferredPrompt;
-            const btnInstalar = document.getElementById('btn-instalar');
-
-            window.addEventListener('beforeinstallprompt', (e) => {
-                e.preventDefault();
-                deferredPrompt = e;
-                if (btnInstalar) btnInstalar.style.display = 'flex';
-            });
-
-            if (btnInstalar) {
-                btnInstalar.addEventListener('click', () => {
-                    if (deferredPrompt) {
-                        deferredPrompt.prompt();
-                        deferredPrompt.userChoice.then((choiceResult) => {
-                            if (choiceResult.outcome === 'accepted') {
-                                console.log('Usuário aceitou a instalação');
-                            }
-                            deferredPrompt = null;
-                            btnInstalar.style.display = 'none';
-                        });
-                    }
-                });
-            }
+            // Botão de instalação: App dos Pais (veja configurarInstalacao no siga-core.js)
+            configurarInstalacao(document.getElementById('btn-instalar'), 'Anchieta Pais');
         });
     </script>
     <script>
