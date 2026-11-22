@@ -108,8 +108,9 @@
         nav ul li a:active { transform: translateY(3px); border-bottom: 2px solid #086d00; }
 
         /* NOVO: SEÇÃO DO VÍDEO EM LOOP */
-        /* Vídeo vertical (720x1280) mostrado INTEIRO; laterais preenchidas por
-           uma cópia desfocada do próprio vídeo */
+        /* Vídeo vertical (720x1280) mostrado INTEIRO, com as bordas esfumadas
+           sobre um fundo azul-marinho com estrelas igual ao do próprio vídeo:
+           sem faixas laterais visíveis */
         .video-hero {
             position: relative;
             width: 100%;
@@ -118,27 +119,56 @@
             overflow: hidden;
             box-shadow: 0 8px 25px rgba(0,0,0,0.2);
             margin-bottom: 50px;
-            background: linear-gradient(#112238, #050d14);
+            background:
+                radial-gradient(ellipse 60% 70% at 50% 45%, #13243d 0%, #0d1827 55%, #070f1a 100%);
+            display: flex;
+            justify-content: center;
             isolation: isolate;
         }
-
-        .video-hero .video-fundo {
-            position: absolute; inset: -60px;
-            width: calc(100% + 120px); height: calc(100% + 120px);
-            object-fit: cover;
-            filter: blur(30px) brightness(.35) saturate(1.3);
+        /* estrelas nas laterais (duas camadas que piscam devagar) */
+        .video-hero::before, .video-hero::after {
+            content: '';
+            position: absolute; inset: 0;
             z-index: -1;
             pointer-events: none;
+            background-image:
+                radial-gradient(1.4px 1.4px at 12% 18%, #fff8 50%, transparent 51%),
+                radial-gradient(1px 1px at 22% 62%, #fff7 50%, transparent 51%),
+                radial-gradient(1.6px 1.6px at 8% 80%, #ffe9a8aa 50%, transparent 51%),
+                radial-gradient(1px 1px at 30% 35%, #fff6 50%, transparent 51%),
+                radial-gradient(1.2px 1.2px at 18% 45%, #fff7 50%, transparent 51%),
+                radial-gradient(1.4px 1.4px at 88% 22%, #fff8 50%, transparent 51%),
+                radial-gradient(1px 1px at 78% 58%, #fff7 50%, transparent 51%),
+                radial-gradient(1.6px 1.6px at 92% 76%, #ffe9a8aa 50%, transparent 51%),
+                radial-gradient(1px 1px at 70% 30%, #fff6 50%, transparent 51%),
+                radial-gradient(1.2px 1.2px at 83% 90%, #fff7 50%, transparent 51%);
+            animation: estrelasPiscam 6s ease-in-out infinite alternate;
         }
+        .video-hero::after {
+            transform: translate(3%, 6%) scale(1.15);
+            animation-delay: -3s;
+            opacity: .7;
+        }
+        @keyframes estrelasPiscam { from { opacity: .35; } to { opacity: 1; } }
+        /* o vídeo some nas bordas, misturando-se ao fundo */
         .video-hero .video-principal {
             position: relative;
             display: block;
-            width: 100%;
             height: 100%;
-            object-fit: contain;
-            filter: drop-shadow(0 10px 30px rgba(0,0,0,.45));
+            width: auto;
+            max-width: 100%;
+            aspect-ratio: 9 / 16;
+            object-fit: cover;
+            -webkit-mask-image:
+                linear-gradient(to right, transparent 0, #000 18%, #000 82%, transparent 100%),
+                linear-gradient(to bottom, transparent 0, #000 6%, #000 94%, transparent 100%);
+            -webkit-mask-composite: source-in;
+                    mask-image:
+                linear-gradient(to right, transparent 0, #000 18%, #000 82%, transparent 100%),
+                linear-gradient(to bottom, transparent 0, #000 6%, #000 94%, transparent 100%);
+                    mask-composite: intersect;
         }
-        @media (prefers-reduced-motion: reduce) { .video-hero .video-fundo { display: none; } }
+        @media (prefers-reduced-motion: reduce) { .video-hero::before, .video-hero::after { animation: none; } }
 
         /* CARROSSEL DE NOVIDADES */
         .carousel-wrapper {
@@ -324,9 +354,6 @@
         
         <!-- 1. VÍDEO EM LOOP NO TOPO -->
         <section class="video-hero">
-            <video class="video-fundo" autoplay loop muted playsinline aria-hidden="true" tabindex="-1">
-                <source src="img/videoanchieta.mp4?v=2" type="video/mp4">
-            </video>
             <video class="video-principal" autoplay loop muted playsinline aria-label="Vídeo de apresentação do brasão do Colégio Cívico-Militar Anchieta">
                 <source src="img/videoanchieta.mp4?v=2" type="video/mp4">
                 Seu navegador não suporta vídeos.
@@ -395,15 +422,6 @@
     </footer>
 
     <script>
-    // ===== VÍDEO DO TOPO: mantém a cópia desfocada (fundo) no mesmo tempo do vídeo principal =====
-    (function () {
-        const p = document.querySelector('.video-hero .video-principal');
-        const f = document.querySelector('.video-hero .video-fundo');
-        if (!p || !f) return;
-        p.addEventListener('timeupdate', () => { if (Math.abs(f.currentTime - p.currentTime) > 0.3) f.currentTime = p.currentTime; });
-        p.addEventListener('play', () => { f.play().catch(() => {}); });
-    })();
-
     // ===== DESAFIO COLETIVO ANCHIETA (mesmo gráfico do Frequenciômetro) =====
     (function () {
         const META = 95;
