@@ -1,4 +1,4 @@
-const CACHE_NAME = 'siga-cache-v17'; // v17: virada do ano letivo (virada-ano.js)
+const CACHE_NAME = 'siga-cache-v18'; // v18: importar do BI e painel do professor
 
 const urlsToCache = [
     '/', '/index.html', '/restrito.html', '/responsaveis.html',

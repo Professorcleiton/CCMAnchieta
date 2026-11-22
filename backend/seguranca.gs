@@ -168,6 +168,13 @@ function doGet(e) {
   if (rota === 'frequencia_gestao') return SEG_json_(FREQ_gestao_());
   // Horários e recursos (horarios.gs)
   if (rota === 'recursos' && sessao.tipo === 'servidor' && typeof HOR_lerRecursos_ === 'function') return SEG_json_(HOR_lerRecursos_());
+  // Plataformas obrigatórias (plataformas.gs)
+  if (typeof PLAT_importar_ === 'function' && sessao.tipo === 'servidor') {
+    if (rota === 'meus_lancamentos') return SEG_json_(PLAT_meusLancamentos_(p.email, p.nome));
+    if (rota === 'historico_docente') return SEG_json_(PLAT_historico_(p.email, p.nome));
+    if (rota === 'visao_geral_docentes') return SEG_json_(PLAT_visaoGeral_(p.semana));
+    if (rota === 'metas_plataformas') return SEG_json_(PLAT_metasRota_());
+  }
   // Virada do ano letivo (virada-ano.gs)
   if (rota === 'virada_dados' && typeof VIR_dados_ === 'function') return SEG_json_(VIR_dados_());
   if (rota === 'planejamento_ano' && typeof VIR_planejamento_ === 'function') return SEG_json_(VIR_planejamento_());
@@ -220,6 +227,7 @@ function doPost(e) {
     if (op === 'NOTICIA_REATIVAR') { SEG_auditar_(sessao, op, corpo.id); return SEG_json_(NOT_alterarAtivo_(corpo, true)); }
     if (op === 'SALVAR_GRADE' && typeof HOR_salvarGrade_ === 'function') return SEG_json_(HOR_salvarGrade_(sessao, corpo));
     if (op === 'RECURSOS_SALVAR' && typeof HOR_salvarRecursos_ === 'function') return SEG_json_(HOR_salvarRecursos_(sessao, corpo));
+    if (op === 'IMPORTAR_LANCAMENTOS' && typeof PLAT_importar_ === 'function') return SEG_json_(PLAT_importar_(sessao, corpo));
     if (/^VIRADA_/.test(op) && typeof VIR_executar_ === 'function') {
       if (op === 'VIRADA_SALVAR_TURMAS') return SEG_json_(VIR_salvarTurmas_(sessao, corpo));
       if (op === 'VIRADA_SALVAR_MATRIZ') return SEG_json_(VIR_salvarMatriz_(sessao, corpo));

@@ -257,7 +257,7 @@
     </section>
 
     <section class="tabela-monitoramento">
-      <h2><i class="fas fa-table"></i> Minhas disciplinas e plataformas</h2>
+      <h2><i class="fas fa-table"></i> Minhas disciplinas e plataformas <small id="semana-painel" style="font-weight:normal;opacity:.75;font-size:.8rem;"></small></h2>
       <table>
         <thead>
           <tr>
@@ -277,7 +277,7 @@
     </section>
 
     <section class="historico">
-      <h2><i class="fas fa-chart-bar"></i> Histórico das últimas 4 semanas</h2>
+      <h2><i class="fas fa-chart-bar"></i> Histórico das últimas semanas</h2>
       <canvas id="grafico-historico"></canvas>
     </section>
 
@@ -320,6 +320,7 @@
         const resp = await fetch(url);
         const json = await resp.json();
         dadosOriginais = json.dados || json || [];
+        if (json.semanaRotulo) document.getElementById('semana-painel').textContent = '— semana de ' + json.semanaRotulo;
         popularFiltroTurmas();
         aplicarFiltros();
       } catch (e) {

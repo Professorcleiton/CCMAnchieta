@@ -11,7 +11,7 @@ let gidSeq=1000;
 function sheet(name,rows,gid){return{name,rows,_gid:gid||(gidSeq++),getSheetId(){return this._gid},getDataRange(){return{getValues:()=>rows.map(r=>r.slice())}},appendRow(r){rows.push(r.slice())},setFrozenRows(){},
  getLastRow(){return rows.length},deleteRow(i){rows.splice(i-1,1)},clearContents(){rows.length=0},
  getRange(l,c,nr,nc){const bloco=()=>rows.slice(l-1,l-1+(nr||1)).map(r=>Array.from({length:nc||1},(_,k)=>r[c-1+k]===undefined?'':r[c-1+k]));
-  return{clearContent(){for(let i=0;i<(nr||1);i++){const r=rows[l-1+i];if(r)for(let k=0;k<(nc||1);k++)r[c-1+k]='';}},setValues(v){v.forEach((linha,di)=>{rows[l-1+di]=rows[l-1+di]||[];linha.forEach((x,i)=>rows[l-1+di][c-1+i]=x)})},setValue(v){rows[l-1][c-1]=v},getValues:bloco,getDisplayValues:()=>bloco().map(r=>r.map(String)),setFontWeight(){return this},setBackground(){return this},setFontColor(){return this}}}}}
+  return{clearContent(){for(let i=0;i<(nr||1);i++){const r=rows[l-1+i];if(r)for(let k=0;k<(nc||1);k++)r[c-1+k]='';}},setValues(v){v.forEach((linha,di)=>{rows[l-1+di]=rows[l-1+di]||[];linha.forEach((x,i)=>rows[l-1+di][c-1+i]=x)})},setValue(v){rows[l-1][c-1]=v},getValues:bloco,getDisplayValues:()=>bloco().map(r=>r.map(String)),setFontWeight(){return this},setBackground(){return this},setFontColor(){return this},setNumberFormat(){return this}}}}}
 const S={};
 function add(n,rows){S[n]=sheet(n,rows)}
 add('Usuários',[['email','nome','setor','nivel','senha'],['prof@x.com','Prof Ana','professores',1,'1234'],['sec@x.com','Secretaria','secretaria',3,'5555'],['dir@x.com','Diretor','direcao',4,'9999']]);
@@ -48,6 +48,7 @@ vm.runInContext(fs.readFileSync(path.join(__dirname,'..','backend','noticias.gs'
 vm.runInContext(fs.readFileSync(path.join(__dirname,'..','backend','frequenciometro.gs'),'utf8'),ctx);
 vm.runInContext(fs.readFileSync(path.join(__dirname,'..','backend','horarios.gs'),'utf8'),ctx);
 vm.runInContext(fs.readFileSync(path.join(__dirname,'..','backend','virada-ano.gs'),'utf8'),ctx);
+vm.runInContext(fs.readFileSync(path.join(__dirname,'..','backend','plataformas.gs'),'utf8'),ctx);
 const G=p=>JSON.parse(ctx.doGet({parameter:p}).getContent());
 const P=b=>{const o=ctx.doPost({parameter:{},postData:{contents:JSON.stringify(b)}}).getContent();try{return JSON.parse(o)}catch(e){return o}};
 // --- acesso anônimo bloqueado
@@ -403,4 +404,43 @@ assert.strictEqual(S.Alunos_Historico.rows.filter(r=>r[0]).length,1,'histórico 
 assert.strictEqual(P({operacao:'VIRADA_SALVAR_MATRIZ',token:tdir,linhas:[{serie:'9',disciplina:'Matemática',aulas:5},{serie:'9',disciplina:'matemática',aulas:3},{serie:'6',disciplina:'Robótica',aulas:'2'}]}).linhas,2);
 assert.strictEqual(G({aba:'planejamento_ano',token:ts}).matriz.salva,true,'secretaria lê o planejamento');
 ctx.PropertiesService._p={};
+
+// ===== plataformas.gs (Importar do BI + Painel do Professor)
+S.Horarios.rows.length=1;
+S.Horarios.rows.push(['Manhã','6A','Segunda','1ª','','Matemática','Ana','',''],['Manhã','8B','Segunda','2ª','','Matemática','Ana','',''],
+ ['Tarde','3ANEM','Terça','1ª','','Matemática','Ana','',''],['Tarde','1AGRO','Terça','2ª','','Português','Leo','','']);
+S.Metas_Plataformas=sheet('Metas_Plataformas',[['ID','Disciplina','Plataforma','Meta','','','','Todas'],[1,'Matemática','Matific',1100,'','','',''],[2,'Matemática','Khan Academy','2,5','','','',''],[3,'','Quizizz',1,'','','','SIM']]);
+const segPassada=(()=>{const d=new Date(Date.now()-7*86400000);const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()-((x.getDay()+6)%7));return x;})();
+const isoD=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+// linha antiga do Código.gs: data em TEXTO dd/MM/yyyy (dia > 12 para não confundir com mês)
+const qua=new Date(segPassada.getTime()+2*86400000);
+S.Lancamentos_Plataformas=sheet('Lancamentos_Plataformas',[['ID','Prof','Disc','Turma','Plat','Data','Qtd','Status','Obs'],['L0','prof@x.com','Matemática','6A','Matific',String(qua.getDate()).padStart(2,'0')+'/'+String(qua.getMonth()+1).padStart(2,'0')+'/'+qua.getFullYear(),'0,5','OK','']]);
+let IM=P({operacao:'IMPORTAR_LANCAMENTOS',token:tdir,semana:isoD(qua),lancamentos:[
+ {professor:'prof@x.com',turma:'6A',plataforma:'Matific',disciplina:'Matemática',valor:'1,2'},
+ {professor:'Ana',turma:'3ANEM',plataforma:'Khan Academy',disciplina:'Matemática',valor:2},
+ {professor:'Fulano',turma:'6A',plataforma:'Matific',disciplina:'Matemática',valor:1},
+ {professor:'prof@x.com',turma:'9Z',plataforma:'Matific',disciplina:'Matemática',valor:1}]});
+assert.strictEqual(IM.status,'erros'); assert.strictEqual(IM.erros.length,2); assert.strictEqual(IM.validas,2);
+IM=P({operacao:'IMPORTAR_LANCAMENTOS',token:tdir,semana:isoD(qua),ignorarErros:true,lancamentos:[
+ {professor:'prof@x.com',turma:'6A',plataforma:'Matific',disciplina:'Matemática',valor:'1,2'},
+ {professor:'Ana',turma:'3ANEM',plataforma:'Khan Academy',disciplina:'Matemática',valor:2},{professor:'Fulano',turma:'6A',plataforma:'Matific',disciplina:'Matemática',valor:1}]});
+assert.strictEqual(IM.status,'success'); assert.strictEqual(IM.inseridos,2); assert.strictEqual(IM.substituidos,1,'linha antiga da mesma semana substituída');
+assert.strictEqual(IM.semana,isoD(segPassada));
+assert(S.Lancamentos_Plataformas.rows[1][5] instanceof Date,'semana gravada como data');
+// reimportar não soma em dobro
+IM=P({operacao:'IMPORTAR_LANCAMENTOS',token:tdir,semana:isoD(segPassada),lancamentos:[{professor:'prof@x.com',turma:'6A',plataforma:'Matific',disciplina:'Matemática',valor:'1,3'}]});
+assert.strictEqual(IM.substituidos,1); assert.strictEqual(S.Lancamentos_Plataformas.rows.filter(r=>r[0]).length,3);
+assert.strictEqual(P({operacao:'IMPORTAR_LANCAMENTOS',token:tdir,semana:isoD(new Date(Date.now()+14*86400000)),lancamentos:[{professor:'Ana',turma:'6A',plataforma:'Matific',disciplina:'Matemática',valor:1}]}).status,'error','semana futura');
+assert.strictEqual(P({operacao:'IMPORTAR_LANCAMENTOS',token:ts,lancamentos:[]}).status,'forbidden');
+// painel do professor (nível 1 vê só o próprio)
+const tAna=P({operacao:'LOGIN',email:'prof@x.com',senha:'1234'}).token; assert(tAna,'login da Ana');
+let ML=G({aba:'meus_lancamentos',token:tAna,email:'dir@x.com',nome:'Diretor'});
+const item=(t,pl)=>ML.dados.find(d=>d.turma===t&&d.plataforma===pl);
+assert.strictEqual(item('6A','Matific').qtd_lancada,1.3); assert.strictEqual(item('6A','Matific').meta_semanal,1.1,'meta 1.100 corrigida'); assert.strictEqual(item('6A','Matific').status,'verde');
+assert(!item('6A','Khan Academy'),'Khan não vale para o 6º'); assert(!item('8B','Matific'),'Matific não vale para o 8º');
+assert.strictEqual(item('3ANEM','Khan Academy').qtd_lancada,2,'3ANEM não vira mais 3A'); assert.strictEqual(item('3ANEM','Khan Academy').status,'amarelo');
+assert.strictEqual(item('8B','Quizizz').lancado,false); assert.strictEqual(ML.semana,isoD(segPassada),'mostra a última semana com dados');
+let HD=G({aba:'historico_docente',token:tAna}); assert.strictEqual(HD.valores.length,5); assert.strictEqual(HD.valores[4],3.3);
+let VG=G({aba:'visao_geral_docentes',token:tdir,semana:isoD(segPassada)}); assert(VG.dados.some(d=>d.nome==='Leo'||d.turma==='1AGRO'));
+assert.strictEqual(G({aba:'metas_plataformas',token:tdir}).plataformas.find(p=>p.plataforma==='Khan Academy').meta,2.5);
 console.log('INTEGRAÇÃO COM O CÓDIGO.GS REAL: TODOS OS TESTES PASSARAM —',S.Auditoria.rows.length-1,'linhas de auditoria');
