@@ -1,4 +1,4 @@
-const CACHE_NAME = 'siga-cache-v15'; // v15: app dos pais (manifest-pais.json) e provas no portal
+const CACHE_NAME = 'siga-cache-v16'; // v16: gestão de horários (horarios-gestao.js) e agenda por recurso
 
 const urlsToCache = [
     '/', '/index.html', '/restrito.html', '/responsaveis.html',

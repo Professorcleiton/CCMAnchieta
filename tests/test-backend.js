@@ -9,7 +9,7 @@ codigo=codigo.replace('function doGet(e)','function doGetOriginal(e)').replace('
 const cache={};
 let gidSeq=1000;
 function sheet(name,rows,gid){return{name,rows,_gid:gid||(gidSeq++),getSheetId(){return this._gid},getDataRange(){return{getValues:()=>rows.map(r=>r.slice())}},appendRow(r){rows.push(r.slice())},setFrozenRows(){},
- getLastRow(){return rows.length},deleteRow(i){rows.splice(i-1,1)},
+ getLastRow(){return rows.length},deleteRow(i){rows.splice(i-1,1)},clearContents(){rows.length=0},
  getRange(l,c,nr,nc){const bloco=()=>rows.slice(l-1,l-1+(nr||1)).map(r=>Array.from({length:nc||1},(_,k)=>r[c-1+k]===undefined?'':r[c-1+k]));
   return{clearContent(){for(let i=0;i<(nr||1);i++){const r=rows[l-1+i];if(r)for(let k=0;k<(nc||1);k++)r[c-1+k]='';}},setValues(v){v.forEach((linha,di)=>{rows[l-1+di]=rows[l-1+di]||[];linha.forEach((x,i)=>rows[l-1+di][c-1+i]=x)})},setValue(v){rows[l-1][c-1]=v},getValues:bloco,getDisplayValues:()=>bloco().map(r=>r.map(String)),setFontWeight(){return this},setBackground(){return this},setFontColor(){return this}}}}}
 const S={};
@@ -46,6 +46,7 @@ vm.runInContext(fs.readFileSync(path.join(__dirname,'..','backend','seguranca.gs
 vm.runInContext(fs.readFileSync(path.join(__dirname,'..','backend','push-e-documentos.gs'),'utf8'),ctx);
 vm.runInContext(fs.readFileSync(path.join(__dirname,'..','backend','noticias.gs'),'utf8'),ctx);
 vm.runInContext(fs.readFileSync(path.join(__dirname,'..','backend','frequenciometro.gs'),'utf8'),ctx);
+vm.runInContext(fs.readFileSync(path.join(__dirname,'..','backend','horarios.gs'),'utf8'),ctx);
 const G=p=>JSON.parse(ctx.doGet({parameter:p}).getContent());
 const P=b=>{const o=ctx.doPost({parameter:{},postData:{contents:JSON.stringify(b)}}).getContent();try{return JSON.parse(o)}catch(e){return o}};
 // --- acesso anônimo bloqueado
@@ -304,4 +305,39 @@ assert.strictEqual(semanasHist.find(r=>r[0]===33)[1],90.98);
 assert.strictEqual(P({operacao:'FREQ_HISTORICO_SALVAR',token:tp2(),semanas:[{semana:40,media:84}]}).status,'forbidden');
 ctx.CacheService.getScriptCache().remove('freq_publico');
 F=G({aba:'frequenciometro'}); assert.deepStrictEqual(F.historico.slice(1).map(h=>h[0]),['1','2','21','22','23','33','37','41','42','Esta']);
+
+add('Turmas_Professor',[['Email','Turmas'],['prof@x.com','6A, 9B'],['sec@x.com','7B']]);
+S['Usuários'].rows.find(r=>r[0]==='prof@x.com')[1]='Ana';
+// ===== horarios.gs: SALVAR_GRADE preserva apoio/local, confere conflitos, guarda histórico
+add('Horarios',[['Turno','Turma','Dia','Aula','Horário','Disciplina','Professor','Local','Professor Apoio','Extra'],
+ ['Manhã','6A','Segunda','1ª','06:55-07:45','Matemática','Ana','Lab. Informática','Bia','x1'],
+ ['Manhã','6A','Segunda','2ª','07:45-08:35','Português','Caio','','',''],
+ ['Manhã','7B','Segunda','2ª','07:45-08:35','Ciências','Davi','Lab','',''],
+ ['Tarde','6A','Segunda','1ª','12:55-13:45','Arte','Eva','','','']]);
+let RH=G({aba:'recursos',token:tdir}); assert.strictEqual(RH.padrao,true); assert(RH.recursos.some(r=>r.recurso==='Lab. Informática'));
+assert.strictEqual(G({aba:'recursos',token:tp2()}).status,'success','professor vê os recursos');
+assert.strictEqual(P({operacao:'RECURSOS_SALVAR',token:tp2(),recursos:[{recurso:'X'}]}).status,'forbidden');
+assert.strictEqual(P({operacao:'RECURSOS_SALVAR',token:tdir,recursos:[{recurso:'Lab. Informática',simultaneas:1}],disciplinas:[{disciplina:'Robótica',recurso:'Inexistente'}]}).status,'error');
+RH=P({operacao:'RECURSOS_SALVAR',token:tdir,recursos:[{recurso:'Lab. Informática',simultaneas:1},{recurso:'Tablets',simultaneas:'3'}],disciplinas:[{disciplina:'Robótica',recurso:'Lab. Informática',aulas:'todas'},{disciplina:'REC MAT',recurso:'Tablets',aulas:2,series:'6, 7'}]});
+assert.strictEqual(RH.status,'success');
+RH=G({aba:'recursos',token:tdir}); assert.strictEqual(RH.padrao,false); assert.strictEqual(RH.recursos[1].simultaneas,3); assert.strictEqual(RH.disciplinas[0].aulas,'Todas'); assert.strictEqual(RH.disciplinas[1].aulas,'2');
+// grade nova do 6A manhã: professor Davi na 2ª de segunda (já está no 7B) -> conflito; Lab na 2ª também (7B usa "Lab")
+const grade6A={Segunda:{'1ª':{disciplina:'Matemática',professor:'Ana',local:'Lab. Informática'},'2ª':{disciplina:'Ciências',professor:'Davi',local:'Lab. Informática'}},Terça:{'1ª':{disciplina:'Português',professor:'Caio',local:''}}};
+let SG=P({operacao:'SALVAR_GRADE',token:tdir,turma:'6A',turno:'Manhã',grade:grade6A});
+assert.strictEqual(SG.status,'conflito'); assert.deepStrictEqual(SG.conflitos.map(c=>c.tipo).sort(),['professor','recurso']);
+assert.strictEqual(S.Horarios.rows.length,5,'nada gravado com conflito');
+SG=P({operacao:'SALVAR_GRADE',token:tdir,turma:'6A',turno:'Manhã',grade:grade6A,ignorarConflitos:true});
+assert.strictEqual(SG.status,'success'); assert.strictEqual(SG.aulas,3);
+const linhas=S.Horarios.rows.slice(1).filter(r=>r[1]);
+const seg1=linhas.find(r=>r[1]==='6A'&&r[0]==='Manhã'&&r[2]==='Segunda'&&r[3]==='1ª');
+assert.strictEqual(seg1[8],'Bia','professor de apoio preservado'); assert.strictEqual(seg1[9],'x1','coluna extra preservada'); assert.strictEqual(seg1[7],'Lab. Informática');
+assert(linhas.some(r=>r[1]==='6A'&&r[0]==='Tarde'),'outro turno intacto'); assert(linhas.some(r=>r[1]==='7B'),'outra turma intacta');
+assert.strictEqual(linhas.length,5); assert.strictEqual(S.Horarios_Historico.rows.length,3,'2 aulas antigas no histórico');
+assert.deepStrictEqual(S.Turmas_Professor.rows.filter(r=>r[0]).map(r=>r[0]),['Email','sec@x.com'],'cache de turmas da Ana refeito; os outros ficam');
+// sem conflito: grava direto; trocar apoio explicitamente
+SG=P({operacao:'SALVAR_GRADE',token:tdir,turma:'6A',turno:'Manhã',grade:{Segunda:{'1ª':{disciplina:'Matemática',professor:'Ana',local:'',professor_apoio:''}}}});
+assert.strictEqual(SG.status,'success'); assert.strictEqual(S.Horarios.rows.slice(1).filter(r=>r[1]==='6A'&&r[0]==='Manhã').length,1);
+assert.strictEqual(S.Horarios.rows.find(r=>r[1]==='6A'&&r[0]==='Manhã')[8],'','apoio removido quando pedido');
+assert.strictEqual(P({operacao:'SALVAR_GRADE',token:tdir,turma:'6A',turno:'Noite',grade:{}}).status,'error');
+assert.strictEqual(P({operacao:'SALVAR_GRADE',token:tp2(),turma:'6A',turno:'Manhã',grade:{}}).status,'forbidden');
 console.log('INTEGRAÇÃO COM O CÓDIGO.GS REAL: TODOS OS TESTES PASSARAM —',S.Auditoria.rows.length-1,'linhas de auditoria');

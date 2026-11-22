@@ -219,6 +219,9 @@
     </div>
 
     <div class="container">
+        <!-- Recurso (Lab, Tablets...) -->
+        <div id="abas-recurso" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;"></div>
+
         <!-- Legenda -->
         <div class="legenda">
             <div class="legenda-item">
@@ -226,14 +229,15 @@
                 <span>Livre</span>
             </div>
             <div class="legenda-item">
-                <div class="legenda-cor ocupado"></div>
-                <span>Ocupado (outra sala)</span>
+                <div class="legenda-cor lab"></div>
+                <span>Em uso (aula fixa da grade)</span>
             </div>
             <div class="legenda-item">
-                <div class="legenda-cor lab"></div>
-                <span>Laboratório de Informática</span>
+                <div class="legenda-cor ocupado"></div>
+                <span>Sem vaga (todos os kits ou unidades em uso)</span>
             </div>
         </div>
+        <p id="resumo-recurso" style="font-size:13px;color:#475569;margin:-6px 0 12px;"></p>
 
         <!-- Grade de horários -->
         <div id="area-grade">
@@ -244,16 +248,17 @@
         </div>
     </div>
 
+    <script src="horarios-gestao.js?v=1"></script>
     <script>
         const APPS_SCRIPT_URL = SIGA_CONFIG.APPS_SCRIPT_URL;
+        const H = window.HorariosNucleo;
         let turnoAtual = 'Manhã';
         let todosHorarios = [];
+        let recursos = [{ recurso: 'Lab. Informática', simultaneas: 1 }, { recurso: 'Tablet', simultaneas: 1 }];
+        let recursoAtual = 'Lab. Informática';
+        const esc = escaparHTML;
 
-        // Inicialização
-        window.addEventListener('DOMContentLoaded', function() {
-            // Verifica sessão (opcional)
-            carregarAgenda();
-        });
+        window.addEventListener('DOMContentLoaded', carregarAgenda);
 
         function filtrarTurno(turno) {
             turnoAtual = turno;
@@ -262,112 +267,91 @@
             renderizarGrade();
         }
 
+        function escolherRecurso(nome) {
+            recursoAtual = nome;
+            desenharAbas();
+            renderizarGrade();
+        }
+
+        function desenharAbas() {
+            document.getElementById('abas-recurso').innerHTML = recursos.map((r, i) =>
+                '<button class="btn btn-turno' + (r.recurso === recursoAtual ? ' ativo' : '') + '" style="color:#0f172a;border:1px solid #cbd5e1;" onclick="escolherRecurso(recursos[' + i + '].recurso)">🖥️ ' +
+                esc(r.recurso) + (r.simultaneas > 1 ? ' (' + r.simultaneas + ')' : '') + '</button>').join('');
+            document.querySelector('.top-bar h1').innerHTML = '<i class="fa-solid fa-desktop"></i> Agenda — ' + esc(recursoAtual);
+        }
+
         async function carregarAgenda() {
             try {
-                // Busca TODOS os horários (sem filtro)
-                const url = APPS_SCRIPT_URL + '?aba=horarios';
-                const response = await fetch(url);
-                const data = await response.json();
+                const [respH, respR] = await Promise.all([
+                    fetch(APPS_SCRIPT_URL + '?aba=horarios'),
+                    fetch(APPS_SCRIPT_URL + '?aba=recursos').catch(() => null)
+                ]);
+                const data = await respH.json();
+                try {
+                    const rec = respR ? await respR.json() : null;
+                    if (rec && rec.status === 'success' && rec.recursos && rec.recursos.length) recursos = rec.recursos;
+                } catch (e) { /* backend antigo: usa os padrões */ }
+                const pedido = new URLSearchParams(location.search).get('recurso');
+                recursoAtual = (recursos.find(r => r.recurso === pedido) || recursos[0]).recurso;
+                desenharAbas();
 
                 if (data.status === 'success' && data.horarios) {
                     todosHorarios = data.horarios;
                     renderizarGrade();
                 } else {
-                    document.getElementById('area-grade').innerHTML = 
+                    document.getElementById('area-grade').innerHTML =
                         '<div style="text-align:center;padding:50px;color:#94a3b8;">Nenhum horário encontrado.</div>';
                 }
             } catch (error) {
                 console.error('Erro:', error);
-                document.getElementById('area-grade').innerHTML = 
+                document.getElementById('area-grade').innerHTML =
                     '<div style="text-align:center;padding:50px;color:#ef4444;">Erro ao carregar dados.</div>';
             }
         }
 
         function renderizarGrade() {
             const area = document.getElementById('area-grade');
-            const dias = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'];
-            const aulas = ['1ª', '2ª', '3ª', '4ª', '5ª', '6ª'];
-            
-            // Horários da manhã e tarde
-            const horarios = turnoAtual === 'Manhã' 
-                ? ['06:55-07:45', '07:45-08:35', '08:35-09:30', '09:40-10:30', '10:30-11:20', '11:20-12:10']
-                : ['12:55-13:45', '13:45-14:35', '14:35-15:30', '15:40-16:30', '16:30-17:20', '17:20-18:10'];
+            const horarios = H.HORARIOS_FIXOS[turnoAtual];
+            const cfg = recursos.find(r => r.recurso === recursoAtual) || { simultaneas: 1 };
+            const capacidade = Math.max(1, parseInt(cfg.simultaneas, 10) || 1);
+            // Só o que usa ESTE recurso conta: aula em sala comum não ocupa o laboratório
+            const usos = todosHorarios.filter(h => h.turno === turnoAtual && H.recursoDoLocal(h.local, recursos) === recursoAtual);
+            let livres = 0, total = 0;
 
-            // Filtra horários do turno atual
-            const horariosTurno = todosHorarios.filter(h => h.turno === turnoAtual);
-
-            let html = '<table class="grade-table">';
-            html += '<thead><tr><th>Horário</th>';
-            dias.forEach(dia => {
-                html += '<th>' + dia + '</th>';
-            });
+            let html = '<table class="grade-table"><thead><tr><th>Horário</th>';
+            H.DIAS.forEach(dia => { html += '<th>' + dia + '</th>'; });
             html += '</tr></thead><tbody>';
 
-            aulas.forEach((aula, index) => {
-                html += '<tr>';
-                html += '<td class="horario-col">' + aula + '<br><small>' + horarios[index] + '</small></td>';
-
-                dias.forEach(dia => {
-                    // Busca aulas neste dia/horário
-                    const aulasNesteHorario = horariosTurno.filter(h => h.dia === dia && h.aula === aula);
-                    
-                    if (aulasNesteHorario.length === 0) {
-                        // Livre
-                        html += '<td class="livre">🟢 Livre</td>';
-                    } else {
-                        // Verifica se alguma é no laboratório
-                        const aulaLab = aulasNesteHorario.find(h => 
-                            h.local && h.local.toLowerCase().includes('lab')
-                        );
-                        const aulaTablet = aulasNesteHorario.find(h => 
-                            h.local && h.local.toLowerCase().includes('tablet')
-                        );
-                        
-                        if (aulaLab) {
-                            // Aula no laboratório
-                            html += '<td class="lab-info">';
-                            html += '<span class="icone-lab">🖥️ LAB</span>';
-                            html += '<span class="celula-turma">' + aulaLab.turma + '</span>';
-                            html += '<span class="celula-disciplina">' + (aulaLab.disciplina || '—') + '</span>';
-                            html += '<span class="celula-professor">👨‍🏫 ' + (aulaLab.professor || '—') + '</span>';
-                            html += '</td>';
-                        } else if (aulaTablet) {
-                            // Aula com tablet
-                            html += '<td class="lab-info">';
-                            html += '<span class="icone-lab">📱 TABLET</span>';
-                            html += '<span class="celula-turma">' + aulaTablet.turma + '</span>';
-                            html += '<span class="celula-disciplina">' + (aulaTablet.disciplina || '—') + '</span>';
-                            html += '<span class="celula-professor">👨‍🏫 ' + (aulaTablet.professor || '—') + '</span>';
-                            html += '</td>';
-                        } else {
-                            // Ocupado, mas não no laboratório
-                            html += '<td class="ocupado">';
-                            aulasNesteHorario.forEach(h => {
-                                html += '<span class="celula-turma">' + h.turma + '</span>';
-                                html += '<span class="celula-disciplina">' + (h.disciplina || '—') + '</span>';
-                                html += '<span class="celula-professor">👨‍🏫 ' + (h.professor || '—') + '</span>';
-                                if (h.professor_apoio) {
-                                    html += '<span class="celula-professor">🤝 ' + h.professor_apoio + '</span>';
-                                }
-                            });
-                            html += '</td>';
-                        }
+            H.AULAS.forEach((aula, index) => {
+                html += '<tr><td class="horario-col">' + aula + '<br><small>' + horarios[index] + '</small></td>';
+                H.DIAS.forEach(dia => {
+                    total++;
+                    const aqui = usos.filter(h => h.dia === dia && h.aula === aula);
+                    if (!aqui.length) {
+                        livres++;
+                        html += '<td class="livre">🟢 Livre' + (capacidade > 1 ? '<br><small>' + capacidade + ' disponíveis</small>' : '') + '</td>';
+                        return;
                     }
+                    const lotado = capacidade > 1 && aqui.length >= capacidade;
+                    html += '<td class="' + (lotado ? 'ocupado' : 'lab-info') + '">';
+                    if (capacidade > 1) html += '<span class="icone-lab">' + aqui.length + ' de ' + capacidade + ' em uso</span>';
+                    aqui.forEach(h => {
+                        html += '<span class="celula-turma">' + esc(h.turma) + '</span>' +
+                            '<span class="celula-disciplina">' + esc(h.disciplina || '—') + '</span>' +
+                            '<span class="celula-professor">👨‍🏫 ' + esc(h.professor || '—') + '</span>';
+                    });
+                    if (aqui.length > capacidade) html += '<span style="color:#b91c1c;font-size:11px;font-weight:700;">⚠️ Mais turmas que o recurso comporta</span>';
+                    html += '</td>';
                 });
-
-                // Insere intervalo após a 3ª aula
-                if (aula === '3ª') {
-                    html += '</tr><tr class="intervalo" style="background:#fef3c7;">';
-                    html += '<td class="horario-col" style="background:#fde68a;font-weight:700;">☕ INTERVALO</td>';
-                    const horarioIntervalo = turnoAtual === 'Manhã' ? '09:30-09:40' : '15:30-15:40';
-                    html += '<td colspan="5" style="text-align:center;font-weight:600;color:#92400e;background:#fef3c7;">' + horarioIntervalo + '</td>';
-                }
-
                 html += '</tr>';
+                if (aula === '3ª') {
+                    html += '<tr class="intervalo" style="background:#fef3c7;"><td class="horario-col" style="background:#fde68a;font-weight:700;">☕ INTERVALO</td>' +
+                        '<td colspan="5" style="text-align:center;font-weight:600;color:#92400e;background:#fef3c7;">' + (turnoAtual === 'Manhã' ? '09:30-09:40' : '15:30-15:40') + '</td></tr>';
+                }
             });
-
             html += '</tbody></table>';
             area.innerHTML = html;
+            document.getElementById('resumo-recurso').textContent = livres + ' de ' + total + ' horários livres no turno da ' + (turnoAtual === 'Manhã' ? 'manhã' : 'tarde') + '.';
         }
     </script>
 </body>

@@ -18,6 +18,7 @@ Tempo estimado: 15 minutos. A camada foi testada junto com o `Código.gs` atual 
 3. Clique em **+ → Script** de novo, dê o nome `push-e-documentos` e cole todo o conteúdo de `backend/push-e-documentos.gs`.
 4. Clique em **+ → Script** mais uma vez, dê o nome `noticias` e cole todo o conteúdo de `backend/noticias.gs`.
 5. E mais um: nome `frequenciometro`, conteúdo de `backend/frequenciometro.gs`.
+6. E outro: nome `horarios`, conteúdo de `backend/horarios.gs` (Gestão de Horários e recursos do laboratório).
 
 A configuração já vem ajustada para a sua planilha: abas `Usuários` (senha na coluna E), `Responsaveis` (senha na coluna C, push na F), `Alunos` e `Sessoes`.
 
@@ -93,6 +94,14 @@ As abas `frequencia`, `HistoricoGeral` e `Alunos` já estão na planilha do SIGA
 - para registrar antes, use o botão **Fechar semana agora**.
 
 A linha **"Esta"** do gráfico agora é calculada sozinha com a média atual. A linha "Esta" antiga da planilha pode ser apagada; se ficar, o sistema a ignora e a substitui no próximo fechamento.
+
+## Passo 4c: horários e laboratório (horarios.gs)
+
+Depois de colar o `horarios.gs` e o `seguranca.gs` atualizado, **implante uma nova versão** (Passo 3). Não precisa mexer no Código.gs: o `SALVAR_GRADE` dele deixa de ser usado.
+
+1. SIGA → **Gestão de Horários → 🖥️ Recursos**: confira o laboratório, os tablets (quantos kits) e as disciplinas que usam cada um (plataformas obrigatórias). Clique em **Salvar recursos**. São criadas as abas **Recursos** e **Recursos_Disciplinas**, que também podem ser editadas direto na planilha.
+2. Abra uma turma e salve. A grade anterior fica guardada na aba **Horarios_Historico** (data, quem salvou e as aulas).
+3. A **Agenda do Laboratório** passa a mostrar "Livre" sempre que o recurso estiver vago, e tem uma aba para cada recurso.
 
 ## Passo 5: fechar a planilha ao público
 
