@@ -73,6 +73,7 @@ var SEG_NIVEL_MINIMO = {
   'NOTICIA_ADICIONAR': 3,
   'FREQ_SALVAR': 3,
   'FREQ_FECHAR_SEMANA': 3,
+  'FREQ_HISTORICO_SALVAR': 3,
   'NOTICIA_OCULTAR': 3,
   'NOTICIA_REATIVAR': 3,
   'RECUSAR_RESPONSAVEL': 3,
@@ -195,7 +196,8 @@ function doPost(e) {
     e.postData.contents = JSON.stringify(corpo); // o doPostOriginal lê daqui
 
     if (op === 'FREQ_SALVAR') { SEG_auditar_(sessao, op, (corpo.itens || []).length + ' turmas'); return SEG_json_(FREQ_salvar_(sessao, corpo)); }
-    if (op === 'FREQ_FECHAR_SEMANA') return SEG_json_(FREQ_fecharSemana_(sessao.email));
+    if (op === 'FREQ_FECHAR_SEMANA') return SEG_json_(FREQ_fecharSemana_(sessao.email, corpo.semana));
+    if (op === 'FREQ_HISTORICO_SALVAR') return SEG_json_(FREQ_salvarHistorico_(sessao, corpo));
     if (op === 'NOTICIA_ADICIONAR') { SEG_auditar_(sessao, op, corpo.link); return SEG_json_(NOT_adicionar_(sessao, corpo)); }
     if (op === 'NOTICIA_OCULTAR') { SEG_auditar_(sessao, op, corpo.id); return SEG_json_(NOT_alterarAtivo_(corpo, false)); }
     if (op === 'NOTICIA_REATIVAR') { SEG_auditar_(sessao, op, corpo.id); return SEG_json_(NOT_alterarAtivo_(corpo, true)); }

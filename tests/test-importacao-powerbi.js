@@ -75,6 +75,20 @@ vm.runInContext('lerColagem()',ctx);
   const media=r.ok.reduce((a,o)=>a+o.f,0)/r.ok.length;
   assert(Math.abs(media-88.12)<0.05,'média ≈ total do Power BI (88,12%): '+media); }
 
+// 5) Cópia REAL só da semana 42: Σ vão para a tabela e a média ao vivo é ponderada (86,09%)
+reset(); els['media-viva']=el(); els['media-metodo']=el();
+els.colar={value:fs.readFileSync(path.join(__dirname,'exemplos','powerbi-semana42-2026-11-22.txt'),'utf8')};
+vm.runInContext('lerColagem()',ctx);
+{ const r=JSON.parse(vm.runInContext('JSON.stringify(casarLinhas())',ctx));
+  assert.strictEqual(r.ok.length,22);
+  vm.runInContext('aplicarImportacao()',ctx);
+  assert(inputs.every(i=>i.dataset.p!==''&&i.dataset.a!==''),'Σ presenças/aulas em todas as turmas');
+  assert.strictEqual(els['media-viva'].textContent,'86,09%','média ponderada ao vivo');
+  assert.strictEqual(els['media-metodo'].textContent,'Σ presenças ÷ Σ aulas');
+  const tresANEM=inputs[19]; assert.strictEqual([tresANEM.dataset.p,tresANEM.dataset.a].join('/'),'205/216','3º A NEM: 92+113 / 99+117');
+  vm.runInContext('digitou(document.querySelectorAll("input.freq")[0])',ctx);
+  assert.strictEqual(els['media-metodo'].textContent,'média simples (faltam Σ do Power BI)','digitar à mão volta para simples'); }
+
 // utilitários
 assert.deepStrictEqual(JSON.parse(vm.runInContext('JSON.stringify(codigosDaTurma("2625776/775"))',ctx)),['2625776','2625775']);
 assert.strictEqual(vm.runInContext('nomeNormalizado("7º Série D Tarde - 2624935")',ctx),vm.runInContext('nomeNormalizado("7º D - EF")',ctx));

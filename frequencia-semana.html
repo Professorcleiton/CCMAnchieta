@@ -50,6 +50,11 @@
     </header>
     <main>
         <div class="card">
+            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:12px">
+                <label for="semana" style="font-weight:700; color:#005088">Semana letiva (Power BI):</label>
+                <input id="semana" class="num" type="number" min="1" max="60" style="width:80px" oninput="atualizarEstado()">
+                <span class="ajuda" style="margin:0">Use o mesmo número do filtro "SEMANA LETIVA" do Presente na Escola.</span>
+            </div>
             <div class="resumo" id="resumo"><div class="vazio">Carregando…</div></div>
         </div>
 
@@ -81,6 +86,20 @@
             <h2>Turmas</h2>
             <div class="ajuda">Campos em amarelo foram alterados e ainda não foram salvos. Frequência de 0 a 100, com vírgula ou ponto.</div>
             <div id="tabela"><div class="vazio">Carregando…</div></div>
+        </div>
+
+        <div class="card">
+            <h2><i class="fa-solid fa-chart-area"></i> Histórico semanal (gráfico de evolução da TV)</h2>
+            <div class="ajuda">As últimas semanas registradas. Para <strong>preencher semanas que faltaram</strong>, use os valores do gráfico
+                "Série histórica: (%) Presença semanal" do Power BI, ou filtre cada semana e importe aqui. Para apagar uma semana, deixe a média vazia.</div>
+            <div id="historico"><div class="vazio">Carregando…</div></div>
+            <div style="display:flex; gap:8px; align-items:center; margin-top:10px; flex-wrap:wrap">
+                <input id="hist-nova-semana" class="num" type="number" min="1" max="60" placeholder="Semana" style="width:90px">
+                <input id="hist-nova-media" class="num" inputmode="decimal" placeholder="Média %" style="width:100px">
+                <button class="btn btn-sec" onclick="adicionarSemanaHistorico()"><i class="fa-solid fa-plus"></i> Adicionar</button>
+                <button class="btn btn-salvar" id="btn-hist" onclick="salvarHistorico()" disabled><i class="fa-solid fa-floppy-disk"></i> Salvar histórico</button>
+                <span class="ajuda" id="msg-hist" style="margin:0"></span>
+            </div>
         </div>
 
         <div class="barra-acoes">
@@ -134,12 +153,13 @@
     function renderizar() {
         const d = dados;
         document.getElementById('resumo').innerHTML = `
-            <div class="kpi"><small>Média atual da escola</small><strong id="media-viva">${fmt(d.mediaAtual)}%</strong><span>prévia da semana ${d.proximaSemana}</span></div>
+            <div class="kpi"><small>Média da escola</small><strong id="media-viva">${fmt(d.mediaAtual)}%</strong><span id="media-metodo">${d.metodoMedia === 'simples' ? 'média simples (faltam Σ do Power BI)' : 'Σ presenças ÷ Σ aulas'}</span></div>
             <div class="kpi"><small>Última semana fechada</small><strong>${d.ultimaSemana ? fmt(d.ultimaSemana.media) + '%' : '—'}</strong><span>${d.ultimaSemana ? 'semana ' + d.ultimaSemana.semana : 'nenhuma ainda'}</span></div>
             <div class="kpi"><small>Última atualização</small><strong style="font-size:16px">${escaparHTML(d.atualizadoEm || '—')}</strong><span>${escaparHTML(d.atualizadoPor || '')}</span></div>
-            <div class="kpi"><small>Fechamento automático</small><strong style="font-size:16px">${d.pendenteFechar ? 'Sexta, 18h' : 'Em dia'}</strong><span>${d.pendenteFechar ? 'semana ' + d.proximaSemana + ' será registrada' : 'atualize para registrar a próxima'}</span></div>`;
+            <div class="kpi"><small>Fechamento automático</small><strong style="font-size:16px">${d.pendenteFechar ? 'Sexta, 18h' : 'Em dia'}</strong><span>${d.pendenteFechar ? 'semana ' + d.semanaAtual + ' será registrada' : 'atualize para registrar a próxima'}</span></div>`;
 
-        document.getElementById('btn-fechar').innerHTML = `<i class="fa-solid fa-flag-checkered"></i> Fechar semana ${d.proximaSemana} agora`;
+        document.getElementById('semana').value = d.semanaAtual;
+        renderizarHistorico();
 
         if (!d.turmas.length) { document.getElementById('tabela').innerHTML = '<div class="vazio">Nenhuma turma na aba "frequencia".</div>'; return; }
         document.getElementById('tabela').innerHTML = `
@@ -149,13 +169,16 @@
                     <tr>
                         <td class="turma">${escaparHTML(t.turma)}</td>
                         <td class="bloco">${escaparHTML(t.bloco)}</td>
-                        <td><input class="num freq" data-i="${i}" inputmode="decimal" value="${t.freq == null ? '' : fmt(t.freq)}" oninput="marcar(this)" aria-label="Frequência ${escaparHTML(t.turma)}"><span class="antes">antes ${fmt(t.freq)}</span></td>
+                        <td><input class="num freq" data-i="${i}" inputmode="decimal" value="${t.freq == null ? '' : fmt(t.freq)}" data-p="${t.presencas ?? ''}" data-a="${t.aulas ?? ''}" oninput="digitou(this)" aria-label="Frequência ${escaparHTML(t.turma)}"><span class="antes">antes ${fmt(t.freq)}</span></td>
                         <td><input class="num trof" data-i="${i}" inputmode="numeric" value="${t.trofeus || 0}" oninput="marcar(this)" aria-label="Troféus ${escaparHTML(t.turma)}"></td>
                     </tr>`).join('')}
                 </tbody>
             </table>`;
         atualizarEstado();
     }
+
+    // Digitado à mão: não há Σ presenças/aulas do Power BI para esta turma
+    function digitou(inp) { inp.dataset.p = ''; inp.dataset.a = ''; marcar(inp); }
 
     function marcar(inp) {
         const t = dados.turmas[+inp.dataset.i];
@@ -171,15 +194,26 @@
         atualizarEstado();
     }
 
-    function haAlteracoes() { return !!document.querySelector('input.num.mudou'); }
+    function haAlteracoes() {
+        const sem = document.getElementById('semana');
+        return !!document.querySelector('input.num.mudou:not(.hist)') || !!(sem && dados && sem.value && String(dados.semanaAtual) !== sem.value);
+    }
 
     function atualizarEstado() {
-        const invalidos = document.querySelectorAll('input.num.invalido').length;
+        const invalidos = document.querySelectorAll('input.num.invalido:not(.hist)').length;
         document.getElementById('btn-salvar').disabled = !haAlteracoes() || invalidos > 0;
-        const vals = Array.from(document.querySelectorAll('input.freq')).map(i => num(i.value)).filter(v => v !== null && v > 0);
-        const m = vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+        const linhas = Array.from(document.querySelectorAll('input.freq')).map(i => ({ f: num(i.value), p: num(i.dataset.p), a: num(i.dataset.a) }))
+            .filter(x => x.f !== null && x.f > 0);
+        const ponderada = linhas.length && linhas.every(x => x.p !== null && x.a);
+        const m = !linhas.length ? null : ponderada
+            ? 100 * linhas.reduce((s, x) => s + x.p, 0) / linhas.reduce((s, x) => s + x.a, 0)
+            : linhas.reduce((s, x) => s + x.f, 0) / linhas.length;
         const el = document.getElementById('media-viva');
         if (el) el.textContent = fmt(m) + '%';
+        const met = document.getElementById('media-metodo');
+        if (met) met.textContent = ponderada ? 'Σ presenças ÷ Σ aulas' : 'média simples (faltam Σ do Power BI)';
+        const sem = document.getElementById('semana');
+        document.getElementById('btn-fechar').innerHTML = `<i class="fa-solid fa-flag-checkered"></i> Fechar semana ${escaparHTML(sem ? sem.value : '')} agora`;
         const msg = document.getElementById('msg');
         if (invalidos) { msg.style.color = '#dc2626'; msg.textContent = 'Corrija os campos em vermelho.'; }
         else if (haAlteracoes()) { msg.style.color = '#b45309'; msg.textContent = 'Há alterações não salvas.'; }
@@ -308,7 +342,9 @@
             else if (g.every(x => x.p !== null && x.a)) f = 100 * g.reduce((s, x) => s + x.p, 0) / g.reduce((s, x) => s + x.a, 0);
             else if (g.every(x => x.n)) f = g.reduce((s, x) => s + x.f * x.n, 0) / g.reduce((s, x) => s + x.n, 0);
             else f = g.reduce((s, x) => s + x.f, 0) / g.length;
-            return { i: +k, f: Math.round(f * 100) / 100, origem: g.map(x => x.origem).join(' + '), linhas: g.length };
+            const temSoma = g.every(x => x.p !== null && x.a);
+            return { i: +k, f: Math.round(f * 100) / 100, origem: g.map(x => x.origem).join(' + '), linhas: g.length,
+                p: temSoma ? g.reduce((s, x) => s + x.p, 0) : null, a: temSoma ? g.reduce((s, x) => s + x.a, 0) : null };
         });
         return { ok, ignoradas };
     }
@@ -330,7 +366,12 @@
         const r = casarLinhas();
         if (!r.ok.length) { alert('Nenhuma turma reconhecida. Confira as colunas escolhidas.'); return; }
         const inputs = document.querySelectorAll('input.freq');
-        r.ok.forEach(o => { inputs[o.i].value = fmt(o.f); marcar(inputs[o.i]); });
+        r.ok.forEach(o => {
+            inputs[o.i].value = fmt(o.f);
+            inputs[o.i].dataset.p = o.p == null ? '' : o.p;
+            inputs[o.i].dataset.a = o.a == null ? '' : o.a;
+            marcar(inputs[o.i]);
+        });
         document.getElementById('msg').style.color = '#b45309';
         document.getElementById('msg').textContent = `${r.ok.length} turmas preenchidas. Confira e clique em Salvar.`;
         document.querySelector('table').scrollIntoView({ behavior: 'smooth' });
@@ -377,6 +418,58 @@
         }
     }
 
+    // ================= HISTÓRICO SEMANAL =================
+    let histEdits = {};   // semana → média (string) ou '' para apagar
+
+    function renderizarHistorico() {
+        histEdits = {};
+        const h = (dados.historico || []).slice().reverse();
+        document.getElementById('historico').innerHTML = h.length ? `
+            <table><thead><tr><th>Semana</th><th>Média (%)</th></tr></thead><tbody>
+            ${h.map(x => `<tr><td class="turma">${x.semana}</td>
+                <td><input class="num hist" data-semana="${x.semana}" inputmode="decimal" value="${fmt(x.media)}" oninput="editouHistorico(this)"></td></tr>`).join('')}
+            </tbody></table>` : '<div class="vazio">Nenhuma semana registrada.</div>';
+        document.getElementById('btn-hist').disabled = true;
+        document.getElementById('msg-hist').textContent = '';
+    }
+
+    function editouHistorico(inp) {
+        const v = inp.value.trim();
+        const ok = v === '' || (num(v) !== null && num(v) > 0 && num(v) <= 100);
+        inp.classList.toggle('invalido', !ok);
+        inp.classList.add('mudou');
+        histEdits[inp.dataset.semana] = v;
+        document.getElementById('btn-hist').disabled = !!document.querySelector('input.hist.invalido');
+    }
+
+    function adicionarSemanaHistorico() {
+        const s = parseInt(document.getElementById('hist-nova-semana').value, 10);
+        const m = num(document.getElementById('hist-nova-media').value);
+        if (!(s >= 1 && s <= 60) || m === null || m <= 0 || m > 100) { alert('Informe a semana (1 a 60) e a média (0 a 100).'); return; }
+        histEdits[s] = String(m);
+        document.getElementById('hist-nova-semana').value = '';
+        document.getElementById('hist-nova-media').value = '';
+        document.getElementById('btn-hist').disabled = false;
+        const pend = Object.keys(histEdits).length;
+        document.getElementById('msg-hist').textContent = `${pend} alteração(ões) pendente(s). Semana ${s} = ${fmt(m)}% — clique em Salvar histórico.`;
+    }
+
+    async function salvarHistorico() {
+        const semanas = Object.keys(histEdits).map(k => histEdits[k] === '' ? { semana: +k, apagar: true } : { semana: +k, media: histEdits[k] });
+        if (!semanas.length) return;
+        const apagar = semanas.filter(x => x.apagar).map(x => x.semana);
+        if (apagar.length && !confirm('Apagar do histórico a(s) semana(s) ' + apagar.join(', ') + '?')) return;
+        const msg = document.getElementById('msg-hist');
+        msg.textContent = 'Salvando…';
+        try {
+            const d = await chamar({ operacao: 'FREQ_HISTORICO_SALVAR', semanas });
+            if (d.status !== 'success') throw new Error(d.message || 'Falha');
+            dados.historico = d.gestao.historico; dados.ultimaSemana = d.gestao.ultimaSemana;
+            renderizarHistorico();
+            msg.textContent = '✅ ' + d.message + ' A TV atualiza em até 10 minutos.';
+        } catch (e) { msg.textContent = '❌ ' + e.message; }
+    }
+
     async function chamar(payload) {
         const r = await fetch(APPS_SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
         return r.json();
@@ -387,13 +480,13 @@
         dados.turmas.forEach((t, i) => {
             const f = document.querySelector(`input.freq[data-i="${i}"]`), tr = document.querySelector(`input.trof[data-i="${i}"]`);
             if (f.classList.contains('mudou') || tr.classList.contains('mudou')) {
-                itens.push({ linha: t.linha, turma: t.turma, freq: num(f.value), trofeus: tr.value.trim() });
+                itens.push({ linha: t.linha, turma: t.turma, freq: num(f.value), trofeus: tr.value.trim(), presencas: f.dataset.p, aulas: f.dataset.a });
             }
         });
         const btn = document.getElementById('btn-salvar'), msg = document.getElementById('msg');
         btn.disabled = true; msg.style.color = '#64748b'; msg.textContent = 'Salvando…';
         try {
-            const d = await chamar({ operacao: 'FREQ_SALVAR', itens });
+            const d = await chamar({ operacao: 'FREQ_SALVAR', itens, semana: document.getElementById('semana').value });
             if (d.status !== 'success') throw new Error(d.message || 'Falha ao salvar');
             dados = d.gestao; renderizar();
             msg.style.color = '#16a34a'; msg.textContent = '✅ ' + d.message + ' A TV atualiza em até 10 minutos.';
@@ -404,12 +497,16 @@
 
     async function fecharSemana() {
         if (haAlteracoes()) { alert('Salve as alterações antes de fechar a semana.'); return; }
-        const n = dados.proximaSemana;
-        if (!confirm(`Registrar a semana ${n} no histórico com a média atual (${fmt(dados.mediaAtual)}%)?\n\nSe não fizer isso, o sistema fecha sozinho na sexta às 18h.`)) return;
+        const n = parseInt(document.getElementById('semana').value, 10);
+        if (!(n >= 1 && n <= 60)) { alert('Informe a semana letiva (1 a 60).'); return; }
+        const existe = (dados.historico || []).some(h => h.semana === n);
+        if (!confirm(`Registrar a semana letiva ${n} com a média atual (${fmt(dados.mediaAtual)}%)?` +
+            (existe ? `\n\nA semana ${n} já existe no histórico e será substituída.` : '') +
+            '\n\nSe não fizer isso, o sistema fecha sozinho na sexta às 18h.')) return;
         const msg = document.getElementById('msg');
         msg.style.color = '#64748b'; msg.textContent = 'Fechando semana…';
         try {
-            const d = await chamar({ operacao: 'FREQ_FECHAR_SEMANA' });
+            const d = await chamar({ operacao: 'FREQ_FECHAR_SEMANA', semana: n });
             if (d.status !== 'success') throw new Error(d.message || 'Falha');
             msg.style.color = '#16a34a'; msg.textContent = '✅ ' + d.message;
             carregar();

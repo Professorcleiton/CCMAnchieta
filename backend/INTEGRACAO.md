@@ -86,7 +86,10 @@ As abas `frequencia`, `HistoricoGeral` e `Alunos` já estão na planilha do SIGA
 
 **SIGA → Frequência da Semana** (nível 3+):
 - **Power BI (Presente na Escola):** a exportação está bloqueada pela SEED. Use a cópia: na tabela, clique na primeira turma, **arraste até a última**, depois **botão direito → Copiar → Copiar seleção**, e cole na caixa da tela. As turmas são reconhecidas pelo código (coluna E da aba `frequencia`) ou pelo nome. Confira os valores e clique em **Salvar**. A TV mostra os números novos em até 10 minutos;
-- toda **sexta às 18h**, se houve atualização na semana, a média da escola entra no `HistoricoGeral` como a próxima semana;
+- no topo da tela, confira a **Semana letiva**. Ela é a mesma do filtro "SEMANA LETIVA" do Power BI;
+- a média da escola é **Σ presenças ÷ Σ aulas**, com os totais da importação gravados nas colunas F e G da aba `frequencia`. Se alguma turma for digitada à mão, a média vira simples até a próxima importação;
+- toda **sexta às 18h**, se houve atualização na semana, a média entra no `HistoricoGeral` com o número da semana letiva;
+- no card **Histórico semanal**, dá para preencher semanas que faltaram, corrigir ou apagar;
 - para registrar antes, use o botão **Fechar semana agora**.
 
 A linha **"Esta"** do gráfico agora é calculada sozinha com a média atual. A linha "Esta" antiga da planilha pode ser apagada; se ficar, o sistema a ignora e a substitui no próximo fechamento.

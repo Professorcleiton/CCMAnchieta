@@ -11,7 +11,7 @@ let gidSeq=1000;
 function sheet(name,rows,gid){return{name,rows,_gid:gid||(gidSeq++),getSheetId(){return this._gid},getDataRange(){return{getValues:()=>rows.map(r=>r.slice())}},appendRow(r){rows.push(r.slice())},setFrozenRows(){},
  getLastRow(){return rows.length},deleteRow(i){rows.splice(i-1,1)},
  getRange(l,c,nr,nc){const bloco=()=>rows.slice(l-1,l-1+(nr||1)).map(r=>Array.from({length:nc||1},(_,k)=>r[c-1+k]===undefined?'':r[c-1+k]));
-  return{setValues(v){v.forEach((linha,di)=>{rows[l-1+di]=rows[l-1+di]||[];linha.forEach((x,i)=>rows[l-1+di][c-1+i]=x)})},setValue(v){rows[l-1][c-1]=v},getValues:bloco,getDisplayValues:()=>bloco().map(r=>r.map(String)),setFontWeight(){return this},setBackground(){return this},setFontColor(){return this}}}}}
+  return{clearContent(){for(let i=0;i<(nr||1);i++){const r=rows[l-1+i];if(r)for(let k=0;k<(nc||1);k++)r[c-1+k]='';}},setValues(v){v.forEach((linha,di)=>{rows[l-1+di]=rows[l-1+di]||[];linha.forEach((x,i)=>rows[l-1+di][c-1+i]=x)})},setValue(v){rows[l-1][c-1]=v},getValues:bloco,getDisplayValues:()=>bloco().map(r=>r.map(String)),setFontWeight(){return this},setBackground(){return this},setFontColor(){return this}}}}}
 const S={};
 function add(n,rows){S[n]=sheet(n,rows)}
 add('Usuários',[['email','nome','setor','nivel','senha'],['prof@x.com','Prof Ana','professores',1,'1234'],['sec@x.com','Secretaria','secretaria',3,'5555'],['dir@x.com','Diretor','direcao',4,'9999']]);
@@ -219,4 +219,35 @@ assert.strictEqual(h[1][1],92.77,'texto 92.77 virou número');
 vm.runInContext('FREQ_fecharSemanaAutomatico()',ctx);
 assert.strictEqual(h.filter(r=>r[0]===24).length,0,'sem atualização na semana, não fecha de novo');
 assert.strictEqual(P({operacao:'FREQ_FECHAR_SEMANA',token:tdir}).semana,24,'fechamento manual');
+// --- Média ponderada (Σ presenças ÷ Σ aulas) e semana letiva do Power BI
+SV=P({operacao:'FREQ_SALVAR',token:tdir,semana:42,itens:[
+  {linha:2,turma:'6º A - EF',freq:'87,91',presencas:633,aulas:720},
+  {linha:3,turma:'1º A - NEM',freq:'67,17',presencas:532,aulas:792},
+  {linha:4,turma:'3º B - NEM',freq:'84,06',presencas:348,aulas:414}]});
+assert.strictEqual(SV.status,'success'); assert.deepStrictEqual(S.frequencia.rows[0].slice(5,7),['Σ Presenças','Σ Aulas'],'cabeçalhos F/G criados');
+assert.deepStrictEqual(S.frequencia.rows[1].slice(5,7),[633,720]);
+const pond=100*(633+532+348)/(720+792+414);
+assert.strictEqual(SV.gestao.metodoMedia,'ponderada'); assert(Math.abs(SV.gestao.mediaAtual-pond)<1e-9,'média ponderada');
+assert.strictEqual(SV.gestao.semanaAtual,42,'semana letiva guardada');
+ctx.CacheService.getScriptCache().remove('freq_publico');
+F=G({aba:'frequenciometro'}); assert.strictEqual(F.medias.metodo,'ponderada'); assert(Math.abs(F.medias.escola-pond)<1e-9);
+assert(Math.abs(F.medias.manha-pond)<1e-9,'todas manhã no teste'); assert.strictEqual(F.medias.tarde,null);
+// digitar à mão uma turma (sem Σ) volta para média simples, sem ponderar com número velho
+SV=P({operacao:'FREQ_SALVAR',token:tdir,itens:[{linha:2,turma:'6º A - EF',freq:'88'}]});
+assert.deepStrictEqual(S.frequencia.rows[1].slice(5,7),['',''],'F/G limpos'); assert.strictEqual(SV.gestao.metodoMedia,'simples');
+P({operacao:'FREQ_SALVAR',token:tdir,itens:[{linha:2,turma:'6º A - EF',freq:'87,91',presencas:633,aulas:720}]});
+// fechar com a semana letiva escolhida
+let FS=P({operacao:'FREQ_FECHAR_SEMANA',token:tdir,semana:42}); assert.strictEqual(FS.semana,42);
+let semanasHist=S.HistoricoGeral.rows.slice(1).map(r=>r[0]).filter(x=>x!=='');
+assert.deepStrictEqual(semanasHist,[1,2,21,22,23,24,42],'42 depois das antigas, em ordem');
+assert.strictEqual(G({aba:'frequencia_gestao',token:tdir}).semanaAtual,43,'próxima = 43');
+// preencher semanas que faltaram (33 a 41) e corrigir/apagar
+let HS=P({operacao:'FREQ_HISTORICO_SALVAR',token:tdir,semanas:[{semana:41,media:'84,66'},{semana:33,media:'90.98'},{semana:37,media:81.42},{semana:24,apagar:true},{semana:99,media:50},{semana:38,media:'abc'}]});
+assert.strictEqual(HS.status,'success'); assert.strictEqual(HS.message,'4 semana(s) gravada(s).');
+semanasHist=S.HistoricoGeral.rows.slice(1).filter(r=>r[0]!=='').map(r=>[r[0],r[1]]);
+assert.deepStrictEqual(semanasHist.map(r=>r[0]),[1,2,21,22,23,33,37,41,42]);
+assert.strictEqual(semanasHist.find(r=>r[0]===33)[1],90.98);
+assert.strictEqual(P({operacao:'FREQ_HISTORICO_SALVAR',token:tp2(),semanas:[{semana:40,media:84}]}).status,'forbidden');
+ctx.CacheService.getScriptCache().remove('freq_publico');
+F=G({aba:'frequenciometro'}); assert.deepStrictEqual(F.historico.slice(1).map(h=>h[0]),['1','2','21','22','23','33','37','41','42','Esta']);
 console.log('INTEGRAÇÃO COM O CÓDIGO.GS REAL: TODOS OS TESTES PASSARAM —',S.Auditoria.rows.length-1,'linhas de auditoria');
