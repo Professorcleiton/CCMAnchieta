@@ -135,6 +135,7 @@
     .status-verde { background: var(--verde); }
     .status-amarelo { background: var(--amarelo); color: #000; }
     .status-vermelho { background: var(--vermelho); }
+    .status-sem_meta, .status-sem_lancamento { background: #94a3b8; }
     .icone-universal { color: var(--azul); margin-left: .3rem; font-size: .8rem; }
     body.dark .icone-universal { color: #93c5fd; }
 
@@ -214,13 +215,6 @@
     <section class="filtros">
       <select id="filtro-plataforma">
         <option value="">Todas as plataformas</option>
-        <option value="Matific">Matific</option>
-        <option value="Redação">Redação Paraná</option>
-        <option value="Leia">Leia Paraná</option>
-        <option value="Quizizz">Quizizz / Desafio</option>
-        <option value="Khan">Khan Academy</option>
-        <option value="Inglês Paraná">Inglês Paraná</option>
-        <option value="Alura">Alura</option>
       </select>
       <select id="filtro-turma">
         <option value="">Todas as turmas</option>
@@ -322,6 +316,8 @@
         dadosOriginais = json.dados || json || [];
         if (json.semanaRotulo) document.getElementById('semana-painel').textContent = '— semana de ' + json.semanaRotulo;
         popularFiltroTurmas();
+        const plats = [...new Set(dadosOriginais.map(d => d.plataforma).filter(Boolean))].sort();
+        document.getElementById('filtro-plataforma').innerHTML = '<option value="">Todas as plataformas</option>' + plats.map(p => `<option>${escaparHTML(p)}</option>`).join('');
         aplicarFiltros();
       } catch (e) {
         console.error(e);
@@ -349,9 +345,7 @@
       const status = document.getElementById('filtro-status').value;
 
       dadosFiltrados = dadosOriginais.filter(d => {
-        const plataformaIgual = !plat ||
-          d.plataforma === plat ||
-          (plat === 'Quizizz' && (d.plataforma === 'Quizizz' || d.plataforma === 'Desafio'));
+        const plataformaIgual = !plat || d.plataforma === plat;
         return plataformaIgual &&
           (!turma || d.turma === turma) &&
           (!status || d.status === status);
@@ -380,38 +374,24 @@
         tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:1.5rem;">Nenhum item encontrado.</td></tr>';
         return;
       }
+      const nomes = { verde: 'META BATIDA', amarelo: '70% A 99%', vermelho: 'ABAIXO DE 70%', sem_meta: 'SEM META', sem_lancamento: 'SEM ÍNDICE' };
+      const f = v => Number(v).toLocaleString('pt-BR', { maximumFractionDigits: 3 });
       tbody.innerHTML = dadosFiltrados.map(d => {
-        let nomePlataforma = d.plataforma || '—';
-        if (d.plataforma === 'Quizizz' || d.plataforma === 'Desafio') {
-          nomePlataforma = 'Quizizz / Desafio';
-        }
-
-        // 🆕 CORREÇÃO DA META DA MATIFIC
-        // Se a planilha tiver 1.100 (mil e cem), ele transforma em 1.1
-        let meta = Number(d.meta_semanal) || 0;
-        if (nomePlataforma === 'Matific' && meta > 100) {
-            meta = meta / 1000; // Corrige o erro de digitação da planilha
-        }
-
+        const meta = Number(d.meta_semanal) || 0;
         const lancado = Number(d.qtd_lancada) || 0;
-        const pct = meta > 0 ? Math.round((lancado / meta) * 100) : 0;
-
-        const statusRaw = d.status ? String(d.status).toLowerCase() : 'vermelho';
-        const statusValidos = ['verde', 'amarelo', 'vermelho'];
-        const statusSeguro = statusValidos.includes(statusRaw) ? statusRaw : 'vermelho';
-        const badge = `<span class="status-badge status-${statusSeguro}">${statusSeguro.toUpperCase()}</span>`;
-
-        const universal = d.universal
-          ? ' <i class="fas fa-globe icone-universal" title="Meta universal"></i>'
-          : '';
-
+        const pct = meta > 0 && d.lancado !== false ? Math.round((lancado / meta) * 100) + '%' : '—';
+        const st = nomes[d.status] ? d.status : 'vermelho';
+        const badge = `<span class="status-badge status-${st}">${nomes[st]}</span>`;
+        const universal = d.universal ? ' <i class="fas fa-globe icone-universal" title="Vale para todos os professores da turma"></i>' : '';
+        const vari = (d.variacao === null || d.variacao === undefined) ? '' :
+          ` <small style="color:${d.variacao > 0 ? '#16a34a' : d.variacao < 0 ? '#dc2626' : '#64748b'};" title="Desde a semana anterior">${d.variacao > 0 ? '▲' : d.variacao < 0 ? '▼' : '='} ${f(Math.abs(d.variacao))}</small>`;
         return `<tr>
-          <td>${d.disciplina || '—'}</td>
-          <td>${d.turma || '—'}</td>
-          <td>${nomePlataforma}${universal}</td>
-          <td>${meta.toFixed(3)}</td>
-          <td>${lancado.toFixed(3)}</td>
-          <td>${pct}%</td>
+          <td>${escaparHTML(d.disciplina || '—')}</td>
+          <td>${escaparHTML(d.turma || '—')}</td>
+          <td>${escaparHTML(d.plataforma || '—')}${universal}</td>
+          <td>${meta > 0 ? f(meta) : '—'}</td>
+          <td>${d.lancado === false ? '—' : f(lancado) + vari}</td>
+          <td>${pct}</td>
           <td>${badge}</td>
         </tr>`;
       }).join('');
@@ -440,7 +420,7 @@
         data: {
           labels: semanas,
           datasets: [{
-            label: 'Índice médio',
+            label: '% da meta (média)',
             data: valores,
             backgroundColor: '#005088',
             borderRadius: 6
@@ -449,7 +429,7 @@
         options: {
           responsive: true,
           plugins: { legend: { display: false } },
-          scales: { y: { beginAtZero: true, max: 1 } }
+          scales: { y: { beginAtZero: true, suggestedMax: 100, ticks: { callback: v => v + '%' } } }
         }
       });
     }

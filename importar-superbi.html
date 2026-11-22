@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
     <script src="siga-core.js?v=15"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lançar Índices (Admin) — Super BI</title>
+  <title>Importar do BI — Plataformas</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     :root {
@@ -68,81 +68,60 @@
     </a>
 
     <div class="card">
-      <div class="form-row" style="grid-template-columns: 220px 1fr;">
+      <h2 style="font-size: 1.1rem; margin-bottom: .8rem; color: var(--azul);">1. Plataforma e semana</h2>
+      <div class="form-row" style="grid-template-columns: 1fr 200px;">
+        <div class="form-group">
+          <label for="plataforma">Plataforma:</label>
+          <select id="plataforma" onchange="mudarPlataforma()"><option>Carregando...</option></select>
+        </div>
         <div class="form-group">
           <label for="semana">Semana de referência:</label>
           <input type="date" id="semana" onchange="mudarSemana()">
         </div>
-        <div style="font-size:.88rem;color:#475569;align-self:center;" id="semana-info"></div>
       </div>
+      <div id="info-plataforma" style="font-size:.85rem;color:#475569;margin-top:.6rem;"></div>
     </div>
 
     <div class="card">
-      <h2 style="font-size: 1.1rem; margin-bottom: .6rem; color: var(--azul);">Colar do Power BI</h2>
-      <p style="font-size:.85rem;color:#64748b;margin-bottom:.6rem;">No Power BI, clique na tabela → <b>⋯</b> → <b>Copiar → Copiar seleção</b> (ou selecione as linhas e Ctrl+C) e cole aqui. O sistema reconhece as colunas Professor, Turma, Plataforma, Disciplina e Índice pelo cabeçalho.</p>
-      <textarea id="colar" rows="5" style="width:100%;padding:.6rem;border:1px solid var(--borda);border-radius:6px;font-family:monospace;font-size:.8rem;background:var(--bg-card);color:var(--texto);" placeholder="Cole aqui..."></textarea>
-      <div class="form-row" style="grid-template-columns: 1fr 1fr auto; margin-top:.6rem;">
-        <div class="form-group"><label>Plataforma (se a tabela não tiver a coluna):</label><select id="colar-plataforma"></select></div>
-        <div class="form-group"><label>Disciplina (se a tabela não tiver a coluna):</label><select id="colar-disciplina"><option value="">pela grade do professor</option></select></div>
-        <button class="btn-add" onclick="lerColagem()">Ler colagem</button>
-      </div>
-      <div id="colar-resultado" style="font-size:.85rem;margin-top:.6rem;"></div>
+      <h2 style="font-size: 1.1rem; margin-bottom: .6rem; color: var(--azul);">2. Colar a tabela do Power BI</h2>
+      <p style="font-size:.85rem;color:#64748b;margin-bottom:.6rem;">No relatório da plataforma: clique na tabela → <b>⋯</b> → <b>Copiar → Copiar seleção</b> e cole aqui, com o cabeçalho.</p>
+      <textarea id="colar" rows="6" style="width:100%;padding:.6rem;border:1px solid var(--borda);border-radius:6px;font-family:monospace;font-size:.78rem;background:var(--bg-card);color:var(--texto);" placeholder="-&#9;Turma&#9;Alunos&#9;..." oninput="lerTabela()"></textarea>
+      <div id="colunas" style="font-size:.85rem;margin-top:.6rem;"></div>
+      <div class="acoes" style="justify-content:flex-start;"><button class="btn" style="background:var(--azul);color:#fff;" id="btn-conferir" onclick="conferir()">Conferir</button></div>
     </div>
 
-    <div class="card">
-      <h2 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--azul);">Adicionar à mão</h2>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Professor(a):</label>
-          <select id="add-professor" onchange="filtrarTurmas()"><option value="">Carregando professores...</option></select>
-        </div>
-        <div class="form-group">
-          <label>Turma:</label>
-          <select id="add-turma" onchange="filtrarPlataformas()"><option value="">Selecione o Prof. primeiro...</option></select>
-        </div>
-        <div class="form-group">
-          <label>Plataforma:</label>
-          <select id="add-plataforma" onchange="filtrarDisciplina()"><option value="">Selecione...</option></select>
-        </div>
-        <div class="form-group">
-          <label>Disciplina:</label>
-          <select id="add-disciplina"><option value="">Selecione...</option></select>
-        </div>
-        <div class="form-group">
-          <label>Índice:</label>
-          <input type="text" id="add-indice" placeholder="Ex: 2,937" onkeydown="if(event.key==='Enter')adicionarLinha()">
-        </div>
-        <button class="btn-add" onclick="adicionarLinha()">+ Add</button>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2 style="font-size: 1.1rem; margin-bottom: .8rem; color: var(--azul);">Para salvar <span id="qtd-lista" style="color:#64748b;font-weight:normal;"></span></h2>
-      <div class="tabela-wrap">
-        <table>
-          <thead><tr><th>Professor</th><th>Turma</th><th>Plataforma</th><th>Disciplina</th><th>Índice</th><th></th></tr></thead>
-          <tbody id="corpo-tabela">
-            <tr><td colspan="6" style="text-align:center; color:#94a3b8; padding:2rem;">Nenhum lançamento adicionado.</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p style="font-size:.8rem;color:#64748b;">Se a mesma semana já tiver um índice para o mesmo professor, turma, disciplina e plataforma, ele é <b>substituído</b> (não soma em dobro).</p>
-      <div class="acoes">
-        <button class="btn" style="background:#e2e8f0;" onclick="limparLista()">Limpar lista</button>
-        <button class="btn btn-salvar" id="btn-salvar" onclick="salvarNaPlanilha()">Salvar na Planilha</button>
-      </div>
+    <div class="card" id="card-previa" style="display:none;">
+      <h2 style="font-size: 1.1rem; margin-bottom: .6rem; color: var(--azul);">3. Conferir e salvar <span id="previa-titulo" style="color:#64748b;font-weight:normal;"></span></h2>
+      <div id="previa"></div>
+      <p style="font-size:.8rem;color:#64748b;margin-top:.6rem;">Se a semana já tiver índice desta plataforma para a turma, ele é <b>substituído</b>. Turmas escolhidas à mão ficam guardadas para as próximas semanas.</p>
+      <div class="acoes"><button class="btn btn-salvar" id="btn-salvar" onclick="salvar()">Salvar na Planilha</button></div>
     </div>
 
     <div class="card">
       <h2 style="font-size: 1.1rem; margin-bottom: .8rem; color: var(--azul);">Situação da semana <span id="sit-semana" style="color:#64748b;font-weight:normal;"></span></h2>
       <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:.8rem;">
-        <select id="sit-filtro-status" onchange="desenharSituacao()"><option value="">Todos</option><option value="vermelho">🔴 Abaixo de 70%</option><option value="amarelo">🟡 70% a 99%</option><option value="verde">🟢 Meta batida</option><option value="sem">⚪ Sem lançamento</option></select>
+        <select id="sit-filtro-status" onchange="desenharSituacao()"><option value="">Todos</option><option value="vermelho">🔴 Abaixo de 70% da meta</option><option value="amarelo">🟡 70% a 99%</option><option value="verde">🟢 Meta batida</option><option value="sem_lancamento">⚪ Sem índice</option><option value="sem_meta">Sem meta</option></select>
         <select id="sit-filtro-plat" onchange="desenharSituacao()"><option value="">Todas as plataformas</option></select>
         <input id="sit-busca" placeholder="Professor ou turma" oninput="desenharSituacao()">
       </div>
       <div id="sit-resumo" style="font-size:.88rem;margin-bottom:.6rem;"></div>
-      <div class="tabela-wrap"><table><thead><tr><th>Professor</th><th>Turma</th><th>Disciplina</th><th>Plataforma</th><th>Meta</th><th>Índice</th><th>Status</th></tr></thead><tbody id="sit-corpo"><tr><td colspan="7" style="text-align:center;color:#94a3b8;">Carregando...</td></tr></tbody></table></div>
+      <div class="tabela-wrap"><table><thead><tr><th>Professor</th><th>Turma</th><th>Disciplina</th><th>Plataforma</th><th>Meta</th><th>Índice</th><th>Desde a anterior</th><th>Status</th></tr></thead><tbody id="sit-corpo"><tr><td colspan="8" style="text-align:center;color:#94a3b8;">Carregando...</td></tr></tbody></table></div>
     </div>
+
+    <details class="card">
+      <summary style="cursor:pointer;font-weight:bold;color:var(--azul);font-size:1.05rem;">⚙️ Plataformas cobradas, metas e colunas do BI</summary>
+      <p style="font-size:.82rem;color:#64748b;margin:.8rem 0;">
+        <b>Disciplinas</b>: quem recebe o índice da turma (vazio = todos os professores da turma).
+        <b>Séries</b>: 6, 7 · fundamental · médio · 1NEM (vazio = todas).
+        <b>Coluna do BI</b>: o título exato da coluna cobrada.
+        <b>Atribuir por</b>: "disciplina do BI" quando a tabela traz a disciplina em cada linha (Robótica).</p>
+      <div id="regras-aviso"></div>
+      <div class="tabela-wrap"><table id="tab-regras" style="min-width:1050px;"></table></div>
+      <div class="acoes" style="justify-content:space-between;">
+        <button class="btn" style="background:#e2e8f0;" onclick="adicionarRegra()">➕ Plataforma</button>
+        <button class="btn btn-salvar" id="btn-regras" onclick="salvarRegras()">Salvar plataformas</button>
+      </div>
+    </details>
 
   </main>
 
@@ -150,251 +129,205 @@
     const APPS_SCRIPT_URL = SIGA_CONFIG.APPS_SCRIPT_URL;
     const esc = escaparHTML;
     let usuarioLogado = null;
-    let professoresList = [];   // {email, nome}
-    let horarios = [];          // grade da escola
-    let plataformas = [];       // {plataforma, disciplina, universal, meta}
-    let listaDeLancamentos = [];
+    let cfg = { plataformas: [], turmas: [], professores: [] };
+    let tabela = null;        // { cab, linhas, col: {...} }
+    let previa = null;        // resposta do servidor
+    let escolhas = {};        // índice da linha do BI → { turma } | { professor, nome }
     let situacao = [];
 
-    const PLATAFORMAS_PADRAO = [
-      { plataforma: 'Matific', disciplina: 'Matemática' }, { plataforma: 'Khan Academy', disciplina: 'Matemática' },
-      { plataforma: 'Redação Paraná', disciplina: 'Português' }, { plataforma: 'Leia Paraná', disciplina: '', universal: true },
-      { plataforma: 'Inglês Paraná', disciplina: 'Inglês' }, { plataforma: 'Quizizz', disciplina: '', universal: true }
-    ];
-
     const norm = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
-    const cod = s => String(s || '').toUpperCase().replace(/\s+/g, '');
-    const numero = v => { let t = String(v || '').trim().replace(/\s/g, '').replace('%', ''); if (t.includes(',')) t = t.replace(/\./g, '').replace(',', '.'); return parseFloat(t); };
-    const valeParaTurma = (plat, turma) => { const p = norm(plat), f = /^[67]/.test(cod(turma)); if (p === 'matific') return f; if (p.includes('khan')) return !f; return true; };
+    const fmt = (v, d = 3) => (v === null || v === undefined || isNaN(v)) ? '—' : Number(v).toLocaleString('pt-BR', { maximumFractionDigits: d });
     const iso = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     function segunda(d) { const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); const w = x.getDay(); x.setDate(x.getDate() - (w === 0 ? 6 : w - 1)); return x; }
-    function semanaSelecionada() { const v = document.getElementById('semana').value; const [a, m, d] = v.split('-').map(Number); return segunda(new Date(a, m - 1, d)); }
+    function semanaSelecionada() { const [a, m, d] = document.getElementById('semana').value.split('-').map(Number); return segunda(new Date(a, m - 1, d)); }
     function rotulo(seg) { const f = new Date(seg.getTime() + 4 * 86400000); const r = d => String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0'); return r(seg) + ' a ' + r(f); }
+    const regraAtual = () => cfg.plataformas.find(p => p.plataforma === document.getElementById('plataforma').value);
+    const post = corpo => { corpo.token = usuarioLogado.token; return fetch(APPS_SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(corpo) }).then(r => r.json()); };
 
     document.addEventListener('DOMContentLoaded', async () => {
       const sessaoRaw = localStorage.getItem('sgi_ccma_session') || sessionStorage.getItem('sgi_ccma_session');
       if (!sessaoRaw) { alert('Sessão não encontrada. Faça login novamente.'); window.location.href = 'index.html'; return; }
       usuarioLogado = JSON.parse(sessaoRaw);
       if (!usuarioLogado || usuarioLogado.nivel < 4) { alert('Acesso restrito à Direção/Admin (Nível 4).'); window.location.href = 'restrito.html'; return; }
-
-      // padrão: a última semana letiva que terminou (no sábado/domingo é a semana que acabou de fechar)
-      const hojeD = new Date(), fds = hojeD.getDay() === 0 || hojeD.getDay() === 6;
-      document.getElementById('semana').value = iso(segunda(fds ? hojeD : new Date(Date.now() - 7 * 86400000)));
-      document.getElementById('semana').max = iso(new Date());
-      mudarSemana(true);
-
-      const [users, hor, metas] = await Promise.all([
-        fetch(APPS_SCRIPT_URL + '?aba=usuarios').then(r => r.json()).catch(() => []),
-        fetch(APPS_SCRIPT_URL + '?aba=horarios').then(r => r.json()).catch(() => ({})),
-        fetch(APPS_SCRIPT_URL + '?aba=metas_plataformas').then(r => r.json()).catch(() => ({}))
-      ]);
-      horarios = (hor && hor.horarios) || [];
-      const nomesNaGrade = new Set(horarios.map(h => norm(h.professor)).filter(Boolean));
-      professoresList = (Array.isArray(users) ? users : []).filter(u => nomesNaGrade.has(norm(u.nome)) || u.setor === 'professores')
-        .map(u => ({ email: u.email, nome: u.nome })).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
-      plataformas = (metas && metas.plataformas && metas.plataformas.length) ? metas.plataformas : PLATAFORMAS_PADRAO;
-      // mesma plataforma em mais de uma linha (ex.: disciplinas diferentes) aparece uma vez na lista
-      const nomesPlat = [...new Set(plataformas.map(p => p.plataforma))];
-
-      const selectProf = document.getElementById('add-professor');
-      selectProf.innerHTML = '<option value="">Selecione o Professor...</option>' + professoresList.map(p => `<option value="${esc(p.email)}">${esc(p.nome)}</option>`).join('');
-      document.getElementById('colar-plataforma').innerHTML = '<option value="">pela coluna da tabela</option>' + nomesPlat.map(p => `<option>${esc(p)}</option>`).join('');
-      document.getElementById('sit-filtro-plat').innerHTML = '<option value="">Todas as plataformas</option>' + nomesPlat.map(p => `<option>${esc(p)}</option>`).join('');
-      const disciplinas = [...new Set(horarios.map(h => h.disciplina).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
-      document.getElementById('colar-disciplina').innerHTML = '<option value="">pela coluna ou pela grade do professor</option>' + disciplinas.map(d => `<option>${esc(d)}</option>`).join('');
+      // padrão: a última semana que terminou (no sábado/domingo, a que acabou de fechar)
+      const hoje = new Date(), fds = hoje.getDay() === 0 || hoje.getDay() === 6;
+      document.getElementById('semana').value = iso(segunda(fds ? hoje : new Date(Date.now() - 7 * 86400000)));
+      document.getElementById('semana').max = iso(hoje);
+      await carregarConfig();
       carregarSituacao();
     });
 
-    function mudarSemana(inicial) {
-      const seg = semanaSelecionada();
-      document.getElementById('semana').value = iso(seg);
-      document.getElementById('semana-info').innerHTML = `Os índices serão gravados na semana de <b>${rotulo(seg)}</b>. O painel do professor mostra a semana mais recente que tiver lançamentos.`;
-      if (!inicial) carregarSituacao();
+    async function carregarConfig() {
+      try { const r = await (await fetch(APPS_SCRIPT_URL + '?aba=metas_plataformas')).json(); if (r && r.plataformas) cfg = r; } catch (e) { }
+      const ativas = cfg.plataformas.filter(p => p.ativa !== false);
+      const atual = document.getElementById('plataforma').value;
+      document.getElementById('plataforma').innerHTML = '<option value="">Selecione...</option>' + ativas.map(p => `<option${p.plataforma === atual ? ' selected' : ''}>${esc(p.plataforma)}</option>`).join('');
+      document.getElementById('sit-filtro-plat').innerHTML = '<option value="">Todas as plataformas</option>' + ativas.map(p => `<option>${esc(p.plataforma)}</option>`).join('');
+      if (!cfg.plataformas.length) document.getElementById('info-plataforma').innerHTML = '<span style="color:#b91c1c;">Não consegui carregar as plataformas. O arquivo plataformas.gs já foi instalado no Apps Script?</span>';
+      desenharRegras();
+      mudarPlataforma();
     }
 
-    const professorDoEmail = email => professoresList.find(p => p.email === email);
-    const aulasDe = email => { const p = professorDoEmail(email); return p ? horarios.filter(h => norm(h.professor) === norm(p.nome)) : []; };
-
-    function filtrarTurmas() {
-      const email = document.getElementById('add-professor').value;
-      const turmas = [...new Set(aulasDe(email).map(h => h.turma))].sort();
-      document.getElementById('add-turma').innerHTML = turmas.length
-        ? '<option value="">Selecione a Turma...</option>' + turmas.map(t => `<option>${esc(t)}</option>`).join('')
-        : '<option value="">Nenhuma turma na grade</option>';
-      filtrarPlataformas();
+    function mudarPlataforma() {
+      const r = regraAtual();
+      document.getElementById('info-plataforma').innerHTML = r
+        ? `Coluna cobrada: <b>${esc(r.coluna || '—')}</b> · Meta semanal: <b>${r.meta > 0 ? fmt(r.meta) : 'não definida'}</b> · ` +
+          `Recebe o índice: <b>${r.atribuir === 'disciplina do BI' ? 'o professor da disciplina que vem na tabela' : (r.disciplinas ? 'quem dá ' + esc(r.disciplinas) : 'todos os professores da turma')}</b>` +
+          (r.series ? ` · Séries: <b>${esc(r.series)}</b>` : '')
+        : '';
+      lerTabela();
     }
+    function mudarSemana() { document.getElementById('semana').value = iso(semanaSelecionada()); previa = null; document.getElementById('card-previa').style.display = 'none'; carregarSituacao(); }
 
-    function disciplinasDe(email, turma) { return [...new Set(aulasDe(email).filter(h => h.turma === turma).map(h => h.disciplina))]; }
-
-    function filtrarPlataformas() {
-      const email = document.getElementById('add-professor').value, turma = document.getElementById('add-turma').value;
-      const sel = document.getElementById('add-plataforma');
-      if (!turma) { sel.innerHTML = '<option value="">Selecione a Turma primeiro...</option>'; return; }
-      const discs = disciplinasDe(email, turma).map(norm);
-      const lista = plataformas.filter(p => valeParaTurma(p.plataforma, turma) && (p.universal || !p.disciplina || discs.includes(norm(p.disciplina))));
-      const nomes = [...new Set(lista.map(p => p.plataforma))];
-      sel.innerHTML = '<option value="">Selecione a Plataforma...</option>' + nomes.map(n => `<option>${esc(n)}</option>`).join('');
-      filtrarDisciplina();
-    }
-
-    function filtrarDisciplina() {
-      const email = document.getElementById('add-professor').value, turma = document.getElementById('add-turma').value;
-      const plat = document.getElementById('add-plataforma').value;
-      const discs = disciplinasDe(email, turma);
-      const regra = plataformas.filter(p => p.plataforma === plat && !p.universal && p.disciplina).map(p => norm(p.disciplina));
-      const opcoes = regra.length ? discs.filter(d => regra.includes(norm(d))) : discs;
-      const sel = document.getElementById('add-disciplina');
-      sel.innerHTML = (opcoes.length === 1 ? '' : '<option value="">Selecione...</option>') + opcoes.map(d => `<option>${esc(d)}</option>`).join('');
-    }
-
-    function adicionarLinha() {
-      const selectProf = document.getElementById('add-professor');
-      const profEmail = selectProf.value;
-      const turma = document.getElementById('add-turma').value;
-      const plataforma = document.getElementById('add-plataforma').value;
-      const disciplina = document.getElementById('add-disciplina').value;
-      const indice = numero(document.getElementById('add-indice').value);
-      if (!profEmail || !turma || !plataforma || !disciplina || isNaN(indice)) { alert('Preencha todos os campos corretamente.'); return; }
-      incluir({ profEmail, profNome: selectProf.options[selectProf.selectedIndex].text, turma, plataforma, disciplina, indice });
-      document.getElementById('add-indice').value = '';
-      document.getElementById('add-indice').focus();
-    }
-
-    function incluir(l) {
-      const chave = x => [x.profEmail, x.turma, norm(x.disciplina), norm(x.plataforma)].join('|');
-      listaDeLancamentos = listaDeLancamentos.filter(x => chave(x) !== chave(l));
-      listaDeLancamentos.push(l);
-      renderizarTabela();
-    }
-
-    // ---------- colagem do Power BI ----------
-    function lerColagem() {
+    // ---------- leitura da colagem ----------
+    function lerTabela() {
       const texto = document.getElementById('colar').value;
+      const area = document.getElementById('colunas');
+      previa = null; document.getElementById('card-previa').style.display = 'none';
       const linhas = texto.split(/\r?\n/).map(l => l.split('\t').map(c => c.trim())).filter(l => l.some(c => c));
-      const saida = document.getElementById('colar-resultado');
-      if (!linhas.length) { saida.innerHTML = 'Nada para ler.'; return; }
-      // cabeçalho = primeira linha que tem "turma" ou "professor"
-      const idxCab = linhas.findIndex(l => l.some(c => /turma|professor|docente/i.test(c)));
-      if (idxCab === -1) { saida.innerHTML = '<span style="color:#b91c1c;">Não achei o cabeçalho (colunas Professor e Turma). Copie a tabela com os títulos das colunas.</span>'; return; }
-      const cab = linhas[idxCab].map(norm);
-      const col = re => cab.findIndex(c => re.test(c));
-      const cProf = col(/professor|docente/), cTurma = col(/turma/), cPlat = col(/plataforma/), cDisc = col(/disciplina|componente/);
-      let cVal = col(/indice|índice|media|média|valor|atividade|%|engaj|uso|acesso/);
-      if (cVal === -1) cVal = cab.length - 1;   // última coluna
-      const platFixa = document.getElementById('colar-plataforma').value, discFixa = document.getElementById('colar-disciplina').value;
-      let ok = 0; const problemas = [];
-      linhas.slice(idxCab + 1).forEach((l, i) => {
-        if (/^total/i.test(l[0] || '')) return;
-        const nomeProf = cProf >= 0 ? l[cProf] : '';
-        const prof = professoresList.find(p => norm(p.nome) === norm(nomeProf) || p.email === String(nomeProf).toLowerCase())
-          || professoresList.find(p => norm(nomeProf) && (norm(p.nome).startsWith(norm(nomeProf)) || norm(nomeProf).startsWith(norm(p.nome))));
-        const turma = turmaDaGrade(cTurma >= 0 ? l[cTurma] : '');
-        const plataforma = platFixa || (cPlat >= 0 ? nomePlataforma(l[cPlat]) : '');
-        const indice = numero(l[cVal]);
-        const linhaTxt = 'Linha ' + (idxCab + i + 2) + ' (' + (nomeProf || '?') + ', ' + ((cTurma >= 0 && l[cTurma]) || '?') + ')';
-        if (!prof) return problemas.push(linhaTxt + ': professor não encontrado');
-        if (!turma) return problemas.push(linhaTxt + ': turma não está na grade');
-        if (!plataforma) return problemas.push(linhaTxt + ': escolha a plataforma acima');
-        if (isNaN(indice)) return problemas.push(linhaTxt + ': índice inválido');
-        let disciplina = discFixa || (cDisc >= 0 ? l[cDisc] : '');
-        const daGrade = disciplinasDe(prof.email, turma);
-        if (disciplina) disciplina = daGrade.find(d => norm(d) === norm(disciplina)) || disciplina;
-        else {
-          const regra = plataformas.filter(p => norm(p.plataforma) === norm(plataforma) && !p.universal && p.disciplina).map(p => norm(p.disciplina));
-          const cand = regra.length ? daGrade.filter(d => regra.includes(norm(d))) : daGrade;
-          if (cand.length !== 1) return problemas.push(linhaTxt + ': não deu para saber a disciplina (' + (cand.join(', ') || 'nenhuma na grade') + ')');
-          disciplina = cand[0];
-        }
-        incluir({ profEmail: prof.email, profNome: prof.nome, turma, plataforma, disciplina, indice });
-        ok++;
-      });
-      saida.innerHTML = `<span style="color:#15803d;font-weight:bold;">✓ ${ok} linha(s) adicionadas à lista.</span>` +
-        (problemas.length ? `<div style="color:#b45309;margin-top:.4rem;">${problemas.length} linha(s) ignoradas:<br>${problemas.slice(0, 20).map(esc).join('<br>')}${problemas.length > 20 ? '<br>...' : ''}</div>` : '');
+      if (!linhas.length) { tabela = null; area.innerHTML = ''; return; }
+      const iCab = linhas.findIndex(l => l.some(c => /^turma$/i.test(c)));
+      if (iCab === -1) { tabela = null; area.innerHTML = '<span style="color:#b91c1c;">Não achei a coluna "Turma". Copie a tabela junto com o cabeçalho.</span>'; return; }
+      const cab = linhas[iCab], n = cab.map(norm);
+      const achar = (...res) => { for (const re of res) { const i = n.findIndex(c => re.test(c)); if (i !== -1) return i; } return -1; };
+      const r = regraAtual();
+      let cValor = r && r.coluna ? n.indexOf(norm(r.coluna)) : -1;
+      if (cValor === -1 && r && r.coluna) cValor = n.findIndex(c => c.includes(norm(r.coluna)) || norm(r.coluna).includes(c) && c.length > 6);
+      if (cValor === -1) cValor = achar(/^indice/);
+      tabela = {
+        cab, linhas: linhas.slice(iCab + 1).filter(l => !/^total/i.test(l[1] || l[0] || '')),
+        col: { turma: n.findIndex(c => c === 'turma'), alunos: achar(/^(total de )?alunos|estudantes/), valor: cValor,
+               acessos: achar(/%.*acessos/, /acessos.*%/), disciplina: achar(/disciplina/), curso: achar(/^curso$/) }
+      };
+      const opc = sel => '<option value="-1">—</option>' + cab.map((c, i) => `<option value="${i}"${i === sel ? ' selected' : ''}>${esc(c)}</option>`).join('');
+      area.innerHTML = `<b>${tabela.linhas.length}</b> linha(s). Coluna do índice: <select onchange="tabela.col.valor=+this.value">${opc(tabela.col.valor)}</select>` +
+        (tabela.col.valor === -1 ? ' <span style="color:#b91c1c;">← escolha a coluna cobrada</span>' : '') +
+        ` · Alunos: <select onchange="tabela.col.alunos=+this.value">${opc(tabela.col.alunos)}</select>` +
+        (tabela.col.disciplina !== -1 ? ` · Disciplina: <b>${esc(cab[tabela.col.disciplina])}</b>` : '');
     }
 
-    function turmaDaGrade(texto) {
-      const turmas = [...new Set(horarios.map(h => h.turma))];
-      const c = cod(texto).replace(/º|°|ª/g, '').replace(/ANO|SERIE|SÉRIE/g, '');
-      return turmas.find(t => cod(t) === cod(texto)) || turmas.find(t => cod(t) === c) || '';
-    }
-    function nomePlataforma(texto) {
-      const n = norm(texto);
-      const p = plataformas.find(x => norm(x.plataforma) === n) || plataformas.find(x => n && (norm(x.plataforma).includes(n) || n.includes(norm(x.plataforma))));
-      return p ? p.plataforma : String(texto || '').trim();
+    function linhasParaEnviar() {
+      const c = tabela.col, v = (l, i) => i >= 0 ? (l[i] || '') : '';
+      return tabela.linhas.map((l, i) => Object.assign({
+        texto: v(l, c.turma), valor: v(l, c.valor), alunos: v(l, c.alunos), acessos: v(l, c.acessos),
+        disciplina: v(l, c.disciplina), curso: v(l, c.curso), linha: l.join('\t')
+      }, escolhas[i] || {}));
     }
 
-    // ---------- lista e salvamento ----------
-    function renderizarTabela() {
-      const tbody = document.getElementById('corpo-tabela');
-      document.getElementById('qtd-lista').textContent = listaDeLancamentos.length ? '(' + listaDeLancamentos.length + ')' : '';
-      if (!listaDeLancamentos.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#94a3b8; padding:2rem;">Nenhum lançamento adicionado.</td></tr>'; return; }
-      tbody.innerHTML = listaDeLancamentos.map((item, i) => `<tr>
-          <td><strong>${esc(item.profNome)}</strong></td><td>${esc(item.turma)}</td><td>${esc(item.plataforma)}</td><td>${esc(item.disciplina)}</td>
-          <td style="color: var(--azul); font-weight: bold;">${item.indice.toLocaleString('pt-BR', { maximumFractionDigits: 3 })}</td>
-          <td><button class="linha-remover" title="Remover" onclick="removerLinha(${i})"><i class="fas fa-trash"></i></button></td></tr>`).join('');
-    }
-    function removerLinha(i) { listaDeLancamentos.splice(i, 1); renderizarTabela(); }
-    function limparLista() { if (listaDeLancamentos.length && confirm('Limpar a lista?')) { listaDeLancamentos = []; renderizarTabela(); } }
-
-    async function salvarNaPlanilha(ignorarErros) {
-      if (!listaDeLancamentos.length) return alert('Adicione pelo menos um lançamento.');
-      const seg = semanaSelecionada();
-      const btn = document.getElementById('btn-salvar');
-      btn.disabled = true; btn.innerHTML = 'Salvando...';
+    async function conferir() {
+      if (!regraAtual()) return alert('Escolha a plataforma.');
+      if (!tabela || !tabela.linhas.length) return alert('Cole a tabela do Power BI.');
+      if (tabela.col.valor === -1) return alert('Escolha a coluna do índice.');
+      const btn = document.getElementById('btn-conferir'); btn.disabled = true; btn.textContent = 'Conferindo...';
       try {
-        const resp = await fetchAutenticadoBI({
-          operacao: 'IMPORTAR_LANCAMENTOS', semana: iso(seg), ignorarErros: !!ignorarErros,
-          lancamentos: listaDeLancamentos.map(l => ({ professor: l.profEmail, turma: l.turma, plataforma: l.plataforma, disciplina: l.disciplina, valor: l.indice }))
+        const r = await post({ operacao: 'IMPORTAR_LANCAMENTOS', previa: true, plataforma: regraAtual().plataforma, semana: iso(semanaSelecionada()), linhas: linhasParaEnviar() });
+        if (r.status !== 'previa') { alert('❌ ' + (r.message || 'Não foi possível conferir.')); return; }
+        previa = r; desenharPrevia();
+      } catch (e) { alert('❌ Erro de conexão.'); }
+      finally { btn.disabled = false; btn.textContent = 'Conferir'; }
+    }
+
+    const corStatus = { verde: '#16a34a', amarelo: '#ca8a04', vermelho: '#dc2626', sem_meta: '#64748b', sem_lancamento: '#94a3b8' };
+    const nomeStatus = { verde: 'meta batida', amarelo: '70% a 99%', vermelho: 'abaixo de 70%', sem_meta: 'sem meta', sem_lancamento: 'sem índice' };
+
+    function desenharPrevia() {
+      const r = previa;
+      document.getElementById('card-previa').style.display = 'block';
+      document.getElementById('previa-titulo').textContent = `— ${r.plataforma}, semana de ${r.semanaRotulo}`;
+      let h = `<p style="font-size:.88rem;margin-bottom:.6rem;"><b>${r.turmas.length}</b> turma(s) prontas` + (r.problemas.length ? ` · <b style="color:#b45309;">${r.problemas.length}</b> linha(s) para resolver` : '') + '</p>';
+      if (r.problemas.length) {
+        h += '<div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:.7rem;margin-bottom:.8rem;font-size:.85rem;"><b>Linhas não reconhecidas</b> — escolha a turma da grade ou, para turmas do contraturno, o professor:<table style="min-width:0;margin-top:.4rem;">';
+        r.problemas.forEach(p => {
+          const e = escolhas[p.linha] || {};
+          h += `<tr><td>${esc(p.texto)}${p.disciplina ? '<br><small>' + esc(p.disciplina) + '</small>' : ''}<br><small style="color:#b45309;">${esc(p.problema)}</small></td>
+            <td><select onchange="escolher(${p.linha},'turma',this.value)"><option value="">Turma da grade...</option>${r.turmasDaGrade.map(t => `<option${t === e.turma ? ' selected' : ''}>${esc(t)}</option>`).join('')}</select></td>
+            <td><select onchange="escolher(${p.linha},'professor',this.value)"><option value="">ou professor (contraturno)...</option>${(cfg.professores || []).map(x => `<option value="${esc(x.email)}"${x.email === e.professor ? ' selected' : ''}>${esc(x.nome)}</option>`).join('')}</select></td></tr>`;
         });
-        const r = await resp.json();
-        if (r.status === 'success') {
-          alert(`✅ ${r.inseridos} índice(s) salvos na semana de ${r.semanaRotulo || rotulo(seg)}` + (r.substituidos ? ` (${r.substituidos} substituídos)` : '') + (r.ignorados ? `. ${r.ignorados} ignorado(s).` : '.'));
-          listaDeLancamentos = []; renderizarTabela(); carregarSituacao();
-        } else if (r.status === 'erros') {
-          btn.disabled = false; btn.innerHTML = 'Salvar na Planilha';
-          if (confirm('⚠️ ' + r.erros.length + ' linha(s) com problema:\n\n' + r.erros.slice(0, 12).join('\n') + '\n\nSalvar só as ' + r.validas + ' linha(s) certas?')) return salvarNaPlanilha(true);
-        } else {
-          alert('❌ Erro: ' + (r.message || 'Falha ao salvar.'));
-        }
-      } catch (e) {
-        alert('❌ Erro de conexão.');
-      } finally {
-        btn.disabled = false; btn.innerHTML = 'Salvar na Planilha';
+        h += '</table><button class="btn" style="background:var(--azul);color:#fff;margin-top:.5rem;padding:.5rem 1rem;" onclick="conferir()">Conferir de novo</button></div>';
+      }
+      h += '<div class="tabela-wrap"><table style="min-width:700px;"><thead><tr><th>Turma</th><th>Linhas do BI</th><th>Alunos</th><th>Índice</th><th>Meta</th><th>Status</th></tr></thead><tbody>';
+      r.turmas.forEach(t => {
+        h += `<tr><td><b>${esc(t.rotulo)}</b>${t.professor ? '<br><small>' + esc(t.professor) + '</small>' : ''}${t.disciplina ? '<br><small>' + esc(t.disciplina) + '</small>' : ''}${t.foraDasSeries ? '<br><small style="color:#b45309;">série fora da regra desta plataforma</small>' : ''}</td>
+          <td style="font-size:.78rem;color:#64748b;">${t.textos.map(esc).join('<br>')}</td><td>${fmt(t.alunos, 0)}</td>
+          <td style="font-weight:bold;color:var(--azul);">${fmt(t.valor)}</td><td>${t.meta > 0 ? fmt(t.meta) : '—'}</td>
+          <td style="color:${corStatus[t.status]};font-weight:bold;">${nomeStatus[t.status]}</td></tr>`;
+      });
+      h += '</tbody></table></div>';
+      document.getElementById('previa').innerHTML = h;
+    }
+
+    function escolher(linha, campo, valor) {
+      escolhas[linha] = valor ? (campo === 'turma' ? { turma: valor } : { professor: valor, nome: '' }) : {};
+      if (campo === 'professor' && valor) {
+        const p = previa.problemas.find(x => x.linha === linha);
+        const sugestao = p && p.disciplina ? p.disciplina.replace(/^\d+\s*-\s*/, '') : '';
+        escolhas[linha].nome = prompt('Nome para mostrar no painel (ex.: Robótica 7º ano):', sugestao) || sugestao;
       }
     }
 
-    function fetchAutenticadoBI(payload) {
-      payload.token = usuarioLogado.token;
-      return fetch(APPS_SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
+    async function salvar() {
+      if (!previa) return;
+      if (previa.problemas.length && !confirm(previa.problemas.length + ' linha(s) não reconhecidas serão ignoradas. Salvar as ' + previa.turmas.length + ' turmas prontas?')) return;
+      const btn = document.getElementById('btn-salvar'); btn.disabled = true; btn.textContent = 'Salvando...';
+      try {
+        const r = await post({ operacao: 'IMPORTAR_LANCAMENTOS', plataforma: regraAtual().plataforma, semana: iso(semanaSelecionada()), linhas: linhasParaEnviar() });
+        if (r.status === 'success') {
+          alert(`✅ ${r.plataforma}: ${r.inseridos} turma(s) salvas na semana de ${r.semanaRotulo}` + (r.substituidos ? ` (${r.substituidos} substituídas)` : '') + '.');
+          document.getElementById('colar').value = ''; tabela = null; previa = null; escolhas = {};
+          document.getElementById('colunas').innerHTML = ''; document.getElementById('card-previa').style.display = 'none';
+          carregarSituacao();
+        } else alert('❌ ' + (r.message || 'Falha ao salvar.'));
+      } catch (e) { alert('❌ Erro de conexão.'); }
+      finally { btn.disabled = false; btn.textContent = 'Salvar na Planilha'; }
     }
 
     // ---------- situação da semana ----------
     async function carregarSituacao() {
       const seg = semanaSelecionada();
       document.getElementById('sit-semana').textContent = '— ' + rotulo(seg);
-      try {
-        const r = await (await fetch(APPS_SCRIPT_URL + '?aba=visao_geral_docentes&semana=' + iso(seg))).json();
-        situacao = r.dados || [];
-      } catch (e) { situacao = []; }
+      try { const r = await (await fetch(APPS_SCRIPT_URL + '?aba=visao_geral_docentes&semana=' + iso(seg))).json(); situacao = r.dados || []; }
+      catch (e) { situacao = []; }
       desenharSituacao();
     }
 
     function desenharSituacao() {
       const st = document.getElementById('sit-filtro-status').value, plat = document.getElementById('sit-filtro-plat').value, busca = norm(document.getElementById('sit-busca').value);
-      const lista = situacao.filter(d => (!plat || d.plataforma === plat) && (!busca || norm(d.nome + ' ' + d.turma).includes(busca)) &&
-        (!st || (st === 'sem' ? d.lancado === false : (d.status === st && d.lancado !== false))))
-        .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR') || a.turma.localeCompare(b.turma));
-      const lancados = situacao.filter(d => d.lancado).length;
+      const lista = situacao.filter(d => (!plat || d.plataforma === plat) && (!busca || norm(d.nome + ' ' + d.turma).includes(busca)) && (!st || d.status === st))
+        .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR') || String(a.turma).localeCompare(String(b.turma)));
+      const conta = s => situacao.filter(d => d.status === s).length;
       document.getElementById('sit-resumo').innerHTML = situacao.length
-        ? `<b>${lancados}</b> de <b>${situacao.length}</b> metas com índice lançado nesta semana · 🟢 ${situacao.filter(d => d.lancado && d.status === 'verde').length} · 🟡 ${situacao.filter(d => d.lancado && d.status === 'amarelo').length} · 🔴 ${situacao.filter(d => d.lancado && d.status === 'vermelho').length}`
-        : 'Sem dados (o arquivo plataformas.gs já foi instalado no Apps Script?).';
-      const cor = { verde: '#16a34a', amarelo: '#ca8a04', vermelho: '#dc2626' };
-      document.getElementById('sit-corpo').innerHTML = lista.length ? lista.map(d => `<tr>
-          <td>${esc(d.nome)}</td><td>${esc(d.turma)}</td><td>${esc(d.disciplina)}</td><td>${esc(d.plataforma)}</td>
-          <td>${Number(d.meta_semanal).toLocaleString('pt-BR', { maximumFractionDigits: 3 })}</td>
-          <td>${d.lancado === false ? '—' : Number(d.qtd_lancada).toLocaleString('pt-BR', { maximumFractionDigits: 3 })}</td>
-          <td style="font-weight:bold;color:${d.lancado === false ? '#94a3b8' : cor[d.status]};">${d.lancado === false ? 'sem lançamento' : esc(d.status)}</td></tr>`).join('')
-        : '<tr><td colspan="7" style="text-align:center;color:#94a3b8;">Nada para mostrar.</td></tr>';
+        ? `<b>${situacao.filter(d => d.lancado).length}</b> de <b>${situacao.length}</b> com índice nesta semana · 🟢 ${conta('verde')} · 🟡 ${conta('amarelo')} · 🔴 ${conta('vermelho')} · sem meta ${conta('sem_meta')}`
+        : 'Sem dados para esta semana.';
+      document.getElementById('sit-corpo').innerHTML = lista.length ? lista.map(d => {
+        const vari = d.variacao === null || d.variacao === undefined ? '—' : (d.variacao > 0 ? '▲ ' : d.variacao < 0 ? '▼ ' : '') + fmt(Math.abs(d.variacao));
+        return `<tr><td>${esc(d.nome)}</td><td>${esc(d.turma)}</td><td>${esc(d.disciplina)}</td><td>${esc(d.plataforma)}</td>
+          <td>${d.meta_semanal > 0 ? fmt(d.meta_semanal) : '—'}</td><td>${d.lancado ? fmt(d.qtd_lancada) : '—'}</td>
+          <td style="color:${d.variacao > 0 ? '#16a34a' : d.variacao < 0 ? '#dc2626' : '#64748b'};">${vari}</td>
+          <td style="font-weight:bold;color:${corStatus[d.status]};">${nomeStatus[d.status] || esc(d.status)}</td></tr>`;
+      }).join('') : '<tr><td colspan="8" style="text-align:center;color:#94a3b8;">Nada para mostrar.</td></tr>';
+    }
+
+    // ---------- plataformas cobradas ----------
+    function desenharRegras() {
+      document.getElementById('regras-aviso').innerHTML = cfg.padrao
+        ? '<div class="aviso" style="margin-bottom:.8rem;">Lista inicial com as 9 plataformas (metas trazidas da aba antiga Metas_Plataformas, quando havia). Confira, preencha as metas e salve: ela passa a ficar na aba <b>Plataformas_Cobradas</b>.</div>' : '';
+      const inp = (i, campo, v, w) => `<input style="width:${w || '100%'}" value="${esc(v == null ? '' : v)}" onchange="cfg.plataformas[${i}].${campo}=this.value">`;
+      document.getElementById('tab-regras').innerHTML = '<thead><tr><th>Plataforma</th><th>Outros nomes</th><th>Disciplinas</th><th>Séries</th><th>Coluna do BI</th><th style="width:90px;">Meta</th><th>Atribuir por</th><th>Ativa</th><th></th></tr></thead><tbody>' +
+        cfg.plataformas.map((p, i) => `<tr><td>${inp(i, 'plataforma', p.plataforma)}</td><td>${inp(i, 'apelidos', p.apelidos)}</td><td>${inp(i, 'disciplinas', p.disciplinas)}</td>
+          <td>${inp(i, 'series', p.series)}</td><td>${inp(i, 'coluna', p.coluna)}</td><td>${inp(i, 'meta', p.meta > 0 ? String(p.meta).replace('.', ',') : '')}</td>
+          <td><select onchange="cfg.plataformas[${i}].atribuir=this.value"><option${p.atribuir !== 'disciplina do BI' ? ' selected' : ''}>grade</option><option${p.atribuir === 'disciplina do BI' ? ' selected' : ''}>disciplina do BI</option></select></td>
+          <td style="text-align:center;"><input type="checkbox" ${p.ativa !== false ? 'checked' : ''} onchange="cfg.plataformas[${i}].ativa=this.checked"></td>
+          <td><button class="linha-remover" title="Excluir" onclick="cfg.plataformas.splice(${i},1);desenharRegras()"><i class="fas fa-trash"></i></button></td></tr>`).join('') + '</tbody>';
+    }
+    function adicionarRegra() { cfg.plataformas.push({ plataforma: '', apelidos: '', disciplinas: '', series: '', coluna: '', meta: '', ativa: true, atribuir: 'grade' }); desenharRegras(); }
+    async function salvarRegras() {
+      const btn = document.getElementById('btn-regras'); btn.disabled = true; btn.textContent = 'Salvando...';
+      try {
+        const r = await post({ operacao: 'PLATAFORMAS_SALVAR', regras: cfg.plataformas });
+        if (r.status === 'success') { alert('✅ ' + r.plataformas + ' plataformas salvas.'); await carregarConfig(); carregarSituacao(); }
+        else alert('❌ ' + (r.message || 'Falha ao salvar.'));
+      } catch (e) { alert('❌ Erro de conexão.'); }
+      finally { btn.disabled = false; btn.textContent = 'Salvar plataformas'; }
     }
   </script>
 </body>

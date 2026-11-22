@@ -405,42 +405,70 @@ assert.strictEqual(P({operacao:'VIRADA_SALVAR_MATRIZ',token:tdir,linhas:[{serie:
 assert.strictEqual(G({aba:'planejamento_ano',token:ts}).matriz.salva,true,'secretaria lê o planejamento');
 ctx.PropertiesService._p={};
 
-// ===== plataformas.gs (Importar do BI + Painel do Professor)
+// ===== plataformas.gs (Importar do BI por turma + Painel do Professor)
 S.Horarios.rows.length=1;
-S.Horarios.rows.push(['Manhã','6A','Segunda','1ª','','Matemática','Ana','',''],['Manhã','8B','Segunda','2ª','','Matemática','Ana','',''],
- ['Tarde','3ANEM','Terça','1ª','','Matemática','Ana','',''],['Tarde','1AGRO','Terça','2ª','','Português','Leo','','']);
-S.Metas_Plataformas=sheet('Metas_Plataformas',[['ID','Disciplina','Plataforma','Meta','','','','Todas'],[1,'Matemática','Matific',1100,'','','',''],[2,'Matemática','Khan Academy','2,5','','','',''],[3,'','Quizizz',1,'','','','SIM']]);
-const segPassada=(()=>{const d=new Date(Date.now()-7*86400000);const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()-((x.getDay()+6)%7));return x;})();
+S.Horarios.rows.push(['Manhã','6A','Segunda','1ª','','Matemática','Ana','',''],['Tarde','9C','Segunda','2ª','','Matemática','Ana','',''],
+ ['Manhã','3ANEM','Terça','1ª','','Física','Leo','',''],['Manhã','1FD','Terça','2ª','','Língua Portuguesa','Leo','',''],['Manhã','6A','Terça','3ª','','Inglês','Leo','','']);
+S['Usuários'].rows.push(['leo@x.com','Leo','professores',1,'x']);
+S.frequencia=sheet('frequencia',[['Turma','Freq','Bloco','Troféus','Código'],['3º Ano A NEM',90,'','','2625775/776'],['1º FD',90,'','','2674520']]);
+S.Metas_Plataformas=sheet('Metas_Plataformas',[['ID','Disciplina','Plataforma','Meta','','','','Todas'],[1,'Matemática','Matific',1100,'','','',''],[2,'Matemática','Khan Academy','5','','','','']]);
 const isoD=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-// linha antiga do Código.gs: data em TEXTO dd/MM/yyyy (dia > 12 para não confundir com mês)
-const qua=new Date(segPassada.getTime()+2*86400000);
-S.Lancamentos_Plataformas=sheet('Lancamentos_Plataformas',[['ID','Prof','Disc','Turma','Plat','Data','Qtd','Status','Obs'],['L0','prof@x.com','Matemática','6A','Matific',String(qua.getDate()).padStart(2,'0')+'/'+String(qua.getMonth()+1).padStart(2,'0')+'/'+qua.getFullYear(),'0,5','OK','']]);
-let IM=P({operacao:'IMPORTAR_LANCAMENTOS',token:tdir,semana:isoD(qua),lancamentos:[
- {professor:'prof@x.com',turma:'6A',plataforma:'Matific',disciplina:'Matemática',valor:'1,2'},
- {professor:'Ana',turma:'3ANEM',plataforma:'Khan Academy',disciplina:'Matemática',valor:2},
- {professor:'Fulano',turma:'6A',plataforma:'Matific',disciplina:'Matemática',valor:1},
- {professor:'prof@x.com',turma:'9Z',plataforma:'Matific',disciplina:'Matemática',valor:1}]});
-assert.strictEqual(IM.status,'erros'); assert.strictEqual(IM.erros.length,2); assert.strictEqual(IM.validas,2);
-IM=P({operacao:'IMPORTAR_LANCAMENTOS',token:tdir,semana:isoD(qua),ignorarErros:true,lancamentos:[
- {professor:'prof@x.com',turma:'6A',plataforma:'Matific',disciplina:'Matemática',valor:'1,2'},
- {professor:'Ana',turma:'3ANEM',plataforma:'Khan Academy',disciplina:'Matemática',valor:2},{professor:'Fulano',turma:'6A',plataforma:'Matific',disciplina:'Matemática',valor:1}]});
-assert.strictEqual(IM.status,'success'); assert.strictEqual(IM.inseridos,2); assert.strictEqual(IM.substituidos,1,'linha antiga da mesma semana substituída');
-assert.strictEqual(IM.semana,isoD(segPassada));
-assert(S.Lancamentos_Plataformas.rows[1][5] instanceof Date,'semana gravada como data');
-// reimportar não soma em dobro
-IM=P({operacao:'IMPORTAR_LANCAMENTOS',token:tdir,semana:isoD(segPassada),lancamentos:[{professor:'prof@x.com',turma:'6A',plataforma:'Matific',disciplina:'Matemática',valor:'1,3'}]});
-assert.strictEqual(IM.substituidos,1); assert.strictEqual(S.Lancamentos_Plataformas.rows.filter(r=>r[0]).length,3);
-assert.strictEqual(P({operacao:'IMPORTAR_LANCAMENTOS',token:tdir,semana:isoD(new Date(Date.now()+14*86400000)),lancamentos:[{professor:'Ana',turma:'6A',plataforma:'Matific',disciplina:'Matemática',valor:1}]}).status,'error','semana futura');
-assert.strictEqual(P({operacao:'IMPORTAR_LANCAMENTOS',token:ts,lancamentos:[]}).status,'forbidden');
-// painel do professor (nível 1 vê só o próprio)
+const segPassada=(()=>{const d=new Date(Date.now()-7*86400000);const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()-((x.getDay()+6)%7));return x;})();
+const segAntes=new Date(segPassada.getFullYear(),segPassada.getMonth(),segPassada.getDate()-7);
+// linha antiga do Código.gs (por professor, data em texto)
+S.Lancamentos_Plataformas=sheet('Lancamentos_Plataformas',[['ID','Prof','Disc','Turma','Plat','Data','Qtd','Status','Obs'],['L0','prof@x.com','Matemática','6A','Matific',String(segAntes.getDate()+2).padStart(2,'0')+'/'+String(segAntes.getMonth()+1).padStart(2,'0')+'/'+segAntes.getFullYear(),'2,5','OK','']]);
+let MP=G({aba:'metas_plataformas',token:tdir});
+assert.strictEqual(MP.padrao,true); assert.strictEqual(MP.plataformas.length,9);
+assert.strictEqual(MP.plataformas.find(p=>p.plataforma==='Matemática Paraná').meta,1.1,'meta antiga da Matific 1100 → 1,1');
+assert.strictEqual(MP.plataformas.find(p=>p.plataforma==='Khan Academy').meta,5);
+const imp=(plat,linhas,extra)=>P(Object.assign({operacao:'IMPORTAR_LANCAMENTOS',token:tdir,plataforma:plat,semana:isoD(segPassada),linhas},extra||{}));
+// Matemática Paraná: 6º A pelo nome; 7º A não está na grade
+let IM=imp('Matific',[{texto:'6º Série A Manhã - 2624496',valor:'2,797',alunos:'30',acessos:'96,7%'},{texto:'7º Série A Manhã - 2624519',valor:'0,368',alunos:'31'}],{previa:true});
+assert.strictEqual(IM.status,'previa'); assert.strictEqual(IM.plataforma,'Matemática Paraná','apelido Matific'); assert.strictEqual(IM.turmas[0].turma,'6A'); assert.strictEqual(IM.problemas.length,1);
+assert.strictEqual(S.Lancamentos_Plataformas.rows.length,2,'prévia não grava');
+IM=imp('Matemática Paraná',[{texto:'6º Série A Manhã - 2624496',valor:'2,797',alunos:'30',acessos:'96,7%'}]);
+assert.strictEqual(IM.status,'success'); assert.strictEqual(IM.inseridos,1);
+assert(S.Lancamentos_Plataformas.rows.at(-1)[5] instanceof Date,'semana como data'); assert.strictEqual(S.Lancamentos_Plataformas.rows.at(-1)[1],'','índice da turma');
+// Khan, médio com 2 códigos (2625775/776) somados pelos alunos
+IM=imp('Khan Academy',[{texto:'9º Série C Tarde - 2628250',valor:'11,05',alunos:'28'},{texto:'3º Série A Manhã - 2625775',valor:'1',alunos:'10'},{texto:'3º Série A Manhã - 2625776',valor:'4',alunos:'30'}]);
+assert.strictEqual(IM.inseridos,2); assert.strictEqual(IM.turmas.find(t=>t.turma==='3ANEM').valor,3.25,'média ponderada (1×10+4×30)/40'); assert.strictEqual(IM.turmas.find(t=>t.turma==='3ANEM').foraDasSeries,false);
+// Redação: "1º Série A Integral" = FD pelo código da aba frequencia
+IM=imp('Redação Paraná',[{texto:'1º Série A Integral - 2674520',valor:'0,132',alunos:'38',curso:'FORM DOC ED INF AI EF - NORMAL - 2500'}],{previa:true});
+assert.strictEqual(IM.turmas[0].turma,'1FD');
+assert.strictEqual(P({operacao:'IMPORTAR_LANCAMENTOS',token:tdir,plataforma:'Redação Paraná',previa:true,linhas:[{texto:'1º Série A Integral - 9999999',valor:'1',curso:'FORM DOC'}]}).turmas[0].turma,'1FD','pelo Curso quando o código é novo');
+imp('Redação Paraná',[{texto:'1º Série A Integral - 2674520',valor:'0,132',alunos:'38'}]);
+// Robótica: disciplina do BI (FISICA III → Física, Leo) e turma do contraturno ligada à mão ao professor
+IM=imp('Robótica Paraná',[{texto:'3º Série A Manhã - 2625775',disciplina:'3444 - FISICA III',valor:'0,126',alunos:'9'},{texto:'2º Série A Manhã - 2642299',disciplina:'3525 - ROBOTICA PRIMEIROS PASSOS',valor:'0,011',alunos:'9'}],{previa:true});
+assert.strictEqual(IM.turmas.length,1); assert.strictEqual(IM.problemas.length,1,'turma do contraturno não está na grade');
+IM=imp('Robótica Paraná',[{texto:'3º Série A Manhã - 2625775',disciplina:'3444 - FISICA III',valor:'0,126',alunos:'9'},{texto:'2º Série A Manhã - 2642299',disciplina:'3525 - ROBOTICA PRIMEIROS PASSOS',valor:'0,011',alunos:'9',professor:'prof@x.com',nome:'Robótica 7º ano'}]);
+assert.strictEqual(IM.status,'success'); assert.strictEqual(S.Plataformas_Turmas.rows.length,2,'contraturno lembrado');
+// semana seguinte: contraturno reconhecido sozinho
+assert.strictEqual(P({operacao:'IMPORTAR_LANCAMENTOS',token:tdir,plataforma:'Robótica Paraná',previa:true,linhas:[{texto:'2º Série A Manhã - 2642299',disciplina:'ROBOTICA',valor:'0,2'}]}).problemas.length,0);
+// reimportar substitui
+IM=imp('Matemática Paraná',[{texto:'6º Série A Manhã - 2624496',valor:'1,0',alunos:'30'}]); assert.strictEqual(IM.substituidos,1);
+// painel da Ana (nível 1 vê só o próprio)
 const tAna=P({operacao:'LOGIN',email:'prof@x.com',senha:'1234'}).token; assert(tAna,'login da Ana');
-let ML=G({aba:'meus_lancamentos',token:tAna,email:'dir@x.com',nome:'Diretor'});
-const item=(t,pl)=>ML.dados.find(d=>d.turma===t&&d.plataforma===pl);
-assert.strictEqual(item('6A','Matific').qtd_lancada,1.3); assert.strictEqual(item('6A','Matific').meta_semanal,1.1,'meta 1.100 corrigida'); assert.strictEqual(item('6A','Matific').status,'verde');
-assert(!item('6A','Khan Academy'),'Khan não vale para o 6º'); assert(!item('8B','Matific'),'Matific não vale para o 8º');
-assert.strictEqual(item('3ANEM','Khan Academy').qtd_lancada,2,'3ANEM não vira mais 3A'); assert.strictEqual(item('3ANEM','Khan Academy').status,'amarelo');
-assert.strictEqual(item('8B','Quizizz').lancado,false); assert.strictEqual(ML.semana,isoD(segPassada),'mostra a última semana com dados');
-let HD=G({aba:'historico_docente',token:tAna}); assert.strictEqual(HD.valores.length,5); assert.strictEqual(HD.valores[4],3.3);
-let VG=G({aba:'visao_geral_docentes',token:tdir,semana:isoD(segPassada)}); assert(VG.dados.some(d=>d.nome==='Leo'||d.turma==='1AGRO'));
-assert.strictEqual(G({aba:'metas_plataformas',token:tdir}).plataformas.find(p=>p.plataforma==='Khan Academy').meta,2.5);
+let ML=G({aba:'meus_lancamentos',token:tAna,email:'leo@x.com',nome:'Leo'});
+const it=(t,pl)=>ML.dados.find(d=>d.turma===t&&d.plataforma===pl);
+assert.strictEqual(ML.semana,isoD(segPassada));
+assert.strictEqual(it('6A','Matemática Paraná').qtd_lancada,1); assert.strictEqual(it('6A','Matemática Paraná').status,'amarelo','1,0 de 1,1');
+assert.strictEqual(it('6A','Matemática Paraná').variacao,-1.5,'compara com a semana anterior (lançamento antigo por professor)');
+assert.strictEqual(it('9C','Khan Academy').status,'verde'); assert(!it('6A','Khan Academy'),'Khan não vale no 6º'); assert(!it('9C','Matemática Paraná'));
+assert.strictEqual(it('6A','Leia Paraná').status,'sem_lancamento','universal sem índice'); assert.strictEqual(it('6A','Leia Paraná').universal,true);
+assert.strictEqual(it('Robótica 7º ano','Robótica Paraná').qtd_lancada,0.011,'contraturno no painel da Ana');
+assert(!ML.dados.some(d=>d.nome==='Leo'),'só os dela');
+const tLeo=(()=>{S['Usuários'].rows.find(r=>r[0]==='leo@x.com')[4]='5678';return P({operacao:'LOGIN',email:'leo@x.com',senha:'5678'}).token;})();
+let ML2=G({aba:'meus_lancamentos',token:tLeo});
+assert.strictEqual(ML2.dados.find(d=>d.plataforma==='Robótica Paraná').turma,'3ANEM','Física III → professor de Física');
+assert.strictEqual(ML2.dados.find(d=>d.turma==='1FD'&&d.plataforma==='Redação Paraná').qtd_lancada,0.132);
+assert(ML2.dados.find(d=>d.turma==='6A'&&d.plataforma==='Inglês Teens'),'Inglês Teens no 6º'); assert(!ML2.dados.some(d=>d.plataforma==='Inglês High'&&d.turma==='6A'));
+let HD=G({aba:'historico_docente',token:tAna}); assert.strictEqual(HD.valores.length,5); assert.strictEqual(HD.unidade,'% da meta');
+let VG=G({aba:'visao_geral_docentes',token:tdir,semana:isoD(segPassada)}); assert(VG.dados.some(d=>d.nome==='Leo')&&VG.dados.some(d=>d.nome==='Ana'));
+// editar plataformas
+assert.strictEqual(P({operacao:'PLATAFORMAS_SALVAR',token:tAna,regras:[]}).status,'forbidden');
+const regras=MP.plataformas.map(p=>p.plataforma==='Matemática Paraná'?{...p,meta:'0,9'}:p);
+assert.strictEqual(P({operacao:'PLATAFORMAS_SALVAR',token:tdir,regras}).status,'success');
+MP=G({aba:'metas_plataformas',token:tdir}); assert.strictEqual(MP.padrao,false); assert.strictEqual(MP.plataformas.find(p=>p.plataforma==='Matemática Paraná').meta,0.9);
+assert.strictEqual(MP.plataformas.find(p=>p.plataforma==='Robótica Paraná').atribuir,'disciplina do BI');
+ML=G({aba:'meus_lancamentos',token:tAna}); assert.strictEqual(ML.dados.find(d=>d.turma==='6A'&&d.plataforma==='Matemática Paraná').status,'verde','1,0 ≥ meta 0,9');
 console.log('INTEGRAÇÃO COM O CÓDIGO.GS REAL: TODOS OS TESTES PASSARAM —',S.Auditoria.rows.length-1,'linhas de auditoria');
