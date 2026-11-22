@@ -20,6 +20,7 @@ Tempo estimado: 15 minutos. A camada foi testada junto com o `Código.gs` atual 
 5. E mais um: nome `frequenciometro`, conteúdo de `backend/frequenciometro.gs`.
 6. E outro: nome `horarios`, conteúdo de `backend/horarios.gs` (Gestão de Horários e recursos do laboratório).
 7. E outro: nome `virada-ano`, conteúdo de `backend/virada-ano.gs` (Virada do Ano Letivo).
+8. E outro: nome `plataformas`, conteúdo de `backend/plataformas.gs` (Importar do BI e Painel do Professor).
 
 A configuração já vem ajustada para a sua planilha: abas `Usuários` (senha na coluna E), `Responsaveis` (senha na coluna C, push na F), `Alunos` e `Sessoes`.
 
