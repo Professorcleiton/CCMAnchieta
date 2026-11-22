@@ -56,9 +56,10 @@
         <div class="card">
             <h2><i class="fa-solid fa-file-import"></i> Importar do Power BI</h2>
             <div class="ajuda">
-                <strong>Opção 1: arquivo.</strong> No Power BI, passe o mouse sobre a tabela de frequência por turma →
-                <strong>⋯ (Mais opções) → Exportar dados</strong> → escolha <em>.xlsx</em> ou <em>.csv</em> → envie aqui.<br>
-                <strong>Opção 2: copiar.</strong> Clique com o botão direito na tabela → <strong>Copiar → Copiar tabela</strong> → cole na caixa abaixo.<br>
+                <strong>Como copiar do "Presente na Escola":</strong> na tabela, clique na primeira turma e <strong>arraste</strong> até a última
+                (de "Turma" até "Σ Aulas", ou todas as colunas) → <strong>botão direito → Copiar → Copiar seleção</strong> → cole na caixa abaixo.
+                Se precisar copiar em partes, cole uma embaixo da outra.<br>
+                <em>Se a exportação estiver liberada, também dá para enviar o arquivo .xlsx/.csv.</em><br>
                 As turmas são reconhecidas pelo <strong>código</strong> (coluna "Código da Turma" da planilha) ou pelo nome. Os valores entram na tabela para você conferir antes de salvar.
             </div>
             <input type="file" id="arquivo-bi" accept=".xlsx,.xls,.csv,.txt" onchange="lerArquivoBI(this)">

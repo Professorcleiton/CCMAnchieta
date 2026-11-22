@@ -55,6 +55,17 @@ reset(); els.colar={value:[cab.join('\t')].concat(bi.map(l=>['',...l,''].join('\
 vm.runInContext('lerColagem()',ctx); conferir('colar');
 vm.runInContext('aplicarImportacao()',ctx);
 assert.strictEqual(inputs[0].value,'90,89'); assert.strictEqual(inputs[19].value,String(esperado['3º A - NEM']).replace('.',','));
+// 3) Formato EXATO do "Copiar seleção" do Presente na Escola (colado pelo professor em 22/11):
+//    coluna "-" com número da linha, 18 colunas, código da escola (41004957) na coluna Escola
+reset();
+const cab18='-\tTurma\tcodturma\tAlunos Ativos\t(%) Presença\tΣ Presenças\tΣ Aulas\t% Faltas Amparadas\tAulas Previstas\tAulas Dadas\t(%) Aulas Dadas\tAmparo Legal Qtde\tEquivalência Seriação\tCurso\tEscola\tMunicípio\tNRE\tSaldo Aulas Dadas';
+const linha18=(n,l)=>[n,l[0],l[1],l[2],l[3],l[4],l[5],'0,55%','1.110','1.069','96,3%','15','Fundamental - 6º Ano','ENS FUND - 4033','ANCHIETA, C E C-M-EF M N - 41004957','CRUZEIRO DO OESTE','UMUARAMA','-41'].join('\t');
+els.colar={value:[cab18,'1\t2º Período A Tarde - 2774605\t2774605\t1\t100,00%\t48\t48\t\t54\t48\t89,6%\t\tMédio - Sem Equivalencia\tPROG ALUNO MONITOR - 3042\tANCHIETA, C E C-M-EF M N - 41004957\tCRUZEIRO DO OESTE\tUMUARAMA\t-6']
+  .concat(bi.filter(l=>l[0]&&l[3]).map((l,i)=>linha18(i+2,l))).join('\n')};
+vm.runInContext('lerColagem()',ctx);
+assert.strictEqual(els['col-turma'].value,'1'); assert.strictEqual(els['col-freq'].value,'4');
+conferir('copiar seleção (formato real)');
+
 // utilitários
 assert.deepStrictEqual(JSON.parse(vm.runInContext('JSON.stringify(codigosDaTurma("2625776/775"))',ctx)),['2625776','2625775']);
 assert.strictEqual(vm.runInContext('nomeNormalizado("7º Série D Tarde - 2624935")',ctx),vm.runInContext('nomeNormalizado("7º D - EF")',ctx));
