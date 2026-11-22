@@ -471,4 +471,16 @@ assert.strictEqual(P({operacao:'PLATAFORMAS_SALVAR',token:tdir,regras}).status,'
 MP=G({aba:'metas_plataformas',token:tdir}); assert.strictEqual(MP.padrao,false); assert.strictEqual(MP.plataformas.find(p=>p.plataforma==='Matemática Paraná').meta,0.9);
 assert.strictEqual(MP.plataformas.find(p=>p.plataforma==='Robótica Paraná').atribuir,'disciplina do BI');
 ML=G({aba:'meus_lancamentos',token:tAna}); assert.strictEqual(ML.dados.find(d=>d.turma==='6A'&&d.plataforma==='Matemática Paraná').status,'verde','1,0 ≥ meta 0,9');
+
+// ===== hora-atividade (HA_SALVAR)
+S.Horas_Atividade=sheet('Horas_Atividade',[['Turno','Professor','Dia','Aula','Horário','Tipo'],['Manhã','Leo','Segunda','6ª','11:20-12:10','H.A. - Planejamento'],['Manhã','Ana','Quinta','1ª','06:55-07:45','H.A. - Planejamento']]);
+let HA=P({operacao:'HA_SALVAR',token:tdir,professor:'Ana',itens:[{turno:'Manhã',dia:'Segunda',aula:'1ª',tipo:'H.A. - Formação'},{turno:'Manhã',dia:'Sexta',aula:'2ª'}]});
+assert.strictEqual(HA.status,'conflito','segunda 1ª é aula da Ana no 6A');
+HA=P({operacao:'HA_SALVAR',token:tdir,professor:'Ana',itens:[{turno:'Manhã',dia:'Terça',aula:'1ª',tipo:'H.A. - Formação'},{turno:'Manhã',dia:'Sexta',aula:'2ª'}]});
+assert.strictEqual(HA.status,'success'); assert.strictEqual(HA.regencia,2); assert.strictEqual(HA.esperadas,0);
+const haRows=S.Horas_Atividade.rows.slice(1).filter(r=>r[1]);
+assert.strictEqual(haRows.length,3,'Leo intacto + 2 da Ana (a antiga da Ana saiu)'); assert(haRows.some(r=>r[1]==='Leo'));
+assert.deepStrictEqual(haRows.find(r=>r[2]==='Terça').slice(3,6),['1ª','06:55-07:45','H.A. - Formação']);
+assert.strictEqual(P({operacao:'HA_SALVAR',token:tAna,professor:'Ana',itens:[]}).status,'forbidden');
+assert.strictEqual(P({operacao:'HA_SALVAR',token:tdir,professor:'Ana',itens:[{turno:'Noite',dia:'Segunda',aula:'1ª'}]}).status,'error');
 console.log('INTEGRAÇÃO COM O CÓDIGO.GS REAL: TODOS OS TESTES PASSARAM —',S.Auditoria.rows.length-1,'linhas de auditoria');

@@ -104,4 +104,22 @@ for (const turma of ['6A', '6B', '7A', '7B']) {
     assert.strictEqual(ef[0].dia, ef[1].dia, turma + ' Ed. Física no mesmo dia');
     assert.strictEqual(Math.abs(H.AULAS.indexOf(ef[0].aula) - H.AULAS.indexOf(ef[1].aula)), 1);
 }
+
+// hora-atividade: tabela oficial e sugestão
+const tabela = {1:0,2:0,3:1,4:1,5:2,6:2,7:2,8:2,9:3,10:3,11:4,12:4,13:4,14:4,15:5,16:5,17:5,18:6,19:6,20:6,21:7,22:7,23:7,24:8,25:8,26:8,27:9,28:9,29:10,30:10};
+Object.keys(tabela).forEach(n => assert.strictEqual(H.haEsperada(+n), tabela[n], n + ' aulas'));
+assert.strictEqual(H.haEsperada(35), 10);
+const escolaHA = [];
+['Segunda', 'Terça', 'Quarta'].forEach(d => ['1ª', '2ª', '4ª', '5ª'].forEach(a => escolaHA.push({ turno: 'Manhã', turma: '6A', dia: d, aula: a, disciplina: 'Mat', professor: 'Zé' })));
+escolaHA.push({ turno: 'Manhã', turma: '7A', dia: 'Quinta', aula: '1ª', disciplina: 'Mat', professor: 'Outro', professor_apoio: 'Zé' });
+assert.strictEqual(H.regencia('Zé', escolaHA), 12, 'apoio não conta como regência');
+const sug = H.sugerirHA('Zé', escolaHA, [{ turno: 'Manhã', dia: 'Segunda', aula: '3ª' }], { restricoes: 'não pode quarta' });
+assert.strictEqual(sug.length, 3, '12 aulas → 4 H.A., já tem 1');
+sug.forEach(h => {
+    assert(!escolaHA.some(a => a.dia === h.dia && a.aula === h.aula && (a.professor === 'Zé' || a.professor_apoio === 'Zé')), 'não cai em aula');
+    assert.notStrictEqual(h.dia, 'Quarta', 'respeita a restrição');
+    assert(['Segunda', 'Terça', 'Quinta'].includes(h.dia), 'em dia que já vem à escola (quinta: apoio)');
+});
+assert(sug.some(h => h.dia === 'Terça' && h.aula === '3ª'), 'prefere a janela entre aulas');
+assert.strictEqual(H.sugerirHA('Zé', escolaHA, sug.concat([{ turno: 'Manhã', dia: 'Segunda', aula: '3ª' }]), {}).length, 0);
 console.log('HORÁRIOS: TODOS OS TESTES PASSARAM —', escola.length, 'aulas distribuídas sem conflito');
