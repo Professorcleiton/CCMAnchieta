@@ -11,28 +11,47 @@ Tempo estimado: 15 minutos. A camada foi testada junto com o `Código.gs` atual 
 3. Testar (passo 4).
 4. Fechar a planilha (passo 5).
 
-## Passo 1: colar o arquivo
+## Passo 1: colar os arquivos novos
 
 1. Abra a planilha → **Extensões → Apps Script**.
-2. Clique em **+ → Script** e dê o nome `seguranca`.
-3. Cole todo o conteúdo de `backend/seguranca.gs`.
+2. Clique em **+ → Script**, dê o nome `seguranca` e cole todo o conteúdo de `backend/seguranca.gs`.
+3. Clique em **+ → Script** de novo, dê o nome `push-e-documentos` e cole todo o conteúdo de `backend/push-e-documentos.gs`.
+4. Clique em **+ → Script** mais uma vez, dê o nome `noticias` e cole todo o conteúdo de `backend/noticias.gs`.
+5. E mais um: nome `frequenciometro`, conteúdo de `backend/frequenciometro.gs`.
 
-A configuração já vem ajustada para a sua planilha: abas `Usuários` (senha na coluna E), `Responsaveis` (senha na coluna C), `Alunos` e `Sessoes`.
+A configuração já vem ajustada para a sua planilha: abas `Usuários` (senha na coluna E), `Responsaveis` (senha na coluna C, push na F), `Alunos` e `Sessoes`.
 
-## Passo 2: renomear duas linhas no Código.gs
+## Passo 2: atualizar o Código.gs
+
+**Opção A (recomendada):** substitua todo o conteúdo do `Código.gs` pelo arquivo `Codigo.gs` que o Claude enviou na conversa. Ele **não** fica no GitHub, porque contém a chave VAPID. É o seu código com estas mudanças, todas marcadas com `SIGA v3`:
+
+- `doGet`/`doPost` renomeados para `doGetOriginal`/`doPostOriginal`
+- nova rota `upload_documento` no `doPost`
+- função antiga `enviarPushNotification` removida (agora em `push-e-documentos.gs`)
+- `notificarResponsaveis`: só avisa responsáveis aprovados e não derruba o salvamento se o e-mail falhar
+- `VAPID_SUBJECT` corrigido
+
+**Opção B (à mão):** faça só estas mudanças no seu `Código.gs`:
 
 ```js
 function doGet(e) {        →   function doGetOriginal(e) {
 function doPost(e) {       →   function doPostOriginal(e) {
 ```
 
-Não mude mais nada. A camada nova recebe cada pedido, confere token e permissão e só então chama o seu código. Ela reaproveita `salvarSessao()`, `validarToken()` e `registrarTentativaLogin()`, então a aba `Sessoes` continua sendo usada.
+1. **Apague** a função `enviarPushNotification` inteira. Se ela ficar, o Apps Script não sabe qual das duas usar.
+2. Logo abaixo de `// 🔒 A PARTIR DAQUI: ROTAS PROTEGIDAS`, adicione:
+   ```js
+   if (data.operacao === "upload_documento") return jsonResponse(uploadDocumentoResponsavel(data));
+   ```
+3. Em `notificarResponsaveis`, logo depois de `var emailResp = ...`, adicione `if (!WP_podeNotificar_(emailResp, alunoVinculado)) continue;` e coloque o `enviarEmailNotificacao(...)` dentro de um `try { } catch (e) { }`.
 
 ## Passo 3: implantar
 
 **Implantar → Gerenciar implantações → ✏️ (editar) → Versão: Nova versão → Implantar.**
 
-Não crie uma implantação nova, senão a URL muda. O Google vai pedir autorização para **enviar e-mail**, que é usada no "Esqueci minha senha".
+Não crie uma implantação nova, senão a URL muda. O Google vai pedir novas autorizações: **enviar e-mail** ("Esqueci minha senha"), **conectar a serviços externos** (envio das notificações push) e **Drive** (documentos dos pais).
+
+**Recomendado:** em **Configurações do projeto (⚙️) → Propriedades do script → Adicionar**, crie `VAPID_PRIVATE_KEY` com o valor que está no Código.gs e depois apague a linha `var VAPID_PRIVATE_KEY = ...` do Código.gs. Assim a chave sai do código.
 
 ## Passo 4: testar
 
@@ -43,10 +62,37 @@ Não crie uma implantação nova, senão a URL muda. O Google vai pedir autoriza
 - [ ] Em **Aprovar Responsáveis** (menu do SIGA, nível 3+), aprovar o teste → ele entra e vê **só** o filho aprovado
 - [ ] "Esqueci minha senha" → chega o e-mail com código
 - [ ] A aba **Auditoria** foi criada e está registrando as ações
+- [ ] No Portal dos Pais, enviar um PDF num documento pendente → aparece "Enviado" e o arquivo está na pasta de documentos do Drive
+- [ ] No SIGA, abrir **Notícias do Site** (nível 3+), colar o link de uma postagem do Instagram e publicar. Em até 5 minutos, a seção "Acontece no Anchieta" aparece na página inicial.
+- [ ] No celular, entrar no Portal dos Pais → **Ativar Notificações**. No editor do Apps Script, executar `WP_testarPush` → a notificação chega. No iPhone, primeiro adicione o site à Tela de Início e abra por lá.
 
 Os responsáveis que já tinham conta continuam entrando e aparecem como **"LEGADO - revisar"** em Aprovar Responsáveis. Peça à secretaria para revisar a lista e revogar quem não for responsável de verdade. A revogação derruba a sessão na hora.
 
 **Para desfazer:** apague o arquivo `seguranca` e volte os nomes para `doGet`/`doPost`. Depois publique uma nova versão.
+
+## Passo 4b: ligar o Frequenciômetro
+
+As abas `frequencia`, `HistoricoGeral` e `Alunos` já estão na planilha do SIGA, e o `frequenciometro.gs` está configurado para elas. Não precisa mudar nada no código.
+
+1. No editor, escolha **`FREQ_diagnosticar`** e clique em **Executar**. O registro precisa mostrar **OK** para Frequência, Alunos e Histórico.
+2. Execute **`FREQ_instalarFechamentoSemanal`**. Ele faz duas coisas: corrige as semanas gravadas como texto ("92.77") e passa a fechar a semana sozinho toda sexta às 18h.
+3. Execute **`FREQ_gerarChaveTV`** e abra **uma vez** em cada TV o endereço `https://anchietafrequencia.vercel.app/?chave=...` que aparece no registro.
+4. Faça o merge do PR do repositório **frequenciometro**.
+5. Teste um sorteio. O nome aparece na aba **Sorteios**.
+6. Depois que a TV estiver mostrando os dados novos, **interrompa a publicação da planilha antiga** do frequenciômetro: **Arquivo → Compartilhar → Publicar na Web → Interromper publicação**. Em seguida, no `index.html` do frequenciometro, mude `USAR_PLANILHA_PUBLICADA` para `false`.
+7. Na aba **Frequenciometro_Trimestres**, preencha a média de cada trimestre quando ele fechar.
+
+### Atualização semanal (sem abrir a planilha)
+
+**SIGA → Frequência da Semana** (nível 3+):
+- **Power BI (Presente na Escola):** a exportação está bloqueada pela SEED. Use a cópia: na tabela, clique na primeira turma, **arraste até a última**, depois **botão direito → Copiar → Copiar seleção**, e cole na caixa da tela. As turmas são reconhecidas pelo código (coluna E da aba `frequencia`) ou pelo nome. Confira os valores e clique em **Salvar**. A TV mostra os números novos em até 10 minutos;
+- no topo da tela, confira a **Semana letiva**. Ela é a mesma do filtro "SEMANA LETIVA" do Power BI;
+- a média da escola é **Σ presenças ÷ Σ aulas**, com os totais da importação gravados nas colunas F e G da aba `frequencia`. Se alguma turma for digitada à mão, a média vira simples até a próxima importação;
+- toda **sexta às 18h**, se houve atualização na semana, a média entra no `HistoricoGeral` com o número da semana letiva;
+- no card **Histórico semanal**, dá para preencher semanas que faltaram, corrigir ou apagar;
+- para registrar antes, use o botão **Fechar semana agora**.
+
+A linha **"Esta"** do gráfico agora é calculada sozinha com a média atual. A linha "Esta" antiga da planilha pode ser apagada; se ficar, o sistema a ignora e a substitui no próximo fechamento.
 
 ## Passo 5: fechar a planilha ao público
 
@@ -61,12 +107,10 @@ Só depois de testar:
 - Para converter todas as senhas antigas de uma vez, sem esperar cada pessoa entrar, execute `SEG_migrarTodasAsSenhas` no editor (menu Executar).
 - Para testar a camada no computador antes de publicar: `node tests/test-backend.js caminho/do/Codigo.gs`. **Nunca** suba o `Código.gs` para o GitHub, porque ele contém a chave privada VAPID.
 
-## Problemas antigos que esta camada NÃO resolve (precisam de ajuste no Código.gs)
+## Ainda vale ajustar
 
-| Onde | Problema |
+| Onde | O que fazer |
 |---|---|
-| `upload_documento` | O site dos pais chama essa operação, mas ela **não existe** no `doPost`. O envio de documentos pelos pais sempre falha. |
-| `enviarPushNotification` | Usa `FCM_SERVER_KEY`, que não está definida, e a API antiga do FCM (`fcm/send`), que o Google desligou em 2024. **As notificações push não estão chegando**, só os e-mails. |
-| `VAPID_PRIVATE_KEY` | Está escrita no código. Mova para **Configurações do projeto → Propriedades do script** e leia com `PropertiesService`. |
+| Cota de e-mail | Contas Gmail comuns enviam no máximo **100 e-mails/dia** pelo Apps Script (contas Workspace: 1.500). Em dias com muitos apontamentos, os avisos excedentes não saem. O apontamento é salvo do mesmo jeito. As notificações push não têm esse limite. |
 | `criarPedidoAvaliacao` | Os anexos de prova ficam "qualquer pessoa com o link". Prefira compartilhar só com a secretaria. |
 | `imprimir-comunicado.html` | Usa **outra implantação** (`APPS_SCRIPT_URL_COMUNICADOS` no `siga-core.js`). Se for uma versão antiga deste mesmo projeto, aponte para a URL principal. Se for outro projeto, ele continua aberto. |

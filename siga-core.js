@@ -327,7 +327,79 @@
         };
     }
 
+    // ---------- 8. NOTIFICAÇÕES PUSH ----------
+    // Chave pública VAPID: precisa ser o par da VAPID_PRIVATE_KEY do Apps Script.
+    const VAPID_PUBLIC_KEY = 'BNJ9Pz0rHohfjvPgrPNqahNelLVvKARagFsoAo8UOU0B2ORFFGHt4kmumrPr698MtL6rOaIht8QjX5XXncehrB0';
+
+    function b64urlParaBytes(s) {
+        const pad = '='.repeat((4 - s.length % 4) % 4);
+        const bin = atob((s + pad).replace(/-/g, '+').replace(/_/g, '/'));
+        const out = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+        return out;
+    }
+
+    function mesmaChave(buffer, esperada) {
+        if (!buffer) return false;
+        const a = new Uint8Array(buffer), b = b64urlParaBytes(esperada);
+        if (a.length !== b.length) return false;
+        for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
+        return true;
+    }
+
+    function pushSuportado() {
+        return 'serviceWorker' in navigator && 'PushManager' in global && 'Notification' in global;
+    }
+
+    // true se já existe inscrição válida (feita com a chave certa)
+    async function pushAtivo() {
+        if (!pushSuportado() || Notification.permission !== 'granted') return false;
+        const reg = await navigator.serviceWorker.getRegistration('/');
+        if (!reg) return false;
+        const sub = await reg.pushManager.getSubscription();
+        return !!(sub && mesmaChave(sub.options && sub.options.applicationServerKey, VAPID_PUBLIC_KEY));
+    }
+
+    // Pede permissão, inscreve (refazendo inscrições antigas feitas com outra chave)
+    // e salva no servidor. Retorna { ok, motivo }.
+    async function ativarPushSIGA(email) {
+        if (!pushSuportado()) {
+            const ios = /iPhone|iPad/.test(navigator.userAgent);
+            return { ok: false, motivo: ios
+                ? 'No iPhone, adicione o site à Tela de Início (Compartilhar → Adicionar à Tela de Início) e abra por lá.'
+                : 'Este navegador não suporta notificações.' };
+        }
+        const permissao = await Notification.requestPermission();
+        if (permissao !== 'granted') return { ok: false, motivo: 'Permissão negada. Ative nas configurações do navegador.' };
+
+        const reg = await navigator.serviceWorker.register('/sw.js');
+        await navigator.serviceWorker.ready;
+        let sub = await reg.pushManager.getSubscription();
+        if (sub && !mesmaChave(sub.options && sub.options.applicationServerKey, VAPID_PUBLIC_KEY)) {
+            await sub.unsubscribe();   // inscrição antiga com a chave errada nunca recebe nada
+            sub = null;
+        }
+        if (!sub) {
+            sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64urlParaBytes(VAPID_PUBLIC_KEY) });
+        }
+
+        const r = await global.fetch(SIGA_CONFIG.APPS_SCRIPT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify({
+                operacao: 'salvar_token_push',
+                email: email,
+                token: JSON.stringify(sub.toJSON()), // inscrição push (o backend usa o campo "token")
+                tokenSessao: obterToken()            // sessão
+            })
+        });
+        const d = await r.json().catch(function () { return {}; });
+        return d.status === 'success' ? { ok: true } : { ok: false, motivo: d.message || 'Não foi possível salvar no servidor.' };
+    }
+
     // ---------- EXPORTA ----------
+    global.ativarPushSIGA = ativarPushSIGA;
+    global.pushAtivoSIGA = pushAtivo;
     global.abrirRecuperacaoSenha = abrirRecuperacaoSenha;
     global.SIGA_CONFIG = SIGA_CONFIG;
     global.escaparHTML = escaparHTML;

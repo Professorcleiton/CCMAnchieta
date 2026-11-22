@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <script src="siga-core.js?v=13"></script>
+    <script src="siga-core.js?v=14"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel do Responsável - SIGA Anchieta</title>
     <link rel="manifest" href="/manifest.json">
@@ -107,8 +107,7 @@
     <script>
         var APPS_SCRIPT_URL = SIGA_CONFIG.APPS_SCRIPT_URL;
         
-        // Credencial Firebase VAPID
-        var VAPID_PUBLIC_KEY = 'BHWtt0EexrSfoRGPROyG8Ulw5pAJ-m6m0eFWrQkPr9eRcC7UWW2iaW0iN8RX-3Dt2SXShLKmHox2SyYXSQOZN2w';
+        // A chave VAPID agora fica no siga-core.js (a antiga daqui não era o par da chave do servidor)
         
         var dadosResponsavel = null;
         var todosRegistros = [];
@@ -291,7 +290,7 @@ window.addEventListener('DOMContentLoaded', function() {
         function abrirUpload(aluno, documento) {
             var input = document.createElement('input');
             input.type = 'file';
-            input.accept = '.pdf,.jpg,.jpeg,.png';
+            input.accept = '.pdf,.jpg,.jpeg,.png,.webp,.heic,.doc,.docx,application/pdf,image/*';
             input.onchange = async function() {
                 var file = input.files[0];
                 if (!file) return;
@@ -299,12 +298,17 @@ window.addEventListener('DOMContentLoaded', function() {
                 var reader = new FileReader();
                 reader.onload = async function(e) {
                     var base64 = e.target.result.split(',')[1];
+                    var aviso = document.createElement('div');
+                    aviso.textContent = '⏳ Enviando documento… não feche esta página.';
+                    aviso.style.cssText = 'position:fixed;inset:auto 0 20px 0;margin:auto;width:max-content;max-width:90vw;background:#005088;color:#fff;padding:12px 18px;border-radius:8px;z-index:9999;font-weight:600;';
+                    document.body.appendChild(aviso);
                     try {
-                        var res = await fetch(APPS_SCRIPT_URL, { method: 'POST', headers: {'Content-Type': 'text/plain'}, body: JSON.stringify({operacao: 'upload_documento', aluno: aluno, documento: documento, nomeArquivo: file.name, arquivo: base64}) });
+                        var res = await fetch(APPS_SCRIPT_URL, { method: 'POST', headers: {'Content-Type': 'text/plain'}, body: JSON.stringify({operacao: 'upload_documento', aluno: aluno, documento: documento, nomeArquivo: file.name, tipo: file.type, arquivo: base64}) });
                         var result = await res.json();
                         if (result.status === 'success') { alert('✅ Documento enviado!'); carregarDocumentosAluno(); }
                         else { alert('❌ ' + (result.message || 'Erro ao enviar.')); }
                     } catch (e) { alert('Erro de conexão.'); }
+                    finally { aviso.remove(); }
                 };
                 reader.readAsDataURL(file);
             };
@@ -344,71 +348,31 @@ window.addEventListener('DOMContentLoaded', function() {
         // =============================================
         
         function verificarSuportePush() {
-            if (!('serviceWorker' in navigator)) return;
-            if (!('PushManager' in window)) return;
-            
-            navigator.serviceWorker.ready.then(function(registration) {
-                registration.pushManager.getSubscription().then(function(subscription) {
-                    if (!subscription) {
-                        document.getElementById('push-container').style.display = 'block';
-                    }
-                });
-            });
+            // Mostra o convite se não houver inscrição válida (inclui as feitas com a chave antiga)
+            pushAtivoSIGA().then(function(ativo) {
+                if (!ativo) document.getElementById('push-container').style.display = 'block';
+            }).catch(function() {});
         }
-        
+
         async function ativarPushNotifications() {
             var btn = document.getElementById('btn-ativar-push');
+            var status = document.getElementById('push-status');
             btn.disabled = true;
             btn.innerText = 'Solicitando...';
-            
             try {
-                var permission = await Notification.requestPermission();
-                if (permission !== 'granted') {
-                    document.getElementById('push-status').innerText = 'Permissão negada. Ative nas configurações do navegador.';
-                    btn.disabled = false;
-                    btn.innerText = '📳 Ativar Notificações';
+                var r = await ativarPushSIGA(dadosResponsavel.email);
+                if (r.ok) {
+                    status.innerText = '✅ Notificações ativadas com sucesso!';
+                    document.getElementById('push-container').style.display = 'none';
                     return;
                 }
-                
-                var registration = await navigator.serviceWorker.ready;
-                var subscription = await registration.pushManager.subscribe({
-                    userVisibleOnly: true,
-                    applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-                });
-                
-                var token = JSON.stringify(subscription.toJSON());
-                
-                await fetch(APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain' },
-                    body: JSON.stringify({
-                        operacao: 'salvar_token_push',
-                        email: dadosResponsavel.email,
-                        token: token,                    // inscrição push
-                        tokenSessao: obterTokenSIGA()    // sessão
-                    })
-                });
-                
-                document.getElementById('push-status').innerText = '✅ Notificações ativadas com sucesso!';
-                document.getElementById('push-container').style.display = 'none';
-                
+                status.innerText = r.motivo;
             } catch (e) {
                 console.error('Erro ao ativar push:', e);
-                document.getElementById('push-status').innerText = 'Erro ao ativar. Tente novamente.';
-                btn.disabled = false;
-                btn.innerText = '📳 Ativar Notificações';
+                status.innerText = 'Erro ao ativar. Tente novamente.';
             }
-        }
-        
-        function urlBase64ToUint8Array(base64String) {
-            var padding = '='.repeat((4 - base64String.length % 4) % 4);
-            var base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
-            var rawData = window.atob(base64);
-            var outputArray = new Uint8Array(rawData.length);
-            for (var i = 0; i < rawData.length; ++i) {
-                outputArray[i] = rawData.charCodeAt(i);
-            }
-            return outputArray;
+            btn.disabled = false;
+            btn.innerText = '📳 Ativar Notificações';
         }
 
 function carregarComunicadosEmitidos(alunos) {

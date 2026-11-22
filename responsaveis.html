@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <script src="siga-core.js?v=13"></script>
+    <script src="siga-core.js?v=14"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal dos Pais - SIGA Anchieta</title>
     <style>
@@ -333,57 +333,14 @@ async function cadastrar() {
     // NOTIFICAÇÕES PUSH
     // =============================================
 
-    const VAPID_PUBLIC_KEY = 'BNJ9Pz0rHohfjvPgrPNqahNelLVvKARagFsoAo8UOU0B2ORFFGHt4kmumrPr698MtL6rOaIht8QjX5XXncehrB0';
-
-    function urlBase64ToUint8Array(base64String) {
-        const padding = '='.repeat((4 - base64String.length % 4) % 4);
-        const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
-        const rawData = window.atob(base64);
-        const outputArray = new Uint8Array(rawData.length);
-        for (let i = 0; i < rawData.length; ++i) {
-            outputArray[i] = rawData.charCodeAt(i);
-        }
-        return outputArray;
-    }
-
+    // Se a pessoa já autorizou notificações antes, renova a inscrição em silêncio
+    // (corrige inscrições antigas feitas com a chave errada). Se ainda não
+    // autorizou, o pedido aparece no Portal, com o botão "Ativar Notificações".
     async function ativarPush(emailResponsavel) {
-        if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-            console.warn('Push não suportado neste navegador.');
-            return;
-        }
-
         try {
-            const registration = await navigator.serviceWorker.register('/sw.js');
-            await navigator.serviceWorker.ready;
-
-            const permission = await Notification.requestPermission();
-            if (permission !== 'granted') {
-                console.warn('Permissão de notificação negada.');
-                return;
-            }
-
-            let subscription = await registration.pushManager.getSubscription();
-            if (!subscription) {
-                subscription = await registration.pushManager.subscribe({
-                    userVisibleOnly: true,
-                    applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-                });
-            }
-
- // Usa a função fazerRequisicao (já existente) para salvar o token
-fazerRequisicao({
-    operacao: 'salvar_token_push',
-    email: emailResponsavel,
-    token: JSON.stringify(subscription),   // inscrição push
-    tokenSessao: obterTokenSIGA()          // sessão (o campo "token" já é da inscrição)
-}).then(function(result) {
-    if (result.status === 'success') {
-        console.log('✅ Token push salvo com sucesso!');
-    } else {
-        console.error('❌ Erro ao salvar token push:', result);
-    }
-});
-
+            if (!('Notification' in window) || Notification.permission !== 'granted') return;
+            const r = await ativarPushSIGA(emailResponsavel);
+            if (!r.ok) console.warn('Push:', r.motivo);
         } catch (err) {
             console.error('Erro ao ativar push:', err);
         }

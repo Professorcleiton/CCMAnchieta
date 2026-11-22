@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head> 
     <meta charset="UTF-8">
-    <script src="siga-core.js?v=13"></script>
+    <script src="siga-core.js?v=14"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIGA - Central Pedagógica CCM Anchieta</title>
     <meta name="theme-color" content="#005088">
@@ -328,6 +328,16 @@
                                 <a id="btn-aprovar-responsaveis" href="aprovar-responsaveis.html" class="btn-acao" style="display: none; background-color: #16a34a;">
                                     <i class="fa-solid fa-user-check"></i>
                                     <span>Aprovar Responsáveis</span>
+                                </a>
+
+                                <a id="btn-frequencia-semana" href="frequencia-semana.html" class="btn-acao" style="display: none; background-color: #0891b2;">
+                                    <i class="fa-solid fa-chart-line"></i>
+                                    <span>Frequência da Semana</span>
+                                </a>
+
+                                <a id="btn-noticias-site" href="noticias-admin.html" class="btn-acao" style="display: none; background-color: #bc1888;">
+                                    <i class="fa-brands fa-instagram"></i>
+                                    <span>Notícias do Site</span>
                                 </a>
 
                                 <button id="btn-comunicado-seed" class="btn-acao" style="display: none; background-color: #8b5cf6;" onclick="abrirModalComunicadoSEED()">
@@ -1397,7 +1407,7 @@ function aplicarControleAcesso() {
         if (btn) btn.style.display = nivel >= 4 ? 'flex' : 'none';
     });
     
-    const botoesNivel3 = ['btn-patrimonio', 'btn-comunicado-seed', 'btn-central-alertas', 'btn-aba-secretaria', 'btn-aniversarios', 'btn-imprimir-apontamentos', 'btn-certificados', 'btn-aprovar-responsaveis'];
+    const botoesNivel3 = ['btn-patrimonio', 'btn-comunicado-seed', 'btn-central-alertas', 'btn-aba-secretaria', 'btn-aniversarios', 'btn-imprimir-apontamentos', 'btn-certificados', 'btn-aprovar-responsaveis', 'btn-noticias-site', 'btn-frequencia-semana'];
     botoesNivel3.forEach(id => {
         const btn = document.getElementById(id);
         if (btn) {

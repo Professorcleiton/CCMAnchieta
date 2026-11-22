@@ -61,6 +61,8 @@ var SEG_NIVEL_MINIMO = {
   // GET (?aba= / ?operacao=)
   'usuarios': 3,
   'responsaveis_cadastros': 3,
+  'noticias_gestao': 3,
+  'frequencia_gestao': 3,
   'avaliacoes_listar': 3,
   'avaliacoes_estatisticas': 3,
   'disciplinas_todas': 3,
@@ -68,6 +70,12 @@ var SEG_NIVEL_MINIMO = {
   'metas_plataformas': 3,
   // POST (operacao)
   'APROVAR_RESPONSAVEL': 3,
+  'NOTICIA_ADICIONAR': 3,
+  'FREQ_SALVAR': 3,
+  'FREQ_FECHAR_SEMANA': 3,
+  'FREQ_HISTORICO_SALVAR': 3,
+  'NOTICIA_OCULTAR': 3,
+  'NOTICIA_REATIVAR': 3,
   'RECUSAR_RESPONSAVEL': 3,
   'USER_SALVAR': 4,
   'USER_DELETAR': 4,
@@ -124,6 +132,12 @@ function doGet(e) {
   var p = e.parameter;
   var rota = p.aba || p.operacao || '';
 
+  // Única leitura pública: notícias da página inicial (noticias.gs)
+  if (rota === 'noticias' && typeof NOT_listarPublicas_ === 'function') return SEG_json_(NOT_listarPublicas_());
+  // Frequenciômetro (frequenciometro.gs): números públicos; nomes só com a chave da TV
+  if (rota === 'frequenciometro' && typeof FREQ_dadosPublicos_ === 'function') return SEG_json_(FREQ_dadosPublicos_());
+  if (rota === 'frequenciometro_alunos' && typeof FREQ_dadosAlunos_ === 'function') return SEG_json_(FREQ_dadosAlunos_(p.chave));
+
   var sessao = SEG_validarSessao_(p.token);
   if (!sessao) return SEG_json_({ status: 'unauthorized', message: 'Sessão expirada. Entre novamente.' });
 
@@ -140,6 +154,8 @@ function doGet(e) {
 
   if (rota === 'tabela') return SEG_json_(SEG_lerTabelaGviz_(p.nome));
   if (rota === 'responsaveis_cadastros') return SEG_json_(SEG_listarVinculos_());
+  if (rota === 'noticias_gestao') return SEG_json_(NOT_listarTodas_());
+  if (rota === 'frequencia_gestao') return SEG_json_(FREQ_gestao_());
 
   var saida = doGetOriginal(e);
   if (sessao.tipo === 'responsavel') saida = SEG_filtrarSaidaResponsavel_(saida, sessao, rota);
@@ -160,6 +176,7 @@ function doPost(e) {
     if (op === 'CADASTRAR_RESPONSAVEL') return SEG_cadastrarResponsavel_(e, corpo);
     if (op === 'RECUPERAR_SENHA') return SEG_json_(SEG_recuperarSenha_(corpo));
     if (op === 'REDEFINIR_SENHA') return SEG_json_(SEG_redefinirSenha_(corpo));
+    if (/^SORTEIO_/.test(op) && typeof FREQ_post_ === 'function') return SEG_json_(FREQ_post_(corpo));  // chave da TV
 
     // ---- Daqui para baixo, só com sessão válida ----
     // salvar_token_push usa "token" para a inscrição push; a sessão vem em "tokenSessao"
@@ -178,6 +195,12 @@ function doPost(e) {
     }
     e.postData.contents = JSON.stringify(corpo); // o doPostOriginal lê daqui
 
+    if (op === 'FREQ_SALVAR') { SEG_auditar_(sessao, op, (corpo.itens || []).length + ' turmas'); return SEG_json_(FREQ_salvar_(sessao, corpo)); }
+    if (op === 'FREQ_FECHAR_SEMANA') return SEG_json_(FREQ_fecharSemana_(sessao.email, corpo.semana));
+    if (op === 'FREQ_HISTORICO_SALVAR') return SEG_json_(FREQ_salvarHistorico_(sessao, corpo));
+    if (op === 'NOTICIA_ADICIONAR') { SEG_auditar_(sessao, op, corpo.link); return SEG_json_(NOT_adicionar_(sessao, corpo)); }
+    if (op === 'NOTICIA_OCULTAR') { SEG_auditar_(sessao, op, corpo.id); return SEG_json_(NOT_alterarAtivo_(corpo, false)); }
+    if (op === 'NOTICIA_REATIVAR') { SEG_auditar_(sessao, op, corpo.id); return SEG_json_(NOT_alterarAtivo_(corpo, true)); }
     if (op === 'APROVAR_RESPONSAVEL') return SEG_json_(SEG_decidirVinculo_(sessao, corpo.email, true, corpo.alunos));
     if (op === 'RECUSAR_RESPONSAVEL') return SEG_json_(SEG_decidirVinculo_(sessao, corpo.email, false, []));
 

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'siga-cache-v13'; // v13: siga-core.js + não guarda dados de terceiros
+const CACHE_NAME = 'siga-cache-v14'; // v14: push Web Push (VAPID) sem conteúdo sensível
 
 const urlsToCache = [
     '/', '/index.html', '/restrito.html', '/responsaveis.html',
@@ -43,7 +43,10 @@ self.addEventListener('fetch', event => {
     );
 });
 
-// Manter as funções de push notification iguais (não precisa mexer)
+// =============================================
+// PUSH — o servidor envia a notificação SEM conteúdo (privacidade/LGPD):
+// a ocorrência do aluno não aparece na tela bloqueada. O detalhe fica no Portal.
+// =============================================
 self.addEventListener('push', event => {
     let data = {};
     if (event.data) {
@@ -54,11 +57,13 @@ self.addEventListener('push', event => {
         }
     }
     const options = {
-        body: data.body || 'Novo apontamento registrado.',
-        icon: '/img/SIGA.png',
-        badge: '/img/SIGA.png',
+        body: data.body || 'Há uma nova atualização sobre seu(sua) filho(a). Toque para ver no Portal.',
+        icon: '/img/SIG.png',
+        badge: '/img/SIG.png',
         vibrate: [200, 100, 200],
-        data: { url: data.url || '/responsaveis.html' },
+        tag: 'siga-atualizacao',   // várias seguidas viram uma só
+        renotify: true,
+        data: { url: data.url || '/painel-responsavel.html' },
         actions: [{ action: 'open', title: 'Ver detalhes' }],
         requireInteraction: true
     };
@@ -69,11 +74,12 @@ self.addEventListener('push', event => {
 
 self.addEventListener('notificationclick', event => {
     event.notification.close();
-    const urlToOpen = event.notification.data?.url || '/responsaveis.html';
+    const urlToOpen = event.notification.data?.url || '/painel-responsavel.html';
     event.waitUntil(
         clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
             for (const client of windowClients) {
-                if (client.url.includes('responsaveis') && 'focus' in client) {
+                if ((client.url.includes('painel-responsavel') || client.url.includes('responsaveis')) && 'focus' in client) {
+                    if ('navigate' in client) client.navigate(urlToOpen);
                     return client.focus();
                 }
             }

@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <script src="siga-core.js?v=14"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frequência da Semana | SIGA</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f1f5f9; color: #1e293b; }
+        header { background: #005088; color: #fff; padding: 16px 20px; border-bottom: 4px solid #eab308; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+        header h1 { font-size: 18px; }
+        header a { color: #fff; text-decoration: none; font-size: 14px; }
+        main { max-width: 900px; margin: 20px auto; padding: 0 16px 40px; }
+        .card { background: #fff; border-radius: 10px; padding: 18px; box-shadow: 0 1px 3px rgba(0,0,0,.08); margin-bottom: 16px; }
+        .card h2 { font-size: 16px; color: #005088; margin-bottom: 8px; }
+        .resumo { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+        .kpi { background: #f8fafc; border-radius: 8px; padding: 12px; border: 1px solid #e2e8f0; }
+        .kpi small { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: #64748b; font-weight: 700; }
+        .kpi strong { font-size: 24px; color: #0f172a; }
+        .kpi span { font-size: 12px; color: #64748b; }
+        .ajuda { font-size: 13px; color: #64748b; line-height: 1.5; margin-bottom: 10px; }
+        details summary { cursor: pointer; font-weight: 600; color: #005088; font-size: 14px; }
+        textarea { width: 100%; min-height: 110px; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font: 13px/1.4 monospace; margin-top: 8px; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: #64748b; padding: 8px 6px; border-bottom: 2px solid #e2e8f0; }
+        td { padding: 6px; border-bottom: 1px solid #f1f5f9; }
+        td.turma { font-weight: 600; }
+        td.bloco { color: #64748b; font-size: 12px; }
+        input.num { width: 90px; padding: 7px 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; text-align: right; }
+        input.num.trof { width: 60px; }
+        input.num.mudou { border-color: #f59e0b; background: #fffbeb; }
+        input.num.invalido { border-color: #dc2626; background: #fef2f2; }
+        .antes { font-size: 11px; color: #94a3b8; margin-left: 4px; }
+        .barra-acoes { position: sticky; bottom: 0; background: #fff; border-top: 1px solid #e2e8f0; padding: 12px 18px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; box-shadow: 0 -2px 8px rgba(0,0,0,.05); border-radius: 10px; }
+        .btn { border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; font-size: 14px; cursor: pointer; }
+        .btn:disabled { opacity: .55; cursor: not-allowed; }
+        .btn-salvar { background: #16a34a; color: #fff; }
+        .btn-fechar { background: #005088; color: #fff; }
+        .btn-sec { background: #e2e8f0; color: #1e293b; }
+        .msg { font-size: 13px; flex: 1; min-width: 200px; }
+        .vazio { text-align: center; color: #64748b; padding: 24px 0; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1><i class="fa-solid fa-chart-line"></i> Frequência da Semana</h1>
+        <a href="restrito.html"><i class="fa-solid fa-arrow-left"></i> Voltar ao SIGA</a>
+    </header>
+    <main>
+        <div class="card">
+            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:12px">
+                <label for="semana" style="font-weight:700; color:#005088">Semana letiva (Power BI):</label>
+                <input id="semana" class="num" type="number" min="1" max="60" style="width:80px" oninput="atualizarEstado()">
+                <span class="ajuda" style="margin:0">Use o mesmo número do filtro "SEMANA LETIVA" do Presente na Escola.</span>
+            </div>
+            <div class="resumo" id="resumo"><div class="vazio">Carregando…</div></div>
+        </div>
+
+        <div class="card">
+            <h2><i class="fa-solid fa-file-import"></i> Importar do Power BI</h2>
+            <div class="ajuda">
+                <strong>Como copiar do "Presente na Escola":</strong> na tabela, clique na primeira turma e <strong>arraste</strong> até a última
+                (de "Turma" até "Σ Aulas", ou todas as colunas) → <strong>botão direito → Copiar → Copiar seleção</strong> → cole na caixa abaixo.
+                Se precisar copiar em partes, cole uma embaixo da outra.<br>
+                <em>Se a exportação estiver liberada, também dá para enviar o arquivo .xlsx/.csv.</em><br>
+                As turmas são reconhecidas pelo <strong>código</strong> (coluna "Código da Turma" da planilha) ou pelo nome. Os valores entram na tabela para você conferir antes de salvar.
+            </div>
+            <input type="file" id="arquivo-bi" accept=".xlsx,.xls,.csv,.txt" onchange="lerArquivoBI(this)">
+            <textarea id="colar" placeholder="...ou cole aqui a tabela copiada do Power BI"></textarea>
+            <button class="btn btn-sec" style="margin-top:8px" onclick="lerColagem()"><i class="fa-solid fa-table"></i> Ler tabela colada</button>
+
+            <div id="mapeamento" style="display:none; margin-top:14px; padding:12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px;">
+                <div class="ajuda" style="margin-bottom:6px"><strong id="map-resumo"></strong></div>
+                <label style="font-size:13px; margin-right:12px">Coluna da turma
+                    <select id="col-turma" onchange="previsualizar()" style="padding:6px; border-radius:6px; border:1px solid #cbd5e1;"></select></label>
+                <label style="font-size:13px">Coluna da frequência
+                    <select id="col-freq" onchange="previsualizar()" style="padding:6px; border-radius:6px; border:1px solid #cbd5e1;"></select></label>
+                <div id="previa" class="ajuda" style="margin-top:8px"></div>
+                <button class="btn btn-salvar" style="margin-top:6px" onclick="aplicarImportacao()"><i class="fa-solid fa-wand-magic-sparkles"></i> Preencher a tabela</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Turmas</h2>
+            <div class="ajuda">Campos em amarelo foram alterados e ainda não foram salvos. Frequência de 0 a 100, com vírgula ou ponto.</div>
+            <div id="tabela"><div class="vazio">Carregando…</div></div>
+        </div>
+
+        <div class="card">
+            <h2><i class="fa-solid fa-chart-area"></i> Histórico semanal (gráfico de evolução da TV)</h2>
+            <div class="ajuda">As últimas semanas registradas. Para <strong>preencher semanas que faltaram</strong>, use os valores do gráfico
+                "Série histórica: (%) Presença semanal" do Power BI, ou filtre cada semana e importe aqui. Para apagar uma semana, deixe a média vazia.</div>
+            <div id="historico"><div class="vazio">Carregando…</div></div>
+            <div style="display:flex; gap:8px; align-items:center; margin-top:10px; flex-wrap:wrap">
+                <input id="hist-nova-semana" class="num" type="number" min="1" max="60" placeholder="Semana" style="width:90px">
+                <input id="hist-nova-media" class="num" inputmode="decimal" placeholder="Média %" style="width:100px">
+                <button class="btn btn-sec" onclick="adicionarSemanaHistorico()"><i class="fa-solid fa-plus"></i> Adicionar</button>
+                <button class="btn btn-salvar" id="btn-hist" onclick="salvarHistorico()" disabled><i class="fa-solid fa-floppy-disk"></i> Salvar histórico</button>
+                <span class="ajuda" id="msg-hist" style="margin:0"></span>
+            </div>
+        </div>
+
+        <div class="barra-acoes">
+            <button class="btn btn-salvar" id="btn-salvar" onclick="salvar()" disabled><i class="fa-solid fa-floppy-disk"></i> Salvar</button>
+            <button class="btn btn-fechar" id="btn-fechar" onclick="fecharSemana()"><i class="fa-solid fa-flag-checkered"></i> Fechar semana agora</button>
+            <div class="msg" id="msg" aria-live="polite"></div>
+        </div>
+    </main>
+
+<script>
+    const APPS_SCRIPT_URL = SIGA_CONFIG.APPS_SCRIPT_URL;
+    let dados = null;
+
+    // Mesmo código de turma do frequenciômetro ("1º A - NEM" e "1NEM" viram a mesma coisa)
+    function codigoTurma(nome) {
+        const c = String(nome || '').toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+            .replace(/º|ª|°/g, '').replace(/-/g, ' ').replace(/\b(EF|EM|ANOS|ANO|SERIE)\b/g, '')
+            .replace(/\b(MANHA|TARDE|NOITE)\b/g, '').replace(/\s+/g, '').trim();
+        return c.replace(/^(\d)A(NEM|FD|AGRO)$/, '$1$2');
+    }
+    function num(v) {
+        const t = String(v == null ? '' : v).replace('%', '').trim().replace(',', '.');
+        if (t === '' || !/^-?\d+(\.\d+)?$/.test(t)) return null;
+        return parseFloat(t);
+    }
+    function fmt(n) { return n == null ? '—' : n.toFixed(2).replace('.', ','); }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        let sessao = null;
+        try { sessao = JSON.parse(sessionStorage.getItem('sgi_ccma_session') || localStorage.getItem('sgi_ccma_session') || 'null'); } catch (e) {}
+        if (!sessao || !sessao.token) { location.href = 'restrito.html'; return; }
+        if ((parseInt(sessao.nivel) || 0) < 3) { alert('Acesso restrito à Secretaria e à Direção.'); location.href = 'restrito.html'; return; }
+        carregar();
+        window.addEventListener('beforeunload', e => { if (haAlteracoes()) { e.preventDefault(); e.returnValue = ''; } });
+    });
+
+    async function carregar() {
+        try {
+            const r = await fetch(APPS_SCRIPT_URL + '?aba=frequencia_gestao');
+            const d = await r.json();
+            if (!d || d.status !== 'success') throw new Error(d && d.message ? d.message : 'Resposta inesperada');
+            dados = d;
+            renderizar();
+        } catch (e) {
+            document.getElementById('tabela').innerHTML = '<div class="vazio">Não foi possível carregar.<br><small>' + escaparHTML(e.message) +
+                '</small><br><small>Confira se o arquivo frequenciometro.gs já está no Apps Script.</small></div>';
+            document.getElementById('resumo').innerHTML = '';
+        }
+    }
+
+    function renderizar() {
+        const d = dados;
+        document.getElementById('resumo').innerHTML = `
+            <div class="kpi"><small>Média da escola</small><strong id="media-viva">${fmt(d.mediaAtual)}%</strong><span id="media-metodo">${d.metodoMedia === 'simples' ? 'média simples (faltam Σ do Power BI)' : 'Σ presenças ÷ Σ aulas'}</span></div>
+            <div class="kpi"><small>Última semana fechada</small><strong>${d.ultimaSemana ? fmt(d.ultimaSemana.media) + '%' : '—'}</strong><span>${d.ultimaSemana ? 'semana ' + d.ultimaSemana.semana : 'nenhuma ainda'}</span></div>
+            <div class="kpi"><small>Última atualização</small><strong style="font-size:16px">${escaparHTML(d.atualizadoEm || '—')}</strong><span>${escaparHTML(d.atualizadoPor || '')}</span></div>
+            <div class="kpi"><small>Fechamento automático</small><strong style="font-size:16px">${d.pendenteFechar ? 'Sexta, 18h' : 'Em dia'}</strong><span>${d.pendenteFechar ? 'semana ' + d.semanaAtual + ' será registrada' : 'atualize para registrar a próxima'}</span></div>`;
+
+        document.getElementById('semana').value = d.semanaAtual;
+        renderizarHistorico();
+
+        if (!d.turmas.length) { document.getElementById('tabela').innerHTML = '<div class="vazio">Nenhuma turma na aba "frequencia".</div>'; return; }
+        document.getElementById('tabela').innerHTML = `
+            <table>
+                <thead><tr><th>Turma</th><th>Turno</th><th>Frequência (%)</th><th>Troféus</th></tr></thead>
+                <tbody>${d.turmas.map((t, i) => `
+                    <tr>
+                        <td class="turma">${escaparHTML(t.turma)}</td>
+                        <td class="bloco">${escaparHTML(t.bloco)}</td>
+                        <td><input class="num freq" data-i="${i}" inputmode="decimal" value="${t.freq == null ? '' : fmt(t.freq)}" data-p="${t.presencas ?? ''}" data-a="${t.aulas ?? ''}" oninput="digitou(this)" aria-label="Frequência ${escaparHTML(t.turma)}"><span class="antes">antes ${fmt(t.freq)}</span></td>
+                        <td><input class="num trof" data-i="${i}" inputmode="numeric" value="${t.trofeus || 0}" oninput="marcar(this)" aria-label="Troféus ${escaparHTML(t.turma)}"></td>
+                    </tr>`).join('')}
+                </tbody>
+            </table>`;
+        atualizarEstado();
+    }
+
+    // Digitado à mão: não há Σ presenças/aulas do Power BI para esta turma
+    function digitou(inp) { inp.dataset.p = ''; inp.dataset.a = ''; marcar(inp); }
+
+    function marcar(inp) {
+        const t = dados.turmas[+inp.dataset.i];
+        if (inp.classList.contains('freq')) {
+            const v = num(inp.value);
+            inp.classList.toggle('invalido', inp.value.trim() !== '' && (v === null || v < 0 || v > 100));
+            inp.classList.toggle('mudou', v !== null && t.freq !== null ? Math.abs(v - t.freq) > 0.004 : v !== t.freq);
+        } else {
+            const v = parseInt(inp.value, 10);
+            inp.classList.toggle('invalido', inp.value.trim() !== '' && (isNaN(v) || v < 0));
+            inp.classList.toggle('mudou', !isNaN(v) && v !== (t.trofeus || 0));
+        }
+        atualizarEstado();
+    }
+
+    function haAlteracoes() {
+        const sem = document.getElementById('semana');
+        return !!document.querySelector('input.num.mudou:not(.hist)') || !!(sem && dados && sem.value && String(dados.semanaAtual) !== sem.value);
+    }
+
+    function atualizarEstado() {
+        const invalidos = document.querySelectorAll('input.num.invalido:not(.hist)').length;
+        document.getElementById('btn-salvar').disabled = !haAlteracoes() || invalidos > 0;
+        const linhas = Array.from(document.querySelectorAll('input.freq')).map(i => ({ f: num(i.value), p: num(i.dataset.p), a: num(i.dataset.a) }))
+            .filter(x => x.f !== null && x.f > 0);
+        const ponderada = linhas.length && linhas.every(x => x.p !== null && x.a);
+        const m = !linhas.length ? null : ponderada
+            ? 100 * linhas.reduce((s, x) => s + x.p, 0) / linhas.reduce((s, x) => s + x.a, 0)
+            : linhas.reduce((s, x) => s + x.f, 0) / linhas.length;
+        const el = document.getElementById('media-viva');
+        if (el) el.textContent = fmt(m) + '%';
+        const met = document.getElementById('media-metodo');
+        if (met) met.textContent = ponderada ? 'Σ presenças ÷ Σ aulas' : 'média simples (faltam Σ do Power BI)';
+        const sem = document.getElementById('semana');
+        document.getElementById('btn-fechar').innerHTML = `<i class="fa-solid fa-flag-checkered"></i> Fechar semana ${escaparHTML(sem ? sem.value : '')} agora`;
+        const msg = document.getElementById('msg');
+        if (invalidos) { msg.style.color = '#dc2626'; msg.textContent = 'Corrija os campos em vermelho.'; }
+        else if (haAlteracoes()) { msg.style.color = '#b45309'; msg.textContent = 'Há alterações não salvas.'; }
+    }
+
+    // ================= IMPORTAÇÃO (Power BI) =================
+    let tabelaBI = null;   // { cab: [...], linhas: [[...]] }
+
+    // "2625776/775" → ["2625776", "2625775"]
+    function codigosDaTurma(texto) {
+        const partes = String(texto || '').split(/[\/,;]/).map(p => p.trim()).filter(Boolean);
+        const out = [];
+        partes.forEach((p, i) => {
+            if (i > 0 && out[0] && p.length < out[0].length) out.push(out[0].slice(0, out[0].length - p.length) + p);
+            else out.push(p);
+        });
+        return out.filter(c => /^\d{4,}$/.test(c));
+    }
+
+    // Converte "91,26%", "91.26", 0,9126 (fração do Excel) → 91.26
+    function valorFrequencia(v, todosFracao) {
+        if (typeof v === 'number') return todosFracao ? v * 100 : v;
+        const t = String(v == null ? '' : v).trim().replace(/\s/g, '');
+        if (!t) return null;
+        let s2 = t.replace('%', '');
+        if (/,\d+$/.test(s2)) s2 = s2.replace(/\./g, '').replace(',', '.');   // 1.234,56 → 1234.56
+        const n = parseFloat(s2.replace(/[^0-9.\-]/g, ''));
+        if (isNaN(n)) return null;
+        return (todosFracao && !t.includes('%')) ? n * 100 : n;
+    }
+
+    function nomeNormalizado(nome) {
+        const t = String(nome || '').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .replace(/\s*-?\s*\d{6,}\s*$/, ' ')          // "7º Série D Tarde - 2624935" → sem o código
+            .replace(/FORMACAO\s+DE\s+DOCENTES?/g, ' FD ')
+            .replace(/NOVO\s+ENSINO\s+MEDIO/g, ' NEM ')
+            .replace(/(TECNICO\s+EM\s+)?AGRO\w*/g, ' AGRO ')
+            .replace(/\b(ENSINO|FUNDAMENTAL|MEDIO|REGULAR|INTEGRAL|ANOS FINAIS|NOVO|DE|DA|DO)\b/g, ' ');
+        return codigoTurma(t);
+    }
+
+    // Recebe as linhas (matriz) e descobre cabeçalho e colunas
+    function prepararTabela(matriz) {
+        const linhas = matriz.map(l => l.map(c => (c == null ? '' : c))).filter(l => l.some(c => String(c).trim() !== ''));
+        if (!linhas.length) { alert('Não encontrei dados.'); return; }
+        // cabeçalho: primeira linha (entre as 10 primeiras) com texto parecido com turma/frequência
+        // (ignora títulos de uma célula só, como "Frequência por Turma - Ref. 17/11")
+        let ic = linhas.slice(0, 10).findIndex(l => l.filter(c => String(c).trim() !== '').length >= 2 &&
+            l.some(c => /turma|classe|s[ée]rie|frequ|presen|%/i.test(String(c))) &&
+            !l.some(c => typeof c === 'number' || /^\d+([.,]\d+)?%?$/.test(String(c).trim())));
+        if (ic < 0) ic = -1;
+        const cab = ic >= 0 ? linhas[ic].map(String) : linhas[0].map((_, k) => 'Coluna ' + (k + 1));
+        const corpo = linhas.slice(ic + 1);
+        tabelaBI = { cab, linhas: corpo };
+
+        const nCol = Math.max(...linhas.map(l => l.length));
+        const opcoes = Array.from({ length: nCol }, (_, k) => `<option value="${k}">${escaparHTML(cab[k] || ('Coluna ' + (k + 1)))}</option>`).join('');
+        const selT = document.getElementById('col-turma'), selF = document.getElementById('col-freq');
+        selT.innerHTML = opcoes; selF.innerHTML = opcoes;
+
+        // Palpites
+        const achar = re => cab.findIndex(c => re.test(c));
+        let kT = cab.findIndex(c => /turma|classe|s[ée]rie/i.test(c) && !/c[óo]d|\bid\b|n[ºo°]\.?\s/i.test(c));
+        if (kT < 0) kT = achar(/turma|classe|s[ée]rie/i);
+        let kF = achar(/frequ|presen/i); if (kF < 0) kF = achar(/%/);
+        const numerica = k => corpo.filter(l => { const v = valorFrequencia(l[k], false); return v !== null && v >= 0 && v <= 100; }).length;
+        if (kF < 0) { let melhor = -1, max = 0; for (let k = 0; k < nCol; k++) { const n = numerica(k); if (n >= max) { max = n; melhor = k; } } kF = melhor; }
+        if (kT < 0) kT = cab.findIndex((_, k) => k !== kF && corpo.some(l => /[a-z]/i.test(String(l[k]))));
+        selT.value = String(Math.max(kT, 0)); selF.value = String(Math.max(kF, 0));
+
+        document.getElementById('mapeamento').style.display = 'block';
+        document.getElementById('map-resumo').textContent = `${corpo.length} linhas lidas. Confira as colunas:`;
+        previsualizar();
+    }
+
+    // Linhas que existem no Power BI mas não fazem parte do painel (não geram alerta)
+    function foraDoPainel(nome) {
+        return /sem\s+seria|per[ií]odo|^total$|^\s*$/i.test(String(nome || '').trim());
+    }
+
+    // Casa cada linha do Power BI com uma turma da planilha.
+    // Turmas que aparecem em mais de uma linha (ex.: 3º A NEM = 2625776 e 2625775)
+    // são somadas: Σ presenças ÷ Σ aulas, a mesma conta do Power BI.
+    function casarLinhas() {
+        const kT = +document.getElementById('col-turma').value, kF = +document.getElementById('col-freq').value;
+        const cab = tabelaBI.cab.map(c => String(c));
+        const kP = cab.findIndex(c => /presen[cç]as/i.test(c) && !/%/.test(c));          // Σ Presenças
+        const kA = cab.findIndex(c => /aulas/i.test(c) && !/%|previst|dadas/i.test(c));  // Σ Aulas
+        const kN = cab.findIndex(c => /alunos/i.test(c));                                // Alunos Ativos
+        const porCodigo = {}, porNome = {};
+        dados.turmas.forEach((t, i) => {
+            codigosDaTurma(t.codigo).forEach(c => { porCodigo[c] = i; });
+            porNome[nomeNormalizado(t.turma)] = i;
+        });
+        const nums = tabelaBI.linhas.map(l => valorFrequencia(l[kF], false)).filter(v => v !== null);
+        const todosFracao = nums.length > 0 && nums.every(v => v <= 1.0001);   // Excel exporta 91% como 0,91
+        // Σ Presenças / Σ Aulas: "28.527" é vinte e oito mil (ponto de milhar), não 28,527
+        const inteiro = v => {
+            if (typeof v === 'number') return v;
+            const t = String(v == null ? '' : v).trim();
+            if (/^\d{1,3}(\.\d{3})+$/.test(t)) return parseInt(t.replace(/\./g, ''), 10);
+            return valorFrequencia(t, false);
+        };
+
+        const grupos = {};   // índice da turma → linhas do BI
+        const ignoradas = [];
+        tabelaBI.linhas.forEach(l => {
+            const f = valorFrequencia(l[kF], todosFracao);
+            const nomeBI = String(l[kT] || '').trim();
+            if (f === null || f < 0 || f > 100) return;
+            let i;
+            for (const c of l) {
+                for (const cod of String(c).match(/\d{6,}/g) || []) { if (porCodigo[cod] !== undefined) { i = porCodigo[cod]; break; } }
+                if (i !== undefined) break;
+            }
+            if (i === undefined) i = porNome[nomeNormalizado(nomeBI)];
+            if (i === undefined) { if (!foraDoPainel(nomeBI)) ignoradas.push(nomeBI || '(sem nome)'); return; }
+            (grupos[i] = grupos[i] || []).push({ f, p: kP >= 0 ? inteiro(l[kP]) : null, a: kA >= 0 ? inteiro(l[kA]) : null,
+                n: kN >= 0 ? inteiro(l[kN]) : null, origem: nomeBI });
+        });
+
+        const ok = Object.keys(grupos).map(k => {
+            const g = grupos[k];
+            let f;
+            if (g.length === 1) f = g[0].f;
+            else if (g.every(x => x.p !== null && x.a)) f = 100 * g.reduce((s, x) => s + x.p, 0) / g.reduce((s, x) => s + x.a, 0);
+            else if (g.every(x => x.n)) f = g.reduce((s, x) => s + x.f * x.n, 0) / g.reduce((s, x) => s + x.n, 0);
+            else f = g.reduce((s, x) => s + x.f, 0) / g.length;
+            const temSoma = g.every(x => x.p !== null && x.a);
+            return { i: +k, f: Math.round(f * 100) / 100, origem: g.map(x => x.origem).join(' + '), linhas: g.length,
+                p: temSoma ? g.reduce((s, x) => s + x.p, 0) : null, a: temSoma ? g.reduce((s, x) => s + x.a, 0) : null };
+        });
+        return { ok, ignoradas };
+    }
+
+    function previsualizar() {
+        if (!tabelaBI) return;
+        const r = casarLinhas();
+        const faltando = dados.turmas.filter((_, i) => !r.ok.some(o => o.i === i)).map(t => t.turma);
+        document.getElementById('previa').innerHTML =
+            `✅ <strong>${r.ok.length}</strong> de ${dados.turmas.length} turmas reconhecidas.` +
+            (r.ok.length ? '<br>Ex.: ' + r.ok.slice(0, 3).map(o => `${escaparHTML(o.origem)} → <strong>${escaparHTML(dados.turmas[o.i].turma)}</strong> (${fmt(o.f)}%)`).join(' · ') : '') +
+            (faltando.length ? `<br>⚠️ Sem valor no arquivo: ${escaparHTML(faltando.join(', '))}` : '') +
+            (r.ok.some(o => o.linhas > 1) ? `<br>🔗 Somadas (mais de uma linha no Power BI): ${r.ok.filter(o => o.linhas > 1).map(o => escaparHTML(dados.turmas[o.i].turma) + ' = ' + fmt(o.f) + '%').join(' · ')}` : '') +
+            (r.ignoradas.length ? `<br>Linhas do arquivo não reconhecidas: ${escaparHTML(r.ignoradas.slice(0, 6).join(', '))}${r.ignoradas.length > 6 ? '…' : ''}` : '') +
+            '<br><small>Turmas "Sem Seriação" e "Período" do Power BI são ignoradas porque não fazem parte do painel.</small>';
+    }
+
+    function aplicarImportacao() {
+        const r = casarLinhas();
+        if (!r.ok.length) { alert('Nenhuma turma reconhecida. Confira as colunas escolhidas.'); return; }
+        const inputs = document.querySelectorAll('input.freq');
+        r.ok.forEach(o => {
+            inputs[o.i].value = fmt(o.f);
+            inputs[o.i].dataset.p = o.p == null ? '' : o.p;
+            inputs[o.i].dataset.a = o.a == null ? '' : o.a;
+            marcar(inputs[o.i]);
+        });
+        document.getElementById('msg').style.color = '#b45309';
+        document.getElementById('msg').textContent = `${r.ok.length} turmas preenchidas. Confira e clique em Salvar.`;
+        document.querySelector('table').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function lerColagem() {
+        const texto = document.getElementById('colar').value;
+        if (!texto.trim()) { alert('Cole a tabela primeiro.'); return; }
+        const sep = texto.includes('\t') ? '\t' : (texto.includes(';') ? ';' : null);
+        const matriz = texto.split(/\r?\n/).map(l => sep ? l.split(sep) : (l.match(/^(.*?)\s+(\d{1,3}(?:[.,]\d+)?\s*%?)\s*$/) || [null, l, '']).slice(1));
+        prepararTabela(matriz);
+    }
+
+    function carregarSheetJS() {
+        if (window.XLSX) return Promise.resolve();
+        return new Promise((ok, erro) => {
+            const sc = document.createElement('script');
+            sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+            sc.onload = ok; sc.onerror = () => erro(new Error('Não consegui carregar o leitor de Excel.'));
+            document.head.appendChild(sc);
+        });
+    }
+
+    async function lerArquivoBI(input) {
+        const arq = input.files[0];
+        if (!arq) return;
+        try {
+            if (/\.(csv|txt)$/i.test(arq.name)) {
+                let texto = await arq.text();
+                if (texto.includes('\uFFFD')) texto = new TextDecoder('windows-1252').decode(await arq.arrayBuffer());
+                const sep = (texto.split('\n')[0].match(/;/g) || []).length >= (texto.split('\n')[0].match(/,/g) || []).length ? ';' : ',';
+                const matriz = texto.split(/\r?\n/).map(l => l.split(new RegExp(`${sep}(?=(?:[^"]*"[^"]*")*[^"]*$)`)).map(c => c.replace(/^"|"$/g, '').trim()));
+                prepararTabela(matriz);
+            } else {
+                await carregarSheetJS();
+                const wb = XLSX.read(await arq.arrayBuffer(), { type: 'array' });
+                const ws = wb.Sheets[wb.SheetNames[0]];
+                prepararTabela(XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: '' }));
+            }
+        } catch (e) {
+            alert('Não foi possível ler o arquivo: ' + e.message);
+        } finally {
+            input.value = '';
+        }
+    }
+
+    // ================= HISTÓRICO SEMANAL =================
+    let histEdits = {};   // semana → média (string) ou '' para apagar
+
+    function renderizarHistorico() {
+        histEdits = {};
+        const h = (dados.historico || []).slice().reverse();
+        document.getElementById('historico').innerHTML = h.length ? `
+            <table><thead><tr><th>Semana</th><th>Média (%)</th></tr></thead><tbody>
+            ${h.map(x => `<tr><td class="turma">${x.semana}</td>
+                <td><input class="num hist" data-semana="${x.semana}" inputmode="decimal" value="${fmt(x.media)}" oninput="editouHistorico(this)"></td></tr>`).join('')}
+            </tbody></table>` : '<div class="vazio">Nenhuma semana registrada.</div>';
+        document.getElementById('btn-hist').disabled = true;
+        document.getElementById('msg-hist').textContent = '';
+    }
+
+    function editouHistorico(inp) {
+        const v = inp.value.trim();
+        const ok = v === '' || (num(v) !== null && num(v) > 0 && num(v) <= 100);
+        inp.classList.toggle('invalido', !ok);
+        inp.classList.add('mudou');
+        histEdits[inp.dataset.semana] = v;
+        document.getElementById('btn-hist').disabled = !!document.querySelector('input.hist.invalido');
+    }
+
+    function adicionarSemanaHistorico() {
+        const s = parseInt(document.getElementById('hist-nova-semana').value, 10);
+        const m = num(document.getElementById('hist-nova-media').value);
+        if (!(s >= 1 && s <= 60) || m === null || m <= 0 || m > 100) { alert('Informe a semana (1 a 60) e a média (0 a 100).'); return; }
+        histEdits[s] = String(m);
+        document.getElementById('hist-nova-semana').value = '';
+        document.getElementById('hist-nova-media').value = '';
+        document.getElementById('btn-hist').disabled = false;
+        const pend = Object.keys(histEdits).length;
+        document.getElementById('msg-hist').textContent = `${pend} alteração(ões) pendente(s). Semana ${s} = ${fmt(m)}% — clique em Salvar histórico.`;
+    }
+
+    async function salvarHistorico() {
+        const semanas = Object.keys(histEdits).map(k => histEdits[k] === '' ? { semana: +k, apagar: true } : { semana: +k, media: histEdits[k] });
+        if (!semanas.length) return;
+        const apagar = semanas.filter(x => x.apagar).map(x => x.semana);
+        if (apagar.length && !confirm('Apagar do histórico a(s) semana(s) ' + apagar.join(', ') + '?')) return;
+        const msg = document.getElementById('msg-hist');
+        msg.textContent = 'Salvando…';
+        try {
+            const d = await chamar({ operacao: 'FREQ_HISTORICO_SALVAR', semanas });
+            if (d.status !== 'success') throw new Error(d.message || 'Falha');
+            dados.historico = d.gestao.historico; dados.ultimaSemana = d.gestao.ultimaSemana;
+            renderizarHistorico();
+            msg.textContent = '✅ ' + d.message + ' A TV atualiza em até 10 minutos.';
+        } catch (e) { msg.textContent = '❌ ' + e.message; }
+    }
+
+    async function chamar(payload) {
+        const r = await fetch(APPS_SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
+        return r.json();
+    }
+
+    async function salvar() {
+        const itens = [];
+        dados.turmas.forEach((t, i) => {
+            const f = document.querySelector(`input.freq[data-i="${i}"]`), tr = document.querySelector(`input.trof[data-i="${i}"]`);
+            if (f.classList.contains('mudou') || tr.classList.contains('mudou')) {
+                itens.push({ linha: t.linha, turma: t.turma, freq: num(f.value), trofeus: tr.value.trim(), presencas: f.dataset.p, aulas: f.dataset.a });
+            }
+        });
+        const btn = document.getElementById('btn-salvar'), msg = document.getElementById('msg');
+        btn.disabled = true; msg.style.color = '#64748b'; msg.textContent = 'Salvando…';
+        try {
+            const d = await chamar({ operacao: 'FREQ_SALVAR', itens, semana: document.getElementById('semana').value });
+            if (d.status !== 'success') throw new Error(d.message || 'Falha ao salvar');
+            dados = d.gestao; renderizar();
+            msg.style.color = '#16a34a'; msg.textContent = '✅ ' + d.message + ' A TV atualiza em até 10 minutos.';
+        } catch (e) {
+            msg.style.color = '#dc2626'; msg.textContent = e.message; btn.disabled = false;
+        }
+    }
+
+    async function fecharSemana() {
+        if (haAlteracoes()) { alert('Salve as alterações antes de fechar a semana.'); return; }
+        const n = parseInt(document.getElementById('semana').value, 10);
+        if (!(n >= 1 && n <= 60)) { alert('Informe a semana letiva (1 a 60).'); return; }
+        const existe = (dados.historico || []).some(h => h.semana === n);
+        if (!confirm(`Registrar a semana letiva ${n} com a média atual (${fmt(dados.mediaAtual)}%)?` +
+            (existe ? `\n\nA semana ${n} já existe no histórico e será substituída.` : '') +
+            '\n\nSe não fizer isso, o sistema fecha sozinho na sexta às 18h.')) return;
+        const msg = document.getElementById('msg');
+        msg.style.color = '#64748b'; msg.textContent = 'Fechando semana…';
+        try {
+            const d = await chamar({ operacao: 'FREQ_FECHAR_SEMANA', semana: n });
+            if (d.status !== 'success') throw new Error(d.message || 'Falha');
+            msg.style.color = '#16a34a'; msg.textContent = '✅ ' + d.message;
+            carregar();
+        } catch (e) { msg.style.color = '#dc2626'; msg.textContent = e.message; }
+    }
+</script>
+</body>
+</html>
