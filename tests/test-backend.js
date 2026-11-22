@@ -42,6 +42,7 @@ vm.runInContext(codigo,ctx);
 if(!vm.runInContext('typeof PASTA_DOCUMENTOS_ID',ctx).includes('string')) vm.runInContext("var PASTA_DOCUMENTOS_ID='x'",ctx);
 vm.runInContext(fs.readFileSync(path.join(__dirname,'..','backend','seguranca.gs'),'utf8'),ctx);
 vm.runInContext(fs.readFileSync(path.join(__dirname,'..','backend','push-e-documentos.gs'),'utf8'),ctx);
+vm.runInContext(fs.readFileSync(path.join(__dirname,'..','backend','noticias.gs'),'utf8'),ctx);
 const G=p=>JSON.parse(ctx.doGet({parameter:p}).getContent());
 const P=b=>{const o=ctx.doPost({parameter:{},postData:{contents:JSON.stringify(b)}}).getContent();try{return JSON.parse(o)}catch(e){return o}};
 // --- acesso anônimo bloqueado
@@ -114,6 +115,7 @@ for(let i=0;i<3;i++) P({operacao:'LOGIN',email:'sec@x.com',senha:'errada'});
 assert.strictEqual(P({operacao:'LOGIN',email:'sec@x.com',senha:'5555'}).status,'blocked');
 // logout
 P({operacao:'LOGOUT',token:tp}); assert.strictEqual(G({aba:'alunos',token:tp}).status,'unauthorized');
+const tp2=()=>{ if(!global.__tp2) global.__tp2=P({operacao:'LOGIN',email:'novo@x.com',senha:'Anchieta2026'}).token; return global.__tp2; };
 // ===== Documentos (upload_documento) =====
 const tpai=P({operacao:'LOGIN_RESPONSAVEL',email:'pai@x.com',senha:'NovaSenha1'}).token;
 const pdf=Buffer.concat([Buffer.from('%PDF-1.4\n'),crypto.randomBytes(100)]).toString('base64');
@@ -154,4 +156,23 @@ assert.strictEqual(S.Registros.rows.length,antes+1); ctx.MailApp.falhar=false;
 ctx.UrlFetchApp.fetch=function(u,o){return{getResponseCode:()=>410,getContentText:()=>'gone'}};
 P({operacao:'SALVAR',token:tdir,aluno:'JOÃO DA SILVA',setor:'ped',texto:'z'});
 assert.strictEqual(S.Responsaveis.rows.find(r=>r[0]==='pai@x.com')[5],'','inscrição expirada removida');
+// ===== Notícias =====
+let N=G({aba:'noticias'}); assert.strictEqual(N.status,'success'); assert.deepStrictEqual(N.noticias,[],'pública e vazia');
+assert.strictEqual(P({operacao:'NOTICIA_ADICIONAR',link:'https://www.instagram.com/p/ABC123xyz/'}).status,'unauthorized');
+assert.strictEqual(P({operacao:'NOTICIA_ADICIONAR',token:tp2(),link:'https://www.instagram.com/p/ABC123xyz/'}).status,'forbidden','professor não publica');
+const publicarNoticia=(link,chamada)=>P({operacao:'NOTICIA_ADICIONAR',token:tdir,link,chamada});
+assert.strictEqual(publicarNoticia('https://site-malicioso.com/p/x').status,'error');
+assert.strictEqual(publicarNoticia('https://www.instagram.com/ccm_anchieta/').status,'error','perfil não é postagem');
+assert.strictEqual(publicarNoticia('https://www.instagram.com/p/ABC123xyz/?igsh=MWx0&utm_source=copy','Medalha na OBMEP <b>').status,'success');
+assert.strictEqual(publicarNoticia('https://www.instagram.com/ccm_anchieta/reels/DEF456uvw/').status,'success');
+assert.strictEqual(publicarNoticia('https://m.facebook.com/anchieta.anchieta.779/posts/pfbid02abc').status,'success');
+assert(/já estava/.test(publicarNoticia('https://instagram.com/p/ABC123xyz').message),'duplicada');
+ctx.CacheService.getScriptCache().remove('not_publicas');
+N=G({aba:'noticias'});
+assert.deepStrictEqual(N.noticias.map(n=>n.link),['https://www.facebook.com/anchieta.anchieta.779/posts/pfbid02abc','https://www.instagram.com/reel/DEF456uvw/','https://www.instagram.com/p/ABC123xyz/']);
+assert.deepStrictEqual(Object.keys(N.noticias[0]).sort(),['chamada','data','id','link','rede'],'sem e-mail de quem publicou');
+const gest=G({aba:'noticias_gestao',token:tdir}); assert.strictEqual(gest.length,3);
+assert.strictEqual(G({aba:'noticias_gestao',token:tp2()}).status,'forbidden');
+assert.strictEqual(P({operacao:'NOTICIA_OCULTAR',token:tdir,id:gest[0].id}).status,'success');
+assert.strictEqual(G({aba:'noticias'}).noticias.length,2,'oculta some do site');
 console.log('INTEGRAÇÃO COM O CÓDIGO.GS REAL: TODOS OS TESTES PASSARAM —',S.Auditoria.rows.length-1,'linhas de auditoria');

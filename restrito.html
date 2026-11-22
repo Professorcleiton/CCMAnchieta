@@ -330,6 +330,11 @@
                                     <span>Aprovar Responsáveis</span>
                                 </a>
 
+                                <a id="btn-noticias-site" href="noticias-admin.html" class="btn-acao" style="display: none; background-color: #bc1888;">
+                                    <i class="fa-brands fa-instagram"></i>
+                                    <span>Notícias do Site</span>
+                                </a>
+
                                 <button id="btn-comunicado-seed" class="btn-acao" style="display: none; background-color: #8b5cf6;" onclick="abrirModalComunicadoSEED()">
                                     <i class="fa-solid fa-file-lines"></i>
                                     <span>Fatos Observados (F.O.)</span>
@@ -1397,7 +1402,7 @@ function aplicarControleAcesso() {
         if (btn) btn.style.display = nivel >= 4 ? 'flex' : 'none';
     });
     
-    const botoesNivel3 = ['btn-patrimonio', 'btn-comunicado-seed', 'btn-central-alertas', 'btn-aba-secretaria', 'btn-aniversarios', 'btn-imprimir-apontamentos', 'btn-certificados', 'btn-aprovar-responsaveis'];
+    const botoesNivel3 = ['btn-patrimonio', 'btn-comunicado-seed', 'btn-central-alertas', 'btn-aba-secretaria', 'btn-aniversarios', 'btn-imprimir-apontamentos', 'btn-certificados', 'btn-aprovar-responsaveis', 'btn-noticias-site'];
     botoesNivel3.forEach(id => {
         const btn = document.getElementById(id);
         if (btn) {

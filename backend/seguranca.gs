@@ -61,6 +61,7 @@ var SEG_NIVEL_MINIMO = {
   // GET (?aba= / ?operacao=)
   'usuarios': 3,
   'responsaveis_cadastros': 3,
+  'noticias_gestao': 3,
   'avaliacoes_listar': 3,
   'avaliacoes_estatisticas': 3,
   'disciplinas_todas': 3,
@@ -68,6 +69,9 @@ var SEG_NIVEL_MINIMO = {
   'metas_plataformas': 3,
   // POST (operacao)
   'APROVAR_RESPONSAVEL': 3,
+  'NOTICIA_ADICIONAR': 3,
+  'NOTICIA_OCULTAR': 3,
+  'NOTICIA_REATIVAR': 3,
   'RECUSAR_RESPONSAVEL': 3,
   'USER_SALVAR': 4,
   'USER_DELETAR': 4,
@@ -124,6 +128,9 @@ function doGet(e) {
   var p = e.parameter;
   var rota = p.aba || p.operacao || '';
 
+  // Única leitura pública: notícias da página inicial (noticias.gs)
+  if (rota === 'noticias' && typeof NOT_listarPublicas_ === 'function') return SEG_json_(NOT_listarPublicas_());
+
   var sessao = SEG_validarSessao_(p.token);
   if (!sessao) return SEG_json_({ status: 'unauthorized', message: 'Sessão expirada. Entre novamente.' });
 
@@ -140,6 +147,7 @@ function doGet(e) {
 
   if (rota === 'tabela') return SEG_json_(SEG_lerTabelaGviz_(p.nome));
   if (rota === 'responsaveis_cadastros') return SEG_json_(SEG_listarVinculos_());
+  if (rota === 'noticias_gestao') return SEG_json_(NOT_listarTodas_());
 
   var saida = doGetOriginal(e);
   if (sessao.tipo === 'responsavel') saida = SEG_filtrarSaidaResponsavel_(saida, sessao, rota);
@@ -178,6 +186,9 @@ function doPost(e) {
     }
     e.postData.contents = JSON.stringify(corpo); // o doPostOriginal lê daqui
 
+    if (op === 'NOTICIA_ADICIONAR') { SEG_auditar_(sessao, op, corpo.link); return SEG_json_(NOT_adicionar_(sessao, corpo)); }
+    if (op === 'NOTICIA_OCULTAR') { SEG_auditar_(sessao, op, corpo.id); return SEG_json_(NOT_alterarAtivo_(corpo, false)); }
+    if (op === 'NOTICIA_REATIVAR') { SEG_auditar_(sessao, op, corpo.id); return SEG_json_(NOT_alterarAtivo_(corpo, true)); }
     if (op === 'APROVAR_RESPONSAVEL') return SEG_json_(SEG_decidirVinculo_(sessao, corpo.email, true, corpo.alunos));
     if (op === 'RECUSAR_RESPONSAVEL') return SEG_json_(SEG_decidirVinculo_(sessao, corpo.email, false, []));
 

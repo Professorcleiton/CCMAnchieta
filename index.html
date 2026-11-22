@@ -221,6 +221,18 @@
             .carousel-caption p { font-size: 0.85rem; }
             #btn-instalar { bottom: 15px; right: 15px; padding: 10px 18px; font-size: 0.9rem; }
         }
+        /* NOTÍCIAS DAS REDES SOCIAIS */
+        #noticias { margin: 50px 0; }
+        .noticias-sub { text-align: center; color: #64748b; margin-bottom: 22px; }
+        .noticias-grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 20px; align-items: start; justify-items: center; }
+        .noticia { width: 100%; max-width: 420px; background: var(--white); border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,.08); overflow: hidden; }
+        .noticia-chamada { padding: 12px 14px 0; font-weight: 600; color: #1e293b; font-size: 15px; line-height: 1.35; }
+        .noticia-data { padding: 2px 14px 8px; font-size: 12px; color: #94a3b8; }
+        .noticia .instagram-media { margin: 0 !important; min-width: 0 !important; width: 100% !important; border: 0 !important; box-shadow: none !important; }
+        .noticia iframe { width: 100%; border: 0; display: block; }
+        .noticia-reserva { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 40px 14px; color: var(--primary-blue); font-weight: 600; text-decoration: none; }
+        .btn-seguir { display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(45deg, #f09433, #dc2743, #bc1888); color: #fff; padding: 12px 22px; border-radius: 30px; font-weight: 700; text-decoration: none; }
+        @media (max-width: 400px) { .noticias-grade { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -249,6 +261,7 @@
         <nav>
             <ul>
                 <li><a href="#destaques">DESTAQUES</a></li>
+                <li id="nav-noticias" style="display:none"><a href="#noticias">NOTÍCIAS</a></li>
                 <li><a href="#sobre">SOBRE NÓS</a></li>
                 <li><a href="https://anchietafrequencia.vercel.app" class="frequenciometro" target="_blank">FREQUÊNCIA 📊</a></li>
                 <li><a href="https://rco.paas.pr.gov.br" target="_blank">RCO</a></li>
@@ -331,6 +344,20 @@
             </div>
         </section>
 
+        <!-- 3. NOTÍCIAS DAS REDES SOCIAIS (publicadas pela secretaria em noticias-admin.html) -->
+        <section id="noticias" style="display:none" aria-labelledby="titulo-noticias">
+            <h2 id="titulo-noticias" style="color: var(--primary-blue); margin-bottom: 6px; text-align: center;">
+                <i class="fab fa-instagram"></i> Acontece no Anchieta
+            </h2>
+            <p class="noticias-sub">Acompanhe as novidades da escola nas redes sociais</p>
+            <div class="noticias-grade" id="noticias-grade"></div>
+            <div style="text-align:center; margin-top: 18px;">
+                <a class="btn-seguir" href="https://www.instagram.com/ccm_anchieta/" target="_blank" rel="noopener">
+                    <i class="fab fa-instagram"></i> Siga @ccm_anchieta
+                </a>
+            </div>
+        </section>
+
         <!-- SEÇÃO SOBRE -->
         <section id="sobre" class="sobre-box">
             <h2 style="color: var(--primary-blue); margin-bottom: 10px;">Sobre o Colégio</h2>
@@ -343,6 +370,66 @@
         <p>&copy; 2026 CCM Anchieta - Cruzeiro do Oeste - PR</p>
         <a href="#TOPO" style="color: #33cc33; text-decoration: none; font-weight: bold; margin-top: 10px; display: inline-block;">Voltar ao Topo</a>
     </footer>
+
+    <script>
+    // ===== NOTÍCIAS: links publicados pela secretaria, incorporados do Instagram/Facebook =====
+    (function () {
+        let noticias = [];
+
+        function montar() {
+            const grade = document.getElementById('noticias-grade');
+            grade.innerHTML = noticias.map(n => {
+                const topo = (n.chamada ? `<div class="noticia-chamada">${escaparHTML(n.chamada)}</div>` : '') +
+                             (n.data ? `<div class="noticia-data">${escaparHTML(n.data)}</div>` : '');
+                if (n.rede === 'facebook') {
+                    const src = 'https://www.facebook.com/plugins/post.php?width=420&show_text=true&href=' + encodeURIComponent(n.link);
+                    return `<article class="noticia">${topo}<iframe src="${escaparHTML(src)}" height="560" loading="lazy" title="Publicação do Facebook" allow="encrypted-media; picture-in-picture; web-share"></iframe></article>`;
+                }
+                // Se o Instagram não carregar (bloqueador, sem internet), fica o link
+                return `<article class="noticia">${topo}
+                    <blockquote class="instagram-media" data-instgrm-permalink="${escaparHTML(n.link)}?utm_source=ig_embed" data-instgrm-version="14">
+                        <a class="noticia-reserva" href="${escaparHTML(n.link)}" target="_blank" rel="noopener"><i class="fab fa-instagram"></i> Ver esta postagem no Instagram</a>
+                    </blockquote></article>`;
+            }).join('');
+
+            if (noticias.some(n => n.rede === 'instagram')) {
+                if (window.instgrm) { window.instgrm.Embeds.process(); return; }
+                const sc = document.createElement('script');
+                sc.async = true;
+                sc.src = 'https://www.instagram.com/embed.js';
+                document.body.appendChild(sc);
+            }
+        }
+
+        async function carregar() {
+            try {
+                const r = await fetch(SIGA_CONFIG.APPS_SCRIPT_URL + '?aba=noticias');
+                const d = await r.json();
+                // O backend antigo responde outra coisa a essa rota: nesse caso a seção fica escondida
+                if (!d || d.status !== 'success' || !Array.isArray(d.noticias) || d.noticias.length === 0) return;
+                noticias = d.noticias.filter(n => /^https:\/\/www\.(instagram|facebook)\.com\//.test(n.link));
+                if (noticias.length === 0) return;
+                document.getElementById('noticias').style.display = 'block';
+                document.getElementById('nav-noticias').style.display = '';
+
+                // Só baixa os embeds quando a seção estiver perto de aparecer na tela
+                const secao = document.getElementById('noticias');
+                if ('IntersectionObserver' in window) {
+                    const obs = new IntersectionObserver(entradas => {
+                        if (entradas.some(e => e.isIntersecting)) { obs.disconnect(); montar(); }
+                    }, { rootMargin: '400px' });
+                    obs.observe(secao);
+                } else {
+                    montar();
+                }
+            } catch (e) {
+                console.warn('Notícias indisponíveis:', e);
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', carregar);
+    })();
+    </script>
 
     <!-- BOTÃO DE INSTALAÇÃO PWA -->
     <button id="btn-instalar">

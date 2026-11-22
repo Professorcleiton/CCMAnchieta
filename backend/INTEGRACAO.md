@@ -11,11 +11,12 @@ Tempo estimado: 15 minutos. A camada foi testada junto com o `Código.gs` atual 
 3. Testar (passo 4).
 4. Fechar a planilha (passo 5).
 
-## Passo 1: colar os dois arquivos novos
+## Passo 1: colar os arquivos novos
 
 1. Abra a planilha → **Extensões → Apps Script**.
 2. Clique em **+ → Script**, dê o nome `seguranca` e cole todo o conteúdo de `backend/seguranca.gs`.
 3. Clique em **+ → Script** de novo, dê o nome `push-e-documentos` e cole todo o conteúdo de `backend/push-e-documentos.gs`.
+4. Clique em **+ → Script** mais uma vez, dê o nome `noticias` e cole todo o conteúdo de `backend/noticias.gs`.
 
 A configuração já vem ajustada para a sua planilha: abas `Usuários` (senha na coluna E), `Responsaveis` (senha na coluna C, push na F), `Alunos` e `Sessoes`.
 
@@ -61,6 +62,7 @@ Não crie uma implantação nova, senão a URL muda. O Google vai pedir novas au
 - [ ] "Esqueci minha senha" → chega o e-mail com código
 - [ ] A aba **Auditoria** foi criada e está registrando as ações
 - [ ] No Portal dos Pais, enviar um PDF num documento pendente → aparece "Enviado" e o arquivo está na pasta de documentos do Drive
+- [ ] No SIGA, abrir **Notícias do Site** (nível 3+), colar o link de uma postagem do Instagram e publicar. Em até 5 minutos, a seção "Acontece no Anchieta" aparece na página inicial.
 - [ ] No celular, entrar no Portal dos Pais → **Ativar Notificações**. No editor do Apps Script, executar `WP_testarPush` → a notificação chega. No iPhone, primeiro adicione o site à Tela de Início e abra por lá.
 
 Os responsáveis que já tinham conta continuam entrando e aparecem como **"LEGADO - revisar"** em Aprovar Responsáveis. Peça à secretaria para revisar a lista e revogar quem não for responsável de verdade. A revogação derruba a sessão na hora.
