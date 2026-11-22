@@ -14,7 +14,7 @@
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=15">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
@@ -2595,9 +2595,17 @@ function atualizarPainelRanking() {
     }
 }
 
+let rankingMostrarTodas = false;
+const RANKING_QTD_INICIAL = 10;
+
+function alternarRankingCompleto() {
+    rankingMostrarTodas = !rankingMostrarTodas;
+    mostrarRankingGeral();
+}
+
 function mostrarRankingGeral() {
     document.getElementById('texto-titulo-ranking').innerText = 'Turmas com Mais Apontamentos';
-    document.getElementById('periodo-ranking').innerText = 'Ano 2026';
+    document.getElementById('periodo-ranking').innerText = 'Ano letivo ' + new Date().getFullYear();
     
     const container = document.getElementById('conteudo-ranking');
     
@@ -2617,10 +2625,10 @@ function mostrarRankingGeral() {
         }
     });
     
-    // Pega só as 3 primeiras (e só as que têm apontamentos)
-    const ranking = Object.entries(contagem)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 3);
+    // Top 10 (ou todas, com o botão "Ver todas as turmas")
+    const rankingCompleto = Object.entries(contagem).sort((a, b) => b[1] - a[1]);
+    const ranking = rankingMostrarTodas ? rankingCompleto : rankingCompleto.slice(0, RANKING_QTD_INICIAL);
+    const maiorQtd = rankingCompleto.length ? rankingCompleto[0][1] : 1;
     
     if (ranking.length === 0) {
         container.innerHTML = '<div style="text-align:center;padding:20px;color:#94a3b8;">Nenhum apontamento registrado.</div>';
@@ -2634,35 +2642,38 @@ function mostrarRankingGeral() {
     
     let html = '';
     ranking.forEach(([turma, qtd], idx) => {
-        // Escapa aspas simples no nome da turma (para o onclick)
-        const turmaEscapada = turma.replace(/'/g, "\\'");
-        
+        const podio = idx < 3;
+        const borda = podio ? coresBorda[idx] : '#cbd5e1';
+        const fundo = podio ? coresFundo[idx] : '#ffffff';
+        const texto = podio ? coresTexto[idx] : '#334155';
+        const marca = podio
+            ? `<span style="font-size:20px;flex-shrink:0;width:26px;text-align:center;">${medalhas[idx]}</span>`
+            : `<span style="flex-shrink:0;width:26px;text-align:center;font-size:12px;font-weight:800;color:#64748b;">${idx + 1}º</span>`;
+        const pct = Math.max(4, Math.round((qtd / maiorQtd) * 100));
         html += `
-    <div onclick="filtrarPorTurmaRanking('${turmaEscapada}')" 
-         style="
-            background: ${coresFundo[idx]};
-            border-left: 5px solid ${coresBorda[idx]};
-            border-radius: 8px;
-            padding: 8px 14px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-            min-height: 48px;
-            cursor: pointer;
-            transition: transform 0.15s ease, box-shadow 0.15s ease;
-         "
+    <div onclick="filtrarPorTurmaRanking('${escaparJSAttr(turma)}')" title="Ver apontamentos da turma ${escaparHTML(turma)}"
+         style="background:${fundo};border-left:5px solid ${borda};border-radius:8px;padding:${podio ? '8px' : '6px'} 14px;
+                display:flex;justify-content:space-between;align-items:center;gap:10px;min-height:${podio ? 48 : 38}px;cursor:pointer;
+                transition:transform .15s ease, box-shadow .15s ease;${podio ? '' : 'border:1px solid #e2e8f0;border-left:5px solid ' + borda + ';'}"
          onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';"
          onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='none';">
         <div style="display:flex;align-items:center;gap:8px;min-width:0;flex:1;">
-            <span style="font-size:20px;flex-shrink:0;">${medalhas[idx]}</span>
-            <span style="font-weight:bold;font-size:13px;color:${coresTexto[idx]};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${turma}</span>
+            ${marca}
+            <div style="min-width:0;flex:1;">
+                <span style="display:block;font-weight:bold;font-size:13px;color:${texto};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escaparHTML(turma)}</span>
+                ${podio ? '' : `<span style="display:block;height:4px;margin-top:4px;border-radius:2px;background:#e2e8f0;"><span style="display:block;height:4px;width:${pct}%;border-radius:2px;background:#94a3b8;"></span></span>`}
+            </div>
         </div>
-        <span style="font-size:18px;font-weight:bold;color:${coresBorda[idx]};flex-shrink:0;">${qtd}</span>
+        <span style="font-size:${podio ? 18 : 15}px;font-weight:bold;color:${podio ? borda : '#475569'};flex-shrink:0;">${qtd}</span>
     </div>
 `;
     });
-    
+
+    if (rankingCompleto.length > RANKING_QTD_INICIAL) {
+        html += `<button onclick="alternarRankingCompleto()" style="width:100%;margin-top:4px;background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;padding:7px 12px;border-radius:15px;cursor:pointer;font-size:12px;font-weight:600;">
+            ${rankingMostrarTodas ? '▲ Mostrar só o top ' + RANKING_QTD_INICIAL : '▼ Ver todas as turmas (' + rankingCompleto.length + ')'}</button>`;
+    }
+
     container.innerHTML = html;
 }
 

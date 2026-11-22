@@ -119,6 +119,31 @@ assert.strictEqual(P({operacao:'LOGIN',email:'sec@x.com',senha:'5555'}).status,'
 // logout
 P({operacao:'LOGOUT',token:tp}); assert.strictEqual(G({aba:'alunos',token:tp}).status,'unauthorized');
 const tp2=()=>{ if(!global.__tp2) global.__tp2=P({operacao:'LOGIN',email:'novo@x.com',senha:'Anchieta2026'}).token; return global.__tp2; };
+// ===== Contadores anuais (antes: só os últimos 200 da escola) =====
+{
+  const ano=new Date().getFullYear();
+  S.Registros.rows.push([new Date(ano-1,10,5),'MARIA SOUZA','ped','do ano passado','x']);
+  S.Registros.rows.push(['15/03/'+ano+' 08:10','JOÃO DA SILVA','ped','data em texto','x']);
+  S.Registros.rows.push(['02/12/'+(ano-1)+' 09:00','JOÃO DA SILVA','ped','texto do ano passado','x']);
+  S.Atas_Disciplinares=sheet('Atas_Disciplinares',[['data','aluno','num','arq','link']].concat(
+    Array.from({length:230},(_,i)=>[new Date(ano,1,1+i%200),'MARIA SOUZA',String(i),'a.pdf','l'])).concat([[new Date(ano-1,5,1),'MARIA SOUZA','velha','a.pdf','l']]));
+  S.Fatos_SEED=sheet('Fatos_SEED',[['data','aluno','tipo','desc']].concat([['10/04/'+ano,'JOÃO DA SILVA','Positivo','ok'],['10/04/'+(ano-1),'JOÃO DA SILVA','Negativo','velho']]));
+  const tdirA=P({operacao:'LOGIN',email:'dir@x.com',senha:'9999'}).token;
+  const D2=G({aba:'todos_os_dados',token:tdirA});
+  const doAno=S.Registros.rows.slice(1).filter(r=>r[0]&&r[1]&&(r[0] instanceof Date?r[0].getFullYear()===ano:(String(r[0]).includes('/'+ano)||String(r[0]).startsWith(ano+'-')))).length;
+  assert(doAno>200,'cenário com mais de 200 no ano');
+  assert.strictEqual(D2.apontamentos.length,doAno,'todos os apontamentos do ano, sem corte de 200');
+  assert(!D2.apontamentos.some(a=>/ano passado/.test(a.texto)),'ano anterior fora');
+  assert(D2.apontamentos.some(a=>a.texto==='data em texto'),'data em texto reconhecida');
+  assert.strictEqual(D2.atas.length,230,'230 atas do ano (antes: 200)');
+  assert.deepStrictEqual(D2.fatos_seed.map(f=>f.tipo),['Positivo']);
+  assert.strictEqual(D2.anoLetivo,ano);
+  // ano letivo configurável
+  ctx.PropertiesService._p.ANO_LETIVO=String(ano-1);
+  const D3=G({aba:'todos_os_dados',token:tdirA});
+  assert(D3.apontamentos.every(a=>!/^\d{2}\/\d{2}\/\d{4}/.test(a.dataAtual)||a.dataAtual.includes(String(ano-1))));
+  delete ctx.PropertiesService._p.ANO_LETIVO;
+}
 // ===== Documentos (upload_documento) =====
 const tpai=P({operacao:'LOGIN_RESPONSAVEL',email:'pai@x.com',senha:'NovaSenha1'}).token;
 const pdf=Buffer.concat([Buffer.from('%PDF-1.4\n'),crypto.randomBytes(100)]).toString('base64');

@@ -156,6 +156,8 @@ function doGet(e) {
   if (rota === 'responsaveis_cadastros') return SEG_json_(SEG_listarVinculos_());
   if (rota === 'noticias_gestao') return SEG_json_(NOT_listarTodas_());
   if (rota === 'frequencia_gestao') return SEG_json_(FREQ_gestao_());
+  // Servidores: todos os registros do ano letivo (sem o corte de 200 do Código.gs)
+  if (rota === 'todos_os_dados' && sessao.tipo === 'servidor') return SEG_json_(SEG_dadosEscolaAno_());
 
   var saida = doGetOriginal(e);
   if (sessao.tipo === 'responsavel') saida = SEG_filtrarSaidaResponsavel_(saida, sessao, rota);
@@ -637,34 +639,69 @@ function SEG_filtrarSaidaResponsavel_(saida, sessao, rota) {
 }
 
 function SEG_dadosDosFilhos_(alunos) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
   var alvo = alunos.map(SEG_normalizar_);
-  function doFilho(nome) { return alvo.indexOf(SEG_normalizar_(nome)) !== -1; }
+  return SEG_lerRegistros_(function (nome) { return alvo.indexOf(SEG_normalizar_(nome)) !== -1; }, null, false);
+}
+
+// Para os servidores: TODOS os registros do ano letivo (o Código.gs cortava
+// nos últimos 200 de cada lista, e os contadores não eram anuais).
+// Ano letivo = ano atual; para mudar (ex.: em janeiro), crie a propriedade
+// do script ANO_LETIVO com o ano desejado.
+function SEG_dadosEscolaAno_() {
+  var prop = parseInt(PropertiesService.getScriptProperties().getProperty('ANO_LETIVO'), 10);
+  var ano = isNaN(prop) ? new Date().getFullYear() : prop;
+  var dados = SEG_lerRegistros_(function () { return true; }, ano, true);
+  dados.anoLetivo = ano;
+  return dados;
+}
+
+// Ano de uma célula de data: Date, "dd/MM/yyyy HH:mm", "yyyy-MM-dd..." (null se não der para saber)
+function SEG_anoDe_(v) {
+  if (v instanceof Date) return v.getFullYear();
+  var t = String(v || '');
+  var m = t.match(/\b\d{1,2}\/\d{1,2}\/(\d{4})\b/) || t.match(/^(\d{4})-\d{2}-\d{2}/);
+  return m ? parseInt(m[1], 10) : null;
+}
+
+// filtroAluno(nome) → bool; ano: só registros desse ano (null = todos);
+// documentos não são filtrados por ano (um pedido pendente continua valendo)
+function SEG_lerRegistros_(filtroAluno, ano, incluirFatos) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
   function fmt(d, padrao) { return d instanceof Date ? Utilities.formatDate(d, 'GMT-3', padrao) : String(d || ''); }
   function ler(nomeAba) { var a = ss.getSheetByName(nomeAba); return a ? a.getDataRange().getValues().slice(1) : []; }
+  function doAno(v) { if (ano === null) return true; var a = SEG_anoDe_(v); return a === null || a === ano; }
 
   var apontamentos = [];
   ler('Registros').forEach(function (r, i) {
-    if (r[0] && r[1] && doFilho(r[1])) apontamentos.push({ idLinha: i + 2, dataAtual: fmt(r[0], 'dd/MM/yyyy HH:mm'),
+    if (r[0] && r[1] && String(r[1]).trim() !== '' && filtroAluno(r[1]) && doAno(r[0])) apontamentos.push({ idLinha: i + 2, dataAtual: fmt(r[0], 'dd/MM/yyyy HH:mm'),
       aluno: String(r[1]).trim(), setor: String(r[2] || '').trim(), texto: String(r[3] || '').trim(), funcionario: String(r[4] || '').trim() });
   });
   var documentos = [];
   ler('Documentos_Secretaria').forEach(function (r) {
-    if (r[0] && doFilho(r[0])) documentos.push({ aluno: String(r[0]).trim(), turma: String(r[1] || '').trim(),
+    if (r[0] && String(r[0]).trim() !== '' && filtroAluno(r[0])) documentos.push({ aluno: String(r[0]).trim(), turma: String(r[1] || '').trim(),
       documento: String(r[2] || '').trim(), status: String(r[3] || '').trim(), data: fmt(r[4], 'dd/MM/yyyy'),
       link: String(r[5] || ''), dataEnvio: String(r[6] || ''), observacoes: String(r[7] || '') });
   });
   var ocorrencias = [];
   ler('Ocorrencias').forEach(function (r) {
-    if (r[1] && doFilho(r[1])) ocorrencias.push({ data: fmt(r[0], 'dd/MM/yyyy HH:mm'), aluno: String(r[1]).trim(),
+    if (r[1] && String(r[1]).trim() !== '' && filtroAluno(r[1]) && doAno(r[0])) ocorrencias.push({ data: fmt(r[0], 'dd/MM/yyyy HH:mm'), aluno: String(r[1]).trim(),
       tipo: String(r[2] || '').trim(), motivo: String(r[3] || '').trim(), autorizador: String(r[4] || '').trim() });
   });
   var atas = [];
   ler('Atas_Disciplinares').forEach(function (r) {
-    if (r[1] && doFilho(r[1])) atas.push({ data: fmt(r[0], 'dd/MM/yyyy HH:mm'), aluno: String(r[1]).trim(),
+    if (r[1] && String(r[1]).trim() !== '' && filtroAluno(r[1]) && doAno(r[0])) atas.push({ data: fmt(r[0], 'dd/MM/yyyy HH:mm'), aluno: String(r[1]).trim(),
       numero: String(r[2] || '').trim(), arquivo: String(r[3] || '').trim(), link: String(r[4] || '').trim() });
   });
-  return { apontamentos: apontamentos, documentos: documentos, ocorrencias: ocorrencias, atas: atas };
+  var saida = { apontamentos: apontamentos, documentos: documentos, ocorrencias: ocorrencias, atas: atas };
+  if (incluirFatos) {
+    var fatos = [];
+    ler('Fatos_SEED').forEach(function (r) {
+      if (r[1] && String(r[1]).trim() !== '' && filtroAluno(r[1]) && doAno(r[0])) fatos.push({ data: fmt(r[0], 'dd/MM/yyyy'),
+        aluno: String(r[1]).trim(), tipo: String(r[2] || 'Neutro').trim(), descricao: String(r[3] || '').trim() });
+    });
+    saida.fatos_seed = fatos;
+  }
+  return saida;
 }
 
 

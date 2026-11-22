@@ -455,6 +455,9 @@ select#select-alunos {
     align-items: start;
 }
 
+/* Ranking de turmas: lista com espaçamento; rola se mostrar todas */
+#conteudo-ranking { display: flex; flex-direction: column; gap: 6px; max-height: 560px; overflow-y: auto; padding-right: 2px; }
+
 .dash-panel {
     background: white;
     padding: 20px;
@@ -1224,34 +1227,9 @@ select#select-alunos {
     .dash-card .dash-card-title { font-size: 10px !important; }
     .dash-card .dash-card-value { font-size: 18px !important; }
 
-    #conteudo-ranking {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 6px;
-    }
-    #conteudo-ranking > div {
-        padding: 8px !important;
-        flex-direction: column !important;
-        text-align: center;
-        gap: 2px !important;
-        min-height: 70px !important;
-    }
-    #conteudo-ranking > div span:first-child {
-        font-size: 18px !important;
-        margin-bottom: 0 !important;
-    }
-    #conteudo-ranking > div span:nth-child(2) {
-        font-size: 10px !important;
-        white-space: normal !important;
-        text-align: center;
-        line-height: 1.1;
-        overflow: visible !important;
-        text-overflow: clip !important;
-    }
-    #conteudo-ranking > div span:last-child {
-        font-size: 16px !important;
-        margin-top: 0 !important;
-    }
+    /* Ranking no celular: lista vertical compacta (top 10 + "ver todas") */
+    #conteudo-ranking { max-height: none; overflow: visible; }
+    #conteudo-ranking > div { padding: 6px 10px !important; min-height: 36px !important; }
 
     /* 1. Empilha o Ranking e as Ações Rápidas no celular */
     .dash-lower-grid {
