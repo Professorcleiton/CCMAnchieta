@@ -2,6 +2,7 @@
 <html lang="pt-br">
 <head> 
     <meta charset="UTF-8">
+    <script src="siga-core.js?v=13"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIGA - Central Pedagógica CCM Anchieta</title>
     <meta name="theme-color" content="#005088">
@@ -39,6 +40,7 @@
             
             <div id="error-message">E-mail ou Senha incorretos!</div>
             <button class="btn-login" id="btn-entrar-login" onclick="autenticarUsuario()">Entrar</button>
+            <a href="#" onclick="abrirRecuperacaoSenha('servidor'); return false;" style="display:block;margin-top:10px;font-size:13px;color:#005088;">Esqueci minha senha</a>
             <br>
             <a href="index.html" class="btn-voltar-site"><i class="fa-solid fa-arrow-left"></i> Voltar ao site principal</a>
         </div>
@@ -321,6 +323,11 @@
                                 <a id="btn-patrimonio" href="patrimonio.html" class="btn-acao" style="background-color: #005088;">
                                     <i class="fa-solid fa-boxes-stacked"></i>
                                     <span>Módulo Patrimônio</span>
+                                </a>
+
+                                <a id="btn-aprovar-responsaveis" href="aprovar-responsaveis.html" class="btn-acao" style="display: none; background-color: #16a34a;">
+                                    <i class="fa-solid fa-user-check"></i>
+                                    <span>Aprovar Responsáveis</span>
                                 </a>
 
                                 <button id="btn-comunicado-seed" class="btn-acao" style="display: none; background-color: #8b5cf6;" onclick="abrirModalComunicadoSEED()">
@@ -799,7 +806,7 @@
                     <div style="flex: 1;"><label style="font-weight: bold; font-size: 14px; margin-bottom: 5px; display: block;">Setor:</label><select id="admin-user-setor" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;" onchange="togglePreferenciasProfessor()"><option value="professores">Professores</option><option value="meivs">MEIV'S</option><option value="pedagogico">Pedagógico</option><option value="adm">ADM</option><option value="direcao">Professores</option></select></div>
                     <div style="flex: 1;"><label style="font-weight: bold; font-size: 14px; margin-bottom: 5px; display: block;">Nível de Acesso:</label><select id="admin-user-nivel" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;"><option value="1">1 - Padrão</option><option value="2">2 - Intermediário</option><option value="3">3 - Administrador</option><option value="4">4 - Direção</option></select></div>
                 </div>
-                <div class="input-group"><label>Senha (Somente números - ex: RG):</label><input type="text" id="admin-user-senha" placeholder="Deixe em branco para manter a atual (na edição)"></div>
+                <div class="input-group"><label>Senha inicial (mín. 6 caracteres, letras e/ou números):</label><input type="password" autocomplete="new-password" id="admin-user-senha" placeholder="Deixe em branco para manter a atual (na edição)"></div>
                 
                 <div id="preferencias-professor" style="display:none;">
                     <hr style="margin: 20px 0; border: 0; border-top: 2px dashed #7c3aed;">
@@ -1096,8 +1103,8 @@
     <!-- ============================================= -->
     <!-- SCRIPTS EXTERNOS -->
     <!-- ============================================= -->
-    <script src="db.js?v=12"></script>
-    <script src="script.js?v=12"></script>
+    <script src="db.js?v=13"></script>
+    <script src="script.js?v=13"></script>
 
 <!-- PARTE 2 CONTINUA ABAIXO -->
         <script>
@@ -1390,7 +1397,7 @@ function aplicarControleAcesso() {
         if (btn) btn.style.display = nivel >= 4 ? 'flex' : 'none';
     });
     
-    const botoesNivel3 = ['btn-patrimonio', 'btn-comunicado-seed', 'btn-central-alertas', 'btn-aba-secretaria', 'btn-aniversarios', 'btn-imprimir-apontamentos', 'btn-certificados'];
+    const botoesNivel3 = ['btn-patrimonio', 'btn-comunicado-seed', 'btn-central-alertas', 'btn-aba-secretaria', 'btn-aniversarios', 'btn-imprimir-apontamentos', 'btn-certificados', 'btn-aprovar-responsaveis'];
     botoesNivel3.forEach(id => {
         const btn = document.getElementById(id);
         if (btn) {
@@ -1754,7 +1761,7 @@ async function carregarAlertasModal() {
         alertas.forEach(a => {
             const cor = a.nivel === 'critico' ? '#dc2626' : '#f59e0b';
             const emoji = a.nivel === 'critico' ? '🔴' : '🟡';
-            html += '<div style="background:white;border-left:5px solid ' + cor + ';padding:15px;margin-bottom:10px;border-radius:8px;cursor:pointer;" onclick="abrirDetalhesAlunoAlerta(\'' + a.nome.replace(/'/g, "\\'") + '\')">';
+            html += '<div style="background:white;border-left:5px solid ' + cor + ';padding:15px;margin-bottom:10px;border-radius:8px;cursor:pointer;" onclick="abrirDetalhesAlunoAlerta(\'' + escaparJSAttr(a.nome) + '\')">';
             html += '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">';
             html += '<strong>' + a.nome + '</strong>';
             html += '<span style="background:#e0f2fe;color:#0369a1;padding:3px 10px;border-radius:12px;font-size:12px;">🎒 ' + a.turma + '</span>';
@@ -2000,9 +2007,9 @@ function renderizarProgressao() {
             html += '</div>';
             
             html += '<div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">';
-            html += '<button onclick="moverTodosPara(\'' + turma.origem + '\', \'1NEM\')" style="background:#e0f2fe;color:#0369a1;border:none;padding:6px 12px;border-radius:15px;cursor:pointer;font-size:12px;font-weight:bold;">Todos → 1NEM</button>';
-            html += '<button onclick="moverTodosPara(\'' + turma.origem + '\', \'1FD\')" style="background:#fce7f3;color:#9d174d;border:none;padding:6px 12px;border-radius:15px;cursor:pointer;font-size:12px;font-weight:bold;">Todos → 1FD</button>';
-            html += '<button onclick="moverTodosPara(\'' + turma.origem + '\', \'1AGRO\')" style="background:#fef3c7;color:#92400e;border:none;padding:6px 12px;border-radius:15px;cursor:pointer;font-size:12px;font-weight:bold;">Todos → 1AGRO</button>';
+            html += '<button onclick="moverTodosPara(\'' + escaparJSAttr(turma.origem) + '\', \'1NEM\')" style="background:#e0f2fe;color:#0369a1;border:none;padding:6px 12px;border-radius:15px;cursor:pointer;font-size:12px;font-weight:bold;">Todos → 1NEM</button>';
+            html += '<button onclick="moverTodosPara(\'' + escaparJSAttr(turma.origem) + '\', \'1FD\')" style="background:#fce7f3;color:#9d174d;border:none;padding:6px 12px;border-radius:15px;cursor:pointer;font-size:12px;font-weight:bold;">Todos → 1FD</button>';
+            html += '<button onclick="moverTodosPara(\'' + escaparJSAttr(turma.origem) + '\', \'1AGRO\')" style="background:#fef3c7;color:#92400e;border:none;padding:6px 12px;border-radius:15px;cursor:pointer;font-size:12px;font-weight:bold;">Todos → 1AGRO</button>';
             html += '</div>';
             
             html += '<div style="max-height:200px;overflow-y:auto;">';
@@ -2010,7 +2017,7 @@ function renderizarProgressao() {
                 const corDestino = aluno.destino === '1NEM' ? '#e0f2fe' : aluno.destino === '1FD' ? '#fce7f3' : '#fef3c7';
                 html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f1f5f9;">';
                 html += '<span style="font-size:13px;">' + aluno.nome + '</span>';
-                html += '<select onchange="mudarDestino(\'' + turma.origem + '\', ' + idx + ', this.value)" style="padding:4px 8px;border-radius:4px;border:1px solid #cbd5e1;font-size:12px;background:' + corDestino + ';">';
+                html += '<select onchange="mudarDestino(\'' + escaparJSAttr(turma.origem) + '\', ' + idx + ', this.value)" style="padding:4px 8px;border-radius:4px;border:1px solid #cbd5e1;font-size:12px;background:' + corDestino + ';">';
                 html += '<option value="1NEM" ' + (aluno.destino === '1NEM' ? 'selected' : '') + '>1º NEM</option>';
                 html += '<option value="1FD" ' + (aluno.destino === '1FD' ? 'selected' : '') + '>1º FD</option>';
                 html += '<option value="1AGRO" ' + (aluno.destino === '1AGRO' ? 'selected' : '') + '>1º Agro</option>';
@@ -2970,7 +2977,7 @@ function exibirCardAniversariantes() {
                     </div>
                 </div>
                 ${htmlRecados}
-                <button onclick="abrirModalRecado('${aniv.nome}')" style="background:#f59e0b;color:white;border:none;padding:6px 14px;border-radius:15px;cursor:pointer;font-size:12px;margin-top:8px;">
+                <button onclick="abrirModalRecado('${escaparJSAttr(aniv.nome)}')" style="background:#f59e0b;color:white;border:none;padding:6px 14px;border-radius:15px;cursor:pointer;font-size:12px;margin-top:8px;">
                     ✍️ Deixar recado
                 </button>
             </div>`;

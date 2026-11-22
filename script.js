@@ -3,10 +3,9 @@
 // =============================================
 
 // ========== GLOBAIS ==========
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
+const APPS_SCRIPT_URL = SIGA_CONFIG.APPS_SCRIPT_URL;
 const APPS_SCRIPT_PAT_URL = APPS_SCRIPT_URL;
-const SHEET_ID = '1UUiVcCaSb_9Lx7gdEpmBzeRQPlBwDZRouQC2pf1q8Vg';
-const COLS_ALUNOS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=Alunos`;
+const SHEET_ID = SIGA_CONFIG.SHEET_ID;
 let usuarioLogado = null, todosOsRegistros = [], cacheAlunosPorTurma = {}, turmaSelecionadaAtiva = '';
 let modalSetorAtivo = '', modalRegistrosFiltrados = [], modalItensExibidos = 50;
 let totalRegistrosAnterior = 0;
@@ -104,20 +103,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 async function autenticarUsuario() {
     const email = document.getElementById('user-email').value.trim().toLowerCase();
-    const senha = document.getElementById('user-password').value.trim().replace(/\D/g, '');
+    const senhas = variacoesSenha(document.getElementById('user-password').value);
     const err = document.getElementById('error-message'), btn = document.getElementById('btn-entrar-login');
-    if (!email || !senha) return;
+    if (!email || senhas.length === 0) return;
 
     btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
 
     try {
-        const r = await fetch(APPS_SCRIPT_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain' },
-            body: JSON.stringify({ operacao: "LOGIN", email, senha })
-        });
-
-        const data = await r.json();
+        let data = null;
+        for (const senha of senhas) {
+            const r = await fetch(APPS_SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify({ operacao: "LOGIN", email, senha })
+            });
+            data = await r.json();
+            if (data.status === "success" || data.status === "blocked") break;
+        }
 
         if (data.status === "success") {
             let setor = data.setor.toString().trim().toLowerCase();
@@ -380,10 +382,8 @@ async function carregarAlunosETurmas() {
             }
         }
 
-        const response = await fetch(COLS_ALUNOS_URL);
-        const text = await response.text();
-        const jsonText = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
-        const data = JSON.parse(jsonText);
+        // 🔒 Lê pelo Apps Script autenticado (GViz público só como plano B temporário)
+        const data = await lerAbaPlanilha('Alunos');
 
         data.table.rows.forEach(r => {
             if (r.c && r.c[1] && r.c[1].v) {
@@ -781,7 +781,7 @@ function filtrarRegistrosPorAluno() {
                     card.className = 'post-card';
 
                     const botoes = (nivelUser >= 3) ?
-                        `<div class="card-actions"><button class="btn-action-card btn-edit-card" onclick="editarRegistroServidor(${r.idLinha}, '${r.setor}')"><i class="fa-solid fa-pen-to-square"></i> Editar</button><button class="btn-action-card btn-delete-card" onclick="excluirRegistroServidor(${r.idLinha})"><i class="fa-solid fa-trash-can"></i> Apagar</button></div>` : '';
+                        `<div class="card-actions"><button class="btn-action-card btn-edit-card" onclick="editarRegistroServidor(${Number(r.idLinha)}, '${escaparJSAttr(r.setor)}')"><i class="fa-solid fa-pen-to-square"></i> Editar</button><button class="btn-action-card btn-delete-card" onclick="excluirRegistroServidor(${Number(r.idLinha)})"><i class="fa-solid fa-trash-can"></i> Apagar</button></div>` : '';
 
                     const dataStr = (typeof formatarDataEHora === 'function') ? formatarDataEHora(r.dataAtual) : r.dataAtual;
                     const autorApontamento = r.funcionario || '';
@@ -1294,6 +1294,10 @@ async function salvarUsuarioAdmin() {
     const senha = document.getElementById('admin-user-senha').value.trim();
 
     if (!email || !nome) return mostrarToast('Preencha pelo menos o E-mail e o Nome.', 'aviso');
+    if (senha) {
+        const problemaSenha = validarNovaSenha(senha);
+        if (problemaSenha) return mostrarToast(problemaSenha, 'aviso');
+    }
 
     const btn = document.getElementById('btn-save-user');
     btn.disabled = true; btn.innerHTML = 'Processando...';
@@ -1535,13 +1539,10 @@ function confirmarGeracaoRelatorio() {
 }
 
 async function carregarRegistrosPreConselho() {
-    const SHEET_PRE_CONSELHO_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=Pre_Conselho`;
 
     try {
-        const response = await fetch(SHEET_PRE_CONSELHO_URL);
-        const text = await response.text();
-        const jsonText = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
-        const data = JSON.parse(jsonText);
+        // 🔒 Lê pelo Apps Script autenticado (GViz público só como plano B temporário)
+        const data = await lerAbaPlanilha('Pre_Conselho');
 
         return data.table.rows.map(r => ({
             data: r.c[0]?.v || '',

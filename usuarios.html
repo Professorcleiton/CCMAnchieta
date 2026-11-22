@@ -2,6 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <script src="siga-core.js?v=13"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerenciamento de Usuários | SIGA</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -197,7 +198,7 @@
     </main>
 
     <script>
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym9DGWB6hBj7nEmoWFM0vmErbzbq4VVobxY4PYRVEsgPmu7A98OxjLfiFY6D4E_ESUXw/exec';
+        const APPS_SCRIPT_URL = SIGA_CONFIG.APPS_SCRIPT_URL;
         
         let listaCompletaUsuarios = [];
         let operadorLogado = {};
@@ -253,7 +254,7 @@
                     <td style="color:#475569;">${user.setor}</td>
                     <td><span class="badge-nivel ${badgeClass}">${labelTexto}</span></td>
                     <td style="text-align: center;">
-                        <button class="btn-action-panel-delete" onclick="executarExcluirUsuario('${user.email}')">
+                        <button class="btn-action-panel-delete" onclick="executarExcluirUsuario('${escaparJSAttr(user.email)}')">
                             <i class="fa-solid fa-trash"></i>
                         </button>
                     </td>
@@ -312,7 +313,8 @@
             if (!email || !nome) { alert("Por favor, preencha o E-mail e o Nome do funcionário."); return; }
             
             const editando = listaCompletaUsuarios.some(u => u.email === email);
-            if (!editando && !senha) { alert("Para novos usuários, a senha inicial (números do RG) é obrigatória."); return; }
+            if (!editando && !senha) { alert("Para novos usuários, a senha inicial é obrigatória."); return; }
+            if (senha) { const problemaSenha = validarNovaSenha(senha); if (problemaSenha) { alert(problemaSenha); return; } }
 
             btn.disabled = true; btn.innerText = "Gravando no servidor...";
 

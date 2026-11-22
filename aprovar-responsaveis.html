@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <script src="siga-core.js?v=13"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aprovar Responsáveis | SIGA</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f1f5f9; color: #1e293b; }
+        header { background: #005088; color: #fff; padding: 16px 20px; border-bottom: 4px solid #eab308; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+        header h1 { font-size: 18px; }
+        header a { color: #fff; text-decoration: none; font-size: 14px; }
+        main { max-width: 960px; margin: 24px auto; padding: 0 16px; }
+        .aviso { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 12px 14px; border-radius: 6px; font-size: 14px; margin-bottom: 18px; line-height: 1.45; }
+        .filtros { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+        .filtros button { border: 1px solid #cbd5e1; background: #fff; padding: 8px 14px; border-radius: 20px; cursor: pointer; font-size: 13px; }
+        .filtros button.ativo { background: #005088; color: #fff; border-color: #005088; }
+        .card { background: #fff; border-radius: 10px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+        .card h3 { font-size: 16px; margin-bottom: 4px; }
+        .meta { font-size: 13px; color: #64748b; margin-bottom: 10px; }
+        .filhos { display: flex; flex-direction: column; gap: 6px; margin: 10px 0; }
+        .filho { display: flex; align-items: center; gap: 8px; font-size: 14px; padding: 8px 10px; border-radius: 6px; background: #f8fafc; }
+        .filho.ok { background: #dcfce7; }
+        .filho.nao { background: #fee2e2; }
+        .acoes { display: flex; gap: 8px; flex-wrap: wrap; }
+        .acoes button { border: none; padding: 9px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; }
+        .btn-aprovar { background: #16a34a; color: #fff; }
+        .btn-recusar { background: #dc2626; color: #fff; }
+        .vazio { text-align: center; color: #64748b; padding: 40px 0; }
+        .status { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; margin-left: 6px; vertical-align: middle; }
+        .status.PENDENTE { background: #fef3c7; color: #92400e; }
+        .status.APROVADO { background: #dcfce7; color: #166534; }
+        .status.RECUSADO { background: #fee2e2; color: #991b1b; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1><i class="fa-solid fa-user-check"></i> Aprovar cadastros de responsáveis</h1>
+        <a href="restrito.html"><i class="fa-solid fa-arrow-left"></i> Voltar ao SIGA</a>
+    </header>
+    <main>
+        <div class="aviso">
+            <strong>Por que isto existe:</strong> qualquer pessoa pode se cadastrar no Portal dos Pais digitando o nome de um aluno.
+            Antes de liberar o acesso às ocorrências, confira na ficha de matrícula se a pessoa é mesmo responsável legal
+            (nome e telefone). Marque apenas os alunos confirmados.
+        </div>
+        <div class="filtros">
+            <button class="ativo" data-filtro="PENDENTE" onclick="filtrar(this)">Pendentes</button>
+            <button data-filtro="APROVADO" onclick="filtrar(this)">Aprovados</button>
+            <button data-filtro="RECUSADO" onclick="filtrar(this)">Recusados</button>
+        </div>
+        <div id="lista"><div class="vazio">Carregando…</div></div>
+    </main>
+
+<script>
+    const APPS_SCRIPT_URL = SIGA_CONFIG.APPS_SCRIPT_URL;
+    let cadastros = [];
+    let filtroAtual = 'PENDENTE';
+
+    window.addEventListener('DOMContentLoaded', () => {
+        let sessao = null;
+        try { sessao = JSON.parse(sessionStorage.getItem('sgi_ccma_session') || localStorage.getItem('sgi_ccma_session') || 'null'); } catch (e) {}
+        if (!sessao || !sessao.token) { location.href = 'restrito.html'; return; }
+        if ((parseInt(sessao.nivel) || 0) < 3) {
+            alert('Acesso restrito à Secretaria e à Direção.');
+            location.href = 'restrito.html';
+            return;
+        }
+        carregar();
+    });
+
+    async function carregar() {
+        const lista = document.getElementById('lista');
+        try {
+            const r = await fetch(APPS_SCRIPT_URL + '?aba=responsaveis_cadastros');
+            const d = await r.json();
+            if (!Array.isArray(d)) throw new Error(d && d.message ? d.message : 'Resposta inesperada do servidor');
+            cadastros = d;
+            renderizar();
+        } catch (e) {
+            lista.innerHTML = '<div class="vazio">Não foi possível carregar os cadastros.<br><small>' + escaparHTML(e.message) +
+                '</small><br><small>Confira se o backend (Apps Script) já foi atualizado com o arquivo backend/seguranca.gs.</small></div>';
+        }
+    }
+
+    function filtrar(btn) {
+        document.querySelectorAll('.filtros button').forEach(b => b.classList.remove('ativo'));
+        btn.classList.add('ativo');
+        filtroAtual = btn.dataset.filtro;
+        renderizar();
+    }
+
+    function renderizar() {
+        const lista = document.getElementById('lista');
+        const itens = cadastros.filter(c => (c.status || 'PENDENTE') === filtroAtual);
+        if (itens.length === 0) {
+            lista.innerHTML = '<div class="vazio">Nenhum cadastro nesta situação.</div>';
+            return;
+        }
+        lista.innerHTML = itens.map((c, i) => {
+            const filhos = Array.isArray(c.filhos) ? c.filhos : [];
+            const pendente = (c.status || 'PENDENTE') === 'PENDENTE';
+            return `
+            <div class="card">
+                <h3>${escaparHTML(c.nome)} <span class="status ${escaparHTML(c.status || 'PENDENTE')}">${escaparHTML(c.status || 'PENDENTE')}</span></h3>
+                <div class="meta">
+                    <i class="fa-solid fa-envelope"></i> ${escaparHTML(c.email)} &nbsp;·&nbsp;
+                    <i class="fa-brands fa-whatsapp"></i> ${escaparHTML(c.telefone)} &nbsp;·&nbsp;
+                    <i class="fa-regular fa-calendar"></i> ${escaparHTML(c.dataCadastro || '')}
+                </div>
+                <div class="filhos">
+                    ${filhos.map((f, j) => `
+                        <label class="filho ${f.encontrado ? 'ok' : 'nao'}">
+                            ${pendente ? `<input type="checkbox" data-email="${escaparHTML(c.email)}" value="${escaparHTML(f.nomeOficial || f.digitado)}" ${f.encontrado ? 'checked' : 'disabled'}>` : ''}
+                            <span>
+                                <strong>${escaparHTML(f.nomeOficial || f.digitado)}</strong>
+                                ${f.turma ? ' — ' + escaparHTML(f.turma) : ''}
+                                ${f.encontrado ? '' : ' <em>(não encontrado na lista de alunos — digitado: “' + escaparHTML(f.digitado) + '”)</em>'}
+                            </span>
+                        </label>`).join('')}
+                </div>
+                ${pendente ? `
+                <div class="acoes">
+                    <button class="btn-aprovar" onclick="decidir('${escaparJSAttr(c.email)}', true)"><i class="fa-solid fa-check"></i> Aprovar marcados</button>
+                    <button class="btn-recusar" onclick="decidir('${escaparJSAttr(c.email)}', false)"><i class="fa-solid fa-xmark"></i> Recusar</button>
+                </div>` : `
+                <div class="meta">Decidido por ${escaparHTML(c.aprovadoPor || '—')}</div>
+                ${c.status === 'APROVADO' ? `<div class="acoes"><button class="btn-recusar" onclick="decidir('${escaparJSAttr(c.email)}', false)"><i class="fa-solid fa-ban"></i> Revogar acesso</button></div>` : ''}`}
+            </div>`;
+        }).join('');
+    }
+
+    async function decidir(email, aprovar) {
+        const alunos = Array.from(document.querySelectorAll('input[type=checkbox]'))
+            .filter(cb => cb.dataset.email === email && cb.checked)
+            .map(cb => cb.value);
+
+        if (aprovar && alunos.length === 0) { alert('Marque pelo menos um aluno confirmado.'); return; }
+        if (!confirm(aprovar
+            ? 'Liberar o acesso de ' + email + ' aos dados de: ' + alunos.join(', ') + '?'
+            : 'Recusar o cadastro de ' + email + '?')) return;
+
+        try {
+            const r = await fetch(APPS_SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify({ operacao: aprovar ? 'APROVAR_RESPONSAVEL' : 'RECUSAR_RESPONSAVEL', email, alunos })
+            });
+            const d = await r.json();
+            if (d.status !== 'success') throw new Error(d.message || 'Falha na operação');
+            carregar();
+        } catch (e) {
+            alert('Erro: ' + e.message);
+        }
+    }
+</script>
+</body>
+</html>
