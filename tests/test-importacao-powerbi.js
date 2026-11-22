@@ -66,6 +66,15 @@ vm.runInContext('lerColagem()',ctx);
 assert.strictEqual(els['col-turma'].value,'1'); assert.strictEqual(els['col-freq'].value,'4');
 conferir('copiar seleção (formato real)');
 
+// 4) Cópia REAL feita pelo professor no Presente na Escola em 22/11/2026 (25 linhas, só turmas)
+reset();
+els.colar={value:fs.readFileSync(path.join(__dirname,'exemplos','powerbi-copiar-selecao-2026-11-22.txt'),'utf8')};
+vm.runInContext('lerColagem()',ctx);
+{ const r=JSON.parse(vm.runInContext('JSON.stringify(casarLinhas())',ctx));
+  assert.strictEqual(r.ok.length,22,'cópia real: 22 turmas'); assert.deepStrictEqual(r.ignoradas,[]);
+  const media=r.ok.reduce((a,o)=>a+o.f,0)/r.ok.length;
+  assert(Math.abs(media-88.12)<0.05,'média ≈ total do Power BI (88,12%): '+media); }
+
 // utilitários
 assert.deepStrictEqual(JSON.parse(vm.runInContext('JSON.stringify(codigosDaTurma("2625776/775"))',ctx)),['2625776','2625775']);
 assert.strictEqual(vm.runInContext('nomeNormalizado("7º Série D Tarde - 2624935")',ctx),vm.runInContext('nomeNormalizado("7º D - EF")',ctx));
