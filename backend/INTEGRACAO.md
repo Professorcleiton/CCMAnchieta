@@ -21,6 +21,7 @@ Tempo estimado: 15 minutos. A camada foi testada junto com o `Código.gs` atual 
 6. E outro: nome `horarios`, conteúdo de `backend/horarios.gs` (Gestão de Horários e recursos do laboratório).
 7. E outro: nome `virada-ano`, conteúdo de `backend/virada-ano.gs` (Virada do Ano Letivo).
 8. E outro: nome `plataformas`, conteúdo de `backend/plataformas.gs` (Importar do BI e Painel do Professor).
+9. E outro: nome `atas`, conteúdo de `backend/atas.gs` (leitura das atas e fila de conferência).
 
 A configuração já vem ajustada para a sua planilha: abas `Usuários` (senha na coluna E), `Responsaveis` (senha na coluna C, push na F), `Alunos` e `Sessoes`.
 
@@ -124,6 +125,12 @@ Substitui a antiga "Progressão de Turmas". SIGA → **Virada do Ano Letivo** (n
    Dá para **desfazer por 30 dias**; quem foi matriculado depois da virada continua na lista.
 
 Faça a virada depois do último conselho de classe. A partir dela, os contadores de apontamentos e atas passam a contar o ano novo.
+
+## Passo 4e: Atas disciplinares (atas.gs)
+
+1. Depois de implantar, no editor do Apps Script escolha **`ATA_instalarVerificacao`** e clique em **Executar**. Isso troca o gatilho antigo (`verificarNovasAtas`) pelo novo, que lê o texto do Google Docs. Na primeira vez o Google pede autorização para ler documentos.
+2. No SIGA → **Atas para conferir** → **🔄 Revisar pasta do Drive**: relê as atas que o sistema antigo descartou (até 60 por clique).
+3. Na aba **Atas antigas com nome fora do cadastro**, corrija as atas que estão gravadas com nome errado.
 
 ## Passo 5: fechar a planilha ao público
 

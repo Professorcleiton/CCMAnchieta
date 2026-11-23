@@ -1,4 +1,4 @@
-const CACHE_NAME = 'siga-cache-v20'; // v20: limite de 12 por dia e 40 por semana (aulas + H.A.)
+const CACHE_NAME = 'siga-cache-v21'; // v21: atas para conferir
 
 const urlsToCache = [
     '/', '/index.html', '/restrito.html', '/responsaveis.html',

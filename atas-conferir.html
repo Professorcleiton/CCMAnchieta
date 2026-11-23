@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <script src="siga-core.js?v=15"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atas para conferir | SIGA</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f1f5f9; color: #1e293b; }
+        header { background: #005088; color: #fff; padding: 16px 20px; border-bottom: 4px solid #eab308; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+        header h1 { font-size: 18px; }
+        header a { color: #fff; text-decoration: none; font-size: 14px; }
+        main { max-width: 980px; margin: 24px auto; padding: 0 16px; }
+        .aviso { background: #e0f2fe; border-left: 4px solid #0284c7; padding: 12px 14px; border-radius: 6px; font-size: 14px; margin-bottom: 18px; line-height: 1.45; }
+        .abas { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; align-items: center; }
+        .abas button { border: 1px solid #cbd5e1; background: #fff; padding: 8px 14px; border-radius: 20px; cursor: pointer; font-size: 13px; }
+        .abas button.ativo { background: #005088; color: #fff; border-color: #005088; }
+        .card { background: #fff; border-radius: 10px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+        .card h3 { font-size: 15px; margin-bottom: 4px; word-break: break-word; }
+        .card h3 a { color: #005088; }
+        .meta { font-size: 13px; color: #64748b; margin-bottom: 8px; }
+        .motivo { font-size: 13px; background: #fffbeb; color: #92400e; padding: 6px 10px; border-radius: 6px; margin-bottom: 10px; }
+        .sug { display: flex; align-items: center; gap: 8px; font-size: 14px; padding: 7px 10px; border-radius: 6px; background: #f8fafc; margin-bottom: 5px; }
+        .sug small { color: #64748b; }
+        .conf { font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 10px; margin-left: auto; white-space: nowrap; }
+        .alta { background: #dcfce7; color: #166534; } .media { background: #fef3c7; color: #92400e; } .baixa { background: #f1f5f9; color: #64748b; }
+        .linha { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
+        input, select { padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; }
+        button.acao { border: none; padding: 9px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; }
+        .verde { background: #16a34a; color: #fff; } .cinza { background: #e2e8f0; color: #334155; } .azul { background: #005088; color: #fff; }
+        .vazio { text-align: center; color: #64748b; padding: 40px 0; }
+        .chip { display: inline-flex; align-items: center; gap: 4px; background: #dbeafe; color: #1e40af; border-radius: 14px; padding: 3px 10px; font-size: 13px; margin: 2px; }
+        .chip button { border: none; background: none; cursor: pointer; color: #1e40af; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1><i class="fa-solid fa-file-circle-question"></i> Atas para conferir</h1>
+        <a href="restrito.html"><i class="fa-solid fa-arrow-left"></i> Voltar ao SIGA</a>
+    </header>
+    <main>
+        <div class="aviso">
+            O sistema lê o nome do arquivo e o texto de cada ata que chega na pasta do Drive e procura os alunos cadastrados.
+            Quando tem certeza, a ata vai direto para o histórico do aluno. Quando há dúvida (nome incompleto, dois alunos com nome
+            parecido, aluno não cadastrado, mais de um aluno citado), ela aparece aqui para você escolher o aluno certo.
+        </div>
+        <div class="abas">
+            <button class="ativo" data-aba="pendentes" onclick="trocarAba(this)">Atas para conferir <span id="n-pend"></span></button>
+            <button data-aba="orfas" onclick="trocarAba(this)">Atas antigas com nome fora do cadastro <span id="n-orfas"></span></button>
+            <button class="acao cinza" style="margin-left:auto;border-radius:20px;" onclick="revisarPasta(this)" title="Relê as atas da pasta que nunca entraram no histórico">🔄 Revisar pasta do Drive</button>
+        </div>
+        <datalist id="lista-alunos"></datalist>
+        <div id="lista"><div class="vazio">Carregando…</div></div>
+    </main>
+
+<script>
+    const APPS_SCRIPT_URL = SIGA_CONFIG.APPS_SCRIPT_URL;
+    const esc = escaparHTML;
+    let dados = { pendentes: [], orfas: [], alunos: [] };
+    let aba = 'pendentes';
+    const escolhidos = {};   // chave do card → Set de nomes
+
+    window.addEventListener('DOMContentLoaded', () => {
+        let sessao = null;
+        try { sessao = JSON.parse(sessionStorage.getItem('sgi_ccma_session') || localStorage.getItem('sgi_ccma_session') || 'null'); } catch (e) {}
+        if (!sessao || !sessao.token) { location.href = 'restrito.html'; return; }
+        if ((parseInt(sessao.nivel) || 0) < 3) { alert('Acesso restrito à Secretaria e à Direção.'); location.href = 'restrito.html'; return; }
+        carregar();
+    });
+
+    async function carregar() {
+        try {
+            const r = await (await fetch(APPS_SCRIPT_URL + '?aba=atas_conferir')).json();
+            if (r.status !== 'success') throw new Error(r.message || 'Resposta inesperada. O arquivo atas.gs já foi instalado no Apps Script?');
+            dados = r;
+            document.getElementById('lista-alunos').innerHTML = dados.alunos.map(a => `<option value="${esc(a.nome)} — ${esc(a.turma)}">`).join('');
+            dados.pendentes.forEach(p => { if (!escolhidos['p' + p.id]) escolhidos['p' + p.id] = new Set(p.sugestoes.filter(s => s.marcado).map(s => s.nome)); });
+            dados.orfas.forEach(o => { if (!escolhidos['o' + o.linha]) escolhidos['o' + o.linha] = new Set(o.sugestoes.filter(s => s.confianca >= 85).slice(0, 1).map(s => s.nome)); });
+            desenhar();
+        } catch (e) {
+            document.getElementById('lista').innerHTML = '<div class="vazio" style="color:#b91c1c;">❌ ' + esc(e.message) + '</div>';
+        }
+    }
+
+    function trocarAba(btn) {
+        aba = btn.dataset.aba;
+        document.querySelectorAll('.abas button[data-aba]').forEach(b => b.classList.toggle('ativo', b === btn));
+        desenhar();
+    }
+
+    const nivel = c => c >= 85 ? ['alta', 'certeza alta'] : c >= 60 ? ['media', 'provável'] : ['baixa', 'parecido'];
+    const turmaDe = nome => (dados.alunos.find(a => a.nome === nome) || {}).turma || '';
+
+    function blocoAlunos(chave, sugestoes) {
+        const sel = escolhidos[chave];
+        let h = '';
+        sugestoes.forEach(s => {
+            const [cls, txt] = nivel(s.confianca);
+            h += `<label class="sug"><input type="checkbox" ${sel.has(s.nome) ? 'checked' : ''} onchange="marcar('${chave}', this.dataset.nome, this.checked)" data-nome="${esc(s.nome)}">
+                <span><b>${esc(s.nome)}</b> <small>${esc(s.turma || '')} · ${esc(s.fonte || '')}</small></span><span class="conf ${cls}">${txt}</span></label>`;
+        });
+        const extras = [...sel].filter(n => !sugestoes.some(s => s.nome === n));
+        if (extras.length) h += '<div>' + extras.map(n => `<span class="chip">${esc(n)} <small>${esc(turmaDe(n))}</small><button title="Tirar" onclick="marcar('${chave}', this.dataset.nome, false)" data-nome="${esc(n)}">✕</button></span>`).join('') + '</div>';
+        h += `<div class="linha"><input list="lista-alunos" placeholder="Outro aluno: digite o nome..." style="flex:1;min-width:220px;" onchange="adicionar('${chave}', this)"></div>`;
+        return h;
+    }
+
+    function desenhar() {
+        document.getElementById('n-pend').textContent = '(' + dados.pendentes.length + ')';
+        document.getElementById('n-orfas').textContent = '(' + dados.orfas.length + ')';
+        const lista = document.getElementById('lista');
+        if (aba === 'pendentes') {
+            if (!dados.pendentes.length) { lista.innerHTML = '<div class="vazio">✅ Nenhuma ata esperando conferência.</div>'; return; }
+            lista.innerHTML = dados.pendentes.map(p => `<div class="card">
+                <h3><a href="${esc(p.link)}" target="_blank" rel="noopener"><i class="fa-solid fa-file-lines"></i> ${esc(p.arquivo)}</a></h3>
+                <div class="meta">Criada em ${esc(p.data)}</div>
+                ${p.motivo ? `<div class="motivo">⚠️ ${esc(p.motivo)}</div>` : ''}
+                ${p.sugestoes.length ? '' : '<div class="meta">Nenhum aluno sugerido. Abra a ata e digite o nome abaixo.</div>'}
+                ${blocoAlunos('p' + p.id, p.sugestoes)}
+                <div class="linha">
+                    <label style="font-size:14px;">Nº da ata: <input id="num-${esc(p.id)}" value="${esc(p.numero)}" placeholder="12/2026" style="width:110px;"></label>
+                    <button class="acao verde" onclick="resolver('${esc(p.id)}', this)">✔ Registrar no histórico</button>
+                    <button class="acao cinza" onclick="ignorar('${esc(p.id)}', this)">Não é ata</button>
+                </div></div>`).join('');
+        } else {
+            if (!dados.orfas.length) { lista.innerHTML = '<div class="vazio">✅ Todas as atas registradas estão ligadas a alunos do cadastro.</div>'; return; }
+            lista.innerHTML = '<div class="aviso" style="background:#fef3c7;border-color:#f59e0b;">Estas atas foram gravadas pelo sistema antigo com um nome que não existe no cadastro de alunos, por isso não aparecem no histórico. Escolha o aluno certo e clique em Corrigir.</div>' +
+                dados.orfas.map(o => `<div class="card">
+                <h3>Gravada como: <span style="color:#b91c1c;">${esc(o.aluno)}</span></h3>
+                <div class="meta">Ata nº ${esc(o.numero || '—')} · ${esc(o.data)} · ${o.link ? `<a href="${esc(o.link)}" target="_blank" rel="noopener">${esc(o.arquivo)}</a>` : esc(o.arquivo)}</div>
+                ${blocoAlunos('o' + o.linha, o.sugestoes)}
+                <div class="linha"><button class="acao azul" onclick="corrigir(${o.linha}, this)">✔ Corrigir</button></div></div>`).join('');
+        }
+    }
+
+    function marcar(chave, nome, sim) { escolhidos[chave][sim ? 'add' : 'delete'](nome); if (!sim) desenhar(); }
+    function adicionar(chave, input) {
+        const nome = input.value.split(' — ')[0].trim();
+        if (!dados.alunos.some(a => a.nome === nome)) { alert('Escolha um nome da lista (alunos cadastrados).'); return; }
+        escolhidos[chave].add(nome);
+        desenhar();
+    }
+
+    async function enviar(corpo, btn) {
+        const txt = btn.textContent; btn.disabled = true; btn.textContent = '⏳';
+        try {
+            const r = await (await fetch(APPS_SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(corpo) })).json();
+            if (r.status !== 'success') { alert('❌ ' + (r.message || 'Não foi possível salvar.')); return null; }
+            return r;
+        } catch (e) { alert('❌ Erro de conexão.'); return null; }
+        finally { btn.disabled = false; btn.textContent = txt; }
+    }
+
+    async function resolver(id, btn) {
+        const alunos = [...escolhidos['p' + id]];
+        const numero = document.getElementById('num-' + id).value.trim();
+        if (!alunos.length) return alert('Marque ou digite pelo menos um aluno.');
+        if (!numero) return alert('Informe o número da ata.');
+        if (!confirm('Registrar a ata nº ' + numero + ' no histórico de:\n\n' + alunos.join('\n') + '\n\nOs responsáveis recebem o aviso.')) return;
+        if (await enviar({ operacao: 'ATA_RESOLVER', id, alunos, numero }, btn)) carregar();
+    }
+    async function ignorar(id, btn) {
+        if (!confirm('Tirar este arquivo da fila? Ele não vai para o histórico de nenhum aluno.')) return;
+        if (await enviar({ operacao: 'ATA_IGNORAR', id }, btn)) carregar();
+    }
+    async function corrigir(linha, btn) {
+        const o = dados.orfas.find(x => x.linha === linha);
+        const alunos = [...escolhidos['o' + linha]];
+        if (!alunos.length) return alert('Marque ou digite o aluno certo.');
+        if (await enviar({ operacao: 'ATA_CORRIGIR', linha, alunoAtual: o.aluno, aluno: alunos[0], alunos: alunos.slice(1) }, btn)) carregar();
+    }
+    async function revisarPasta(btn) {
+        if (!confirm('Reler as atas da pasta do Drive que nunca entraram no histórico? Pode levar alguns minutos (até 60 arquivos por vez).')) return;
+        const r = await enviar({ operacao: 'ATA_REVISAR_PASTA' }, btn);
+        if (r) { alert(`Revisão: ${r.registrada} registradas direto, ${r.conferir} para conferir.` + (r.terminou ? '' : '\nAinda há arquivos: clique de novo para continuar.')); carregar(); }
+    }
+</script>
+</body>
+</html>
