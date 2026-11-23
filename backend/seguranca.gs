@@ -94,6 +94,11 @@ var SEG_NIVEL_MINIMO = {
   'SALVAR_GRADE': 3,
   'RECURSOS_SALVAR': 4,
   'HA_SALVAR': 4,
+  'atas_conferir': 3,
+  'ATA_RESOLVER': 3,
+  'ATA_IGNORAR': 3,
+  'ATA_CORRIGIR': 3,
+  'ATA_REVISAR_PASTA': 3,
   'virada_dados': 4,
   'planejamento_ano': 3,
   'VIRADA_SALVAR_TURMAS': 4,
@@ -177,6 +182,8 @@ function doGet(e) {
     if (rota === 'visao_geral_docentes') return SEG_json_(PLAT_visaoGeral_(p.semana));
     if (rota === 'metas_plataformas') return SEG_json_(PLAT_metasRota_());
   }
+  // Atas para conferir (atas.gs)
+  if (rota === 'atas_conferir' && typeof ATA_listar_ === 'function') return SEG_json_(ATA_listar_());
   // Virada do ano letivo (virada-ano.gs)
   if (rota === 'virada_dados' && typeof VIR_dados_ === 'function') return SEG_json_(VIR_dados_());
   if (rota === 'planejamento_ano' && typeof VIR_planejamento_ === 'function') return SEG_json_(VIR_planejamento_());
@@ -230,6 +237,12 @@ function doPost(e) {
     if (op === 'SALVAR_GRADE' && typeof HOR_salvarGrade_ === 'function') return SEG_json_(HOR_salvarGrade_(sessao, corpo));
     if (op === 'HA_SALVAR' && typeof HOR_salvarHA_ === 'function') return SEG_json_(HOR_salvarHA_(sessao, corpo));
     if (op === 'RECURSOS_SALVAR' && typeof HOR_salvarRecursos_ === 'function') return SEG_json_(HOR_salvarRecursos_(sessao, corpo));
+    if (/^ATA_/.test(op) && typeof ATA_resolver_ === 'function') {
+      if (op === 'ATA_RESOLVER') return SEG_json_(ATA_resolver_(sessao, corpo));
+      if (op === 'ATA_IGNORAR') return SEG_json_(ATA_ignorar_(sessao, corpo));
+      if (op === 'ATA_CORRIGIR') return SEG_json_(ATA_corrigir_(sessao, corpo));
+      if (op === 'ATA_REVISAR_PASTA') { SEG_auditar_(sessao, op, ''); return SEG_json_(ATA_revisarPasta()); }
+    }
     if (op === 'IMPORTAR_LANCAMENTOS' && typeof PLAT_importar_ === 'function') return SEG_json_(PLAT_importar_(sessao, corpo));
     if (op === 'PLATAFORMAS_SALVAR' && typeof PLAT_salvarRegras_ === 'function') return SEG_json_(PLAT_salvarRegras_(sessao, corpo));
     if (/^VIRADA_/.test(op) && typeof VIR_executar_ === 'function') {

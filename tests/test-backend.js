@@ -49,6 +49,7 @@ vm.runInContext(fs.readFileSync(path.join(__dirname,'..','backend','frequenciome
 vm.runInContext(fs.readFileSync(path.join(__dirname,'..','backend','horarios.gs'),'utf8'),ctx);
 vm.runInContext(fs.readFileSync(path.join(__dirname,'..','backend','virada-ano.gs'),'utf8'),ctx);
 vm.runInContext(fs.readFileSync(path.join(__dirname,'..','backend','plataformas.gs'),'utf8'),ctx);
+vm.runInContext(fs.readFileSync(path.join(__dirname,'..','backend','atas.gs'),'utf8'),ctx);
 const G=p=>JSON.parse(ctx.doGet({parameter:p}).getContent());
 const P=b=>{const o=ctx.doPost({parameter:{},postData:{contents:JSON.stringify(b)}}).getContent();try{return JSON.parse(o)}catch(e){return o}};
 // --- acesso anônimo bloqueado
@@ -499,5 +500,53 @@ assert.strictEqual(P({operacao:'HA_SALVAR',token:tdir,professor:'Ana',itens:[{tu
   SG2=P({operacao:'SALVAR_GRADE',token:tdir,turma:'6A',turno:'Manhã',grade:{Segunda:{'1ª':{disciplina:'Matemática',professor:'Ana',local:''}},Quarta:{'1ª':{disciplina:'Matemática',professor:'Ana',local:'',professor_apoio:'Leo'}}}});
   assert.strictEqual(SG2.status,'conflito'); assert(SG2.conflitos.some(c=>c.tipo==='limite'&&c.texto.includes('13 na Quarta')),'apoio na quarta passa de 12');
   S.Horarios.rows.splice(base); 
+}
+// ===== atas.gs: identificação do aluno
+{
+  const AL=[{nome:'JOÃO PEDRO DA SILVA',turma:'7B',turmaNome:'7º Ano B'},{nome:'JOÃO PEDRO SOUZA',turma:'8A',turmaNome:'8º Ano A'},
+    {nome:'MARIA EDUARDA LIMA',turma:'7B',turmaNome:'7º Ano B'},{nome:'MARIA EDUARDA LIMA',turma:'9C',turmaNome:'9º Ano C'},
+    {nome:'ANA CLARA ROCHA',turma:'6A',turmaNome:'6º Ano A'},{nome:'LUCAS GABRIEL DE OLIVEIRA',turma:'3ANEM',turmaNome:'3º Ano A NEM'}];
+  const an=(n,t)=>JSON.parse(JSON.stringify(ctx.ATA_analisar_(n,t||'',AL)));
+  let a=an('Ata nº 12/2026 João Pedro da Silva.docx');
+  assert.deepStrictEqual(a.registrar,['JOÃO PEDRO DA SILVA']); assert.strictEqual(a.numero,'12/2026');
+  a=an('ATA N° 13-2026 - Ana Clara Rocha 6A'); assert.deepStrictEqual(a.registrar,['ANA CLARA ROCHA'],'n° e turma no nome'); assert.strictEqual(a.numero,'13/2026');
+  a=an('Ata 14/2026 Lucas Gabriel Oliveira'); assert.deepStrictEqual(a.registrar,['LUCAS GABRIEL DE OLIVEIRA'],'sem o "de"');
+  a=an('Ata nº 15/2026 João Pedro'); assert.strictEqual(a.certo,false,'dois João Pedro → conferir'); assert.strictEqual(a.sugestoes.length,2);
+  a=an('Ata nº 15/2026 João Pedro 8º ano A'); assert.deepStrictEqual(a.registrar,['JOÃO PEDRO SOUZA'],'turma desempata');
+  a=an('Ata nº 16/2026 Maria Eduarda Lima'); assert.strictEqual(a.certo,false,'homônimas sem turma → conferir');
+  a=an('Ata nº 16/2026','ATA DISCIPLINAR\nAluno(a): Maria Eduarda Lima    Turma: 9º Ano C\nRelato: ...'); assert.deepStrictEqual(a.registrar,['MARIA EDUARDA LIMA']); 
+  assert.strictEqual(a.sugestoes[0].turma,'9C','a do 9º C');
+  a=an('Ata nº 17/2026 João'); assert.strictEqual(a.certo,false,'só o primeiro nome nunca é registrado sozinho');
+  a=an('Ata nº 18/2026 Pedro Henrique Alves'); assert.strictEqual(a.certo,false); assert(a.motivo.includes('não está no cadastro'));
+  a=an('Ata disciplinar.docx','Ata nº 19/2026\nNo dia 10, o estudante ANA CLARA ROCHA desrespeitou...'); assert.deepStrictEqual(a.registrar,['ANA CLARA ROCHA'],'um aluno citado no texto');
+  a=an('Ata disciplinar.docx','Ata nº 20/2026\nAna Clara Rocha agrediu João Pedro da Silva no intervalo.'); assert.strictEqual(a.certo,false,'dois citados → conferir');
+  a=an('Ata nº 21/2026 Ana Clara Rocha','Relato: Ana Clara Rocha empurrou João Pedro da Silva.'); assert.deepStrictEqual(a.registrar,['ANA CLARA ROCHA'],'vítima citada não entra');
+  assert(a.sugestoes.some(x=>x.nome==='JOÃO PEDRO DA SILVA'&&!x.marcado));
+  a=an('Ata Ana Clara Rocha'); assert.strictEqual(a.certo,false); assert(a.motivo.includes('número'));
+  // fila de conferência e correção
+  S.Alunos.rows.push([90,'ANA CLARA ROCHA','6º Ano A','6A',''],[91,'JOÃO PEDRO DA SILVA','7º Ano B','7B','']);
+  S.Atas_Disciplinares=sheet('Atas_Disciplinares',[['Data','Aluno','Nº','Arquivo','Link','P'],[new Date(),'Ana Clara','10/2026','Ata nº 10/2026 Ana Clara.docx','https://docs/x','SIM']]);
+  S.Atas_Conferir=sheet('Atas_Conferir',[ctx.ATA_CONFIG.CAB_CONFERIR,['ID1','Ata nº 15/2026 João Pedro','https://docs/ID1','15/2026',new Date(),'[]','dois','Pendente','','']]);
+  let LA=G({aba:'atas_conferir',token:ts}); assert.strictEqual(LA.pendentes.length,1); assert.strictEqual(LA.orfas.length,1); assert.strictEqual(LA.orfas[0].sugestoes[0].nome,'ANA CLARA ROCHA');
+  assert.strictEqual(G({aba:'atas_conferir',token:tAna}).status,'forbidden');
+  assert.strictEqual(P({operacao:'ATA_RESOLVER',token:ts,id:'ID1',alunos:['JOÃO X'],numero:'15/2026'}).status,'error');
+  assert.strictEqual(P({operacao:'ATA_RESOLVER',token:ts,id:'ID1',alunos:['JOÃO PEDRO DA SILVA'],numero:'15/2026'}).status,'success');
+  assert.strictEqual(S.Atas_Disciplinares.rows.at(-1)[1],'JOÃO PEDRO DA SILVA'); assert(String(S.Atas_Conferir.rows[1][7]).startsWith('Resolvida'));
+  assert.strictEqual(P({operacao:'ATA_CORRIGIR',token:ts,linha:2,alunoAtual:'Ana Clara',aluno:'ANA CLARA ROCHA'}).status,'success');
+  assert.strictEqual(S.Atas_Disciplinares.rows[1][1],'ANA CLARA ROCHA');
+  assert.strictEqual(G({aba:'atas_conferir',token:ts}).orfas.length,0);
+}
+
+{
+  ctx.DocumentApp={openById:id=>({getBody:()=>({getText:()=>id==='DOC1'?'ATA DISCIPLINAR Nº 30/2026\nAluno(a): Ana Clara Rocha\nRelato...':'Ata nº 31/2026\nRelato sem nome'})})};
+  vm.runInContext('DocumentApp=this.DocumentApp',ctx);
+  const arq=(id,nome)=>({getId:()=>id,getName:()=>nome,getMimeType:()=>'application/vnd.google-apps.document',getDateCreated:()=>new Date(),getUrl:()=>'https://docs.google.com/document/d/'+id,getLastUpdated:()=>new Date()});
+  const al=ctx.ATA_alunos_();
+  assert.strictEqual(ctx.ATA_processarArquivo_(arq('DOC1','Ata disciplinar (1)'),al),'registrada','achou pelo conteúdo');
+  assert(S.Atas_Disciplinares.rows.some(r=>r[1]==='ANA CLARA ROCHA'&&r[2]==='30/2026'));
+  assert.strictEqual(ctx.ATA_processarArquivo_(arq('DOC2','Documento sem título'),al),'conferir');
+  assert.strictEqual(G({aba:'atas_conferir',token:ts}).pendentes.find(p=>p.id==='DOC2').numero,'31/2026');
+  assert.strictEqual(P({operacao:'ATA_IGNORAR',token:ts,id:'DOC2'}).status,'success');
+  assert.strictEqual(ctx.ATA_jaTratado_('DOC1'),true);
 }
 console.log('INTEGRAÇÃO COM O CÓDIGO.GS REAL: TODOS OS TESTES PASSARAM —',S.Auditoria.rows.length-1,'linhas de auditoria');

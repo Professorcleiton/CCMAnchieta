@@ -332,6 +332,11 @@
                                     <span>Aprovar Responsáveis</span>
                                 </a>
 
+                                <a id="btn-atas-conferir" href="atas-conferir.html" class="btn-acao" style="display: none; background-color: #b45309;">
+                                    <i class="fa-solid fa-file-circle-question"></i>
+                                    <span>Atas para conferir</span>
+                                </a>
+
                                 <a id="btn-frequencia-semana" href="frequencia-semana.html" class="btn-acao" style="display: none; background-color: #0891b2;">
                                     <i class="fa-solid fa-chart-line"></i>
                                     <span>Frequência da Semana</span>
@@ -1430,7 +1435,7 @@ function aplicarControleAcesso() {
         if (btn) btn.style.display = nivel >= 4 ? 'flex' : 'none';
     });
     
-    const botoesNivel3 = ['btn-patrimonio', 'btn-comunicado-seed', 'btn-central-alertas', 'btn-aba-secretaria', 'btn-aniversarios', 'btn-imprimir-apontamentos', 'btn-certificados', 'btn-aprovar-responsaveis', 'btn-noticias-site', 'btn-frequencia-semana'];
+    const botoesNivel3 = ['btn-patrimonio', 'btn-comunicado-seed', 'btn-central-alertas', 'btn-aba-secretaria', 'btn-aniversarios', 'btn-imprimir-apontamentos', 'btn-certificados', 'btn-aprovar-responsaveis', 'btn-noticias-site', 'btn-frequencia-semana', 'btn-atas-conferir'];
     botoesNivel3.forEach(id => {
         const btn = document.getElementById(id);
         if (btn) {
