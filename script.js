@@ -1310,7 +1310,7 @@ async function salvarUsuarioAdmin() {
         nivel: nivel,
         senha: senha,
         turno_pref: document.getElementById('admin-pref-turno')?.value || 'Ambos',
-        max_aulas: document.getElementById('admin-pref-max-aulas')?.value || 5,
+        max_aulas: 12,
         geminadas: document.getElementById('admin-pref-geminadas')?.value || 'Não',
         restricoes: document.getElementById('admin-pref-restricoes')?.value || '',
         data_nasc: document.getElementById('admin-data-nasc')?.value || ''
@@ -1327,7 +1327,7 @@ async function salvarUsuarioAdmin() {
             document.getElementById('admin-user-senha').value = '';
             if (document.getElementById('admin-pref-restricoes')) document.getElementById('admin-pref-restricoes').value = '';
             if (document.getElementById('admin-pref-turno')) document.getElementById('admin-pref-turno').value = 'Ambos';
-            if (document.getElementById('admin-pref-max-aulas')) document.getElementById('admin-pref-max-aulas').value = 5;
+            if (document.getElementById('admin-pref-max-aulas')) document.getElementById('admin-pref-max-aulas').value = 12;
             if (document.getElementById('admin-pref-geminadas')) document.getElementById('admin-pref-geminadas').value = 'Não';
             if (document.getElementById('admin-data-nasc')) document.getElementById('admin-data-nasc').value = '';
             document.getElementById('preferencias-professor').style.display = 'none';

@@ -28,6 +28,9 @@ var HOR_CONFIG = {
   ABA_RECURSOS: 'Recursos',
   ABA_RECURSOS_DISC: 'Recursos_Disciplinas',
   DIAS: ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'],
+  // Regra da escola: por professor, máximo por dia e por semana contando aulas (titular ou apoio) e horas-atividade
+  LIMITE_DIA: 12,
+  LIMITE_SEMANA: 40,
   AULAS: ['1ª', '2ª', '3ª', '4ª', '5ª', '6ª'],
   HORARIOS: {
     'Manhã': ['06:55-07:45', '07:45-08:35', '08:35-09:30', '09:40-10:30', '10:30-11:20', '11:20-12:10'],
@@ -206,6 +209,44 @@ function HOR_conflitos_(turma, turno, celulas, linhasOutras, recursos) {
   return conflitos;
 }
 
+
+/** Carga por professor (nome normalizado): { dia: {"nome|Segunda": n}, semana: {nome: n} }. */
+function HOR_carga_(linhasHorarios, linhasHA, pularLinhaHorario, pularLinhaHA) {
+  var c = { dia: {}, semana: {} };
+  var somar = function (nome, dia) {
+    var n = HOR_norm_(nome);
+    if (!n) return;
+    c.dia[n + '|' + dia] = (c.dia[n + '|' + dia] || 0) + 1;
+    c.semana[n] = (c.semana[n] || 0) + 1;
+  };
+  linhasHorarios.forEach(function (l) {
+    if (pularLinhaHorario && pularLinhaHorario(l)) return;
+    var dia = String(l[2] || '').trim();
+    somar(l[6], dia);
+    if (HOR_norm_(l[8]) && HOR_norm_(l[8]) !== HOR_norm_(l[6])) somar(l[8], dia);
+  });
+  linhasHA.forEach(function (l) { if (!(pularLinhaHA && pularLinhaHA(l))) somar(l[1], String(l[2] || '').trim()); });
+  return c;
+}
+function HOR_linhasHA_() {
+  var aba = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Horas_Atividade');
+  return aba ? aba.getDataRange().getValues().slice(1).filter(function (l) { return String(l[1] || '').trim(); }) : [];
+}
+/** Conflitos de limite de carga para as pessoas indicadas. */
+function HOR_conflitosCarga_(carga, nomes) {
+  var out = [];
+  Object.keys(nomes).forEach(function (n) {
+    var rot = nomes[n];
+    HOR_CONFIG.DIAS.forEach(function (d) {
+      var v = carga.dia[n + '|' + d] || 0;
+      if (v > HOR_CONFIG.LIMITE_DIA) out.push({ tipo: 'limite', dia: d, aula: '', texto: rot + ': ' + v + ' na ' + d + ' (máx. ' + HOR_CONFIG.LIMITE_DIA + ' com H.A.)' });
+    });
+    var sem = carga.semana[n] || 0;
+    if (sem > HOR_CONFIG.LIMITE_SEMANA) out.push({ tipo: 'limite', dia: '', aula: '', texto: rot + ': ' + sem + ' na semana (máx. ' + HOR_CONFIG.LIMITE_SEMANA + ' com H.A.)' });
+  });
+  return out;
+}
+
 function HOR_salvarGrade_(sessao, corpo) {
   var turma = String(corpo.turma || '').trim();
   var turno = String(corpo.turno || '').trim();
@@ -259,6 +300,11 @@ function HOR_salvarGrade_(sessao, corpo) {
 
     var recursos = HOR_lerRecursos_().recursos;
     var conflitos = HOR_conflitos_(turma, turno, celulas, outras, recursos);
+    // limite de carga (outras turmas, todos os turnos + H.A. + esta grade)
+    var carga = HOR_carga_(outras.concat(novas), HOR_linhasHA_());
+    var pessoas = {};
+    novas.forEach(function (l) { [l[6], l[8]].forEach(function (n) { if (HOR_norm_(n)) pessoas[HOR_norm_(n)] = String(n).trim(); }); });
+    conflitos = conflitos.concat(HOR_conflitosCarga_(carga, pessoas));
     if (conflitos.length && !corpo.ignorarConflitos) {
       return { status: 'conflito', message: 'Há conflitos com outras turmas.', conflitos: conflitos };
     }
@@ -374,6 +420,11 @@ function HOR_salvarHA_(sessao, corpo) {
     if (aulas[k]) conflitos.push({ dia: dia, aula: aula, texto: turno + ': aula no ' + aulas[k] });
     linhas.push([turno, professor, dia, aula, HOR_CONFIG.HORARIOS[turno][idx], String(it.tipo || 'H.A. - Planejamento').trim().slice(0, 60)]);
   }
+  // limite de carga: aulas (todas as turmas e turnos) + estas H.A.
+  var linhasHor = abaH ? abaH.getDataRange().getValues().slice(1) : [];
+  var carga = HOR_carga_(linhasHor, linhas);
+  var pessoa = {}; pessoa[alvo] = professor;
+  conflitos = conflitos.concat(HOR_conflitosCarga_(carga, pessoa));
   if (conflitos.length && !corpo.ignorarConflitos) return { status: 'conflito', conflitos: conflitos };
 
   var lock = LockService.getScriptLock(); lock.waitLock(20000);

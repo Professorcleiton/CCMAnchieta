@@ -49,7 +49,7 @@ assert.strictEqual(an.celulas['Segunda|2ª'], undefined, 'tablets ainda têm kit
 assert(an.celulas['Segunda|3ª'].conflitos[0].includes('apoio no 8B'));
 assert(an.celulas['Terça|1ª'].alertas.some(a => a.includes('Hora-atividade')));
 assert(an.celulas['Sexta|1ª'].alertas.some(a => a.includes('Restrição')));
-assert(an.celulas['Segunda|3ª'].alertas.some(a => a.includes('2 aulas na Segunda (máx. 1)')), 'conta a aula da tarde no 9A');
+assert.strictEqual(an.celulas['Segunda|3ª'].conflitos.length, 1, 'só o apoio; o max_aulas antigo do cadastro não vale mais');
 assert(an.gerais.some(g => g.startsWith('Robótica: 0 de 1')));
 assert(an.gerais.some(g => g.startsWith('Matemática: 1 de 1')) === false, 'Matemática já tem 1 no lab');
 
@@ -122,4 +122,31 @@ sug.forEach(h => {
 });
 assert(sug.some(h => h.dia === 'Terça' && h.aula === '3ª'), 'prefere a janela entre aulas');
 assert.strictEqual(H.sugerirHA('Zé', escolaHA, sug.concat([{ turno: 'Manhã', dia: 'Segunda', aula: '3ª' }]), {}).length, 0);
+
+// limite da escola: 12 por dia e 40 por semana, contando aulas (titular/apoio) e H.A., nos dois turnos
+{
+    const cheia = [];
+    ['Manhã', 'Tarde'].forEach(t => H.AULAS.forEach((a, i) => { if (!(t === 'Tarde' && i > 4)) cheia.push({ turno: t, turma: t === 'Manhã' ? '8A' : '9A', dia: 'Segunda', aula: a, disciplina: 'Mat', professor: 'Rui' }); }));
+    const haRui = [{ turno: 'Tarde', professor: 'Rui', dia: 'Segunda', aula: '6ª' }];   // 11 aulas + 1 H.A. = 12 na segunda
+    const g = H.gradeVazia();
+    g.Segunda['1ª'] = { disciplina: 'Mat', professor: 'Rui', local: '' };   // outra turma no mesmo turno? usa turma 7A, turno Manhã mas horário ocupado não importa aqui
+    let an = H.analisarGrade({ turma: '7A', turno: 'Noite', grade: g, outras: [], todasDoProfessor: cheia, horasAtividade: haRui, cfg });
+    assert(an.celulas['Segunda|1ª'].conflitos.some(c => c.includes('13 na Segunda (máx. 12 com H.A.)')), 'passa de 12 no dia');
+    // semana: 39 + 2 = 41
+    const semana = [];
+    let k = 0;
+    ['Manhã', 'Tarde'].forEach(t => H.DIAS.forEach(d => H.AULAS.forEach(a => { if (k++ < 39 && !(d === 'Sexta' && t === 'Tarde')) semana.push({ turno: t, turma: 'Z' + t, dia: d, aula: a, professor: 'Bia' }); })));
+    const g2 = H.gradeVazia();
+    g2.Sexta['1ª'] = { disciplina: 'Mat', professor: 'Bia' }; g2.Sexta['2ª'] = { disciplina: 'Mat', professor: 'Bia' };
+    const n0 = semana.length;
+    an = H.analisarGrade({ turma: '7A', turno: 'Noite', grade: g2, outras: [], todasDoProfessor: semana, horasAtividade: [], cfg });
+    assert(Object.values(an.celulas).some(i => i.conflitos.some(c => c.includes((n0 + 2) + ' na semana'))) === (n0 + 2 > 40), 'passa de 40 na semana');
+    // distribuir respeita 12/dia: Rui já tem 12 na segunda → nada dele na segunda
+    const r = H.distribuirAulas([{ disciplina: 'Mat', professor: 'Rui' }, { disciplina: 'Mat', professor: 'Rui' }], { turma: '6C', turno: 'Manhã', outras: [], todasDoProfessor: cheia, horasAtividade: haRui, cfg, professores: [] });
+    assert(!H.AULAS.some(a => r.grade.Segunda[a].professor === 'Rui'), 'não põe aula na segunda (já tem 12)');
+    assert.strictEqual(r.sobraram.length, 0);
+    // sugerir H.A. respeita 12/dia
+    const sug2 = H.sugerirHA('Rui', cheia, [], {});
+    assert(!sug2.some(h => h.dia === 'Segunda' && cheia.length >= 11 && sug2.filter(x => x.dia === 'Segunda').length > 1), 'no máximo 1 H.A. na segunda (11 aulas)');
+}
 console.log('HORÁRIOS: TODOS OS TESTES PASSARAM —', escola.length, 'aulas distribuídas sem conflito');
