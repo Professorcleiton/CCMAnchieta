@@ -20,6 +20,8 @@
         'Tarde': ['12:55-13:45', '13:45-14:35', '14:35-15:30', '15:40-16:30', '16:30-17:20', '17:20-18:10']
     };
     const INTERVALO = { 'Manhã': '09:30-09:40', 'Tarde': '15:30-15:40' };
+    // Regra da escola: por professor, no máximo 12 por dia e 40 por semana, contando aulas (titular ou apoio) e horas-atividade
+    const LIMITE_DIA = 12, LIMITE_SEMANA = 40;
     const RECURSOS_PADRAO = {
         recursos: [{ recurso: 'Lab. Informática', simultaneas: 1, obs: '' }, { recurso: 'Tablet', simultaneas: 1, obs: '' }],
         disciplinas: []
@@ -69,6 +71,28 @@
         }) || null;
     }
 
+
+    /**
+     * Carga de cada professor (aulas como titular ou apoio + horas-atividade), fora da turma/turno em edição.
+     * Devolve { dia: {"nome|Segunda": n}, semana: {"nome": n} }
+     */
+    function cargaBase(todas, horasAtividade, turma, turno) {
+        const c = { dia: {}, semana: {} };
+        const somar = (nome, dia) => {
+            const n = norm(nome);
+            if (!n) return;
+            c.dia[n + '|' + dia] = (c.dia[n + '|' + dia] || 0) + 1;
+            c.semana[n] = (c.semana[n] || 0) + 1;
+        };
+        (todas || []).forEach(h => {
+            if (h.turma === turma && h.turno === turno) return;
+            somar(h.professor, h.dia);
+            if (h.professor_apoio && norm(h.professor_apoio) !== norm(h.professor)) somar(h.professor_apoio, h.dia);
+        });
+        (horasAtividade || []).forEach(h => somar(h.professor, h.dia));
+        return c;
+    }
+
     /**
      * Analisa a grade em edição.
      * ctx: { turma, turno, grade, outras (linhas de outras turmas do mesmo turno),
@@ -95,13 +119,16 @@
             haPorChave[norm(h.professor) + '|' + h.dia + '|' + h.aula] = h.tipo || 'Hora-atividade';
         });
 
-        // aulas de cada professor por dia (esta turma + outras turmas, todos os turnos que conhecemos)
-        const aulasDia = {};
-        const contar = (prof, dia) => { const k = norm(prof) + '|' + dia; aulasDia[k] = (aulasDia[k] || 0) + 1; };
-        (ctx.todasDoProfessor || outras).forEach(o => { if (o.professor && o.turma !== turma) contar(o.professor, o.dia); });
+        // carga de cada professor: outras turmas (todos os turnos) + horas-atividade + esta grade
+        const carga = cargaBase(ctx.todasDoProfessor || outras, horasAtividade, turma, turno);
         DIAS.forEach(dia => AULAS.forEach(aula => {
             const c = grade[dia] && grade[dia][aula];
-            if (c && c.disciplina && c.professor) contar(c.professor, dia);
+            if (!c || !c.disciplina) return;
+            [c.professor, c.professor_apoio].forEach((n, i) => {
+                if (!norm(n) || (i === 1 && norm(n) === norm(c.professor))) return;
+                carga.dia[norm(n) + '|' + dia] = (carga.dia[norm(n) + '|' + dia] || 0) + 1;
+                carga.semana[norm(n)] = (carga.semana[norm(n)] || 0) + 1;
+            });
         }));
 
         const usoRecursoDisc = {};   // disciplina → {total, noRecurso}
@@ -119,10 +146,11 @@
                     else if (norm(o.professor_apoio) === prof) info.conflitos.push(c.professor + ' é apoio no ' + o.turma);
                 });
                 if (haPorChave[prof + '|' + dia + '|' + aula]) info.alertas.push('Hora-atividade de ' + c.professor);
+                const nDia = carga.dia[prof + '|' + dia] || 0, nSem = carga.semana[prof] || 0;
+                if (nDia > LIMITE_DIA) info.conflitos.push(c.professor + ': ' + nDia + ' na ' + dia + ' (máx. ' + LIMITE_DIA + ' com H.A.)');
+                if (nSem > LIMITE_SEMANA) info.conflitos.push(c.professor + ': ' + nSem + ' na semana (máx. ' + LIMITE_SEMANA + ' com H.A.)');
                 const p = profPorNome[prof];
                 if (p) {
-                    const max = parseInt(p.max_aulas, 10) || 0;
-                    if (max && aulasDia[prof + '|' + dia] > max) info.alertas.push(c.professor + ': ' + aulasDia[prof + '|' + dia] + ' aulas na ' + dia + ' (máx. ' + max + ')');
                     if (p.turno_pref && p.turno_pref !== 'Ambos' && norm(p.turno_pref) !== norm(turno)) info.alertas.push(c.professor + ' prefere o turno ' + p.turno_pref);
                     const restr = norm(p.restricoes);
                     if (restr && restr.includes(norm(dia))) info.alertas.push('Restrição: ' + p.restricoes);
@@ -189,8 +217,7 @@
         horasAtividade.forEach(h => { if (!h.turno || h.turno === turno) ha[norm(h.professor) + '|' + h.dia + '|' + h.aula] = true; });
         const perfil = {};
         professores.forEach(p => { perfil[norm(p.nome)] = p; });
-        const aulasDia = {};
-        outras.forEach(o => { if (o.professor && o.turma !== turma) { const k = norm(o.professor) + '|' + o.dia; aulasDia[k] = (aulasDia[k] || 0) + 1; } });
+        const carga = cargaBase(ctx.todasDoProfessor || outras, horasAtividade, turma, turno);
 
         const livre = (dia, aula, a) => {
             if (grade[dia][aula].disciplina) return false;
@@ -199,8 +226,7 @@
                 if (aqui.some(o => norm(o.professor) === prof || norm(o.professor_apoio) === prof)) return false;
                 if (ha[prof + '|' + dia + '|' + aula]) return false;
                 const p = perfil[prof];
-                const max = p ? parseInt(p.max_aulas, 10) || 0 : 0;
-                if (max && (aulasDia[prof + '|' + dia] || 0) >= max) return false;
+                if ((carga.dia[prof + '|' + dia] || 0) >= LIMITE_DIA || (carga.semana[prof] || 0) >= LIMITE_SEMANA) return false;
                 if (p && p.restricoes && norm(p.restricoes).includes(norm(dia))) return false;
             }
             const rec = recursoDoLocal(a.local, cfg.recursos || []);
@@ -210,7 +236,7 @@
         const noDia = (dia, disc) => AULAS.filter(a => grade[dia][a].disciplina === disc).length;
         const colocar = (dia, aula, a) => {
             grade[dia][aula] = { disciplina: a.disciplina, professor: a.professor || '', local: a.local || '' };
-            if (a.professor) { const k = norm(a.professor) + '|' + dia; aulasDia[k] = (aulasDia[k] || 0) + 1; }
+            if (a.professor) { const n = norm(a.professor); carga.dia[n + '|' + dia] = (carga.dia[n + '|' + dia] || 0) + 1; carga.semana[n] = (carga.semana[n] || 0) + 1; }
         };
 
         // Agrupa por disciplina+professor; recursos e professores mais ocupados primeiro
@@ -270,7 +296,7 @@
 
         function retirar(dia, aula) {
             const c = grade[dia][aula];
-            if (c.professor) { const k = norm(c.professor) + '|' + dia; aulasDia[k] = Math.max(0, (aulasDia[k] || 0) - 1); }
+            if (c.professor) { const n = norm(c.professor); carga.dia[n + '|' + dia] = Math.max(0, (carga.dia[n + '|' + dia] || 0) - 1); carga.semana[n] = Math.max(0, (carga.semana[n] || 0) - 1); }
             grade[dia][aula] = { disciplina: '', professor: '', local: '' };
             return c;
         }
@@ -341,12 +367,14 @@
         const restr = norm(perfil && perfil.restricoes);
         const novas = [];
         const haNoDia = (t, d) => ha.concat(novas).filter(h => h.turno === t && h.dia === d).length;
+        const cargaDia = d => aulas.filter(a => a.dia === d).length + ha.concat(novas).filter(h => h.dia === d).length;
+        if (aulas.length + ha.length >= LIMITE_SEMANA) return [];
         for (let k = 0; k < falta; k++) {
             let melhor = null, melhorNota = -Infinity;
             turnos.forEach((t, ti) => DIAS.forEach(d => {
                 if (restr && restr.includes(norm(d))) return;
                 const aulasDia = aulas.filter(a => a.turno === t && a.dia === d).map(a => AULAS.indexOf(a.aula));
-                if (haNoDia(t, d) >= 2) return;
+                if (haNoDia(t, d) >= 2 || cargaDia(d) >= LIMITE_DIA) return;
                 AULAS.forEach((au, i) => {
                     const chave = t + '|' + d + '|' + au;
                     if (ocupado.has(chave)) return;
@@ -359,14 +387,14 @@
                     if (nota > melhorNota) { melhorNota = nota; melhor = { turno: t, dia: d, aula: au, tipo: tipo || 'H.A. - Planejamento' }; }
                 });
             }));
-            if (!melhor) break;
+            if (!melhor || aulas.length + ha.length + novas.length >= LIMITE_SEMANA) break;
             novas.push(melhor);
             ocupado.add(melhor.turno + '|' + melhor.dia + '|' + melhor.aula);
         }
         return novas;
     }
 
-    const nucleo = { haEsperada, aulasDoProfessor, regencia, sugerirHA, DIAS, AULAS, HORARIOS_FIXOS, norm, listaDisciplinas, recursoDoLocal, serieDaTurma, regraDaDisciplina,
+    const nucleo = { LIMITE_DIA, LIMITE_SEMANA, cargaBase, haEsperada, aulasDoProfessor, regencia, sugerirHA, DIAS, AULAS, HORARIOS_FIXOS, norm, listaDisciplinas, recursoDoLocal, serieDaTurma, regraDaDisciplina,
         analisarGrade, sugerirProfessor, distribuirAulas, gradeVazia };
     if (typeof module !== 'undefined' && module.exports) { module.exports = nucleo; return; }
     global.HorariosNucleo = nucleo;
@@ -907,7 +935,13 @@
             html += '</tr>';
             if (aula === '3ª') html += '<tr style="background:#fef3c7;"><td colspan="6" style="text-align:center;font-weight:bold;padding:4px;">☕ INTERVALO — ' + INTERVALO[est.turno] + '</td></tr>';
         });
-        html += '</tbody></table>';
+        // total do dia (os dois turnos, aulas + H.A.)
+        html += '<tr style="background:#f8fafc;"><td style="padding:6px;font-weight:bold;text-align:center;font-size:11px;">Total no dia<br><small style="font-weight:normal;">(2 turnos)</small></td>';
+        DIAS.forEach(dia => {
+            const n = aulas.filter(a => a.dia === dia).length + est.haEdit.filter(h => h.dia === dia).length;
+            html += '<td style="text-align:center;padding:6px;font-weight:bold;color:' + (n > LIMITE_DIA ? '#b91c1c' : '#334155') + ';">' + n + ' / ' + LIMITE_DIA + (n > LIMITE_DIA ? ' 🔴' : '') + '</td>';
+        });
+        html += '</tr></tbody></table>';
         cont.innerHTML = html;
         renderizarResumoHA();
     }
@@ -917,12 +951,14 @@
         let html = '';
         if (est.prof) {
             const r = regencia(est.prof, est.todas), e = haEsperada(r), m = est.haEdit.length;
+            const semana = aulasDoProfessor(est.prof, est.todas).length + m;
             const outroTurno = est.haEdit.filter(h => h.turno !== est.turno).length;
             const cor = m === e ? '#dcfce7' : (m < e ? '#fef3c7' : '#e0e7ff');
             html += '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-size:13px;margin-bottom:10px;">' +
                 '<span style="background:#ede9fe;padding:6px 10px;border-radius:6px;"><b>' + r + '</b> aulas de regência</span>' +
                 '<span style="background:' + cor + ';padding:6px 10px;border-radius:6px;">H.A.: <b>' + m + '</b> de <b>' + e + '</b> pela tabela' + (m < e ? ' — faltam ' + (e - m) : m > e ? ' — ' + (m - e) + ' a mais' : ' ✓') + '</span>' +
-                (outroTurno ? '<span style="color:#64748b;">(' + outroTurno + ' no outro turno)</span>' : '') +
+                '<span style="background:' + (semana > LIMITE_SEMANA ? '#fee2e2' : '#f1f5f9') + ';padding:6px 10px;border-radius:6px;">Semana: <b>' + semana + '</b> de ' + LIMITE_SEMANA + ' (aulas + H.A.)' + (semana > LIMITE_SEMANA ? ' 🔴' : '') + '</span>' +
+                (outroTurno ? '<span style="color:#64748b;">(' + outroTurno + ' H.A. no outro turno)</span>' : '') +
                 (est.haAlterado ? '<span style="background:#fde68a;padding:6px 10px;border-radius:6px;">✏️ não salvo</span>' : '') +
                 '<button onclick="sugerirHAProfessor()" style="background:#7c3aed;color:white;border:none;padding:7px 12px;border-radius:6px;cursor:pointer;font-weight:bold;margin-left:auto;">✨ Sugerir as que faltam</button>' +
                 '<button onclick="salvarHAProfessor()" id="btn-salvar-ha" style="background:#22c55e;color:white;border:none;padding:7px 12px;border-radius:6px;cursor:pointer;font-weight:bold;">💾 Salvar H.A.</button></div>';

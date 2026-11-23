@@ -1,4 +1,4 @@
-const CACHE_NAME = 'siga-cache-v19'; // v19: hora-atividade na Gestão de Horários
+const CACHE_NAME = 'siga-cache-v20'; // v20: limite de 12 por dia e 40 por semana (aulas + H.A.)
 
 const urlsToCache = [
     '/', '/index.html', '/restrito.html', '/responsaveis.html',

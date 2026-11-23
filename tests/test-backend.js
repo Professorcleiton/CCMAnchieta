@@ -483,4 +483,21 @@ assert.strictEqual(haRows.length,3,'Leo intacto + 2 da Ana (a antiga da Ana saiu
 assert.deepStrictEqual(haRows.find(r=>r[2]==='Terça').slice(3,6),['1ª','06:55-07:45','H.A. - Formação']);
 assert.strictEqual(P({operacao:'HA_SALVAR',token:tAna,professor:'Ana',itens:[]}).status,'forbidden');
 assert.strictEqual(P({operacao:'HA_SALVAR',token:tdir,professor:'Ana',itens:[{turno:'Noite',dia:'Segunda',aula:'1ª'}]}).status,'error');
+
+// ===== limite de carga: 12 por dia e 40 por semana (aulas + H.A.)
+{
+  const base=S.Horarios.rows.length;
+  ['1ª','2ª','3ª','4ª','5ª','6ª'].forEach(a=>S.Horarios.rows.push(['Manhã','8Z','Quarta',a,'','Mat','Leo','','']));
+  ['1ª','2ª','3ª','4ª','5ª'].forEach(a=>S.Horarios.rows.push(['Tarde','9Z','Quarta',a,'','Mat','Leo','','']));
+  // 11 aulas na quarta: 1 H.A. ok (12), 2 H.A. passa
+  let L=P({operacao:'HA_SALVAR',token:tdir,professor:'Leo',itens:[{turno:'Tarde',dia:'Quarta',aula:'6ª'}]});
+  assert.strictEqual(L.status,'success');
+  S.Horarios.rows.push(['Manhã','7Z','Quinta','1ª','','Mat','Outro','','']);
+  let SG2=P({operacao:'SALVAR_GRADE',token:tdir,turma:'7Y',turno:'Noite',grade:{}});  // turno inválido continua erro
+  assert.strictEqual(SG2.status,'error');
+  // uma aula a mais na quarta (outra turma, manhã? horário ocupado → usa turma da tarde em outro turno não existe; testa pelo apoio)
+  SG2=P({operacao:'SALVAR_GRADE',token:tdir,turma:'6A',turno:'Manhã',grade:{Segunda:{'1ª':{disciplina:'Matemática',professor:'Ana',local:''}},Quarta:{'1ª':{disciplina:'Matemática',professor:'Ana',local:'',professor_apoio:'Leo'}}}});
+  assert.strictEqual(SG2.status,'conflito'); assert(SG2.conflitos.some(c=>c.tipo==='limite'&&c.texto.includes('13 na Quarta')),'apoio na quarta passa de 12');
+  S.Horarios.rows.splice(base); 
+}
 console.log('INTEGRAÇÃO COM O CÓDIGO.GS REAL: TODOS OS TESTES PASSARAM —',S.Auditoria.rows.length-1,'linhas de auditoria');
